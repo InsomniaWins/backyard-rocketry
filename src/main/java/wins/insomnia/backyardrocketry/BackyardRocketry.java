@@ -1,22 +1,14 @@
 package wins.insomnia.backyardrocketry;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
-import wins.insomnia.backyardrocketry.world.World;
-
-import java.awt.image.BufferedImage;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class BackyardRocketry {
@@ -25,11 +17,8 @@ public class BackyardRocketry {
     private Renderer renderer;
     private boolean running = false;
 
-
-    ShaderProgram shaderProgram;
-    Texture texture;
-
-
+    private int framesPerSecond = 0;
+    private int updatesPerSecond = 0;
 
     public void run() {
 
@@ -40,56 +29,9 @@ public class BackyardRocketry {
         running = true;
 
         init();
+        loop();
 
-
-
-
-        // TODO: remove placeholder code here!!!
-
-        // create shader program
-        shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
-
-        float[] vertexArray = {
-                0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-                0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f // top left
-        };
-        int[] indexArray = {  // note that we start from 0!
-                0, 1, 3,   // first triangle
-                1, 2, 3    // second triangle
-        };
-
-        int vao = glGenVertexArrays();
-        int vbo = glGenBuffers();
-        int ebo = glGenBuffers();
-
-        glBindVertexArray(vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
-
-
-        // set first parameter of shader
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-
-        texture = new Texture("cobblestone.png");
-
-        loop(vao);
-
-        glDeleteProgram(shaderProgram.getProgramHandle());
-
-
-        // TODO: remove placeholder code here!!!
-
-
+        renderer.clean();
 
         glfwFreeCallbacks(window.getWindowHandle());
         glfwDestroyWindow(window.getWindowHandle());
@@ -99,36 +41,21 @@ public class BackyardRocketry {
 
     }
 
-    private void update(double deltaTime, long updateIndex) {
-
-
-
-
+    // this is the game loop tick/process/update hook/listener
+    private void update(double deltaTime) {
 
     }
 
-    private void loop(int vao) {
-
-        glClearColor(1f, 0f, 0f, 1f);
+    private void loop() {
 
         double updateLimit = 1.0 / 60.0;
         double previousTime = glfwGetTime();
         double deltaTime = 0.0;
 
-        long totalUpdates = 0L;
-        long totalFrames = 0L;
-
-        int updatesPerSecond = 0;
-        int framesPerSecond = 0;
-
         double timer = previousTime;
 
-
-        // TODO: replace temp code
-        shaderProgram.use();
-        shaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-
-
+        int frameCounter = 0;
+        int updateCounter = 0;
 
         // game loop
         while (!glfwWindowShouldClose(window.getWindowHandle())) {
@@ -141,44 +68,32 @@ public class BackyardRocketry {
 
             while (deltaTime >= updateLimit) {
 
-                update(deltaTime, totalUpdates);
-                updatesPerSecond += 1;
-                totalUpdates += 1;
+                update(deltaTime);
+
+                updateCounter += 1;
                 deltaTime -= updateLimit;
 
             }
 
-            draw(shaderProgram, vao);
-            framesPerSecond += 1;
-            totalFrames += 1;
+            renderer.draw(window);
+            frameCounter += 1;
 
             while (glfwGetTime() - timer > 1.0) {
 
                 //System.out.println("FPS: " + framesPerSecond + ",     UPS: " + updatesPerSecond + ",     Total Frames: " + totalFrames + ",     Total Updates: " + totalUpdates);
 
                 timer += 1.0;
-                updatesPerSecond = 0;
-                framesPerSecond = 0;
+
+                updatesPerSecond = updateCounter;
+                framesPerSecond = frameCounter;
+
+                updateCounter = 0;
+                frameCounter = 0;
             }
 
             previousTime = currentTime;
 
         }
-
-    }
-
-    private void draw(ShaderProgram shaderProgram, int vao) {
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
-        glBindVertexArray(vao);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glfwSwapBuffers(window.getWindowHandle());
 
     }
 
@@ -211,6 +126,10 @@ public class BackyardRocketry {
             // Get the resolution of the primary monitor
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
+            if (vidmode == null) {
+                throw new RuntimeException("Failed to create vidmode!");
+            }
+
             // Center the window
             glfwSetWindowPos(
                     window.getWindowHandle(),
@@ -236,5 +155,13 @@ public class BackyardRocketry {
 
     public Window getWindow() {
         return window;
+    }
+
+    public int getFramesPerSecond() {
+        return framesPerSecond;
+    }
+
+    public int getUpdatesPerSecond() {
+        return updatesPerSecond;
     }
 }
