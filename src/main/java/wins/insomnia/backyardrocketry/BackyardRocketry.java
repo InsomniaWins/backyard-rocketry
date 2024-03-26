@@ -5,10 +5,7 @@ import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import wins.insomnia.backyardrocketry.render.Mesh;
-import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.render.ShaderProgram;
-import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.awt.image.BufferedImage;
@@ -30,6 +27,7 @@ public class BackyardRocketry {
 
 
     ShaderProgram shaderProgram;
+    Texture texture;
 
 
 
@@ -52,10 +50,10 @@ public class BackyardRocketry {
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
 
         float[] vertexArray = {
-                0.5f,  0.5f, 0.0f,  // top right
-                0.5f, -0.5f, 0.0f,  // bottom right
-                -0.5f, -0.5f, 0.0f,  // bottom left
-                -0.5f,  0.5f, 0.0f   // top left
+                0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+                0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f // top left
         };
         int[] indexArray = {  // note that we start from 0!
                 0, 1, 3,   // first triangle
@@ -76,12 +74,17 @@ public class BackyardRocketry {
 
 
         // set first parameter of shader
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+
+        texture = new Texture("cobblestone.png");
 
         loop(vao);
 
-        glDeleteProgram(shaderProgram.getProgram());
+        glDeleteProgram(shaderProgram.getProgramHandle());
 
 
         // TODO: remove placeholder code here!!!
@@ -119,6 +122,12 @@ public class BackyardRocketry {
         int framesPerSecond = 0;
 
         double timer = previousTime;
+
+
+        // TODO: replace temp code
+        shaderProgram.use();
+        shaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+
 
 
         // game loop
@@ -162,10 +171,11 @@ public class BackyardRocketry {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shaderProgram.getProgram());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
         glBindVertexArray(vao);
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window.getWindowHandle());

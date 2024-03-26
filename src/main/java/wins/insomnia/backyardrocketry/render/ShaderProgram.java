@@ -7,13 +7,29 @@ import java.nio.charset.StandardCharsets;
 import static org.lwjgl.opengl.GL20.*;
 
 public class ShaderProgram {
-    private int shaderProgram;
+    private int shaderProgramHandle;
 
     public ShaderProgram(String vertexSourcePath, String fragmentSourcePath) {
         String vertexShaderSource = loadShaderSource(vertexSourcePath);
         String fragmentShaderSource = loadShaderSource(fragmentSourcePath);
 
         createAndLinkShaderProgram(vertexShaderSource, fragmentShaderSource);
+    }
+
+    public void use() {
+        glUseProgram(shaderProgramHandle);
+    }
+
+    public void setUniform(String uniformName, boolean value) {
+        glUniform1i(glGetUniformLocation(shaderProgramHandle, uniformName), value ? 1 : 0);
+    }
+
+    public void setUniform(String uniformName, int value) {
+        glUniform1i(glGetUniformLocation(shaderProgramHandle, uniformName), value);
+    }
+
+    public void setUniform(String uniformName, float value) {
+        glUniform1f(glGetUniformLocation(shaderProgramHandle, uniformName), value);
     }
 
     private static String loadShaderSource(String sourcePath) {
@@ -63,16 +79,16 @@ public class ShaderProgram {
 
         int[] linkingSuccess = new int[1];
 
-        shaderProgram = glCreateProgram();
+        shaderProgramHandle = glCreateProgram();
 
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
+        glAttachShader(shaderProgramHandle, vertexShader);
+        glAttachShader(shaderProgramHandle, fragmentShader);
 
-        glLinkProgram(shaderProgram);
+        glLinkProgram(shaderProgramHandle);
 
-        glGetProgramiv(shaderProgram, GL_LINK_STATUS, linkingSuccess);
+        glGetProgramiv(shaderProgramHandle, GL_LINK_STATUS, linkingSuccess);
         if (linkingSuccess[0] == 0) {
-            String error = glGetProgramInfoLog(shaderProgram);
+            String error = glGetProgramInfoLog(shaderProgramHandle);
             System.out.println("Error linking shader: " + error);
         } else {
             System.out.println("Shader program linked!");
@@ -91,8 +107,8 @@ public class ShaderProgram {
 
     }
 
-    public int getProgram() {
-        return shaderProgram;
+    public int getProgramHandle() {
+        return shaderProgramHandle;
     }
 
 }
