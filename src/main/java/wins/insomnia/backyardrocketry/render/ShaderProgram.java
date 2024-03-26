@@ -1,6 +1,8 @@
 package wins.insomnia.backyardrocketry.render;
 
 
+import org.joml.Matrix4f;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -22,6 +24,12 @@ public class ShaderProgram {
 
     public void setUniform(String uniformName, boolean value) {
         glUniform1i(glGetUniformLocation(shaderProgramHandle, uniformName), value ? 1 : 0);
+    }
+
+    public void setUniform(String uniformName, Matrix4f value) {
+        float[] matrixValues = new float[16];
+        matrixValues = value.get(matrixValues);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, uniformName), false, matrixValues);
     }
 
     public void setUniform(String uniformName, int value) {

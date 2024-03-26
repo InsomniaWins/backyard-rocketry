@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
+
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -43,60 +44,8 @@ public class BackyardRocketry {
 
     // this is the game loop tick/process/update hook/listener
     private void update(double deltaTime) {
-
+        renderer.update(deltaTime);
     }
-
-    private void loop() {
-
-        double updateLimit = 1.0 / 60.0;
-        double previousTime = glfwGetTime();
-        double deltaTime = 0.0;
-
-        double timer = previousTime;
-
-        int frameCounter = 0;
-        int updateCounter = 0;
-
-        // game loop
-        while (!glfwWindowShouldClose(window.getWindowHandle())) {
-
-            double currentTime = glfwGetTime();
-            deltaTime += currentTime - previousTime;
-
-            glfwPollEvents();
-
-
-            while (deltaTime >= updateLimit) {
-
-                update(deltaTime);
-
-                updateCounter += 1;
-                deltaTime -= updateLimit;
-
-            }
-
-            renderer.draw(window);
-            frameCounter += 1;
-
-            while (glfwGetTime() - timer > 1.0) {
-
-                //System.out.println("FPS: " + framesPerSecond + ",     UPS: " + updatesPerSecond + ",     Total Frames: " + totalFrames + ",     Total Updates: " + totalUpdates);
-
-                timer += 1.0;
-
-                updatesPerSecond = updateCounter;
-                framesPerSecond = frameCounter;
-
-                updateCounter = 0;
-                frameCounter = 0;
-            }
-
-            previousTime = currentTime;
-
-        }
-
-    }
-
 
     private void init() {
 
@@ -113,7 +62,7 @@ public class BackyardRocketry {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
-        window = new Window(300, 300, "Backyard Rocketry");
+        window = new Window(900, 900, "Backyard Rocketry");
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
@@ -151,6 +100,43 @@ public class BackyardRocketry {
         // create renderer
         renderer = new Renderer();
 
+    }
+
+    private void loop() {
+        double secondTimer = 0.0;
+        final double deltaTime = 1.0 / 60.0;
+
+        glfwSetTime(0.0);
+        double currentTime = glfwGetTime();
+        double accumulator = 0.0;
+
+        while (!glfwWindowShouldClose(window.getWindowHandle())) {
+
+            glfwPollEvents();
+
+            double newTime = glfwGetTime();
+            double timeSincePreviousLoopIteration = newTime - currentTime;
+            secondTimer += timeSincePreviousLoopIteration;
+            currentTime = newTime;
+
+            accumulator += timeSincePreviousLoopIteration;
+
+            while (accumulator >= deltaTime) {
+                update(deltaTime);
+                accumulator -= deltaTime;
+                updatesPerSecond += 1;
+            }
+
+            renderer.draw(window);
+            framesPerSecond += 1;
+
+            if (secondTimer >= 1.0) {
+
+                framesPerSecond = 0;
+                updatesPerSecond = 0;
+                secondTimer = 0.0;
+            }
+        }
     }
 
     public Window getWindow() {

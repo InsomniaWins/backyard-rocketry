@@ -4,8 +4,10 @@ layout (location = 1) in vec2 vs_textureCoordinates;
 
 out vec2 fs_textureCoordinates;
 
+uniform mat4 vs_transformationMatrix;
+
 void main()
 {
-    gl_Position = vec4(vs_vertexPosition, 1.0);
+    gl_Position = vs_transformationMatrix * vec4(vs_vertexPosition, 1.0);
     fs_textureCoordinates = vs_textureCoordinates;
 }
