@@ -1,7 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
+
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -26,11 +28,22 @@ public class Window {
 
 
         // setup callback for window
-        glfwSetKeyCallback(WINDOW_HANDLE, Window::windowCallback);
-
+        glfwSetKeyCallback(WINDOW_HANDLE, Window::windowKeyInputCallback);
+        glfwSetWindowSizeCallback(WINDOW_HANDLE, Window::windowResizeCallback);
     }
 
-    private static void windowCallback(long windowHandle, int key, int scancode, int action, int mods) {
+
+    private static void windowResizeCallback(long windowHandle, int width, int height) {
+
+        Window window = BackyardRocketry.getInstance().getWindow();
+
+        window.width = width;
+        window.height = height;
+
+        glViewport(0,0,window.width, window.height);
+    }
+
+    private static void windowKeyInputCallback(long windowHandle, int key, int scancode, int action, int mods) {
 
         /*
 

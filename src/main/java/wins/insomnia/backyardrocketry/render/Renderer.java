@@ -93,6 +93,8 @@ public class Renderer {
         modelMatrix1 = new Matrix4f().identity();
         modelMatrix2 = new Matrix4f().identity();
 
+        //modelMatrix1.translate(1, 0, 0);
+
 
     }
 
@@ -117,6 +119,9 @@ public class Renderer {
     }
 
     private void render() {
+
+        camera.updateProjectionMatrix();
+        camera.updateViewMatrix();
 
         // placeholder render code
         shaderProgram.use();
