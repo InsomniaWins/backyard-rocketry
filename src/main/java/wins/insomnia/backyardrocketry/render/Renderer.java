@@ -1,35 +1,37 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
-
 import java.util.ArrayList;
-
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer {
 
     public final ArrayList<IRenderable> renderables = new ArrayList<>();
 
+    private Camera camera;
     private ShaderProgram shaderProgram;
+
     private Texture texture;
     private int vao = -1;
     private int vao2 = -1;
-    private Matrix4f transformationMatrix1;
-    private Matrix4f transformationMatrix2;
+    private Matrix4f modelMatrix1;
+    private Matrix4f modelMatrix2;
+
+
+
 
     public Renderer() {
 
+        camera = new Camera();
+
         glClearColor(1f, 0f, 0f, 1f);
+        glEnable(GL_DEPTH_TEST);
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
 
@@ -87,18 +89,11 @@ public class Renderer {
         glEnableVertexAttribArray(1);
 
         texture = new Texture("cobblestone.png");
-        transformationMatrix1 = new Matrix4f(
-                1f, 0f, 0f, 0f,
-                0f, 1f, 0f, 0f,
-                0f, 0f, 1f, 0f,
-                0f, 0f, 0f, 1f
-        );
-        transformationMatrix2 = new Matrix4f(
-                1f, 0f, 0f, 0f,
-                0f, 1f, 0f, 0f,
-                0f, 0f, 1f, 0f,
-                0f, 0f, 0f, 1f
-        );
+
+        modelMatrix1 = new Matrix4f().identity();
+        modelMatrix2 = new Matrix4f().identity();
+
+
     }
 
     // master draw method used in game loop
@@ -112,8 +107,12 @@ public class Renderer {
 
     public void update(double deltaTime) {
 
-        transformationMatrix1.rotate((float) deltaTime, 0f, 0f, 1f);
-        transformationMatrix2.rotate((float) deltaTime, 0f, 0f, 1f);
+        modelMatrix1.rotate((float) deltaTime, 0f, 0f, 1f);
+        modelMatrix2.rotate((float) deltaTime, 0f, 0f, 1f);
+
+
+        modelMatrix1.rotate((float) deltaTime, 1f, 0f, 0f);
+        modelMatrix2.rotate((float) deltaTime, 1f, 0f, 0f);
 
     }
 
@@ -122,6 +121,9 @@ public class Renderer {
         // placeholder render code
         shaderProgram.use();
         shaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        shaderProgram.setUniform("vs_viewMatrix", camera.getViewMatrix());
+        shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
+
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -130,26 +132,17 @@ public class Renderer {
 
 
         if (vao > -1) {
-            shaderProgram.setUniform("vs_transformationMatrix", transformationMatrix1);
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix1);
             glBindVertexArray(vao);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         }
 
 
         if (vao2 > -1) {
-            shaderProgram.setUniform("vs_transformationMatrix", transformationMatrix2);
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix2);
             glBindVertexArray(vao2);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         }
-
-
-        /*
-        for (IRenderable renderable : renderables) {
-
-            renderable.render();
-
-        }
-        */
 
     }
 

@@ -5,7 +5,6 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
-
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -14,6 +13,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class BackyardRocketry {
 
+    private static BackyardRocketry instance;
     private Window window;
     private Renderer renderer;
     private boolean running = false;
@@ -28,6 +28,7 @@ public class BackyardRocketry {
         }
 
         running = true;
+        instance = this;
 
         init();
         loop();
@@ -62,7 +63,7 @@ public class BackyardRocketry {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
-        window = new Window(900, 900, "Backyard Rocketry");
+        window = new Window(600, 600, "Backyard Rocketry");
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
@@ -149,5 +150,9 @@ public class BackyardRocketry {
 
     public int getUpdatesPerSecond() {
         return updatesPerSecond;
+    }
+
+    public static BackyardRocketry getInstance() {
+        return instance;
     }
 }

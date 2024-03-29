@@ -7,10 +7,15 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
 
     private long WINDOW_HANDLE;
+    private int width;
+    private int height;
 
     public Window(int width, int height, String title) {
 
         // make the window
+
+        this.width = width;
+        this.height = height;
 
         WINDOW_HANDLE = glfwCreateWindow(width, height, title, NULL, NULL);
         if (WINDOW_HANDLE == NULL) {
@@ -39,6 +44,18 @@ public class Window {
 
     public long getWindowHandle() {
         return WINDOW_HANDLE;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int[] getSize() {
+        return new int[] {width, height};
     }
 
 }
