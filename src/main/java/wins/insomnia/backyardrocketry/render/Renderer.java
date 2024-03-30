@@ -112,9 +112,13 @@ public class Renderer {
         modelMatrix1.rotate((float) deltaTime, 0f, 0f, 1f);
         modelMatrix2.rotate((float) deltaTime, 0f, 0f, 1f);
 
-
         modelMatrix1.rotate((float) deltaTime, 1f, 0f, 0f);
         modelMatrix2.rotate((float) deltaTime, 1f, 0f, 0f);
+
+        modelMatrix1.rotate((float) deltaTime, 0f, 1f, 0f);
+        modelMatrix2.rotate((float) deltaTime, 0f, 1f, 0f);
+
+        camera.update(deltaTime);
 
     }
 

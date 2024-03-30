@@ -2,19 +2,51 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.KeyboardInputEvent;
+import wins.insomnia.backyardrocketry.util.Transform;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera {
 
     private final Matrix4f PROJECTION_MATRIX;
     private final Matrix4f VIEW_MATRIX;
+    private final Transform TRANSFORM;
 
     public Camera() {
+
+        TRANSFORM = new Transform();
+        TRANSFORM.getPosition().set(0,0,0);
 
         PROJECTION_MATRIX = new Matrix4f();
         updateProjectionMatrix();
 
         VIEW_MATRIX = new Matrix4f();
         updateViewMatrix();
+
+    }
+
+    public void update(double deltaTime) {
+
+        KeyboardInput keyboardInput = BackyardRocketry.getInstance().getKeyboardInput();
+
+        float forwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_W) ? 1 : 0;
+        float backwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_S) ? 1 : 0;
+
+        TRANSFORM.getPosition().add(0f, 0f, (float) deltaTime * (forwardDirection - backwardDirection));
+
+
+        float leftDirection = keyboardInput.isKeyPressed(GLFW_KEY_A) ? 1 : 0;
+        float rightDirection = keyboardInput.isKeyPressed(GLFW_KEY_D) ? 1 : 0;
+
+        TRANSFORM.getPosition().add((float) deltaTime * (leftDirection - rightDirection), 0f, 0f);
+
+
+        float upDirection = keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0;
+        float downDirection = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0;
+
+        TRANSFORM.getPosition().add(0f, (float) deltaTime * (downDirection - upDirection), 0f);
 
     }
 
@@ -28,7 +60,7 @@ public class Camera {
 
     public void updateViewMatrix() {
         VIEW_MATRIX.identity();
-        VIEW_MATRIX.translate(0f, 0f, -3f);
+        VIEW_MATRIX.translate(TRANSFORM.getPosition());
     }
 
 

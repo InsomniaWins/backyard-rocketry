@@ -5,6 +5,9 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.util.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.KeyboardInputEvent;
+
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -16,6 +19,7 @@ public class BackyardRocketry {
     private static BackyardRocketry instance;
     private Window window;
     private Renderer renderer;
+    private KeyboardInput keyboardInput;
     private boolean running = false;
 
     private int framesPerSecond = 0;
@@ -46,6 +50,11 @@ public class BackyardRocketry {
     // this is the game loop tick/process/update hook/listener
     private void update(double deltaTime) {
         renderer.update(deltaTime);
+
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
+            glfwSetWindowShouldClose(window.getWindowHandle(), true);
+        }
+
     }
 
     private void init() {
@@ -98,6 +107,9 @@ public class BackyardRocketry {
         glfwShowWindow(window.getWindowHandle());
         GL.createCapabilities();
 
+        // create keyboard and mouse input
+        keyboardInput = new KeyboardInput(window.getWindowHandle());
+
         // create renderer
         renderer = new Renderer();
 
@@ -123,6 +135,7 @@ public class BackyardRocketry {
             accumulator += timeSincePreviousLoopIteration;
 
             while (accumulator >= deltaTime) {
+                keyboardInput.updateKeyStates();
                 update(deltaTime);
                 accumulator -= deltaTime;
                 updatesPerSecond += 1;
@@ -136,12 +149,18 @@ public class BackyardRocketry {
                 framesPerSecond = 0;
                 updatesPerSecond = 0;
                 secondTimer = 0.0;
+
             }
+
+
         }
     }
 
     public Window getWindow() {
         return window;
+    }
+    public KeyboardInput getKeyboardInput() {
+        return keyboardInput;
     }
 
     public int getFramesPerSecond() {

@@ -28,12 +28,12 @@ public class Window {
 
 
         // setup callback for window
-        glfwSetKeyCallback(WINDOW_HANDLE, Window::windowKeyInputCallback);
-        glfwSetWindowSizeCallback(WINDOW_HANDLE, Window::windowResizeCallback);
+        glfwSetKeyCallback(WINDOW_HANDLE, this::windowKeyInputCallback);
+        glfwSetWindowSizeCallback(WINDOW_HANDLE, this::windowResizeCallback);
     }
 
 
-    private static void windowResizeCallback(long windowHandle, int width, int height) {
+    private void windowResizeCallback(long windowHandle, int width, int height) {
 
         Window window = BackyardRocketry.getInstance().getWindow();
 
@@ -43,7 +43,7 @@ public class Window {
         glViewport(0,0,window.width, window.height);
     }
 
-    private static void windowKeyInputCallback(long windowHandle, int key, int scancode, int action, int mods) {
+    private void windowKeyInputCallback(long windowHandle, int key, int scancode, int action, int mods) {
 
         /*
 
