@@ -1,6 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.Transform;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -12,7 +15,6 @@ public class Mesh implements IRenderable {
 
     private int vao;
     private int indexCount;
-    private Matrix4f modelMatrix;
 
     public Mesh(float[] vertexArray, int[] indexArray) {
 
@@ -36,7 +38,6 @@ public class Mesh implements IRenderable {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        modelMatrix = new Matrix4f().identity();
     }
 
     public void clean() {
@@ -47,10 +48,6 @@ public class Mesh implements IRenderable {
 
     public int getIndexCount() {
         return indexCount;
-    }
-
-    public Matrix4f getModelMatrix() {
-        return modelMatrix;
     }
 
     public int getVao() {

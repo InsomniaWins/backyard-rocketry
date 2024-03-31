@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.KeyboardInput;
 
@@ -28,6 +29,9 @@ public class BackyardRocketry {
 
     private int framesPerSecond = 0;
     private int updatesPerSecond = 0;
+
+
+    private DebugNoclipPlayer player;
 
     public BackyardRocketry() {
 
@@ -61,7 +65,7 @@ public class BackyardRocketry {
 
     }
 
-    // this is the game loop tick/process/update hook/listener
+    // update runs as fast as possible with the game loop
     private void update(double deltaTime) {
 
         for (WeakReference<IUpdateListener> updateListener : UPDATE_LISTENERS) {
@@ -129,13 +133,14 @@ public class BackyardRocketry {
 
         // create renderer
         renderer = new Renderer();
-        registerUpdateListener(renderer);
+
+        player = new DebugNoclipPlayer();
 
     }
 
     private void loop() {
         double secondTimer = 0.0;
-        final double deltaTime = 1.0 / 60.0;
+        final double secondsPerTick = 1.0 / 60.0;
 
         glfwSetTime(0.0);
         double currentTime = glfwGetTime();
@@ -152,10 +157,10 @@ public class BackyardRocketry {
 
             accumulator += timeSincePreviousLoopIteration;
 
-            while (accumulator >= deltaTime) {
+            while (accumulator >= secondsPerTick) {
                 keyboardInput.updateKeyStates();
-                update(deltaTime);
-                accumulator -= deltaTime;
+                update(secondsPerTick);
+                accumulator -= secondsPerTick;
                 updatesPerSecond += 1;
             }
 
@@ -191,5 +196,9 @@ public class BackyardRocketry {
 
     public static BackyardRocketry getInstance() {
         return instance;
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
     }
 }

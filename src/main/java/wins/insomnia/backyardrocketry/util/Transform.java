@@ -23,4 +23,8 @@ public class Transform {
         return rotation;
     }
 
+    public void set(Transform transform) {
+        getPosition().set(transform.getPosition());
+        getRotation().set(transform.getRotation());
+    }
 }

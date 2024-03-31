@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.render;
 
+import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Renderer implements IUpdateListener {
+public class Renderer {
 
     public final ArrayList<IRenderable> renderables = new ArrayList<>();
 
@@ -22,6 +23,7 @@ public class Renderer implements IUpdateListener {
     private Mesh mesh;
     private Mesh mesh2;
 
+    private Matrix4f modelMatrix;
 
 
 
@@ -61,7 +63,7 @@ public class Renderer implements IUpdateListener {
                         1, 2, 3
                 }
         );
-        mesh2.getModelMatrix().translate(0, 1f, 0);
+        modelMatrix = new Matrix4f().identity();
 
         texture = new Texture("cobblestone.png");
         texture2 = new Texture("stone.png");
@@ -76,15 +78,6 @@ public class Renderer implements IUpdateListener {
 
         glfwSwapBuffers(window.getWindowHandle());
     }
-
-
-    public void update(double deltaTime) {
-
-        //mesh.getModelMatrix().rotate((float) deltaTime, 1f, 1f, 1f);
-        camera.update(deltaTime);
-
-    }
-
 
     private void render() {
 
@@ -103,17 +96,22 @@ public class Renderer implements IUpdateListener {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
 
+        modelMatrix.identity();
 
         if (mesh.getVao() > -1) {
-            shaderProgram.setUniform("vs_modelMatrix", mesh.getModelMatrix());
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
             glBindVertexArray(mesh.getVao());
             glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
 
         glBindTexture(GL_TEXTURE_2D, texture2.getTextureHandle());
 
+
+
+        modelMatrix.identity().translate(0,1f,0);
+
         if (mesh2.getVao() > -1) {
-            shaderProgram.setUniform("vs_modelMatrix", mesh2.getModelMatrix());
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
             glBindVertexArray(mesh2.getVao());
             glDrawElements(GL_TRIANGLES, mesh2.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
@@ -128,5 +126,7 @@ public class Renderer implements IUpdateListener {
     }
 
 
-
+    public Camera getCamera() {
+        return camera;
+    }
 }
