@@ -1,26 +1,29 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.Transform;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public class Mesh implements IRenderable {
 
     private int vao;
+    private int vbo;
+    private int ebo;
     private int indexCount;
-    private Matrix4f modelMatrix;
 
     public Mesh(float[] vertexArray, int[] indexArray) {
 
         indexCount = indexArray.length;
 
         vao = glGenVertexArrays();
-        int vbo = glGenBuffers();
-        int ebo = glGenBuffers();
+        vbo = glGenBuffers();
+        ebo = glGenBuffers();
 
         glBindVertexArray(vao);
 
@@ -36,21 +39,18 @@ public class Mesh implements IRenderable {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        modelMatrix = new Matrix4f().identity();
     }
 
     public void clean() {
 
-
+        glDeleteBuffers(vbo);
+        glDeleteBuffers(ebo);
+        glDeleteVertexArrays(vao);
 
     }
 
     public int getIndexCount() {
         return indexCount;
-    }
-
-    public Matrix4f getModelMatrix() {
-        return modelMatrix;
     }
 
     public int getVao() {

@@ -5,38 +5,32 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
-import wins.insomnia.backyardrocketry.util.IUpdateListener;
-import wins.insomnia.backyardrocketry.util.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.*;
 
-import java.lang.ref.WeakReference;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public class BackyardRocketry {
+public class BackyardRocketry implements IUpdateListener {
 
     private static BackyardRocketry instance;
     private Window window;
     private Renderer renderer;
     private KeyboardInput keyboardInput;
     private boolean running = false;
-    private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
+
+    private final Updater UPDATER;
 
     private int framesPerSecond = 0;
     private int updatesPerSecond = 0;
 
+
+    private DebugNoclipPlayer player;
+
     public BackyardRocketry() {
-
-        UPDATE_LISTENERS = new ArrayList<>();
-
-    }
-
-    public void registerUpdateListener(IUpdateListener updateListener) {
-        UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+        UPDATER = new Updater();
     }
 
     public void run() {
@@ -49,7 +43,7 @@ public class BackyardRocketry {
         instance = this;
 
         init();
-        loop();
+        UPDATER.loop();
 
         renderer.clean();
 
@@ -61,16 +55,9 @@ public class BackyardRocketry {
 
     }
 
-    // this is the game loop tick/process/update hook/listener
-    private void update(double deltaTime) {
+    public void update(double deltaTime) {
 
-        for (WeakReference<IUpdateListener> updateListener : UPDATE_LISTENERS) {
-            updateListener.get().update(deltaTime);
-        }
-
-        if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
-            glfwSetWindowShouldClose(window.getWindowHandle(), true);
-        }
+        renderer.draw(window);
 
     }
 
@@ -129,49 +116,9 @@ public class BackyardRocketry {
 
         // create renderer
         renderer = new Renderer();
-        registerUpdateListener(renderer);
 
-    }
+        player = new DebugNoclipPlayer();
 
-    private void loop() {
-        double secondTimer = 0.0;
-        final double deltaTime = 1.0 / 60.0;
-
-        glfwSetTime(0.0);
-        double currentTime = glfwGetTime();
-        double accumulator = 0.0;
-
-        while (!glfwWindowShouldClose(window.getWindowHandle())) {
-
-            glfwPollEvents();
-
-            double newTime = glfwGetTime();
-            double timeSincePreviousLoopIteration = newTime - currentTime;
-            secondTimer += timeSincePreviousLoopIteration;
-            currentTime = newTime;
-
-            accumulator += timeSincePreviousLoopIteration;
-
-            while (accumulator >= deltaTime) {
-                keyboardInput.updateKeyStates();
-                update(deltaTime);
-                accumulator -= deltaTime;
-                updatesPerSecond += 1;
-            }
-
-            renderer.draw(window);
-            framesPerSecond += 1;
-
-            if (secondTimer >= 1.0) {
-
-                framesPerSecond = 0;
-                updatesPerSecond = 0;
-                secondTimer = 0.0;
-
-            }
-
-
-        }
     }
 
     public Window getWindow() {
@@ -191,5 +138,13 @@ public class BackyardRocketry {
 
     public static BackyardRocketry getInstance() {
         return instance;
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
+    }
+
+    public Updater getUpdater() {
+        return UPDATER;
     }
 }

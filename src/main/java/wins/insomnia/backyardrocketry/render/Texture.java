@@ -42,12 +42,19 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
         // if mipmaps should be loaded
             //glGenerateMipmap(GL_TEXTURE_2D)
 
         STBImage.stbi_image_free(buffer);
+
+    }
+
+    public void clean() {
+
+        glDeleteTextures(textureIndex);
 
     }
 
