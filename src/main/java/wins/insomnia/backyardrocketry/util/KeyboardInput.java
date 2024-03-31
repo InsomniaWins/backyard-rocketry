@@ -51,7 +51,9 @@ public class KeyboardInput {
     }
 
     public void updateKeyStates() {
+
         clearConsumedInputs();
+
 
         for (Map.Entry<Integer, KeyboardInputEvent.KeyState> keyStateEntry : KEY_STATES.entrySet()) {
             if (keyStateEntry.getValue() == KeyboardInputEvent.KeyState.justReleased) {
@@ -61,6 +63,7 @@ public class KeyboardInput {
                 keyStateEntry.setValue(KeyboardInputEvent.KeyState.pressed);
             }
         }
+
 
         while (!QUEUED_INPUTS.isEmpty()) {
             KeyboardInputEvent inputEvent = QUEUED_INPUTS.remove();
@@ -76,8 +79,8 @@ public class KeyboardInput {
         }
 
 
-
         sendInputsToCallbacks();
+
     }
 
     private void sendInputsToCallbacks() {
@@ -88,7 +91,7 @@ public class KeyboardInput {
             for (WeakReference<IInputCallback> weakReference: INPUT_CALLBACK_LIST) {
                 IInputCallback inputCallback = weakReference.get();
 
-                if (inputEvent.isConsumed()) {// || inputEvent.getState() == KeyboardInputEvent.KeyState.released) {
+                if (inputEvent.isConsumed()) {
                     break;
                 }
 

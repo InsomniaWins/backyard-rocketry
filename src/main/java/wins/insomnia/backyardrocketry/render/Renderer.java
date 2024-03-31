@@ -1,16 +1,16 @@
 package wins.insomnia.backyardrocketry.render;
 
-import org.joml.Matrix4f;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
+
 import java.util.ArrayList;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Renderer {
+public class Renderer implements IUpdateListener {
 
     public final ArrayList<IRenderable> renderables = new ArrayList<>();
 
@@ -18,85 +18,55 @@ public class Renderer {
     private ShaderProgram shaderProgram;
 
     private Texture texture;
-    private int vao = -1;
-    private int vao2 = -1;
-    private Matrix4f modelMatrix1;
-    private Matrix4f modelMatrix2;
+    private Texture texture2;
+    private Mesh mesh;
+    private Mesh mesh2;
 
 
 
 
     public Renderer() {
-
         camera = new Camera();
+        camera.getTransform().getPosition().set(0f, 0f, -3f);
 
         glClearColor(1f, 0f, 0f, 1f);
         glEnable(GL_DEPTH_TEST);
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
 
-        float[] vertexArray = {
-                0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
-                0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f // top left
-        };
-        int[] indexArray = {
-                0, 1, 3   // first triangle
-        };
+        mesh = new Mesh(
+                new float[] {
+                    0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+                    0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+                    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+                    -0.5f,  0.5f, 0.0f,  0.0f, 1.0f // top left
+                },
 
-        int[] indexArray2 = {
-                1, 2, 3    // second triangle
-        };
+                new int[] {
+                        0, 1, 3,
+                        1, 2, 3
+                }
+        );
 
+        mesh2 = new Mesh(
+                new float[] {
+                        0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+                        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+                        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+                        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f // top left
+                },
 
-        vao = glGenVertexArrays();
-        int vbo = glGenBuffers();
-        int ebo = glGenBuffers();
-
-        glBindVertexArray(vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-
-
-        vao2 = glGenVertexArrays();
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-
-        glBindVertexArray(vao2);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray2, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+                new int[] {
+                        0, 1, 3,
+                        1, 2, 3
+                }
+        );
+        mesh2.getModelMatrix().translate(0, 1f, 0);
 
         texture = new Texture("cobblestone.png");
-
-        modelMatrix1 = new Matrix4f().identity();
-        modelMatrix2 = new Matrix4f().identity();
-
-        //modelMatrix1.translate(1, 0, 0);
-
-
+        texture2 = new Texture("stone.png");
     }
+
 
     // master draw method used in game loop
     public void draw(Window window) {
@@ -107,20 +77,14 @@ public class Renderer {
         glfwSwapBuffers(window.getWindowHandle());
     }
 
+
     public void update(double deltaTime) {
 
-        modelMatrix1.rotate((float) deltaTime, 0f, 0f, 1f);
-        modelMatrix2.rotate((float) deltaTime, 0f, 0f, 1f);
-
-        modelMatrix1.rotate((float) deltaTime, 1f, 0f, 0f);
-        modelMatrix2.rotate((float) deltaTime, 1f, 0f, 0f);
-
-        modelMatrix1.rotate((float) deltaTime, 0f, 1f, 0f);
-        modelMatrix2.rotate((float) deltaTime, 0f, 1f, 0f);
-
+        //mesh.getModelMatrix().rotate((float) deltaTime, 1f, 1f, 1f);
         camera.update(deltaTime);
 
     }
+
 
     private void render() {
 
@@ -140,23 +104,25 @@ public class Renderer {
         glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
 
 
-        if (vao > -1) {
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix1);
-            glBindVertexArray(vao);
-            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        if (mesh.getVao() > -1) {
+            shaderProgram.setUniform("vs_modelMatrix", mesh.getModelMatrix());
+            glBindVertexArray(mesh.getVao());
+            glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
 
+        glBindTexture(GL_TEXTURE_2D, texture2.getTextureHandle());
 
-        if (vao2 > -1) {
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix2);
-            glBindVertexArray(vao2);
-            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        if (mesh2.getVao() > -1) {
+            shaderProgram.setUniform("vs_modelMatrix", mesh2.getModelMatrix());
+            glBindVertexArray(mesh2.getVao());
+            glDrawElements(GL_TRIANGLES, mesh2.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
-
     }
+
 
     public void clean() {
 
+        mesh.clean();
         glDeleteProgram(shaderProgram.getProgramHandle());
 
     }

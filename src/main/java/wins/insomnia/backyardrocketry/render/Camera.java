@@ -29,24 +29,26 @@ public class Camera {
 
     public void update(double deltaTime) {
 
+        float moveSpeed = 2.5f;
+
         KeyboardInput keyboardInput = BackyardRocketry.getInstance().getKeyboardInput();
 
         float forwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_W) ? 1 : 0;
         float backwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_S) ? 1 : 0;
 
-        TRANSFORM.getPosition().add(0f, 0f, (float) deltaTime * (forwardDirection - backwardDirection));
+        TRANSFORM.getPosition().add(0f, 0f, (float) deltaTime * (forwardDirection - backwardDirection) * moveSpeed);
 
 
         float leftDirection = keyboardInput.isKeyPressed(GLFW_KEY_A) ? 1 : 0;
         float rightDirection = keyboardInput.isKeyPressed(GLFW_KEY_D) ? 1 : 0;
 
-        TRANSFORM.getPosition().add((float) deltaTime * (leftDirection - rightDirection), 0f, 0f);
+        TRANSFORM.getPosition().add((float) deltaTime * (leftDirection - rightDirection) * moveSpeed, 0f, 0f);
 
 
         float upDirection = keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0;
         float downDirection = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0;
 
-        TRANSFORM.getPosition().add(0f, (float) deltaTime * (downDirection - upDirection), 0f);
+        TRANSFORM.getPosition().add(0f, (float) deltaTime * (downDirection - upDirection) * moveSpeed, 0f);
 
     }
 
@@ -72,5 +74,8 @@ public class Camera {
         return VIEW_MATRIX;
     }
 
+    public Transform getTransform() {
+        return TRANSFORM;
+    }
 
 }

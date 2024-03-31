@@ -10,10 +10,8 @@ public class Transform {
 
 
     public Transform() {
-
         position = new Vector3f();
         rotation = new Quaternionf();
-
     }
 
 

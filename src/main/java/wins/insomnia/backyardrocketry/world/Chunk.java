@@ -14,7 +14,7 @@ public class Chunk implements IRenderable {
     private final int Z;
 
 
-    private final Mesh CHUNK_MESH;
+    //private final Mesh CHUNK_MESH;
 
 
     private BlockState[][][] blocks;
@@ -25,7 +25,7 @@ public class Chunk implements IRenderable {
         Y = y;
         Z = z;
 
-        CHUNK_MESH = new Mesh();
+        //CHUNK_MESH = new Mesh();
 
         initializeBlocks();
 

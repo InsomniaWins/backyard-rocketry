@@ -10,6 +10,6 @@ uniform mat4 vs_projectionMatrix;
 
 void main()
 {
-    gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);//vs_transformationMatrix * vec4(vs_vertexPosition, 1.0);
+    gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);
     fs_textureCoordinates = vs_textureCoordinates;
 }

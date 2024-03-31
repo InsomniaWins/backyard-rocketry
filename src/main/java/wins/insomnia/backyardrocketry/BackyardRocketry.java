@@ -5,10 +5,13 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.KeyboardInputEvent;
 
+import java.lang.ref.WeakReference;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -21,9 +24,20 @@ public class BackyardRocketry {
     private Renderer renderer;
     private KeyboardInput keyboardInput;
     private boolean running = false;
+    private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
 
     private int framesPerSecond = 0;
     private int updatesPerSecond = 0;
+
+    public BackyardRocketry() {
+
+        UPDATE_LISTENERS = new ArrayList<>();
+
+    }
+
+    public void registerUpdateListener(IUpdateListener updateListener) {
+        UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+    }
 
     public void run() {
 
@@ -49,7 +63,10 @@ public class BackyardRocketry {
 
     // this is the game loop tick/process/update hook/listener
     private void update(double deltaTime) {
-        renderer.update(deltaTime);
+
+        for (WeakReference<IUpdateListener> updateListener : UPDATE_LISTENERS) {
+            updateListener.get().update(deltaTime);
+        }
 
         if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window.getWindowHandle(), true);
@@ -112,6 +129,7 @@ public class BackyardRocketry {
 
         // create renderer
         renderer = new Renderer();
+        registerUpdateListener(renderer);
 
     }
 
