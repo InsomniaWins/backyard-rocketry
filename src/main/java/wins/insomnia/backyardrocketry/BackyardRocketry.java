@@ -13,7 +13,7 @@ import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public class BackyardRocketry implements IUpdateListener {
+public class BackyardRocketry {
 
     private static BackyardRocketry instance;
     private Window window;
@@ -52,12 +52,6 @@ public class BackyardRocketry implements IUpdateListener {
 
         glfwTerminate();
         glfwSetErrorCallback(null).free();
-
-    }
-
-    public void update(double deltaTime) {
-
-        renderer.draw(window);
 
     }
 

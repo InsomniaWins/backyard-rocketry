@@ -75,8 +75,6 @@ public class Updater {
 
             update(timeSincePreviousLoopIteration);
 
-            BackyardRocketry.getInstance().getRenderer().draw(BackyardRocketry.getInstance().getWindow());
-
         }
     }
 

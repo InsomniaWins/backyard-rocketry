@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Renderer {
+public class Renderer implements IUpdateListener {
 
     public final ArrayList<IRenderable> renderables = new ArrayList<>();
 
@@ -65,10 +66,16 @@ public class Renderer {
 
         texture = new Texture("cobblestone.png");
         texture2 = new Texture("stone.png");
+
+        BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
+    }
+
+    public void update(double deltaTime) {
+        draw(BackyardRocketry.getInstance().getWindow());
     }
 
     // master draw method used in game loop
-    public void draw(Window window) {
+    private void draw(Window window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         render();
         glfwSwapBuffers(window.getWindowHandle());
