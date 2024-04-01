@@ -50,7 +50,7 @@ public class Updater {
     }
 
     public void loop() {
-        final double secondsPerTick = 1.0 / 20.0;
+        final double secondsPerTick = 1.0 / 60.0;
 
         glfwSetTime(0.0);
         double currentTime = glfwGetTime();

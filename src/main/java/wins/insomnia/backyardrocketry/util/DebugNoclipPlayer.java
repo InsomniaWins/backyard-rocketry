@@ -25,8 +25,8 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener 
 
         BackyardRocketry.getInstance().getRenderer().getCamera().getTransform().set(transform);
 
-        float moveSpeed = 0.5f;
-        float rotateSpeed = 0.25f;
+        float moveSpeed = 0.15f;
+        float rotateSpeed = 0.05f;
         KeyboardInput keyboardInput = BackyardRocketry.getInstance().getKeyboardInput();
 
 
