@@ -2,6 +2,8 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
+import wins.insomnia.backyardrocketry.util.IPlayer;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 
 import java.util.ArrayList;
@@ -108,7 +110,11 @@ public class Renderer implements IUpdateListener {
             //glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
 
-        drawText("This is a test string!");
+        /*
+        if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
+            drawText(player.getTransform().getPosition().toString());
+        }*/
+        drawText("This is sample text!");
     }
 
 
@@ -116,6 +122,8 @@ public class Renderer implements IUpdateListener {
 
         //int[] previousTexture = new int[1];
         //glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
+
+        FONT_MESH.setText(text);
 
 
         shaderProgram.use();

@@ -27,7 +27,7 @@ public class BackyardRocketry {
     private int updatesPerSecond = 0;
 
 
-    private DebugNoclipPlayer player;
+    private IPlayer player;
 
     public BackyardRocketry() {
         UPDATER = new Updater();
@@ -113,6 +113,10 @@ public class BackyardRocketry {
 
         player = new DebugNoclipPlayer();
 
+    }
+
+    public IPlayer getPlayer() {
+        return player;
     }
 
     public Window getWindow() {

@@ -7,7 +7,7 @@ import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
-public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener {
+public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener, IPlayer {
 
     private Transform transform;
 
@@ -49,9 +49,6 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener 
         );
 
         transform.getRotation().rotateAxis(rotateSpeed * (rotateRightDirection - rotateLeftDirection), 0, 1, 0);
-
-
-
     }
 
     @Override
@@ -68,5 +65,9 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener 
         camera.getTransform().getPosition().lerp(transform.getPosition(), (float) deltaTime * Updater.getFixedUpdatesPerSecond());
         camera.getTransform().getRotation().slerp(transform.getRotation(), (float) deltaTime * Updater.getFixedUpdatesPerSecond());
 
+    }
+
+    public Transform getTransform() {
+        return transform;
     }
 }
