@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
 import wins.insomnia.backyardrocketry.util.IPlayer;
@@ -20,13 +21,15 @@ public class Renderer implements IUpdateListener {
 
     private Camera camera;
     private ShaderProgram shaderProgram;
+    private ShaderProgram textShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
 
     private int framesPerSecond = 0;
+    private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
+    private double fpsTimer = 0.0;
 
     private Texture texture;
-    private Texture texture2;
     private Mesh mesh;
 
     private Matrix4f modelMatrix;
@@ -43,6 +46,7 @@ public class Renderer implements IUpdateListener {
         glEnable(GL_DEPTH_TEST);
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
+        textShaderProgram = new ShaderProgram("text.vert", "text.frag");
 
         mesh = new Mesh(
                 new float[] {
@@ -66,7 +70,6 @@ public class Renderer implements IUpdateListener {
         modelMatrix = new Matrix4f().identity();
 
         texture = new Texture("cobblestone.png");
-        texture2 = new Texture("stone.png");
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
 
@@ -75,6 +78,17 @@ public class Renderer implements IUpdateListener {
 
     public void update(double deltaTime) {
         draw(BackyardRocketry.getInstance().getWindow());
+        framesRenderedSoFar++;
+
+        fpsTimer += deltaTime;
+        while (fpsTimer > 1.0) {
+
+            fpsTimer -= 1.0;
+            framesPerSecond = framesRenderedSoFar;
+            framesRenderedSoFar = 0;
+
+        }
+
     }
 
     // master draw method used in game loop
@@ -107,26 +121,40 @@ public class Renderer implements IUpdateListener {
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
 
-            //glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
         }
 
-        /*
         if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
-            drawText(player.getTransform().getPosition().toString());
-        }*/
-        drawText("This is sample text!");
+
+            Vector3f eulerRotation = new Vector3f();
+            player.getTransform().getRotation().getEulerAnglesXYZ(eulerRotation);
+
+            String debugString = String.format(
+                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nYaw: %f\nPitch: %f",
+                    Runtime.getRuntime().freeMemory() / 1_048_576,
+                    Runtime.getRuntime().totalMemory() / 1_048_576,
+                    getFramesPerSecond(),
+                    BackyardRocketry.getInstance().getUpdater().getUpdatesPerSecond(),
+                    player.getTransform().getPosition().x,
+                    player.getTransform().getPosition().y,
+                    player.getTransform().getPosition().z,
+                    eulerRotation.y,
+                    eulerRotation.x
+            );
+            drawText(debugString);
+        }
     }
 
 
     public void drawText(String text) {
 
-        //int[] previousTexture = new int[1];
-        //glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
+        int[] previousTexture = new int[1];
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
 
         FONT_MESH.setText(text);
 
 
-        shaderProgram.use();
+        textShaderProgram.use();
         glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getFontTexture().getTextureHandle());
         glActiveTexture(GL_TEXTURE0);
 
@@ -134,10 +162,8 @@ public class Renderer implements IUpdateListener {
 
         modelMatrix.identity();
 
-        shaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        shaderProgram.setUniform("vs_viewMatrix", camera.getViewMatrix());// modelMatrix);
-        shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
-        shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+        textShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        textShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(0f, BackyardRocketry.getInstance().getWindow().getWidth(), 0f, BackyardRocketry.getInstance().getWindow().getHeight(), 0.01f, 100f));
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -147,10 +173,16 @@ public class Renderer implements IUpdateListener {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
+        glDisable(GL_DEPTH_TEST);
+
         glDrawElements(GL_TRIANGLES, FONT_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
+
+        glEnable(GL_DEPTH_TEST);
         glBindVertexArray(0);
 
-        //glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
+
+
+        glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
     }
 
 

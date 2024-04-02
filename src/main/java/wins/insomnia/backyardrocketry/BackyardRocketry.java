@@ -23,9 +23,6 @@ public class BackyardRocketry {
 
     private final Updater UPDATER;
 
-    private int framesPerSecond = 0;
-    private int updatesPerSecond = 0;
-
 
     private IPlayer player;
 
@@ -124,14 +121,6 @@ public class BackyardRocketry {
     }
     public KeyboardInput getKeyboardInput() {
         return keyboardInput;
-    }
-
-    public int getFramesPerSecond() {
-        return framesPerSecond;
-    }
-
-    public int getUpdatesPerSecond() {
-        return updatesPerSecond;
     }
 
     public static BackyardRocketry getInstance() {

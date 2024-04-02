@@ -14,6 +14,12 @@ public class Updater {
     private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
     private final List<WeakReference<IFixedUpdateListener>> FIXED_UPDATE_LISTENERS;
 
+
+    private int updatesPerSecond = 0;
+    private int updatesProcessedSoFar = 0; // updates processed before ups-polling occurs
+    private double upsTimer = 0.0;
+
+
     public Updater() {
 
         UPDATE_LISTENERS = new ArrayList<>();
@@ -39,6 +45,8 @@ public class Updater {
             glfwSetWindowShouldClose(BackyardRocketry.getInstance().getWindow().getWindowHandle(), true);
         }
 
+        updatesProcessedSoFar++;
+
     }
 
     private void update(double deltaTime) {
@@ -47,10 +55,17 @@ public class Updater {
             updateListener.get().update(deltaTime);
         }
 
+        upsTimer += deltaTime;
+        while (upsTimer > 1.0) {
+            upsTimer -= 1.0;
+            updatesPerSecond = updatesProcessedSoFar;
+            updatesProcessedSoFar = 0;
+        }
+
     }
 
     public void loop() {
-        final double secondsPerTick = 1.0 / 60.0;
+        final double secondsPerTick = 1.0 / FIXED_UPDATES_PER_SECOND;
 
         glfwSetTime(0.0);
         double currentTime = glfwGetTime();
@@ -80,6 +95,10 @@ public class Updater {
 
     public static int getFixedUpdatesPerSecond() {
         return FIXED_UPDATES_PER_SECOND;
+    }
+
+    public int getUpdatesPerSecond() {
+        return updatesPerSecond;
     }
 
 
