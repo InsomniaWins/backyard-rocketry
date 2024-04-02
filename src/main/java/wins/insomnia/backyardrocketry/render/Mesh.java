@@ -36,9 +36,6 @@ public class Mesh implements IRenderable {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
 
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
     }
 
     public void clean() {

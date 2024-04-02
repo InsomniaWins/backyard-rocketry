@@ -21,16 +21,25 @@ public class FontMesh {
 
         text = "";
         VAO = glGenVertexArrays();
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
 
         glBindVertexArray(VAO);
+
+        vbo = glGenBuffers();
+        ebo = glGenBuffers();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, new float[0], GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, new int[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        indexCount = 0;
 
         updateMesh();
 
@@ -42,10 +51,11 @@ public class FontMesh {
     }
 
     private void updateMesh() {
+
         float[] vertexArray = new float[] {
-                0.5f,  0.5f,  -0.5f,  1f,  1f, // top right
-                0.5f, -0.5f,  -0.5f,  1f,  0.0f, // bottom right
-                -0.5f, -0.5f,  -0.5f,  0.0f,  0.0f, // bottom left
+                0.5f,  0.5f,  -0.5f,  CHARACTER_UV_WIDTH,  1f, // top right
+                0.5f, -0.5f,  -0.5f,  CHARACTER_UV_WIDTH,  1f - CHARACTER_UV_HEIGHT, // bottom right
+                -0.5f, -0.5f,  -0.5f,  0.0f,  1f - CHARACTER_UV_HEIGHT, // bottom left
                 -0.5f,  0.5f,  -0.5f,  0.0f,  1f, // top left
         };
 
@@ -54,7 +64,7 @@ public class FontMesh {
                 1, 2, 3
         };
 
-        indexCount = indexArray.length;
+
 
         glBindVertexArray(VAO);
 
@@ -69,6 +79,11 @@ public class FontMesh {
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+
+        indexCount = indexArray.length;
 
     }
 
