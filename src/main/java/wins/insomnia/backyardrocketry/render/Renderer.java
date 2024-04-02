@@ -19,7 +19,7 @@ public class Renderer implements IUpdateListener {
     private Camera camera;
     private ShaderProgram shaderProgram;
     private final TextureManager TEXTURE_MANAGER;
-    private final FontQuad FONT_QUAD;
+    private final FontMesh FONT_QUAD;
 
     private int framesPerSecond = 0;
 
@@ -33,7 +33,7 @@ public class Renderer implements IUpdateListener {
 
     public Renderer() {
         TEXTURE_MANAGER = new TextureManager();
-        FONT_QUAD = new FontQuad();
+        FONT_QUAD = new FontMesh();
 
         camera = new Camera();
         camera.getTransform().getPosition().set(0f, 0f, -3f);
@@ -92,6 +92,12 @@ public class Renderer implements IUpdateListener {
         shaderProgram.setUniform("vs_viewMatrix", camera.getViewMatrix());
         shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
 
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
 
@@ -126,6 +132,11 @@ public class Renderer implements IUpdateListener {
         shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
         shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
