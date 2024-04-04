@@ -84,6 +84,7 @@ public class Updater {
 
             while (accumulator >= secondsPerTick) {
                 BackyardRocketry.getInstance().getKeyboardInput().updateKeyStates();
+                BackyardRocketry.getInstance().getMouseInput().updateButtonStates();
                 fixedUpdate();
                 accumulator -= secondsPerTick;
             }

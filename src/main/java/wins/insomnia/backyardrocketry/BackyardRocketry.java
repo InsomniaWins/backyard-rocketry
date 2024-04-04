@@ -19,6 +19,7 @@ public class BackyardRocketry {
     private Window window;
     private Renderer renderer;
     private KeyboardInput keyboardInput;
+    private MouseInput mouseInput;
     private boolean running = false;
 
     private final Updater UPDATER;
@@ -104,6 +105,7 @@ public class BackyardRocketry {
 
         // create keyboard and mouse input
         keyboardInput = new KeyboardInput(window.getWindowHandle());
+        mouseInput = new MouseInput(window.getWindowHandle());
 
         // create renderer
         renderer = new Renderer();
@@ -121,6 +123,9 @@ public class BackyardRocketry {
     }
     public KeyboardInput getKeyboardInput() {
         return keyboardInput;
+    }
+    public MouseInput getMouseInput() {
+        return mouseInput;
     }
 
     public static BackyardRocketry getInstance() {

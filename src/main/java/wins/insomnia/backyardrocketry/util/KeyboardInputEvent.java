@@ -11,8 +11,6 @@ public class KeyboardInputEvent extends InputEvent {
     private final int KEY;
     private final KeyState KEY_STATE;
 
-    private boolean consumed = false;
-
     public KeyboardInputEvent(int key, boolean pressed, boolean justHappened) {
 
         KEY = key;
@@ -55,14 +53,6 @@ public class KeyboardInputEvent extends InputEvent {
 
     public boolean isJustReleased() {
         return KEY_STATE == KeyState.justReleased;
-    }
-
-    public boolean isConsumed() {
-        return consumed;
-    }
-
-    public void consume() {
-        consumed = true;
     }
 
 }

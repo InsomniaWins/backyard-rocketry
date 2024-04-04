@@ -1,13 +1,11 @@
 package wins.insomnia.backyardrocketry.util;
 
-import org.joml.AxisAngle4f;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.Camera;
 
-import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
@@ -104,6 +102,8 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         transform.getRotation().rotateY(rotateSpeed * (rotateRightDirection - rotateLeftDirection));
 
         cameraInterpolationFactor = 0f;
+
+
     }
 
 
