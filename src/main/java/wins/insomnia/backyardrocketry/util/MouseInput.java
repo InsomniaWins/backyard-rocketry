@@ -15,11 +15,13 @@ public class MouseInput {
     private int previousMouseY = 0;
     private int currentMouseX = 0;
     private int currentMouseY = 0;
-
+    private int previousFixedMouseX = 0;
+    private int previousFixedMouseY = 0;
 
     private final Queue<InputEvent> INPUT_EVENT_QUEUE; // input events for the current update() call
     private final Queue<InputEvent> QUEUED_INPUTS; // input events to be processed in the next update() call
     private final HashMap<Integer, MouseButtonInputEvent.ButtonState> BUTTON_STATES;
+    private final Vector2i MOUSE_MOTION;
     private final List<WeakReference<IInputCallback>> INPUT_CALLBACK_LIST;
 
     public MouseInput(long windowHandle) {
@@ -29,7 +31,20 @@ public class MouseInput {
         INPUT_EVENT_QUEUE = new LinkedList<>();
         QUEUED_INPUTS = new LinkedList<>();
         BUTTON_STATES = new HashMap<>();
+        MOUSE_MOTION = new Vector2i();
         INPUT_CALLBACK_LIST = new ArrayList<>();
+
+
+        double[] mouseX = new double[1]; double[] mouseY = new double[1];
+        glfwGetCursorPos(WINDOW_HANDLE, mouseX, mouseY);
+        previousMouseX = (int) mouseX[0];
+        previousMouseY = (int) mouseY[0];
+        currentMouseX = previousMouseX;
+        currentMouseY = previousMouseY;
+        previousFixedMouseX = previousMouseX;
+        previousFixedMouseY = previousMouseY;
+
+
 
         glfwSetMouseButtonCallback(WINDOW_HANDLE, this::mouseButtonCallback);
         glfwSetScrollCallback(WINDOW_HANDLE, this::mouseWheelCallback);
@@ -61,6 +76,10 @@ public class MouseInput {
         return BUTTON_STATES.get(key) == MouseButtonInputEvent.ButtonState.justReleased;
     }
 
+    public Vector2i getMouseMotion() {
+        return MOUSE_MOTION;
+    }
+
     public void updateButtonStates() {
 
         clearConsumedInputs();
@@ -76,6 +95,14 @@ public class MouseInput {
         }
 
 
+        MOUSE_MOTION.x = currentMouseX - previousMouseX;
+        MOUSE_MOTION.y = currentMouseY - previousMouseY;
+
+        previousMouseX = currentMouseX;
+        previousMouseY = currentMouseY;
+
+
+
         while (!QUEUED_INPUTS.isEmpty()) {
             InputEvent inputEvent = QUEUED_INPUTS.remove();
 
@@ -89,6 +116,11 @@ public class MouseInput {
                 }
 
                 INPUT_EVENT_QUEUE.add(mouseButtonInputEvent);
+
+            }
+            else if (inputEvent instanceof  MouseMovementInputEvent mouseMovementInputEvent) {
+
+                INPUT_EVENT_QUEUE.add(mouseMovementInputEvent);
 
             }
         }
@@ -143,13 +175,38 @@ public class MouseInput {
     }
 
     private void mousePositionCallback(long windowHandle, double x, double y) {
-
-        previousMouseX = currentMouseX;
-        previousMouseY = currentMouseY;
-
         currentMouseX = (int) x;
         currentMouseY = (int) y;
 
+        InputEvent inputEvent = new MouseMovementInputEvent(previousMouseX, previousMouseY, currentMouseX, currentMouseY);
+        QUEUED_INPUTS.add(inputEvent);
+
+    }
+
+    public void setMousePosition(int x, int y) {
+        setMousePosition(x, y, true);
+    }
+
+    public void setMousePosition(int x, int y, boolean isMovement) {
+        if (isMovement) {
+
+            mousePositionCallback(WINDOW_HANDLE, x, y);
+
+        }
+        else {
+
+            glfwSetCursorPos(WINDOW_HANDLE, x, y);
+
+            previousMouseX = x;
+            previousMouseY = y;
+
+            currentMouseX = x;
+            currentMouseY = y;
+
+            MOUSE_MOTION.x = 0;
+            MOUSE_MOTION.y = 0;
+
+        }
     }
 
 }

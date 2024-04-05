@@ -48,12 +48,13 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         // define vars
 
         float moveSpeed = 0.15f;
-        float rotateSpeed = 0.05f;
+        float rotateSpeed = 0.015f;
 
 
         // get input
 
         KeyboardInput keyboardInput = BackyardRocketry.getInstance().getKeyboardInput();
+        MouseInput mouseInput = BackyardRocketry.getInstance().getMouseInput();
 
         float forwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_W) ? 1 : 0;
         float backwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_S) ? 1 : 0;
@@ -64,15 +65,10 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         float upDirection = keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0;
         float downDirection = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0;
 
-        float rotateRightDirection = keyboardInput.isKeyPressed(GLFW_KEY_E) ? 1 : 0;
-        float rotateLeftDirection = keyboardInput.isKeyPressed(GLFW_KEY_Q) ? 1 : 0;
-
-        float rotateDownDirection = keyboardInput.isKeyPressed(GLFW_KEY_X) ? 1 : 0;
-        float rotateUpDirection = keyboardInput.isKeyPressed(GLFW_KEY_Z) ? 1 : 0;
-
-
 
         // get move amount for x, y, and z
+
+        // TODO: movement speed on x and z is affected by up-down look direction (BUG)
 
         Vector3f eulerRotation = new Vector3f();
         getTransform().getRotation().getEulerAnglesXYZ(eulerRotation);
@@ -98,8 +94,14 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
         previousTransform.set(transform);
         transform.getPosition().add(moveAmount);
-        transform.getRotation().rotateLocalX(rotateSpeed * (rotateDownDirection - rotateUpDirection));
-        transform.getRotation().rotateY(rotateSpeed * (rotateRightDirection - rotateLeftDirection));
+
+        float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
+        float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
+
+        mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
+
+        transform.getRotation().rotateLocalX(verticalRotateAmount);//(rotateDownDirection - rotateUpDirection));
+        transform.getRotation().rotateY(horizontalRotateAmount);
 
         cameraInterpolationFactor = 0f;
 
