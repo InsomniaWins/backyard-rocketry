@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util;
 
 import org.joml.Math;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
@@ -68,15 +69,15 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
         // get move amount for x, y, and z
 
-        // TODO: movement speed on x and z is affected by up-down look direction (BUG)
-
         Vector3f eulerRotation = new Vector3f();
         getTransform().getRotation().getEulerAnglesXYZ(eulerRotation);
 
-        Vector3f forwardBackwardMovement = transform.getRotation().positiveZ(new Vector3f());
+        Quaternionf horizontalRotation = transform.getHorizontalRotation();
+
+        Vector3f forwardBackwardMovement = horizontalRotation.positiveZ(new Vector3f());
         forwardBackwardMovement.mul(forwardDirection - backwardDirection);
 
-        Vector3f leftRightMovement = transform.getRotation().positiveX(new Vector3f());
+        Vector3f leftRightMovement = horizontalRotation.positiveX(new Vector3f());
         leftRightMovement.mul(leftDirection - rightDirection);
 
         float upDownMovement = (downDirection - upDirection);
@@ -107,7 +108,6 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
 
     }
-
 
     @Override
     public void update(double deltaTime) {

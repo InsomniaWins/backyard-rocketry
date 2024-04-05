@@ -136,7 +136,7 @@ public class Renderer implements IUpdateListener {
             float sineYawValue = sin(player.getTransform().getRotation().y);
 
             String debugString = String.format(
-                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRot W: %f",
+                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRot W: %f\nRot Mat: %s",
                     Runtime.getRuntime().freeMemory() / 1_048_576,
                     Runtime.getRuntime().totalMemory() / 1_048_576,
                     getFramesPerSecond(),
@@ -147,7 +147,8 @@ public class Renderer implements IUpdateListener {
                     player.getTransform().getRotation().x,
                     player.getTransform().getRotation().y,
                     player.getTransform().getRotation().z,
-                    player.getTransform().getRotation().w
+                    player.getTransform().getRotation().w,
+                    player.getTransform().getRotation().get(new Matrix4f()).toString()
             );
             drawText(debugString);
         }
