@@ -152,10 +152,10 @@ public class FontMesh {
 
 
             // indices
+
             indexArray[indexIndex] = 4 * i; // top right
             indexArray[indexIndex + 1] = 1 + 4 * i; // bottom right
             indexArray[indexIndex + 2] = 3 + 4 * i; // top left
-
             indexArray[indexIndex + 3] = 1 + 4 * i; // bottom right
             indexArray[indexIndex + 4] = 2 + 4 * i; // bottom left
             indexArray[indexIndex + 5] = 3 + 4 * i; // top left

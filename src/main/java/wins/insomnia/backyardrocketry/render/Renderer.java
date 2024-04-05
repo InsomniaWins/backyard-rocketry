@@ -47,27 +47,64 @@ public class Renderer implements IUpdateListener {
 
         glClearColor(1f, 0f, 0f, 1f);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
         textShaderProgram = new ShaderProgram("text.vert", "text.frag");
 
         mesh = new Mesh(
                 new float[] {
+                        // front
                         0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // top right front
                         0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom right front
                         -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom left front
                         -0.5f,  0.5f, 0.5f,  0.0f, 1.0f, // top left front
-                        0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // top right back
+
+                        // back
+                        0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // top right back
+                        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom right back
+                        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // bottom left back
+                        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top left back
+
+                        // right
+                        0.5f,  0.5f, 0.5f, 0.0f, 1.0f, // top right front
+                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top right back
                         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // bottom right back
-                        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom left back
-                        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top left back
+                        0.5f, -0.5f, 0.5f,  0.0f, 0.0f, // bottom right front
+
+                        // left
+                        -0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // top right front
+                        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top right back
+                        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom right back
+                        -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // bottom right front
+
+                        // top
+                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top right front
+                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top right back
+                        -0.5f, 0.5f, -0.5f,  0.0f, 1.0f, // top left back
+                        -0.5f, 0.5f, 0.5f,  0.0f, 0.0f, // top left front
+
+                        // bottom
+                        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, // top right front
+                        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // top right back
+                        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // top left back
+                        -0.5f, -0.5f, 0.5f,  0.0f, 1.0f // top left front
                 },
 
                 new int[] {
-                        0, 1, 3,
-                        1, 2, 3,
+                        0, 3, 1,
+                        1, 3, 2,
                         4, 5, 7,
-                        5, 6, 7
+                        5, 6, 7,
+                        8, 11, 9,
+                        9, 11, 10,
+                        12, 13, 15,
+                        13, 14, 15,
+                        16, 17, 19,
+                        17, 18, 19,
+                        20, 23, 21,
+                        21, 23, 22
                 }
         );
         modelMatrix = new Matrix4f().identity();
@@ -117,6 +154,7 @@ public class Renderer implements IUpdateListener {
 
         modelMatrix.identity();
 
+        glEnable(GL_CULL_FACE);
         if (mesh.getVao() > -1) {
             shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
             glBindVertexArray(mesh.getVao());
@@ -124,13 +162,21 @@ public class Renderer implements IUpdateListener {
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
 
-            glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+            for (int x = 0; x < 5; x++) {
+                for (int y = 0; y < 5; y++) {
+                    for (int z = 0; z < 5; z++) {
+
+                        modelMatrix.identity().translate(x, y, z);
+                        shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+
+                        glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+
+                    }
+                }
+            }
         }
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
-
-            float cosineYawValue = signum(-player.getTransform().getRotation().y) * (1f - abs(sin(player.getTransform().getRotation().y)));
-            float sineYawValue = sin(player.getTransform().getRotation().y);
 
             String debugString = String.format(
                     "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f",
@@ -177,11 +223,16 @@ public class Renderer implements IUpdateListener {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
+
+        // TODO: Add back-face culling to text rendering!!!
+
         glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
 
         glDrawElements(GL_TRIANGLES, FONT_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
         glBindVertexArray(0);
 
 
