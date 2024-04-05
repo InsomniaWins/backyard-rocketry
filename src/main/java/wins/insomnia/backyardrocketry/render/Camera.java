@@ -37,7 +37,7 @@ public class Camera {
 
     public void updateViewMatrix() {
         VIEW_MATRIX.identity();
-        VIEW_MATRIX.rotate(TRANSFORM.getRotation());
+        VIEW_MATRIX.rotateXYZ(TRANSFORM.getRotation().x, TRANSFORM.getRotation().y, TRANSFORM.getRotation().z);
         VIEW_MATRIX.translate(TRANSFORM.getPosition());
     }
 

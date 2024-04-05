@@ -20,7 +20,7 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
 
     private float cameraInterpolationFactor = 0f;
-    private Quaternionf interpolatedRotation;
+    private Vector3f interpolatedRotation;
     private Vector3f interpolatedPosition;
 
 
@@ -29,7 +29,7 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         transform = new Transform();
         previousTransform = new Transform();
 
-        interpolatedRotation = new Quaternionf(previousTransform.getRotation());
+        interpolatedRotation = new Vector3f(previousTransform.getRotation());
         interpolatedPosition = new Vector3f(previousTransform.getPosition());
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
@@ -49,7 +49,7 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         // define vars
 
         float moveSpeed = 0.15f;
-        float rotateSpeed = 0.015f;
+        float rotateSpeed = 0.0025f;
 
 
         // get input
@@ -66,43 +66,37 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         float upDirection = keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0;
         float downDirection = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0;
 
+        Vector3f moveAmount = new Vector3f(
+                (leftDirection - rightDirection),
+                0f,
+                (forwardDirection - backwardDirection)
+        ).rotateY(-transform.getRotation().y);
 
-        // get move amount for x, y, and z
-
-        Vector3f eulerRotation = new Vector3f();
-        getTransform().getRotation().getEulerAnglesXYZ(eulerRotation);
-
-        Quaternionf horizontalRotation = transform.getHorizontalRotation();
-
-        Vector3f forwardBackwardMovement = horizontalRotation.positiveZ(new Vector3f());
-        forwardBackwardMovement.mul(forwardDirection - backwardDirection);
-
-        Vector3f leftRightMovement = horizontalRotation.positiveX(new Vector3f());
-        leftRightMovement.mul(leftDirection - rightDirection);
-
-        float upDownMovement = (downDirection - upDirection);
-
-        Vector3f moveAmount = new Vector3f(forwardBackwardMovement).add(leftRightMovement);
         if (moveAmount.length() > 0f) {
             moveAmount.normalize();
-            moveAmount.mul(moveSpeed);
         }
 
-        moveAmount.y = upDownMovement * moveSpeed;
-
+        moveAmount.y = (downDirection - upDirection);
+        moveAmount.mul(moveSpeed);
 
         // apply translation and rotation
 
         previousTransform.set(transform);
         transform.getPosition().add(moveAmount);
 
-        float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
-        float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
+        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+            float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
+            float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
 
-        mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
+            mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
 
-        transform.getRotation().rotateLocalX(verticalRotateAmount);//(rotateDownDirection - rotateUpDirection));
-        transform.getRotation().rotateY(horizontalRotateAmount);
+            transform.rotateX(verticalRotateAmount);
+            transform.rotateY(horizontalRotateAmount);
+
+            // clamp vertical rotation
+            transform.getRotation().x = Math.max(transform.getRotation().x, (float) -Math.PI * 0.5f);
+            transform.getRotation().x = Math.min(transform.getRotation().x, (float) Math.PI * 0.5f);
+        }
 
         cameraInterpolationFactor = 0f;
 
@@ -126,7 +120,16 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         interpolatedRotation.set(previousTransform.getRotation());
         interpolatedPosition.set(previousTransform.getPosition());
 
-        interpolatedRotation.slerp(transform.getRotation(), cameraInterpolationFactor);
+        // interpolate camera rotation
+
+        interpolatedRotation.set(
+                Transform.lerpAngle(interpolatedRotation.x, transform.getRotation().x, cameraInterpolationFactor),
+                Transform.lerpAngle(interpolatedRotation.y, transform.getRotation().y, cameraInterpolationFactor),
+                Transform.lerpAngle(interpolatedRotation.z, transform.getRotation().z, cameraInterpolationFactor)
+        );
+
+        // interpolate camera position
+
         interpolatedPosition.lerp(transform.getPosition(), cameraInterpolationFactor);
 
         camera.getTransform().getRotation().set(interpolatedRotation);

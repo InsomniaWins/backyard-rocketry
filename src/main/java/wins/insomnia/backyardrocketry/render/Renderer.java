@@ -129,14 +129,11 @@ public class Renderer implements IUpdateListener {
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
 
-            Vector3f eulerRotation = new Vector3f();
-            player.getTransform().getRotation().getEulerAnglesXYZ(eulerRotation);
-
             float cosineYawValue = signum(-player.getTransform().getRotation().y) * (1f - abs(sin(player.getTransform().getRotation().y)));
             float sineYawValue = sin(player.getTransform().getRotation().y);
 
             String debugString = String.format(
-                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRot W: %f\nRot Mat: %s",
+                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f",
                     Runtime.getRuntime().freeMemory() / 1_048_576,
                     Runtime.getRuntime().totalMemory() / 1_048_576,
                     getFramesPerSecond(),
@@ -146,9 +143,7 @@ public class Renderer implements IUpdateListener {
                     player.getTransform().getPosition().z,
                     player.getTransform().getRotation().x,
                     player.getTransform().getRotation().y,
-                    player.getTransform().getRotation().z,
-                    player.getTransform().getRotation().w,
-                    player.getTransform().getRotation().get(new Matrix4f()).toString()
+                    player.getTransform().getRotation().z
             );
             drawText(debugString);
         }
