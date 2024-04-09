@@ -1,9 +1,12 @@
 package wins.insomnia.backyardrocketry.world;
 
+import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.render.Mesh;
 
-public class Chunk implements IRenderable {
+public class Chunk {
+
+    private boolean isClean;
 
     private final int SIZE_X = 16;
     private final int SIZE_Y = 16;
@@ -13,8 +16,7 @@ public class Chunk implements IRenderable {
     private final int Y;
     private final int Z;
 
-
-    //private final Mesh CHUNK_MESH;
+    private final ChunkMesh CHUNK_MESH;
 
 
     private BlockState[][][] blocks;
@@ -25,7 +27,8 @@ public class Chunk implements IRenderable {
         Y = y;
         Z = z;
 
-        //CHUNK_MESH = new Mesh();
+        CHUNK_MESH = new ChunkMesh(this);
+        BackyardRocketry.getInstance().getRenderer().addRenderable(CHUNK_MESH);
 
         initializeBlocks();
 
@@ -37,7 +40,7 @@ public class Chunk implements IRenderable {
 
     private void generateMesh() {
 
-
+        CHUNK_MESH.generateMesh();
 
     }
 
@@ -63,9 +66,7 @@ public class Chunk implements IRenderable {
 
     }
 
-
-    @Override
-    public void render() {
-
+    public ChunkMesh getChunkMesh() {
+        return CHUNK_MESH;
     }
 }

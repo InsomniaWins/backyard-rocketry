@@ -12,10 +12,19 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Mesh implements IRenderable {
 
-    private int vao;
-    private int vbo;
-    private int ebo;
-    private int indexCount;
+    protected boolean isClean;
+    protected int vao;
+    protected int vbo;
+    protected int ebo;
+    protected int indexCount;
+
+    public Mesh() {
+        vao = -1;
+        vbo = -1;
+        ebo = -1;
+        indexCount = 0;
+        isClean = true;
+    }
 
     public Mesh(float[] vertexArray, int[] indexArray) {
 
@@ -36,14 +45,21 @@ public class Mesh implements IRenderable {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
 
+        isClean = false;
     }
 
     public void clean() {
+
+        isClean = true;
 
         glDeleteBuffers(vbo);
         glDeleteBuffers(ebo);
         glDeleteVertexArrays(vao);
 
+    }
+
+    public boolean isClean() {
+        return isClean;
     }
 
     public int getIndexCount() {
@@ -55,7 +71,20 @@ public class Mesh implements IRenderable {
     }
 
     @Override
-    public void render() {
+    public boolean shouldRender() {
+        return true;
+    }
 
+    @Override
+    public void render() {
+        if (vao < 0) {
+            return;
+        }
+
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 }

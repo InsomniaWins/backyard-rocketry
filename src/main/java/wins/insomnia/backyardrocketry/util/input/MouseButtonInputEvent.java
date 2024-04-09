@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.util;
+package wins.insomnia.backyardrocketry.util.input;
 
 public class MouseButtonInputEvent extends InputEvent {
 

@@ -2,11 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.util.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.KeyboardInputEvent;
 import wins.insomnia.backyardrocketry.util.Transform;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 public class Camera {
 

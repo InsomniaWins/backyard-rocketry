@@ -6,6 +6,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.nio.IntBuffer;
 
@@ -21,11 +24,18 @@ public class BackyardRocketry {
     private KeyboardInput keyboardInput;
     private MouseInput mouseInput;
     private boolean running = false;
-
     private final Updater UPDATER;
 
 
+
+    // TODO: REMOVE PLACEHOLDER CODE!
+
     private IPlayer player;
+    private World world;
+
+
+
+
 
     public BackyardRocketry() {
         UPDATER = new Updater();
@@ -110,7 +120,11 @@ public class BackyardRocketry {
         // create renderer
         renderer = new Renderer();
 
+
+
+        // TODO: REPLACE PLACEHOLDER CODE!
         player = new DebugNoclipPlayer();
+        world = new World();
 
     }
 

@@ -1,16 +1,15 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.Random;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
-import wins.insomnia.backyardrocketry.util.IPlayer;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import static org.joml.Math.*;
-import static org.joml.Math.sin;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -27,19 +26,22 @@ public class Renderer implements IUpdateListener {
     private ShaderProgram textShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
+    private final ArrayList<WeakReference<IRenderable>> RENDER_LIST;
 
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
 
     private Texture texture;
-    private Mesh mesh;
 
     private Matrix4f modelMatrix;
 
 
+    float[][] noise;
+
 
     public Renderer() {
+        RENDER_LIST = new ArrayList<>();
         TEXTURE_MANAGER = new TextureManager();
 
         camera = new Camera();
@@ -53,60 +55,6 @@ public class Renderer implements IUpdateListener {
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
         textShaderProgram = new ShaderProgram("text.vert", "text.frag");
 
-        mesh = new Mesh(
-                new float[] {
-                        // front
-                        0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // top right front
-                        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, // bottom right front
-                        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom left front
-                        -0.5f,  0.5f, 0.5f,  0.0f, 1.0f, // top left front
-
-                        // back
-                        0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // top right back
-                        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom right back
-                        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // bottom left back
-                        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top left back
-
-                        // right
-                        0.5f,  0.5f, 0.5f, 0.0f, 1.0f, // top right front
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top right back
-                        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // bottom right back
-                        0.5f, -0.5f, 0.5f,  0.0f, 0.0f, // bottom right front
-
-                        // left
-                        -0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // top right front
-                        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top right back
-                        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom right back
-                        -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // bottom right front
-
-                        // top
-                        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, // top right front
-                        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, // top right back
-                        -0.5f, 0.5f, -0.5f,  0.0f, 1.0f, // top left back
-                        -0.5f, 0.5f, 0.5f,  0.0f, 0.0f, // top left front
-
-                        // bottom
-                        0.5f, -0.5f, 0.5f, 1.0f, 1.0f, // top right front
-                        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // top right back
-                        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // top left back
-                        -0.5f, -0.5f, 0.5f,  0.0f, 1.0f // top left front
-                },
-
-                new int[] {
-                        0, 3, 1,
-                        1, 3, 2,
-                        4, 5, 7,
-                        5, 6, 7,
-                        8, 11, 9,
-                        9, 11, 10,
-                        12, 13, 15,
-                        13, 14, 15,
-                        16, 17, 19,
-                        17, 18, 19,
-                        20, 23, 21,
-                        21, 23, 22
-                }
-        );
         modelMatrix = new Matrix4f().identity();
 
         texture = new Texture("cobblestone.png");
@@ -114,6 +62,18 @@ public class Renderer implements IUpdateListener {
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
 
         FONT_MESH = new FontMesh();
+
+
+        noise = new float[100][100];
+        long seed = Random.newSeed();
+        for (int x = 0; x < 100; x++) {
+            for (int z = 0; z < 100; z++) {
+
+                noise[x][z] = OpenSimplex2.noise3_ImproveXY(seed, x, 0, z);
+
+            }
+        }
+
     }
 
     public void update(double deltaTime) {
@@ -138,6 +98,12 @@ public class Renderer implements IUpdateListener {
         glfwSwapBuffers(window.getWindowHandle());
     }
 
+    public void addRenderable(IRenderable renderable) {
+
+        RENDER_LIST.add(new WeakReference<>(renderable));
+
+    }
+
     private void render() {
 
         camera.updateProjectionMatrix();
@@ -155,25 +121,19 @@ public class Renderer implements IUpdateListener {
         modelMatrix.identity();
 
         glEnable(GL_CULL_FACE);
-        if (mesh.getVao() > -1) {
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-            glBindVertexArray(mesh.getVao());
 
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
+        for (WeakReference<IRenderable> renderableWeakReference : RENDER_LIST) {
+            IRenderable renderable = renderableWeakReference.get();
 
-            for (int x = 0; x < 5; x++) {
-                for (int y = 0; y < 5; y++) {
-                    for (int z = 0; z < 5; z++) {
+            if (renderable == null) continue;
 
-                        modelMatrix.identity().translate(x, y, z);
-                        shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            if (renderable.shouldRender()) {
 
-                        glDrawElements(GL_TRIANGLES, mesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+                renderable.render();
+                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
-                    }
-                }
             }
+
         }
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
@@ -243,7 +203,18 @@ public class Renderer implements IUpdateListener {
 
     public void clean() {
 
-        mesh.clean();
+        for (WeakReference<IRenderable> renderableWeakReference : RENDER_LIST) {
+
+            IRenderable renderable = renderableWeakReference.get();
+
+            if (renderable == null) continue;
+
+            if (!renderable.isClean()) {
+                renderable.clean();
+            }
+
+        }
+
         FONT_MESH.clean();
         TEXTURE_MANAGER.clean();
         glDeleteProgram(shaderProgram.getProgramHandle());
