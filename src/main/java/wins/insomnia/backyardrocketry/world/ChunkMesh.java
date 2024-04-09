@@ -135,12 +135,41 @@ public class ChunkMesh extends Mesh {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
 
-                    addFrontFace(vertices, indices, x, y, z);
-                    addBackFace(vertices, indices, x, y, z);
-                    addRightFace(vertices, indices, x, y, z);
-                    addLeftFace(vertices, indices, x, y, z);
-                    addBottomFace(vertices, indices, x, y, z);
-                    addTopFace(vertices, indices, x, y, z);
+                    if (chunk.getBlock(x,y,z) != Block.AIR) {
+
+                        int topNeighbor = chunk.getBlock(x, y+1, z);
+                        int bottomNeighbor = chunk.getBlock(x, y-1, z);
+                        int leftNeighbor = chunk.getBlock(x-1, y, z);
+                        int rightNeighbor = chunk.getBlock(x+1, y, z);
+                        int backNeighbor = chunk.getBlock(x, y, z-1);
+                        int frontNeighbor = chunk.getBlock(x, y, z+1);
+
+
+                        if (frontNeighbor == Block.AIR || frontNeighbor == -1) {
+                            addFrontFace(vertices, indices, x, y, z);
+                        }
+
+                        if (backNeighbor == Block.AIR || backNeighbor == -1) {
+                            addBackFace(vertices, indices, x, y, z);
+                        }
+
+                        if (rightNeighbor == Block.AIR || rightNeighbor == -1) {
+                            addRightFace(vertices, indices, x, y, z);
+                        }
+
+                        if (leftNeighbor == Block.AIR || leftNeighbor == -1) {
+                            addLeftFace(vertices, indices, x, y, z);
+                        }
+
+                        if (bottomNeighbor == Block.AIR || bottomNeighbor == -1) {
+                            addBottomFace(vertices, indices, x, y, z);
+                        }
+
+                        if (topNeighbor == Block.AIR || topNeighbor == -1) {
+                            addTopFace(vertices, indices, x, y, z);
+                        }
+
+                    }
 
                 }
             }

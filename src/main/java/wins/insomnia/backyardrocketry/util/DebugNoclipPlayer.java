@@ -57,6 +57,8 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         KeyboardInput keyboardInput = BackyardRocketry.getInstance().getKeyboardInput();
         MouseInput mouseInput = BackyardRocketry.getInstance().getMouseInput();
 
+        if (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) moveSpeed *= 3f;
+
         float forwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_W) ? 1 : 0;
         float backwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_S) ? 1 : 0;
 

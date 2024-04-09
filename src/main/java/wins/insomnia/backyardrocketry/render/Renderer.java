@@ -74,6 +74,8 @@ public class Renderer implements IUpdateListener {
             }
         }
 
+        glClearColor(0.25882352941176473f, 0.6901960784313725f, 1f, 1f);
+
     }
 
     public void update(double deltaTime) {
