@@ -18,26 +18,18 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer implements IUpdateListener {
-
-    public final ArrayList<IRenderable> renderables = new ArrayList<>();
-
     private Camera camera;
     private ShaderProgram shaderProgram;
     private ShaderProgram textShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final ArrayList<WeakReference<IRenderable>> RENDER_LIST;
-
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
-
     private Texture texture;
-
     private Matrix4f modelMatrix;
 
-
-    float[][] noise;
 
 
     public Renderer() {
@@ -62,17 +54,6 @@ public class Renderer implements IUpdateListener {
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
 
         FONT_MESH = new FontMesh();
-
-
-        noise = new float[100][100];
-        long seed = Random.newSeed();
-        for (int x = 0; x < 100; x++) {
-            for (int z = 0; z < 100; z++) {
-
-                noise[x][z] = OpenSimplex2.noise3_ImproveXY(seed, x, 0, z);
-
-            }
-        }
 
         glClearColor(0.25882352941176473f, 0.6901960784313725f, 1f, 1f);
 
