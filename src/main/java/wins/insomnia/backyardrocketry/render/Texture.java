@@ -9,6 +9,14 @@ import static org.lwjgl.opengl.GL11.*;
 public class Texture {
 
     private int textureIndex;
+    private boolean isClean;
+
+
+    public Texture() {
+        isClean = true;
+        textureIndex = -1;
+    }
+
 
     public Texture(String textureName) {
 
@@ -50,10 +58,16 @@ public class Texture {
 
         STBImage.stbi_image_free(buffer);
 
+        isClean = false;
+    }
+
+    public boolean isClean() {
+        return isClean;
     }
 
     public void clean() {
 
+        isClean = true;
         glDeleteTextures(textureIndex);
 
     }

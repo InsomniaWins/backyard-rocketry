@@ -1,11 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
-import org.joml.Random;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
-import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -214,5 +212,9 @@ public class Renderer implements IUpdateListener {
 
     public TextureManager getTextureManager() {
         return TEXTURE_MANAGER;
+    }
+
+    public static Renderer get() {
+        return BackyardRocketry.getInstance().getRenderer();
     }
 }

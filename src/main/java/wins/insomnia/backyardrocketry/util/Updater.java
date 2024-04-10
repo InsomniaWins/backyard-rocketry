@@ -102,5 +102,8 @@ public class Updater {
         return updatesPerSecond;
     }
 
+    public static Updater get() {
+        return BackyardRocketry.getInstance().getUpdater();
+    }
 
 }
