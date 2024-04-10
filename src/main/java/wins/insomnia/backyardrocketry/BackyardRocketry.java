@@ -120,6 +120,8 @@ public class BackyardRocketry {
         // create renderer
         renderer = new Renderer();
 
+        // load block models
+        BlockModelData.loadBlockModels();
 
 
         // TODO: REPLACE PLACEHOLDER CODE!

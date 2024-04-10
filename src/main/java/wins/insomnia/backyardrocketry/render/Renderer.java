@@ -47,7 +47,7 @@ public class Renderer implements IUpdateListener {
 
         modelMatrix = new Matrix4f().identity();
 
-        texture = new Texture("cobblestone.png");
+        texture = new Texture("blocks/cobblestone.png");
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
 

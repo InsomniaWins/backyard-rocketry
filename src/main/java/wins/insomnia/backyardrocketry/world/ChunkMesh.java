@@ -1,8 +1,13 @@
 package wins.insomnia.backyardrocketry.world;
 
+import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Mesh;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -18,108 +23,33 @@ public class ChunkMesh extends Mesh {
         this.chunk = chunk;
     }
 
-    public void addFrontFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
+
+    public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ) {
 
         int indexOffset = vertices.size() / 5;
 
-        indices.addAll(List.of(
-                indexOffset, 3 + indexOffset, 1 + indexOffset,
-                1 + indexOffset, 3 + indexOffset, 2 + indexOffset
-        ));
+        for (int faceIndex : faceIndexArray) {
+            indices.add(faceIndex + indexOffset);
+        }
 
-        vertices.addAll(List.of(
-                0.5f + offX, 0.5f + offY, 0.5f + offZ, 1.0f, 1.0f, // top right front
-                0.5f + offX, -0.5f + offY, 0.5f + offZ, 1.0f, 0.0f, // bottom right front
-                -0.5f + offX, -0.5f + offY, 0.5f + offZ, 0.0f, 0.0f, // bottom left front
-                -0.5f + offX, 0.5f + offY, 0.5f + offZ, 0.0f, 1.0f // top left front
-        ));
+        for (int i = 0; i < faceVertexArray.size(); i++) {
+
+            int vertexDataIndex = i % 5;
+            float vertexData = faceVertexArray.get(i).floatValue();
+
+            if (vertexDataIndex == 0) {
+                vertexData += offX;
+            } else if (vertexDataIndex == 1) {
+                vertexData += offY;
+            } else if (vertexDataIndex == 2) {
+                vertexData += offZ;
+            }
+
+            vertices.add(vertexData);
+
+        }
     }
 
-
-    public void addBackFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
-
-        int indexOffset = vertices.size() / 5;
-
-        indices.addAll(List.of(
-                indexOffset, 1 + indexOffset, 3 + indexOffset,
-                1 + indexOffset, 2 + indexOffset, 3 + indexOffset
-        ));
-
-        vertices.addAll(List.of(
-                0.5f + offX,  0.5f + offY, -0.5f + offZ, 0.0f, 1.0f, // top right back
-                0.5f + offX, -0.5f + offY, -0.5f + offZ, 0.0f, 0.0f, // bottom right back
-                -0.5f + offX, -0.5f + offY, -0.5f + offZ, 1.0f, 0.0f, // bottom left back
-                -0.5f + offX,  0.5f + offY, -0.5f + offZ,  1.0f, 1.0f // top left back
-        ));
-    }
-
-    public void addRightFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
-
-        int indexOffset = vertices.size() / 5;
-
-        indices.addAll(List.of(
-                indexOffset, 3 + indexOffset, 1 + indexOffset,
-                1 + indexOffset, 3 + indexOffset, 2 + indexOffset
-        ));
-
-        vertices.addAll(List.of(
-                0.5f + offX, 0.5f + offY, 0.5f + offZ, 0.0f, 1.0f, // top right front
-                0.5f + offX, 0.5f + offY, -0.5f + offZ, 1.0f, 1.0f, // top right back
-                0.5f + offX, -0.5f + offY, -0.5f + offZ, 1.0f, 0.0f, // bottom right back
-                0.5f + offX, -0.5f + offY, 0.5f + offZ,  0.0f, 0.0f // bottom right front
-        ));
-    }
-
-    public void addLeftFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
-
-        int indexOffset = vertices.size() / 5;
-
-        indices.addAll(List.of(
-                indexOffset, 1 + indexOffset, 3 + indexOffset,
-                1 + indexOffset, 2 + indexOffset, 3 + indexOffset
-        ));
-
-        vertices.addAll(List.of(
-                -0.5f + offX, 0.5f + offY, 0.5f + offZ, 1.0f, 1.0f, // top right front
-                -0.5f + offX, 0.5f + offY, -0.5f + offZ, 0.0f, 1.0f, // top right back
-                -0.5f + offX, -0.5f + offY, -0.5f + offZ, 0.0f, 0.0f, // bottom right back
-                -0.5f + offX, -0.5f + offY, 0.5f + offZ,  1.0f, 0.0f // bottom right front
-        ));
-    }
-
-    public void addTopFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
-
-        int indexOffset = vertices.size() / 5;
-
-        indices.addAll(List.of(
-                indexOffset, 1 + indexOffset, 3 + indexOffset,
-                1 + indexOffset, 2 + indexOffset, 3 + indexOffset
-        ));
-
-        vertices.addAll(List.of(
-                0.5f + offX, 0.5f + offY, 0.5f + offZ, 1.0f, 0.0f, // top right front
-                0.5f + offX, 0.5f + offY, -0.5f + offZ, 1.0f, 1.0f, // top right back
-                -0.5f + offX, 0.5f + offY, -0.5f + offZ, 0.0f, 1.0f, // top left back
-                -0.5f + offX, 0.5f + offY, 0.5f + offZ, 0.0f, 0.0f // top left front
-        ));
-    }
-
-    public void addBottomFace(ArrayList<Float> vertices, ArrayList<Integer> indices, int offX, int offY, int offZ) {
-
-        int indexOffset = vertices.size() / 5;
-
-        indices.addAll(List.of(
-                indexOffset, 3 + indexOffset, 1 + indexOffset,
-                1 + indexOffset, 3 + indexOffset, 2 + indexOffset
-        ));
-
-        vertices.addAll(List.of(
-                0.5f + offX, -0.5f + offY, 0.5f + offZ, 1.0f, 1.0f, // top right front
-                0.5f + offX, -0.5f + offY, -0.5f + offZ, 1.0f, 0.0f, // top right back
-                -0.5f + offX, -0.5f + offY, -0.5f + offZ,  0.0f, 0.0f, // top left back
-                -0.5f + offX, -0.5f + offY, 0.5f + offZ,  0.0f, 1.0f // top left front
-        ));
-    }
 
 
     public void generateMesh() {
@@ -145,28 +75,44 @@ public class ChunkMesh extends Mesh {
                         int frontNeighbor = chunk.getBlock(x, y, z+1);
 
 
-                        if (frontNeighbor == Block.AIR || frontNeighbor == -1) {
-                            addFrontFace(vertices, indices, x, y, z);
-                        }
 
-                        if (backNeighbor == Block.AIR || backNeighbor == -1) {
-                            addBackFace(vertices, indices, x, y, z);
-                        }
+                        BlockModelData blockModelData = BlockModelData.getBlockModel(chunk.getBlock(x,y,z));
+                        for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 
-                        if (rightNeighbor == Block.AIR || rightNeighbor == -1) {
-                            addRightFace(vertices, indices, x, y, z);
-                        }
+                            String faceName = faceEntry.getKey();
+                            HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
+                            ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
+                            ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
-                        if (leftNeighbor == Block.AIR || leftNeighbor == -1) {
-                            addLeftFace(vertices, indices, x, y, z);
-                        }
+                            String cullface = (String) faceData.get("cullface");
+                            if (cullface.equals("top")) {
+                                if (topNeighbor == Block.AIR || topNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else if (cullface.equals("bottom")) {
+                                if (bottomNeighbor == Block.AIR || bottomNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else if (cullface.equals("left")) {
+                                if (leftNeighbor == Block.AIR || leftNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else if (cullface.equals("right")) {
+                                if (rightNeighbor == Block.AIR || rightNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else if (cullface.equals("front")) {
+                                if (frontNeighbor == Block.AIR || frontNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else if (cullface.equals("back")) {
+                                if (backNeighbor == Block.AIR || backNeighbor == -1) {
+                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                                }
+                            } else {
+                                addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                            }
 
-                        if (bottomNeighbor == Block.AIR || bottomNeighbor == -1) {
-                            addBottomFace(vertices, indices, x, y, z);
-                        }
-
-                        if (topNeighbor == Block.AIR || topNeighbor == -1) {
-                            addTopFace(vertices, indices, x, y, z);
                         }
 
                     }
