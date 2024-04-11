@@ -12,9 +12,25 @@ public class Texture {
     private boolean isClean;
 
 
-    public Texture() {
-        isClean = true;
-        textureIndex = -1;
+    public Texture(ByteBuffer textureData, int width, int height) {
+
+        textureIndex = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureIndex);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+
+        // if mipmaps should be loaded
+        //glGenerateMipmap(GL_TEXTURE_2D)
+
+        isClean = false;
+
     }
 
 

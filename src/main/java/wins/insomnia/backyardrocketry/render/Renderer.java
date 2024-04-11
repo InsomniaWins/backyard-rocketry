@@ -25,7 +25,6 @@ public class Renderer implements IUpdateListener {
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
-    private Texture texture;
     private Matrix4f modelMatrix;
 
 
@@ -46,8 +45,6 @@ public class Renderer implements IUpdateListener {
         textShaderProgram = new ShaderProgram("text.vert", "text.frag");
 
         modelMatrix = new Matrix4f().identity();
-
-        texture = new Texture("blocks/cobblestone.png");
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
 
@@ -97,7 +94,7 @@ public class Renderer implements IUpdateListener {
         shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
+        glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockAtlasTexture().getTextureHandle());
 
         modelMatrix.identity();
 
@@ -110,8 +107,8 @@ public class Renderer implements IUpdateListener {
 
             if (renderable.shouldRender()) {
 
-                renderable.render();
                 shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+                renderable.render();
 
             }
 
