@@ -5,6 +5,7 @@ import wins.insomnia.backyardrocketry.world.blockproperty.BlockGrassProperties;
 public class Block {
     public static final int AIR = 0;
     public static final int GRASS = 1;
+    public static final int COBBLESTONE = 2;
 
     public static IBlockProperties  createBlockProperties(int block) {
         switch (block) {

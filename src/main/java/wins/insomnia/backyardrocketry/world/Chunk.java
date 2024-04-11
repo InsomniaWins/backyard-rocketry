@@ -64,7 +64,7 @@ public class Chunk implements IFixedUpdateListener {
                 for (int z = 0; z < SIZE_Z; z++) {
 
                     if (random.nextInt(2) == 0) {
-                        blocks[x][y][z].setBlock(Block.GRASS);
+                        blocks[x][y][z].setBlock(random.nextInt(2) == 0 ? Block.GRASS : Block.COBBLESTONE);
                     } else {
                         blocks[x][y][z].setBlock(Block.AIR);
                     }

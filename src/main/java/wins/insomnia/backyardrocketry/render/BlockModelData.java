@@ -1,11 +1,10 @@
 package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.w3c.dom.Text;
 import wins.insomnia.backyardrocketry.world.Block;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,58 +22,73 @@ public class BlockModelData {
     }
 
 
+    private static void fixModelUvs(BlockModelData blockModelData) {
+
+        int[] atlasCoordinates = new int[2];
+
+        for (Map.Entry<String, Object> faceEntry : blockModelData.getFaces().entrySet()) {
+            HashMap<String, Object> faceData = (HashMap<String, Object>) faceEntry.getValue();
+            ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
+
+            String faceTextureName = blockModelData.textures.get((String) faceData.get("texture"));
+            atlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(faceTextureName);
+
+
+            // modify uv coordinates to fit texture atlas
+            for (int i = 0; i < faceVertexArray.size(); i++) {
+
+                int vertexDataIndex = i % 5;
+                if (vertexDataIndex == 3 || vertexDataIndex == 4) {
+
+                    double coordinateValue = faceVertexArray.get(i);
+
+                    coordinateValue *= TextureManager.BLOCK_SCALE_ON_ATLAS;
+
+                    if (vertexDataIndex == 3) {
+
+                        coordinateValue += TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
+
+                    } else {
+
+                        coordinateValue -= TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1] + TextureManager.BLOCK_SCALE_ON_ATLAS;
+
+                    }
+
+                    faceVertexArray.set(i, coordinateValue);
+                }
+
+            }
+
+            faceData.put("vertices", faceVertexArray);
+        }
+
+    }
+
+    private static void loadBlockModel(ObjectMapper mapper, int block, String modelPath) throws IOException {
+
+        URL src = BlockModelData.class.getResource(modelPath);
+
+        if (src == null) {
+
+            throw new RuntimeException("Failed to load block model: " + modelPath);
+
+        }
+
+        BlockModelData blockModelData = mapper.readValue(src, BlockModelData.class);
+        fixModelUvs(blockModelData);
+        BLOCK_MODEL_MAP.put(block, blockModelData);
+
+    }
+
     public static void loadBlockModels() {
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            BlockModelData cobblestoneModel = mapper.readValue(BlockModelData.class.getResource("/models/blocks/cobblestone.json"), BlockModelData.class);
-
-
-            int[] atlasCoordinates = new int[2];
-
-            for (Map.Entry<String, Object> faceEntry : cobblestoneModel.getFaces().entrySet()) {
-                HashMap<String, Object> faceData = (HashMap<String, Object>) faceEntry.getValue();
-                ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
-
-                String faceTextureName = cobblestoneModel.textures.get((String) faceData.get("texture"));
-                atlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(faceTextureName);
-
-                for (int i = 0; i < faceVertexArray.size(); i++) {
-
-                    int vertexDataIndex = i % 5;
-                    if (vertexDataIndex == 3 || vertexDataIndex == 4) {
-
-                        double coordinateValue = faceVertexArray.get(i);
-
-                        coordinateValue *= TextureManager.BLOCK_SCALE_ON_ATLAS;
-
-                        if (vertexDataIndex == 3) {
-
-                            coordinateValue += TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
-
-                        } else {
-
-                            coordinateValue -= TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1] + TextureManager.BLOCK_SCALE_ON_ATLAS;
-
-                        }
-
-                        faceVertexArray.set(i, coordinateValue);
-                    }
-
-                }
-
-                faceData.put("vertices", faceVertexArray);
-            }
-
-            BLOCK_MODEL_MAP.put(Block.GRASS, cobblestoneModel);
-
-
-
+            loadBlockModel(mapper, Block.GRASS, "/models/blocks/grass_block.json");
+            loadBlockModel(mapper, Block.COBBLESTONE, "/models/blocks/cobblestone.json");
         } catch (IOException e) {
-
-            throw new RuntimeException(e);
-
+            e.printStackTrace();
         }
 
 
