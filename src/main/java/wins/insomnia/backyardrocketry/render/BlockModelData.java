@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.world.Block;
+import wins.insomnia.backyardrocketry.world.BlockState;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,9 +17,22 @@ public class BlockModelData {
     private HashMap<String, Object> faces;
 
 
-    private static final HashMap<Integer, BlockModelData> BLOCK_MODEL_MAP = new HashMap<>();
+    private static final HashMap<Integer, HashMap<String, String>> BLOCK_STATE_MODEL_MAP = new HashMap();
+    private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
     public static BlockModelData getBlockModel(int block) {
-        return BLOCK_MODEL_MAP.get(block);
+
+        String currentBlockStateName = "default";
+        String modelName = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
+
+        return MODEL_MAP.get(
+                modelName
+        );
+    }
+
+    public static BlockModelData getBlockModelFromBlockState(BlockState blockState) {
+
+        return MODEL_MAP.get(BLOCK_STATE_MODEL_MAP.get(blockState.getBlock()).get(blockState.getStateString()));
+
     }
 
 
@@ -64,19 +78,46 @@ public class BlockModelData {
 
     }
 
-    private static void loadBlockModel(ObjectMapper mapper, int block, String modelPath) throws IOException {
+    private static void loadBlockModel(ObjectMapper mapper, String modelName) throws IOException {
 
-        URL src = BlockModelData.class.getResource(modelPath);
+        URL src = BlockModelData.class.getResource("/models/blocks/" + modelName + ".json");
 
         if (src == null) {
 
-            throw new RuntimeException("Failed to load block model: " + modelPath);
+            throw new RuntimeException("Failed to load block model: " + modelName);
 
         }
 
         BlockModelData blockModelData = mapper.readValue(src, BlockModelData.class);
         fixModelUvs(blockModelData);
-        BLOCK_MODEL_MAP.put(block, blockModelData);
+        MODEL_MAP.put(modelName, blockModelData);
+
+        System.out.println("Loaded block model: " + modelName);
+    }
+
+    private static void loadBlockState(ObjectMapper mapper, int block, String blockStatePath) throws IOException {
+
+        URL src = BlockModelData.class.getResource("/blockstates/" + blockStatePath + ".json");
+
+        if (src == null) {
+
+            throw new RuntimeException("Failed to load blockstate file: " + blockStatePath);
+
+        }
+
+        HashMap<Object, Object> blockStateData = mapper.readValue(src, HashMap.class);
+        HashMap<String, String> blockStateModelMap = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : blockStateData.entrySet()) {
+
+            String stateName = (String) entry.getKey();
+            String modelName = (String) entry.getValue();
+
+            blockStateModelMap.put(stateName, modelName);
+
+        }
+
+        BLOCK_STATE_MODEL_MAP.put(block, blockStateModelMap);
+        System.out.println("Loaded blockstate: " + blockStatePath);
 
     }
 
@@ -85,12 +126,28 @@ public class BlockModelData {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            loadBlockModel(mapper, Block.GRASS, "/models/blocks/grass_block.json");
-            loadBlockModel(mapper, Block.COBBLESTONE, "/models/blocks/cobblestone.json");
+            loadBlockModel(mapper, "grass_block");
+            loadBlockModel(mapper, "grass_block_deep");
+            loadBlockModel(mapper, "cobblestone");
+            loadBlockModel(mapper, "dirt");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+
+    }
+
+    public static void loadBlockStates() {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            loadBlockState(mapper, Block.GRASS, "grass_block");
+            loadBlockState(mapper, Block.COBBLESTONE, "cobblestone");
+            loadBlockState(mapper, Block.DIRT, "dirt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

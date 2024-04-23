@@ -48,6 +48,15 @@ public class Chunk implements IFixedUpdateListener {
         return blocks[x][y][z].getBlock();
     }
 
+    public BlockState getBlockState(int x, int y, int z) {
+
+        if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
+            return null;
+        }
+
+        return blocks[x][y][z];
+    }
+
 
     private void generateMesh() {
 
@@ -63,10 +72,12 @@ public class Chunk implements IFixedUpdateListener {
             for (int x = 0; x < SIZE_X; x++) {
                 for (int z = 0; z < SIZE_Z; z++) {
 
-                    if (random.nextInt(2) == 0) {
-                        blocks[x][y][z].setBlock(random.nextInt(2) == 0 ? Block.GRASS : Block.COBBLESTONE);
+                    if (y == 15) {
+                        blocks[x][y][z].setBlock(Block.GRASS);
+                    } else if (y > 10) {
+                        blocks[x][y][z].setBlock(Block.DIRT);
                     } else {
-                        blocks[x][y][z].setBlock(Block.AIR);
+                        blocks[x][y][z].setBlock(Block.COBBLESTONE);
                     }
 
                 }

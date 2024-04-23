@@ -63,4 +63,13 @@ public class BlockState {
         return block;
     }
 
+    public String getStateString() {
+
+        if (blockProperties != null) {
+            return blockProperties.getStateString(CHUNK, x, y, z);
+        }
+
+        return "default";
+    }
+
 }

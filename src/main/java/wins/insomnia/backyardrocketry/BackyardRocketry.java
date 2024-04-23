@@ -122,6 +122,7 @@ public class BackyardRocketry {
 
         // load block models
         BlockModelData.loadBlockModels();
+        BlockModelData.loadBlockStates();
 
 
         // TODO: REPLACE PLACEHOLDER CODE!

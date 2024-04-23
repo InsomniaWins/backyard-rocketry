@@ -31,37 +31,9 @@ public class TextureManager {
 
     }
 
-    private Texture makeBlockAtlas() {
-
-        String[] textureNames = {
-                "blocks/cobblestone.png"
-        };
-
-        byte[][] textureAtlasData;
-
-
-
-        for (int i = 0; i < textureNames.length; i++) {
-            byte[] textureData = loadTextureData("blocks/cobblestone.png");
-
-
-        }
-
-
-        //Texture texture = new Texture(textureDataBuffer, 256, 256);
-
-
-
-
-        //STBImage.stbi_image_free(textureDataBuffer);
-
-        return null;
-        //return texture;
-    }
-
     public int[] getBlockAtlasCoordinates(String blockTextureName) {
         switch (blockTextureName) {
-            case "cobblestone" -> {
+            case "cobblestone.json" -> {
                 return new int[] {0, 0};
             }
             case "stone" -> {
@@ -75,6 +47,9 @@ public class TextureManager {
             }
             case "grass_block_top" -> {
                 return new int[] {4, 0};
+            }
+            case "grass_block_deep_side" -> {
+                return new int[] {5, 0};
             }
         }
         return new int[] {0, 0};

@@ -67,6 +67,7 @@ public class ChunkMesh extends Mesh {
 
                     if (chunk.getBlock(x,y,z) != Block.AIR) {
 
+
                         int topNeighbor = chunk.getBlock(x, y+1, z);
                         int bottomNeighbor = chunk.getBlock(x, y-1, z);
                         int leftNeighbor = chunk.getBlock(x-1, y, z);
@@ -76,7 +77,7 @@ public class ChunkMesh extends Mesh {
 
 
 
-                        BlockModelData blockModelData = BlockModelData.getBlockModel(chunk.getBlock(x,y,z));
+                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z));
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 
                             String faceName = faceEntry.getKey();
