@@ -4,6 +4,8 @@ import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.TestPlayer;
+import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -26,8 +28,6 @@ public class Renderer implements IUpdateListener {
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
     private Matrix4f modelMatrix;
-
-
 
     public Renderer() {
         RENDER_LIST = new ArrayList<>();
@@ -114,7 +114,7 @@ public class Renderer implements IUpdateListener {
 
         }
 
-        if (BackyardRocketry.getInstance().getPlayer() instanceof DebugNoclipPlayer player) {
+        if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
 
             String debugString = String.format(
                     "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f",

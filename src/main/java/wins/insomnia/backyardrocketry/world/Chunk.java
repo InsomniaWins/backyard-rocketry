@@ -106,6 +106,7 @@ public class Chunk implements IFixedUpdateListener {
         return CHUNK_MESH;
     }
 
+
     @Override
     public void fixedUpdate() {
 

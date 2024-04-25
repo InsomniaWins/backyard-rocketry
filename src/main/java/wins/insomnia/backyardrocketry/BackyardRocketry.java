@@ -4,6 +4,8 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
@@ -126,8 +128,21 @@ public class BackyardRocketry {
 
 
         // TODO: REPLACE PLACEHOLDER CODE!
-        player = new DebugNoclipPlayer();
+        player = new TestPlayer();
+        ((TestPlayer) player).getTransform().getPosition().set(7.5,17,7.5);
         world = new World();
+
+        BoundingBox bb1 = new BoundingBox(-3,-3,-3,5,5,5);
+        BoundingBox bb2 = new BoundingBox(-5,-5,-5,5,5,5);
+
+        Collision.AABBCollisionResultType result = bb1.collideWithBoundingBox(bb2);
+        if (result == Collision.AABBCollisionResultType.INSIDE) {
+            System.out.println("Collision inside!");
+        } else if (result == Collision.AABBCollisionResultType.CLIPPING) {
+            System.out.println("Collision clipping!");
+        } else {
+            System.out.println("Collision outside!");
+        }
 
     }
 

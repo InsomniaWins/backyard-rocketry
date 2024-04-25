@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.Transform;
 
@@ -34,7 +35,8 @@ public class Camera {
     public void updateViewMatrix() {
         VIEW_MATRIX.identity();
         VIEW_MATRIX.rotateXYZ(TRANSFORM.getRotation().x, TRANSFORM.getRotation().y, TRANSFORM.getRotation().z);
-        VIEW_MATRIX.translate(TRANSFORM.getPosition());
+        // TODO: replace "new Vector()" with other negation method to avoid lag from object creation
+        VIEW_MATRIX.translate(TRANSFORM.getPosition().negate(new Vector3f()));
     }
 
 
