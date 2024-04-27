@@ -130,6 +130,7 @@ public class BlockModelData {
             loadBlockModel(mapper, "grass_block_deep");
             loadBlockModel(mapper, "cobblestone");
             loadBlockModel(mapper, "dirt");
+            loadBlockModel(mapper, "stone");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,6 +146,7 @@ public class BlockModelData {
             loadBlockState(mapper, Block.GRASS, "grass_block");
             loadBlockState(mapper, Block.COBBLESTONE, "cobblestone");
             loadBlockState(mapper, Block.DIRT, "dirt");
+            loadBlockState(mapper, Block.STONE, "stone");
         } catch (IOException e) {
             e.printStackTrace();
         }

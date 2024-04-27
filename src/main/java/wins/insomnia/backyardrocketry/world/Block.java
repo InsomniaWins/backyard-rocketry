@@ -1,12 +1,20 @@
 package wins.insomnia.backyardrocketry.world;
 
+import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.world.blockproperty.BlockGrassProperties;
 
 public class Block {
+
+    public static BoundingBox DEFAULT_BLOCK_BOUNDING_BOX = new BoundingBox(
+            0,0,0,
+            1,1,1
+    );
+
     public static final int AIR = 0;
     public static final int GRASS = 1;
     public static final int COBBLESTONE = 2;
     public static final int DIRT = 3;
+    public static final int STONE = 4;
 
     public static IBlockProperties  createBlockProperties(int block) {
         switch (block) {
@@ -17,6 +25,19 @@ public class Block {
                 return null;
             }
         }
+    }
+
+    public static BoundingBox getBlockCollision(int block) {
+
+        switch (block) {
+            case AIR -> {
+                return null;
+            }
+            default -> {
+                return new BoundingBox(DEFAULT_BLOCK_BOUNDING_BOX);
+            }
+        }
+
     }
 
 }

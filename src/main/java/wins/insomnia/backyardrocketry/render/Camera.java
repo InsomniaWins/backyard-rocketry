@@ -1,7 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.Transform;
 
@@ -10,8 +12,11 @@ public class Camera {
     private final Matrix4f PROJECTION_MATRIX;
     private final Matrix4f VIEW_MATRIX;
     private final Transform TRANSFORM;
+    private float fov;
 
     public Camera() {
+
+        fov = (float) Math.toRadians(90f);
 
         TRANSFORM = new Transform();
         TRANSFORM.getPosition().set(0,0,0);
@@ -29,14 +34,13 @@ public class Camera {
         Window gameWindow = backyardRocketryInstance.getWindow();
         int[] gameWindowSize = gameWindow.getSize();
 
-        PROJECTION_MATRIX.setPerspective(70f, (float) gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, 100f);
+        PROJECTION_MATRIX.setPerspective(fov, (float) gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, 100f);
     }
 
     public void updateViewMatrix() {
         VIEW_MATRIX.identity();
         VIEW_MATRIX.rotateXYZ(TRANSFORM.getRotation().x, TRANSFORM.getRotation().y, TRANSFORM.getRotation().z);
-        // TODO: replace "new Vector()" with other negation method to avoid lag from object creation
-        VIEW_MATRIX.translate(TRANSFORM.getPosition().negate(new Vector3f()));
+        VIEW_MATRIX.translate(new Vector3f((float) -TRANSFORM.getPosX(), (float) -TRANSFORM.getPosY(), (float) -TRANSFORM.getPosZ()));
     }
 
 

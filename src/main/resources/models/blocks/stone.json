@@ -1,7 +1,7 @@
 {
 	"textures": {
-		"particle": "dirt",
-		"all": "dirt"
+		"particle": "stone",
+		"all": "stone"
 	},
 	"faces": {
 		"top": {

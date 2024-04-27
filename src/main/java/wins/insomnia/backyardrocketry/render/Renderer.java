@@ -3,13 +3,17 @@ package wins.insomnia.backyardrocketry.render;
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
+import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.TestPlayer;
+import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -17,7 +21,7 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Renderer implements IUpdateListener {
+public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
     private ShaderProgram shaderProgram;
     private ShaderProgram textShaderProgram;
@@ -28,6 +32,7 @@ public class Renderer implements IUpdateListener {
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
     private Matrix4f modelMatrix;
+    private int renderMode = 0;
 
     public Renderer() {
         RENDER_LIST = new ArrayList<>();
@@ -47,11 +52,21 @@ public class Renderer implements IUpdateListener {
         modelMatrix = new Matrix4f().identity();
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
+        BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
 
         FONT_MESH = new FontMesh();
 
         glClearColor(0.25882352941176473f, 0.6901960784313725f, 1f, 1f);
 
+    }
+
+    public void fixedUpdate() {
+        if (BackyardRocketry.getInstance().getKeyboardInput().isKeyJustReleased(GLFW_KEY_F3)) {
+            renderMode++;
+            if (renderMode == 3) {
+                renderMode = 0;
+            }
+        }
     }
 
     public void update(double deltaTime) {
@@ -82,6 +97,14 @@ public class Renderer implements IUpdateListener {
 
     }
 
+    public ShaderProgram getShaderProgram() {
+        return shaderProgram;
+    }
+
+    public Matrix4f getModelMatrix() {
+        return modelMatrix;
+    }
+
     private void render() {
 
         camera.updateProjectionMatrix();
@@ -96,9 +119,24 @@ public class Renderer implements IUpdateListener {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockAtlasTexture().getTextureHandle());
 
+        switch (renderMode) {
+            case 0 -> {
+                glEnable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_FILL);
+            }
+            case 1 -> {
+                glEnable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_LINE);
+            }
+            case 2 -> {
+                glDisable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_FILL);
+            }
+        }
+
         modelMatrix.identity();
 
-        glEnable(GL_CULL_FACE);
+
 
         for (WeakReference<IRenderable> renderableWeakReference : RENDER_LIST) {
             IRenderable renderable = renderableWeakReference.get();
@@ -117,7 +155,7 @@ public class Renderer implements IUpdateListener {
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
 
             String debugString = String.format(
-                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f",
+                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRender Mode: %s",
                     Runtime.getRuntime().freeMemory() / 1_048_576,
                     Runtime.getRuntime().totalMemory() / 1_048_576,
                     getFramesPerSecond(),
@@ -127,7 +165,12 @@ public class Renderer implements IUpdateListener {
                     player.getTransform().getPosition().z,
                     player.getTransform().getRotation().x,
                     player.getTransform().getRotation().y,
-                    player.getTransform().getRotation().z
+                    player.getTransform().getRotation().z,
+                    switch (renderMode) {
+                        case 0 -> "[Cull Back], [Fill]";
+                        case 1 -> "[Cull Back], [Wireframe]";
+                        default -> "[No Cull], [Fill]";
+                    }
             );
             drawText(debugString);
         }

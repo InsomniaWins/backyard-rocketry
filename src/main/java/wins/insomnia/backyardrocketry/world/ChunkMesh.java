@@ -1,7 +1,9 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Mesh;
+import wins.insomnia.backyardrocketry.render.Renderer;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
@@ -50,7 +53,21 @@ public class ChunkMesh extends Mesh {
         }
     }
 
+    @Override
+    public void render() {
+        if (vao < 0) {
+            return;
+        }
 
+        Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
+        Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
+
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
+    }
 
     public void generateMesh() {
 

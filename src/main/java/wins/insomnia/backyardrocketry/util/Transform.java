@@ -1,22 +1,35 @@
 package wins.insomnia.backyardrocketry.util;
 
 import org.joml.Math;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 public class Transform {
 
     public static final double TAO = Math.PI * 2.0;
 
-    private Vector3f position;
+    private Vector3d position;
     private Vector3f rotation;
 
     
     public Transform() {
-        position = new Vector3f();
+        position = new Vector3d();
         rotation = new Vector3f();
     }
-    public Vector3f getPosition() {
+    public Vector3d getPosition() {
         return position;
+    }
+
+    public double getPosX() {
+        return position.x;
+    }
+
+    public double getPosY() {
+        return position.y;
+    }
+
+    public double getPosZ() {
+        return position.z;
     }
 
     public Vector3f getRotation() {

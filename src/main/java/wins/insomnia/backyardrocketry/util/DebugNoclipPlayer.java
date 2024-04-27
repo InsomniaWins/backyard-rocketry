@@ -1,11 +1,13 @@
 package wins.insomnia.backyardrocketry.util;
 
 import org.joml.Math;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.world.World;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
@@ -21,7 +23,7 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
     private float cameraInterpolationFactor = 0f;
     private Vector3f interpolatedRotation;
-    private Vector3f interpolatedPosition;
+    private Vector3d interpolatedPosition;
 
 
     public DebugNoclipPlayer() {
@@ -30,7 +32,7 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
         previousTransform = new Transform();
 
         interpolatedRotation = new Vector3f(previousTransform.getRotation());
-        interpolatedPosition = new Vector3f(previousTransform.getPosition());
+        interpolatedPosition = new Vector3d(previousTransform.getPosition());
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
         BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
@@ -141,5 +143,10 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
 
     public Transform getTransform() {
         return transform;
+    }
+
+    @Override
+    public World getWorld() {
+        return null;
     }
 }

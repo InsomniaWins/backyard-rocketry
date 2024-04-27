@@ -80,7 +80,7 @@ public class BackyardRocketry {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
-        window = new Window(600, 600, "Backyard Rocketry");
+        window = new Window(900, 600, "Backyard Rocketry");
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
@@ -128,18 +128,21 @@ public class BackyardRocketry {
 
 
         // TODO: REPLACE PLACEHOLDER CODE!
-        player = new TestPlayer();
-        ((TestPlayer) player).getTransform().getPosition().set(7.5,17,7.5);
         world = new World();
+
+        player = new TestPlayer(world);
+        ((TestPlayer) player).getTransform().getPosition().set(7.5,20,7.5);
 
         BoundingBox bb1 = new BoundingBox(-3,-3,-3,5,5,5);
         BoundingBox bb2 = new BoundingBox(-5,-5,-5,5,5,5);
 
-        Collision.AABBCollisionResultType result = bb1.collideWithBoundingBox(bb2);
+        Collision.AABBCollisionResultType result = bb2.collideWithBoundingBox(bb1);
         if (result == Collision.AABBCollisionResultType.INSIDE) {
             System.out.println("Collision inside!");
         } else if (result == Collision.AABBCollisionResultType.CLIPPING) {
             System.out.println("Collision clipping!");
+        } else if (result == Collision.AABBCollisionResultType.CONTAINS) {
+            System.out.println("Collision contains!");
         } else {
             System.out.println("Collision outside!");
         }
