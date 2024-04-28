@@ -22,9 +22,7 @@ public class BlockGrassProperties implements IBlockProperties {
 
     @Override
     public void onPlace(Chunk chunk, int x, int y, int z) {
-        if (World.RANDOM.nextDouble() < 0.5) {
-            stateString = "deep";
-        }
+        stateString = "deep";
     }
 
     @Override

@@ -171,21 +171,26 @@ public class Chunk implements IFixedUpdateListener {
 
     private void generateBlocks() {
 
-        long seed = World.RANDOM.nextLong();
+        long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
 
         for (int y = 0; y < SIZE_Y; y++) {
             for (int x = 0; x < SIZE_X; x++) {
                 for (int z = 0; z < SIZE_Z; z++) {
 
-                    if (y + Y > 18) continue;
+                    int globalBlockX = x + X;
+                    int globalBlockY = y + Y;
+                    int globalBlockZ = z + Z;
 
-                    if ((OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
+                    int groundHeight = (int) (10 + 2 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f));
+
+
+                    if (y > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
                     }
 
-                    if (y == 15) {
+                    if (y == groundHeight) {
                         blocks[x][y][z].setBlock(Block.GRASS, false);
-                    } else if (y > 10) {
+                    } else if (y > groundHeight - 4) {
                         blocks[x][y][z].setBlock(Block.DIRT, false);
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {

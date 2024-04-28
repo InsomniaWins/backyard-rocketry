@@ -9,6 +9,7 @@ import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
+import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 import wins.insomnia.backyardrocketry.world.Block;
@@ -40,8 +41,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private float height = 1.73f;
     private float halfWidth = 0.3f;
     private float cameraInterpolationFactor = 0f;
-    private Vector3f interpolatedRotation;
-    private Vector3d interpolatedPosition;
+    private Vector3f interpolatedCameraRotation;
+    private Vector3d interpolatedCameraPosition;
     private boolean lockMouseToCenterForCameraRotation = false;
     public boolean hasGravity = true;
 
@@ -55,8 +56,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         transform = new Transform();
         previousTransform = new Transform();
 
-        interpolatedRotation = new Vector3f(previousTransform.getRotation());
-        interpolatedPosition = new Vector3d(previousTransform.getPosition());
+        interpolatedCameraRotation = new Vector3f(previousTransform.getRotation());
+        interpolatedCameraPosition = getCameraPosition();
 
         BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
         BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
@@ -148,7 +149,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     public void fixedUpdate() {
 
         // make sure interpolation of camera transformation is complete
-        BackyardRocketry.getInstance().getRenderer().getCamera().getTransform().set(transform);
+        BackyardRocketry.getInstance().getRenderer().getCamera().getTransform().getRotation().set(transform.getRotation());
+        BackyardRocketry.getInstance().getRenderer().getCamera().getTransform().getPosition().set(getCameraPosition());
 
 
         // define vars
@@ -245,7 +247,6 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         BlockRaycastResult raycastResult = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
         if (raycastResult == null) return;
 
-        System.out.println(raycastResult.getBlockX() + ", " + raycastResult.getBlockY() + ", " + raycastResult.getBlockZ());
 
         raycastResult.getChunk().getBlockState(
                 raycastResult.getChunk().toLocalX(raycastResult.getBlockX()),
@@ -313,9 +314,14 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         if (blockState == null) return;
 
         BoundingBox blockBoundingBox = Block.getBlockCollision(blockToPlace);
-        blockBoundingBox.translate(placePosX, placePosY, placePosZ);
 
-        if (getBoundingBox().collideWithBoundingBoxExclusive(blockBoundingBox) != Collision.AABBCollisionResultType.OUTSIDE) return;
+        if (blockBoundingBox != null) {
+            blockBoundingBox.translate(placePosX, placePosY, placePosZ);
+
+            if (getBoundingBox().collideWithBoundingBoxExclusive(blockBoundingBox) != Collision.AABBCollisionResultType.OUTSIDE) {
+                return;
+            }
+        }
 
         blockState.setBlock(blockToPlace);
     }
@@ -340,7 +346,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     public Vector3d getCameraPosition() {
 
-        return new Vector3d(getPosition()).add(0, eyeHeight, 0);
+        return getCameraPosition(getPosition());
 
     }
 
@@ -355,25 +361,23 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         cameraInterpolationFactor += (float) deltaTime / CAMERA_INTERPOLATION_DURATION;
         cameraInterpolationFactor = Math.min(cameraInterpolationFactor, 1f);
 
-        Camera camera = BackyardRocketry.getInstance().getRenderer().getCamera();
+        Camera camera = Renderer.get().getCamera();
 
-        interpolatedRotation.set(previousTransform.getRotation());
-        interpolatedPosition.set(getCameraPosition(previousTransform.getPosition()));
+        // reset interpolation to t = 0 to begin interpolation
+        interpolatedCameraRotation.set(previousTransform.getRotation());
+        interpolatedCameraPosition.set(getCameraPosition(previousTransform.getPosition()));
 
-        // interpolate camera rotation
-
-        interpolatedRotation.set(
-                Transform.lerpAngle(interpolatedRotation.x, transform.getRotation().x, cameraInterpolationFactor),
-                Transform.lerpAngle(interpolatedRotation.y, transform.getRotation().y, cameraInterpolationFactor),
-                Transform.lerpAngle(interpolatedRotation.z, transform.getRotation().z, cameraInterpolationFactor)
+        // interpolate camera rotation and position
+        interpolatedCameraRotation.set(
+                Transform.lerpAngle(interpolatedCameraRotation.x, transform.getRotation().x, cameraInterpolationFactor),
+                Transform.lerpAngle(interpolatedCameraRotation.y, transform.getRotation().y, cameraInterpolationFactor),
+                Transform.lerpAngle(interpolatedCameraRotation.z, transform.getRotation().z, cameraInterpolationFactor)
         );
+        interpolatedCameraPosition.lerp(getCameraPosition(), cameraInterpolationFactor);
 
-        // interpolate camera position
-
-        interpolatedPosition.lerp(getCameraPosition(), cameraInterpolationFactor);
-
-        camera.getTransform().getRotation().set(interpolatedRotation);
-        camera.getTransform().getPosition().set(interpolatedPosition);
+        // set camera rotation and position to interpolated values
+        camera.getTransform().getRotation().set(interpolatedCameraRotation);
+        camera.getTransform().getPosition().set(interpolatedCameraPosition);
 
     }
 

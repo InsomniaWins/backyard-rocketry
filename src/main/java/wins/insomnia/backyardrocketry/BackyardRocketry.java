@@ -133,6 +133,8 @@ public class BackyardRocketry {
         player = new TestPlayer(world);
         ((TestPlayer) player).getTransform().getPosition().set(7.5,20,7.5);
 
+        world.generate();
+
         BoundingBox bb1 = new BoundingBox(-3,-3,-3,5,5,5);
         BoundingBox bb2 = new BoundingBox(-5,-5,-5,5,5,5);
 

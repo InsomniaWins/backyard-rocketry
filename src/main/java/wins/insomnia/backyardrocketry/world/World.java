@@ -14,10 +14,18 @@ public class World {
     private final ArrayList<Chunk> CHUNKS;
     public static final Random RANDOM = new Random();
 
+    private long seed;
+
     public World() {
+
+        seed = RANDOM.nextLong();
 
         CHUNKS = new ArrayList<>();
 
+
+    }
+
+    public void generate() {
         for (int y = 0; y < CHUNK_AMOUNT_Y; y++){
             for (int x = 0; x < CHUNK_AMOUNT_X; x++) {
                 for (int z = 0; z < CHUNK_AMOUNT_Z; z++) {
@@ -31,8 +39,10 @@ public class World {
                 }
             }
         }
+    }
 
-
+    public long getSeed() {
+        return seed;
     }
 
     public int getSizeX() {
