@@ -28,6 +28,31 @@ public class BlockState {
     }
 
     public void setBlock(int newBlock) {
+        setBlock(newBlock, true);
+    }
+
+
+    /*
+    public RayCastResult collisionRayCast(BlockState blockState, World world, int blockX, int blockY, int blockZ, Vector3d start, Vector3d end) {
+        return rayCast(blockX, blockY, blockZ, start, end, Block.getBlockCollision(blockState.getBlock()));
+    }
+
+    public RayCastResult rayCast(int blockX, int blockY, int blockZ, Vector3d start, Vector3d end, BoundingBox boundingBox) {
+
+        if (boundingBox == null) {
+            return null;
+        }
+
+        Vector3d vec3d = start.sub(blockX, blockY, blockZ);
+        Vector3d vec3d1 = end.sub(blockX, blockY, blockZ);
+
+        RayCastResult rayCastResult = boundingBox.calculateIntercept(vec3d, vec3d1);
+        return rayCastResult == null ? null : new RayCastResult(raytraceresult.hitVec.add(blockX, blockY, blockZ), rayCastResult.sideHit, blockX, blockY, blockZ);
+    }
+     */
+
+
+    public void setBlock(int newBlock, boolean regenerateChunkMesh) {
 
         int oldBlock = block;
         if (oldBlock > -1 && blockProperties != null) {
@@ -41,6 +66,9 @@ public class BlockState {
             blockProperties.onPlace(CHUNK, x, y, z);
         }
 
+        if (regenerateChunkMesh) {
+            CHUNK.setShouldRegenerateMesh(true);
+        }
     }
 
     public int getX() {

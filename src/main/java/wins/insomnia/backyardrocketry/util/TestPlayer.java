@@ -7,14 +7,16 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
+import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.world.Block;
+import wins.insomnia.backyardrocketry.world.BlockState;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -24,21 +26,24 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
     private final float GRAVITY = -0.1f;
-    private float walkSpeed = 0.25f;
+    private float walkSpeed = 0.22f;
     private float sprintSpeed = 0.5f;
     private float jumpSpeed = 0.5f;
-    private boolean grounded = false;
+    private boolean onGround = false;
     private final Vector3d VELOCITY = new Vector3d();
     private final World WORLD;
 
     private Transform transform;
     private Transform previousTransform;
 
-    private float eyeHeight = 1.6f;
-    private float height = 1.8f;
+    private float eyeHeight = 1.57f;
+    private float height = 1.73f;
+    private float halfWidth = 0.3f;
     private float cameraInterpolationFactor = 0f;
     private Vector3f interpolatedRotation;
     private Vector3d interpolatedPosition;
+    private boolean lockMouseToCenterForCameraRotation = false;
+    public boolean hasGravity = true;
 
     private final BoundingBox BOUNDING_BOX;
 
@@ -110,9 +115,16 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             getPosition().x += VELOCITY.x;
         }
 
+        onGround = false;
         if (VELOCITY.y != 0f) {
             for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                VELOCITY.y = boundingBox.collideY(getBoundingBox(), VELOCITY.y);
+                double newVelocity = boundingBox.collideY(getBoundingBox(), VELOCITY.y);
+
+                if (newVelocity != VELOCITY.y && Math.signum(VELOCITY.y) < 0d) {
+                    onGround = true;
+                }
+
+                VELOCITY.y = newVelocity;
             }
 
             getPosition().y += VELOCITY.y;
@@ -125,6 +137,11 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             getPosition().z += VELOCITY.z;
         }
+
+    }
+
+    public boolean isOnGround() {
+        return onGround;
     }
 
     @Override
@@ -167,10 +184,16 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
         VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
-        VELOCITY.add(0f, GRAVITY, 0f);
 
-        if (keyboardInput.isKeyJustPressed(GLFW_KEY_SPACE)) {
-            VELOCITY.y = jumpSpeed;
+        if (hasGravity) {
+            VELOCITY.add(0f, GRAVITY, 0f);
+
+            if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
+                VELOCITY.y = jumpSpeed;
+            }
+        } else {
+            float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
+            VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
         }
 
         // apply translation and rotation
@@ -178,7 +201,11 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         move();
         updateBoundingBox();
 
-        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_F2)) {
+            lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
+        }
+
+        if (lockMouseToCenterForCameraRotation) {
             float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
             float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
 
@@ -194,24 +221,125 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         cameraInterpolationFactor = 0f;
 
+        if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 
+            breakBlock();
+
+        }
+
+        if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+
+            placeBlock();
+
+        }
+    }
+
+    private void breakBlock() {
+
+        Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
+        Vector3d rayDirection = new Vector3d(0, 0, -1)
+                .rotateX(-transform.getRotation().x)
+                .rotateY(-transform.getRotation().y);
+        int rayLength = 7;
+
+        BlockRaycastResult raycastResult = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+        if (raycastResult == null) return;
+
+        System.out.println(raycastResult.getBlockX() + ", " + raycastResult.getBlockY() + ", " + raycastResult.getBlockZ());
+
+        raycastResult.getChunk().getBlockState(
+                raycastResult.getChunk().toLocalX(raycastResult.getBlockX()),
+                raycastResult.getChunk().toLocalY(raycastResult.getBlockY()),
+                raycastResult.getChunk().toLocalZ(raycastResult.getBlockZ())
+        ).setBlock(Block.AIR);
+
+    }
+
+    private void placeBlock() {
+
+        Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
+        Vector3d rayDirection = new Vector3d(0, 0, -1)
+                .rotateX(-transform.getRotation().x)
+                .rotateY(-transform.getRotation().y);
+        int rayLength = 7;
+
+        BlockRaycastResult raycastResult = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+        if (raycastResult == null) return;
+
+        Block.Face face = raycastResult.getFace();
+
+        int placePosX = raycastResult.getBlockX();
+        int placePosY = raycastResult.getBlockY();
+        int placePosZ = raycastResult.getBlockZ();
+
+        switch (face) {
+            case NEG_X -> {
+                placePosX -= 1;
+            }
+            case POS_X -> {
+                placePosX += 1;
+            }
+
+            case NEG_Y -> {
+                placePosY -= 1;
+            }
+            case POS_Y -> {
+                placePosY += 1;
+            }
+
+            case NEG_Z -> {
+                placePosZ -= 1;
+            }
+            case POS_Z -> {
+                placePosZ += 1;
+            }
+
+            default -> {
+                return;
+            }
+        }
+
+        Chunk chunk = getWorld().getChunkContainingBlock(placePosX, placePosY, placePosZ);
+
+        if (chunk == null) return;
+
+
+        BlockState blockState = chunk.getBlockState(
+                chunk.toLocalX(placePosX),
+                chunk.toLocalY(placePosY),
+                chunk.toLocalZ(placePosZ)
+        );
+
+        blockState.setBlock(Block.COBBLESTONE);
     }
 
     private void updateBoundingBox() {
 
-        BOUNDING_BOX.getMin().x = getPosX() - 0.2f;
-        BOUNDING_BOX.getMin().y = getPosY() - eyeHeight;
-        BOUNDING_BOX.getMin().z = getPosZ() - 0.2f;
+        BOUNDING_BOX.getMin().x = getPosX() - halfWidth;
+        BOUNDING_BOX.getMin().y = getPosY();
+        BOUNDING_BOX.getMin().z = getPosZ() - halfWidth;
 
-        BOUNDING_BOX.getMax().x = getPosX() + 0.2f;
-        BOUNDING_BOX.getMax().y = getPosY() + (height - eyeHeight);
-        BOUNDING_BOX.getMax().z = getPosZ() + 0.2f;
+        BOUNDING_BOX.getMax().x = getPosX() + halfWidth;
+        BOUNDING_BOX.getMax().y = getPosY() + height;
+        BOUNDING_BOX.getMax().z = getPosZ() + halfWidth;
     }
 
     @Override
     public void update(double deltaTime) {
 
         interpolateCameraTransform(deltaTime);
+
+    }
+
+    public Vector3d getCameraPosition() {
+
+        return new Vector3d(getPosition()).add(0, eyeHeight, 0);
+
+    }
+
+    public Vector3d getCameraPosition(Vector3d playerPosition) {
+
+        return new Vector3d(playerPosition).add(0, eyeHeight, 0);
 
     }
 
@@ -223,7 +351,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         Camera camera = BackyardRocketry.getInstance().getRenderer().getCamera();
 
         interpolatedRotation.set(previousTransform.getRotation());
-        interpolatedPosition.set(previousTransform.getPosition());
+        interpolatedPosition.set(getCameraPosition(previousTransform.getPosition()));
 
         // interpolate camera rotation
 
@@ -235,7 +363,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         // interpolate camera position
 
-        interpolatedPosition.lerp(transform.getPosition(), cameraInterpolationFactor);
+        interpolatedPosition.lerp(getCameraPosition(), cameraInterpolationFactor);
 
         camera.getTransform().getRotation().set(interpolatedRotation);
         camera.getTransform().getPosition().set(interpolatedPosition);

@@ -9,7 +9,9 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
+import wins.insomnia.backyardrocketry.util.Updater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +22,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 public class Chunk implements IFixedUpdateListener {
 
     private final BoundingBox BOUNDING_BOX;
-    private final int SIZE_X = 16;
-    private final int SIZE_Y = 16;
-    private final int SIZE_Z = 16;
+    public static final int SIZE_X = 16;
+    public static  final int SIZE_Y = 16;
+    public static  final int SIZE_Z = 16;
 
     private final int X;
     private final int Y;
@@ -31,6 +33,7 @@ public class Chunk implements IFixedUpdateListener {
     private final ChunkMesh CHUNK_MESH;
 
     private BlockState[][][] blocks;
+    private boolean shouldRegenerateMesh = false;
 
     public Chunk(int x, int y, int z) {
 
@@ -49,10 +52,9 @@ public class Chunk implements IFixedUpdateListener {
         initializeBlocks();
 
         generateBlocks();
-
         generateMesh();
 
-        BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
+        Updater.get().registerFixedUpdateListener(this);
     }
 
     public List<BoundingBox> getBoundingBoxesOfBlocksPotentiallyCollidingWithBoundingBox(BoundingBox boundingBox) {
@@ -100,8 +102,32 @@ public class Chunk implements IFixedUpdateListener {
         return boundingBoxes;
     }
 
+    public int toLocalX(int x) {
+        return x - X;
+    }
+
+    public int toLocalY(int y) {
+        return y - Y;
+    }
+    public int toLocalZ(int z) {
+        return z - Z;
+    }
+
+
     public Vector3f getPosition() {
         return new Vector3f(X,Y,Z);
+    }
+
+    public int getX() {
+        return X;
+    }
+
+    public int getY() {
+        return Y;
+    }
+
+    public int getZ() {
+        return Z;
     }
 
     public int getBlock(int x, int y, int z) {
@@ -115,17 +141,31 @@ public class Chunk implements IFixedUpdateListener {
 
     public BlockState getBlockState(int x, int y, int z) {
 
-        if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
+        if (!isBlockInBounds(x, y, z)) {
             return null;
         }
 
         return blocks[x][y][z];
     }
 
+    public boolean isBlockInBounds(int x, int y, int z) {
+        return !((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1));
+    }
 
     private void generateMesh() {
 
+        if (!CHUNK_MESH.isClean()) {
+            CHUNK_MESH.clean();
+        }
+
         CHUNK_MESH.generateMesh();
+        shouldRegenerateMesh = false;
+
+    }
+
+    public void setShouldRegenerateMesh(boolean value) {
+
+        shouldRegenerateMesh = value;
 
     }
 
@@ -137,29 +177,21 @@ public class Chunk implements IFixedUpdateListener {
             for (int x = 0; x < SIZE_X; x++) {
                 for (int z = 0; z < SIZE_Z; z++) {
 
-                    /*if ((OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
-                        blocks[x][y][z].setBlock(Block.AIR);
+                    if (y + Y > 18) continue;
+
+                    if ((OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
-                    }*/
-
-
+                    }
 
                     if (y == 15) {
-
-                        if (x == 3 || z == 3 || x == 7) {
-                            blocks[x][y][z].setBlock(Block.GRASS);
-                        } else {
-                            blocks[x][y][z].setBlock(Block.AIR);
-                        }
-
-
+                        blocks[x][y][z].setBlock(Block.GRASS, false);
                     } else if (y > 10) {
-                        blocks[x][y][z].setBlock(Block.DIRT);
+                        blocks[x][y][z].setBlock(Block.DIRT, false);
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {
-                            blocks[x][y][z].setBlock(Block.COBBLESTONE);
+                            blocks[x][y][z].setBlock(Block.COBBLESTONE, false);
                         } else {
-                            blocks[x][y][z].setBlock(Block.STONE);
+                            blocks[x][y][z].setBlock(Block.STONE, false);
                         }
                     }
 
@@ -167,6 +199,7 @@ public class Chunk implements IFixedUpdateListener {
             }
         }
 
+        shouldRegenerateMesh = true;
     }
 
     private void initializeBlocks() {
@@ -195,18 +228,18 @@ public class Chunk implements IFixedUpdateListener {
 
         if (BackyardRocketry.getInstance().getKeyboardInput().isKeyJustPressed(GLFW_KEY_R)) {
 
-            if (!CHUNK_MESH.isClean()) {
-                CHUNK_MESH.clean();
-            }
-
             generateBlocks();
             generateMesh();
 
         }
 
+        if (shouldRegenerateMesh) {
+            generateMesh();
+        }
     }
 
     public BoundingBox getBoundingBox() {
         return BOUNDING_BOX;
     }
+
 }

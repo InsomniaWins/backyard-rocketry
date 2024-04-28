@@ -16,7 +16,7 @@ public class Camera {
 
     public Camera() {
 
-        fov = (float) Math.toRadians(90f);
+        fov = (float) Math.toRadians(70f);
 
         TRANSFORM = new Transform();
         TRANSFORM.getPosition().set(0,0,0);

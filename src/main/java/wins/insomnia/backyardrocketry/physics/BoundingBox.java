@@ -167,6 +167,83 @@ public class BoundingBox {
         return offsetZ;
     }
 
+
+    /*
+    Vector3d collideWithXPlane(double p_186671_1_, Vector3d p_186671_3_, Vector3d p_186671_4_) {
+        Vector3d vec3d = p_186671_3_.getIntermediateWithXValue(p_186671_4_, p_186671_1_);
+        return vec3d != null && intersectsWithYZ(vec3d) ? vec3d : null;
+    }
+
+
+    Vector3d collideWithYPlane(double p_186663_1_, Vector3d p_186663_3_, Vector3d p_186663_4_) {
+        Vector3d vec3d = p_186663_3_.getIntermediateWithYValue(p_186663_4_, p_186663_1_);
+        return vec3d != null && intersectsWithXZ(vec3d) ? vec3d : null;
+    }
+
+
+    Vector3d collideWithZPlane(double p_186665_1_, Vector3d p_186665_3_, Vector3d p_186665_4_) {
+        Vector3d vec3d = p_186665_3_.getIntermediateWithZValue(p_186665_4_, p_186665_1_);
+        return vec3d != null && intersectsWithXY(vec3d) ? vec3d : null;
+    }
+
+
+    public boolean intersectsWithYZ(Vector3d vec) {
+        return vec.y >= min.y && vec.y <= max.y && vec.z >= min.z && vec.z <= max.z;
+    }
+
+    public boolean intersectsWithXZ(Vector3d vec) {
+        return vec.x >= min.x && vec.x <= max.x && vec.z >= min.z && vec.z <= max.z;
+    }
+
+    public boolean intersectsWithXY(Vector3d vec) {
+        return vec.x >= min.x && vec.x <= max.x && vec.y >= min.y && vec.y <= max.y;
+    }
+
+
+    public RayCastResult calculateIntercept(Vector3d vecA, Vector3d vecB) {
+        Vector3d vec3d = collideWithXPlane(min.x, vecA, vecB);
+        Collision.Facing facing = Collision.Facing.NEG_X;
+        Vector3d vec3d1 = collideWithXPlane(max.x, vecA, vecB);
+
+        if (vec3d1 != null && isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = Collision.Facing.POS_X;
+        }
+
+        vec3d1 = collideWithYPlane(min.y, vecA, vecB);
+
+        if (vec3d1 != null && isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = Collision.Facing.NEG_Y;
+        }
+
+        vec3d1 = collideWithYPlane(max.y, vecA, vecB);
+
+        if (vec3d1 != null && isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = Collision.Facing.POS_Y;
+        }
+
+        vec3d1 = collideWithZPlane(min.z, vecA, vecB);
+
+        if (vec3d1 != null && isClosest(vecA, vec3d, vec3d1))
+        {
+            vec3d = vec3d1;
+            facing = Collision.Facing.NEG_Z;
+        }
+
+        vec3d1 = collideWithZPlane(max.z, vecA, vecB);
+
+        if (vec3d1 != null && isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = Collision.Facing.POS_Z;
+        }
+
+        return vec3d == null ? null : new RayCastResult(vec3d, facing);
+    }
+
+*/
+
     public BoundingBox grow(double units) {
 
         min.sub(units, units, units);
