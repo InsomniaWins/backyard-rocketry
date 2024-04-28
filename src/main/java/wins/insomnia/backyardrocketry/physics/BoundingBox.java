@@ -36,6 +36,38 @@ public class BoundingBox {
         return max;
     }
 
+    public Collision.AABBCollisionResultType collideWithBoundingBoxExclusive(BoundingBox other) {
+        // Check for non-collision conditions along each axis
+        if (this.max.x <= other.min.x ||
+                this.min.x >= other.max.x ||
+                this.max.y <= other.min.y ||
+                this.min.y >= other.max.y ||
+                this.max.z <= other.min.z ||
+                this.min.z >= other.max.z) {
+            return Collision.AABBCollisionResultType.OUTSIDE; // No collision (outside)
+        }
+        // Check if this bounding box fully contains the other
+        if (this.min.x < other.min.x &&
+                this.min.y < other.min.y &&
+                this.min.z < other.min.z &&
+                this.max.x > other.max.x &&
+                this.max.y > other.max.y &&
+                this.max.z > other.max.z) {
+            return Collision.AABBCollisionResultType.CONTAINS; // Fully contains the other
+        }
+        // Check if this bounding box is fully contained by the other
+        if (this.min.x > other.min.x &&
+                this.min.y > other.min.y &&
+                this.min.z > other.min.z &&
+                this.max.x < other.max.x &&
+                this.max.y < other.max.y &&
+                this.max.z < other.max.z) {
+            return Collision.AABBCollisionResultType.INSIDE; // Fully contained by the other
+        }
+        // Otherwise, the bounding boxes are clipping each other
+        return Collision.AABBCollisionResultType.CLIPPING; // Clipping
+    }
+
     public Collision.AABBCollisionResultType collideWithBoundingBox(BoundingBox other) {
         // Check for non-collision conditions along each axis
         if (this.max.x < other.min.x ||

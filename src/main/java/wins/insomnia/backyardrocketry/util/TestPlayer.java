@@ -229,7 +229,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
-            placeBlock();
+            placeBlock(Block.COBBLESTONE);
 
         }
     }
@@ -255,7 +255,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     }
 
-    private void placeBlock() {
+    private void placeBlock(int blockToPlace) {
 
         Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
         Vector3d rayDirection = new Vector3d(0, 0, -1)
@@ -310,7 +310,14 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
                 chunk.toLocalZ(placePosZ)
         );
 
-        blockState.setBlock(Block.COBBLESTONE);
+        if (blockState == null) return;
+
+        BoundingBox blockBoundingBox = Block.getBlockCollision(blockToPlace);
+        blockBoundingBox.translate(placePosX, placePosY, placePosZ);
+
+        if (getBoundingBox().collideWithBoundingBoxExclusive(blockBoundingBox) != Collision.AABBCollisionResultType.OUTSIDE) return;
+
+        blockState.setBlock(blockToPlace);
     }
 
     private void updateBoundingBox() {

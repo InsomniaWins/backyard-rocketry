@@ -8,7 +8,7 @@ import java.util.Random;
 public class World {
 
     public static final int CHUNK_AMOUNT_X = 5;
-    public static final int CHUNK_AMOUNT_Y = 5;
+    public static final int CHUNK_AMOUNT_Y = 1;
     public static final int CHUNK_AMOUNT_Z = 5;
 
     private final ArrayList<Chunk> CHUNKS;
@@ -18,8 +18,20 @@ public class World {
 
         CHUNKS = new ArrayList<>();
 
-        CHUNKS.add(new Chunk(0,0,0));
-        CHUNKS.add(new Chunk(0,16,0));
+        for (int y = 0; y < CHUNK_AMOUNT_Y; y++){
+            for (int x = 0; x < CHUNK_AMOUNT_X; x++) {
+                for (int z = 0; z < CHUNK_AMOUNT_Z; z++) {
+
+                    CHUNKS.add(new Chunk(
+                            x * Chunk.SIZE_X,
+                            y * Chunk.SIZE_Y,
+                            z * Chunk.SIZE_Z
+                    ));
+
+                }
+            }
+        }
+
 
     }
 
