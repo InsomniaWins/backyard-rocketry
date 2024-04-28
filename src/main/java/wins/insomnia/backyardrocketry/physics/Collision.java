@@ -69,11 +69,6 @@ public class Collision {
     }
 
 
-    // -------------------  THANK YOU { Kevin Reid } !!!!!!  ----------------------------------
-    //
-    //  ->   https://gamedev.stackexchange.com/users/9825/kevin-reid
-    //  ->   https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
-
     private static BlockRaycastResult blockCollisionCheck(int blockX, int blockY, int blockZ, Block.Face face) {
 
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
@@ -90,17 +85,16 @@ public class Collision {
         return new BlockRaycastResult(chunk, blockX, blockY, blockZ, face);
     }
 
-    /**
-     * Call the callback with (x,y,z,value,face) of all blocks along the line
-     * segment from point 'origin' in vector direction 'direction' of length
-     * 'radius'. 'radius' may be infinite.
-     *
-     * 'face' is the normal vector of the face of that block that was entered.
-     * It should not be used after the callback returns.
-     *
-     * If the callback returns a true value, the traversal will be stopped.
-     */
-    public static BlockRaycastResult blockRaycast(Vector3d origin, Vector3d direction, float length) {
+
+
+
+
+    // -------------------  THANK YOU { Kevin Reid } !!!!!!  ----------------------------------
+    //
+    //  ->   https://gamedev.stackexchange.com/users/9825/kevin-reid
+    //  ->   https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
+
+    public static BlockRaycastResult blockRaycast(Vector3d origin, Vector3d direction, double length) {
         // From "A Fast Voxel Traversal Algorithm for Ray Tracing"
         // by John Amanatides and Andrew Woo, 1987
         // <http://www.cse.yorku.ca/~amana/research/grid.pdf>
