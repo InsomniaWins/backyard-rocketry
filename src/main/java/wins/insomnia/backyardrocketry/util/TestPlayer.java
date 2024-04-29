@@ -101,6 +101,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             BoundingBox tempBoundingBox = new BoundingBox(getBoundingBox()).grow(VELOCITY.length() * 2);
 
+
             for (Chunk chunk : chunksNearPlayer) {
                 List<BoundingBox> boundingBoxes = chunk.getBoundingBoxesOfBlocksPotentiallyCollidingWithBoundingBox(tempBoundingBox);
                 blockBoundingBoxesNearPlayer.addAll(boundingBoxes);

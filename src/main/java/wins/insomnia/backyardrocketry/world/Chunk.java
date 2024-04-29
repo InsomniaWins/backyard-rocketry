@@ -22,20 +22,21 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 public class Chunk implements IFixedUpdateListener {
 
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 16;
-    public static  final int SIZE_Y = 16;
-    public static  final int SIZE_Z = 16;
+    public static final int SIZE_X = 32;
+    public static  final int SIZE_Y = 32;
+    public static  final int SIZE_Z = 32;
 
     private final int X;
     private final int Y;
     private final int Z;
 
     private final ChunkMesh CHUNK_MESH;
+    private final World WORLD;
 
     private BlockState[][][] blocks;
-    private boolean shouldRegenerateMesh = false;
+    protected boolean shouldRegenerateMesh = false;
 
-    public Chunk(int x, int y, int z) {
+    public Chunk(World world, int x, int y, int z) {
 
         X = x;
         Y = y;
@@ -43,16 +44,15 @@ public class Chunk implements IFixedUpdateListener {
 
         BOUNDING_BOX = new BoundingBox(
                 x, y, z,
-                x + 16, y + 16, z + 16
+                x + SIZE_X, y + SIZE_Y, z + SIZE_Z
         );
 
+        WORLD = world;
         CHUNK_MESH = new ChunkMesh(this);
         Renderer.get().addRenderable(CHUNK_MESH);
 
         initializeBlocks();
-
         generateBlocks();
-        generateMesh();
 
         Updater.get().registerFixedUpdateListener(this);
     }
@@ -74,9 +74,6 @@ public class Chunk implements IFixedUpdateListener {
         Vector3i localMinPos = new Vector3i(minPos).sub(X, Y, Z);
         Vector3i localMaxPos = new Vector3i(maxPos).sub(X, Y, Z);
 
-        localMinPos.set(-1,-1,-1);
-        localMaxPos.set(17, 17, 17);
-
         List<BoundingBox> boundingBoxes = new ArrayList<>();
 
         for (int x = localMinPos.x; x < localMaxPos.x; x++) {
@@ -85,7 +82,7 @@ public class Chunk implements IFixedUpdateListener {
 
                     int block = getBlock(x, y, z);
 
-                    if (block == -1) continue;
+                    if (block == Block.NULL) continue;
 
                     BoundingBox blockBoundingBox = Block.getBlockCollision(block);
 
@@ -133,7 +130,7 @@ public class Chunk implements IFixedUpdateListener {
     public int getBlock(int x, int y, int z) {
 
         if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
-            return -1;
+            return WORLD.getBlock(x + X, y + Y, z + Z);
         }
 
         return blocks[x][y][z].getBlock();
@@ -150,6 +147,12 @@ public class Chunk implements IFixedUpdateListener {
 
     public boolean isBlockInBounds(int x, int y, int z) {
         return !((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1));
+    }
+
+    public boolean isBlockOnChunkBorder(int x, int y, int z) {
+
+        return (x == 0 || x == SIZE_X -1 || y == 0 || y == SIZE_Y - 1 || z == 0 || z == SIZE_Z - 1);
+
     }
 
     private void generateMesh() {
@@ -184,13 +187,13 @@ public class Chunk implements IFixedUpdateListener {
                     int groundHeight = (int) (10 + 2 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f));
 
 
-                    if (y > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
+                    if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
                     }
 
-                    if (y == groundHeight) {
+                    if (globalBlockY == groundHeight) {
                         blocks[x][y][z].setBlock(Block.GRASS, false);
-                    } else if (y > groundHeight - 4) {
+                    } else if (globalBlockY > groundHeight - 4) {
                         blocks[x][y][z].setBlock(Block.DIRT, false);
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {
@@ -205,6 +208,24 @@ public class Chunk implements IFixedUpdateListener {
         }
 
         shouldRegenerateMesh = true;
+
+
+        for (Chunk chunk : getNeighborChunks()) {
+            if (chunk == null) continue;
+            chunk.shouldRegenerateMesh = true;
+        }
+
+    }
+
+    public Chunk[] getNeighborChunks() {
+        return new Chunk[] {
+                WORLD.getChunkAt(X-SIZE_X, Y, Z),
+                WORLD.getChunkAt(X+SIZE_X, Y, Z),
+                WORLD.getChunkAt(X, Y-SIZE_Y, Z),
+                WORLD.getChunkAt(X, Y+SIZE_Y, Z),
+                WORLD.getChunkAt(X, Y, Z-SIZE_Z),
+                WORLD.getChunkAt(X, Y, Z+SIZE_Z)
+        };
     }
 
     private void initializeBlocks() {
@@ -230,14 +251,6 @@ public class Chunk implements IFixedUpdateListener {
 
     @Override
     public void fixedUpdate() {
-
-        if (BackyardRocketry.getInstance().getKeyboardInput().isKeyJustPressed(GLFW_KEY_R)) {
-
-            generateBlocks();
-            generateMesh();
-
-        }
-
         if (shouldRegenerateMesh) {
             generateMesh();
         }

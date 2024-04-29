@@ -67,7 +67,19 @@ public class BlockState {
         }
 
         if (regenerateChunkMesh) {
+
+
             CHUNK.setShouldRegenerateMesh(true);
+
+            if (CHUNK.isBlockOnChunkBorder(x, y, z)) {
+
+                for (Chunk chunk : CHUNK.getNeighborChunks()) {
+                    if (chunk == null) continue;
+                    chunk.shouldRegenerateMesh = true;
+                }
+
+            }
+
         }
     }
 

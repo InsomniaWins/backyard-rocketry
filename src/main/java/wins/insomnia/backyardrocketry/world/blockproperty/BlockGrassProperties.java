@@ -22,7 +22,7 @@ public class BlockGrassProperties implements IBlockProperties {
 
     @Override
     public void onPlace(Chunk chunk, int x, int y, int z) {
-        stateString = "deep";
+        //stateString = "deep";
     }
 
     @Override

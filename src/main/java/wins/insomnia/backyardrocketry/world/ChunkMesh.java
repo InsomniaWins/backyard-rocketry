@@ -78,12 +78,11 @@ public class ChunkMesh extends Mesh {
         ArrayList<Integer> indices = new ArrayList<>();
 
 
-        for (int y = 0; y < 16; y++) {
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
+        for (int y = 0; y < Chunk.SIZE_X; y++) {
+            for (int x = 0; x < Chunk.SIZE_Y; x++) {
+                for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
                     if (chunk.getBlock(x,y,z) != Block.AIR) {
-
 
                         int topNeighbor = chunk.getBlock(x, y+1, z);
                         int bottomNeighbor = chunk.getBlock(x, y-1, z);
@@ -91,8 +90,6 @@ public class ChunkMesh extends Mesh {
                         int rightNeighbor = chunk.getBlock(x+1, y, z);
                         int backNeighbor = chunk.getBlock(x, y, z-1);
                         int frontNeighbor = chunk.getBlock(x, y, z+1);
-
-
 
                         BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z));
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {

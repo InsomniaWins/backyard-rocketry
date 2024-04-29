@@ -95,23 +95,6 @@ public class Collision {
     //  ->   https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
 
     public static BlockRaycastResult blockRaycast(Vector3d origin, Vector3d direction, double length) {
-        // From "A Fast Voxel Traversal Algorithm for Ray Tracing"
-        // by John Amanatides and Andrew Woo, 1987
-        // <http://www.cse.yorku.ca/~amana/research/grid.pdf>
-        // <http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.3443>
-        // Extensions to the described algorithm:
-        //   • Imposed a distance limit.
-        //   • The face passed through to reach the current cube is provided to
-        //     the callback.
-
-        // The foundation of this algorithm is a parameterized representation of
-        // the provided ray,
-        //                    origin + t * direction,
-        // except that t is not actually stored; rather, at any given point in the
-        // traversal, we keep track of the *greater* t values which we would have
-        // if we took a step sufficient to cross a cube boundary along that axis
-        // (i.e. change the integer part of the coordinate) in the variables
-        // tMaxX, tMaxY, and tMaxZ.
 
         // Cube containing origin point.
         int x = (int) Math.floor(origin.x);
@@ -128,7 +111,6 @@ public class Collision {
         int stepY = (int) Math.signum(dy);
         int stepZ = (int) Math.signum(dz);
 
-        // See description above. The initial values depend on the fractional
         // part of the origin.
         double tMaxX = intbound(origin.x, dx);
         double tMaxY = intbound(origin.y, dy);

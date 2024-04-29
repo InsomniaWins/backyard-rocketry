@@ -1,5 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Vector2d;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.Random;
 public class World {
 
     public static final int CHUNK_AMOUNT_X = 5;
-    public static final int CHUNK_AMOUNT_Y = 1;
+    public static final int CHUNK_AMOUNT_Y = 4;
     public static final int CHUNK_AMOUNT_Z = 5;
 
     private final ArrayList<Chunk> CHUNKS;
@@ -31,6 +33,7 @@ public class World {
                 for (int z = 0; z < CHUNK_AMOUNT_Z; z++) {
 
                     CHUNKS.add(new Chunk(
+                            this,
                             x * Chunk.SIZE_X,
                             y * Chunk.SIZE_Y,
                             z * Chunk.SIZE_Z
@@ -39,6 +42,38 @@ public class World {
                 }
             }
         }
+    }
+
+    public Chunk getChunkAt(int chunkX, int chunkY, int chunkZ) {
+        for (Chunk chunk : CHUNKS) {
+            if (chunk.getX() == chunkX && chunk.getY() == chunkY && chunk.getZ() == chunkZ) {
+                return chunk;
+            }
+        }
+        return null;
+    }
+
+    public int getBlock(int x, int y, int z) {
+
+        if (x > getSizeX()-1 || x < 0 || y > getSizeX()-1 || y < 0 || z > getSizeX()-1 || z < 0 ) {
+            return Block.WORLD_BORDER;
+        }
+
+        Chunk chunk = getChunkContainingBlock(x, y, z);
+
+        if (chunk == null) return Block.NULL;
+
+        return chunk.getBlock(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));
+
+    }
+
+    public double[] getCenterXZ() {
+
+        return new double[]{
+                getSizeX() * 0.5,
+                getSizeZ() * 0.5
+        };
+
     }
 
     public long getSeed() {
@@ -70,9 +105,11 @@ public class World {
 
     public Chunk getChunkContainingBlock(int x, int y, int z) {
 
-        int chunkPosX = 16 * (x / 16);
-        int chunkPosY = 16 * (y / 16);
-        int chunkPosZ = 16 * (z / 16);
+        if (x < 0 || y < 0 || z < 0) return null;
+
+        int chunkPosX = Chunk.SIZE_X * (x / Chunk.SIZE_X);
+        int chunkPosY = Chunk.SIZE_Y * (y / Chunk.SIZE_Y);
+        int chunkPosZ = Chunk.SIZE_Z * (z / Chunk.SIZE_Z);
 
         for (Chunk chunk : CHUNKS) {
             if (chunk.getX() == chunkPosX && chunk.getY() == chunkPosY && chunk.getZ() == chunkPosZ) return chunk;

@@ -20,6 +20,8 @@ public class Block {
             1,1,1
     );
 
+    public static final int WORLD_BORDER = -2;
+    public static final int NULL = -1;
     public static final int AIR = 0;
     public static final int GRASS = 1;
     public static final int COBBLESTONE = 2;

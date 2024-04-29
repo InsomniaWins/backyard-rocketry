@@ -129,11 +129,10 @@ public class BackyardRocketry {
 
         // TODO: REPLACE PLACEHOLDER CODE!
         world = new World();
-
         player = new TestPlayer(world);
-        ((TestPlayer) player).getTransform().getPosition().set(7.5,20,7.5);
-
         world.generate();
+        double[] worldCenter = world.getCenterXZ();
+        ((TestPlayer) player).getTransform().getPosition().set(worldCenter[0],20,worldCenter[1]);
 
         BoundingBox bb1 = new BoundingBox(-3,-3,-3,5,5,5);
         BoundingBox bb2 = new BoundingBox(-5,-5,-5,5,5,5);
