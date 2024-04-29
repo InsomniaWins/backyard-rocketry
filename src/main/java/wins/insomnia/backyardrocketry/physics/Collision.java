@@ -3,10 +3,7 @@ package wins.insomnia.backyardrocketry.physics;
 import org.joml.Math;
 import org.joml.Vector3d;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.world.Block;
-import wins.insomnia.backyardrocketry.world.BlockState;
-import wins.insomnia.backyardrocketry.world.Chunk;
-import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.*;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -51,18 +48,45 @@ public class Collision {
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
 
         List<Chunk> chunks = new ArrayList<>();
+
+        ChunkPosition minChunkPos = world.getChunkPositionFromBlockPositionClamped(
+                (int) boundingBox.getMin().x,
+                (int) boundingBox.getMin().y,
+                (int) boundingBox.getMin().z
+        );
+        ChunkPosition maxChunkPos = world.getChunkPositionFromBlockPositionClamped(
+                (int) boundingBox.getMax().x,
+                (int) boundingBox.getMax().y,
+                (int) boundingBox.getMax().z
+        );
+
+        int xRange = (maxChunkPos.X - minChunkPos.X);
+        int yRange = (maxChunkPos.Y - minChunkPos.Y);
+        int zRange = (maxChunkPos.Z - minChunkPos.Z);
+
+        for (int x = 0; x <= xRange; x += Chunk.SIZE_X) {
+            for (int y = 0; y <= yRange; y += Chunk.SIZE_Y) {
+                for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
+
+                    Chunk chunk = world.getChunkAt(minChunkPos.X + x, minChunkPos.Y + y, minChunkPos.Z + z);
+                    if (chunk == null) continue;
+
+                    chunks.add(chunk);
+
+                }
+            }
+        }
+
+        /*   MAYBE SLOWER THAN NEWER VERSION, HARD TO TELL??? (seems like it should be slower)
         for (Chunk chunk : world.getChunks()) {
 
             AABBCollisionResultType collisionResult = boundingBox.collideWithBoundingBox(chunk.getBoundingBox());
 
             if (collisionResult != AABBCollisionResultType.OUTSIDE) {
-
-
-
                 chunks.add(chunk);
             }
 
-        }
+        }*/
 
         return chunks;
 
