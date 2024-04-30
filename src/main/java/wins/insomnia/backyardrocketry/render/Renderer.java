@@ -7,6 +7,7 @@ import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.TestPlayer;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.world.BlockState;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
@@ -154,8 +155,21 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
 
+            int targetBlockHealth = 0;
+            if (player.getTargetBlock() != null) {
+                BlockState blockState = (player.getWorld().getBlockState(
+                        player.getTargetBlock().getBlockX(),
+                        player.getTargetBlock().getBlockY(),
+                        player.getTargetBlock().getBlockZ()
+                ));
+
+                if (blockState != null) {
+                    targetBlockHealth = (int) (blockState.getHealth() * 100f);
+                }
+            }
+
             String debugString = String.format(
-                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRender Mode: %s",
+                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRender Mode: %s\nTargeted Block health: %d",
                     Runtime.getRuntime().freeMemory() / 1_048_576,
                     Runtime.getRuntime().totalMemory() / 1_048_576,
                     getFramesPerSecond(),
@@ -170,7 +184,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                         case 0 -> "[Cull Back], [Fill]";
                         case 1 -> "[Cull Back], [Wireframe]";
                         default -> "[No Cull], [Fill]";
-                    }
+                    },
+                    targetBlockHealth
             );
             drawText(debugString);
         }

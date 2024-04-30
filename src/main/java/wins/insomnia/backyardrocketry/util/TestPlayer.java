@@ -45,8 +45,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private Vector3d interpolatedCameraPosition;
     private boolean lockMouseToCenterForCameraRotation = false;
     public boolean hasGravity = true;
-
     private final BoundingBox BOUNDING_BOX;
+    private BlockRaycastResult targetBlock;
 
 
     public TestPlayer(World world) {
@@ -224,7 +224,15 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         cameraInterpolationFactor = 0f;
 
-        if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+        Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
+        Vector3d rayDirection = new Vector3d(0, 0, -1)
+                .rotateX(-transform.getRotation().x)
+                .rotateY(-transform.getRotation().y);
+        int rayLength = 7;
+
+        targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+
+        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 
             breakBlock();
 
@@ -232,47 +240,37 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
-            placeBlock(Block.COBBLESTONE);
+            placeBlock(Block.GRASS);
 
         }
     }
 
+    public BlockRaycastResult getTargetBlock() {
+        return targetBlock;
+    }
+
     private void breakBlock() {
 
-        Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
-        Vector3d rayDirection = new Vector3d(0, 0, -1)
-                .rotateX(-transform.getRotation().x)
-                .rotateY(-transform.getRotation().y);
-        int rayLength = 7;
+        if (targetBlock == null) return;
 
-        BlockRaycastResult raycastResult = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
-        if (raycastResult == null) return;
+        BlockState blockState = targetBlock.getChunk().getBlockState(
+                targetBlock.getChunk().toLocalX(targetBlock.getBlockX()),
+                targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
+                targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
+        );
 
-
-        raycastResult.getChunk().getBlockState(
-                raycastResult.getChunk().toLocalX(raycastResult.getBlockX()),
-                raycastResult.getChunk().toLocalY(raycastResult.getBlockY()),
-                raycastResult.getChunk().toLocalZ(raycastResult.getBlockZ())
-        ).setBlock(Block.AIR);
-
+        blockState.damage(0.1f);
     }
 
     private void placeBlock(int blockToPlace) {
 
-        Vector3d rayFrom = new Vector3d(getPosition()).add(0, eyeHeight, 0);
-        Vector3d rayDirection = new Vector3d(0, 0, -1)
-                .rotateX(-transform.getRotation().x)
-                .rotateY(-transform.getRotation().y);
-        int rayLength = 7;
+        if (targetBlock == null) return;
 
-        BlockRaycastResult raycastResult = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
-        if (raycastResult == null) return;
+        Block.Face face = targetBlock.getFace();
 
-        Block.Face face = raycastResult.getFace();
-
-        int placePosX = raycastResult.getBlockX();
-        int placePosY = raycastResult.getBlockY();
-        int placePosZ = raycastResult.getBlockZ();
+        int placePosX = targetBlock.getBlockX();
+        int placePosY = targetBlock.getBlockY();
+        int placePosZ = targetBlock.getBlockZ();
 
         switch (face) {
             case NEG_X -> {

@@ -33,7 +33,7 @@ public class World {
                     int chunkPosY = y * Chunk.SIZE_Y;
                     int chunkPosZ = z * Chunk.SIZE_Z;
 
-                    ChunkPosition chunkPosition = new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
+                    ChunkPosition chunkPosition = new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ, false);
 
                     Chunk chunk = new Chunk(
                             this,
@@ -47,15 +47,12 @@ public class World {
         }
     }
 
+    public Chunk getChunkAt(ChunkPosition chunkPosition) {
+        return CHUNKS.get(chunkPosition);
+    }
+
     public Chunk getChunkAt(int chunkX, int chunkY, int chunkZ) {
         return CHUNKS.get(new ChunkPosition(chunkX, chunkY, chunkZ));
-        /*
-        for (Chunk chunk : CHUNKS) {
-            if (chunk.getX() == chunkX && chunk.getY() == chunkY && chunk.getZ() == chunkZ) {
-                return chunk;
-            }
-        }
-        return null;*/
     }
 
     public int getBlock(int x, int y, int z) {

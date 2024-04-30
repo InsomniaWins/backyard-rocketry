@@ -49,26 +49,42 @@ public class Collision {
 
         List<Chunk> chunks = new ArrayList<>();
 
-        ChunkPosition minChunkPos = world.getChunkPositionFromBlockPositionClamped(
-                (int) boundingBox.getMin().x,
-                (int) boundingBox.getMin().y,
-                (int) boundingBox.getMin().z
-        );
-        ChunkPosition maxChunkPos = world.getChunkPositionFromBlockPositionClamped(
+
+        // get min chunk position, and get range for chunk loops
+
+        ChunkPosition currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
                 (int) boundingBox.getMax().x,
                 (int) boundingBox.getMax().y,
                 (int) boundingBox.getMax().z
         );
 
-        int xRange = (maxChunkPos.X - minChunkPos.X);
-        int yRange = (maxChunkPos.Y - minChunkPos.Y);
-        int zRange = (maxChunkPos.Z - minChunkPos.Z);
+        int xRange = currentChunkPosition.getX();
+        int yRange = currentChunkPosition.getY();
+        int zRange = currentChunkPosition.getZ();
+
+        currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
+                (int) boundingBox.getMin().x,
+                (int) boundingBox.getMin().y,
+                (int) boundingBox.getMin().z
+        );
+
+        int minChunkX = currentChunkPosition.getX();
+        int minChunkY = currentChunkPosition.getY();
+        int minChunkZ = currentChunkPosition.getZ();
+
+        xRange -= currentChunkPosition.getX();
+        yRange -= currentChunkPosition.getY();
+        zRange -= currentChunkPosition.getZ();
+
+
+        // loop through chunks to find loaded chunks colliding
 
         for (int x = 0; x <= xRange; x += Chunk.SIZE_X) {
             for (int y = 0; y <= yRange; y += Chunk.SIZE_Y) {
                 for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
 
-                    Chunk chunk = world.getChunkAt(minChunkPos.X + x, minChunkPos.Y + y, minChunkPos.Z + z);
+                    currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
+                    Chunk chunk = world.getChunkAt(currentChunkPosition);
                     if (chunk == null) continue;
 
                     chunks.add(chunk);
@@ -77,7 +93,11 @@ public class Collision {
             }
         }
 
-        /*   MAYBE SLOWER THAN NEWER VERSION, HARD TO TELL??? (seems like it should be slower)
+        /*
+
+        // MAYBE SLOWER THAN NEWER VERSION, HARD TO TELL??? (seems like it should be slower)
+        // Would definitely get slower the more loaded chunks there are
+
         for (Chunk chunk : world.getChunks()) {
 
             AABBCollisionResultType collisionResult = boundingBox.collideWithBoundingBox(chunk.getBoundingBox());

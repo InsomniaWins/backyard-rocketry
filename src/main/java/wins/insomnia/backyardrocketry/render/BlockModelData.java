@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.Block;
 import wins.insomnia.backyardrocketry.world.BlockState;
 
@@ -9,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class BlockModelData {
@@ -17,21 +19,51 @@ public class BlockModelData {
     private HashMap<String, Object> faces;
 
 
-    private static final HashMap<Integer, HashMap<String, String>> BLOCK_STATE_MODEL_MAP = new HashMap();
+    private static final HashMap<Integer, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
-    public static BlockModelData getBlockModel(int block) {
+    public static BlockModelData getBlockModel(int block, int blockX, int blockY, int blockZ) {
 
         String currentBlockStateName = "default";
-        String modelName = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
+        Object model = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
+
+        if (model instanceof ArrayList modelList) {
+            int randomIndex = getRandomBlockNumberBasedOnBlockPosition(blockX, blockY, blockZ) % modelList.size();
+            String modelName = (String) modelList.get(randomIndex);
+            return MODEL_MAP.get(modelName);
+        }
 
         return MODEL_MAP.get(
-                modelName
+                (String) model
         );
+    }
+
+    public static BlockModelData getBlockModel(int block) {
+        return getBlockModel(block, 0);
+    }
+
+    public static BlockModelData getBlockModel(int block, int blockModelIndex) {
+
+        String currentBlockStateName = "default";
+        Object model = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
+
+        if (model instanceof ArrayList modelList) {
+            int randomIndex = blockModelIndex % modelList.size();
+            String modelName = (String) modelList.get(randomIndex);
+            return MODEL_MAP.get(modelName);
+        }
+
+        return MODEL_MAP.get(
+                (String) model
+        );
+    }
+
+    public static int getRandomBlockNumberBasedOnBlockPosition(int x, int y, int z) {
+        return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
     public static BlockModelData getBlockModelFromBlockState(BlockState blockState) {
 
-        return MODEL_MAP.get(BLOCK_STATE_MODEL_MAP.get(blockState.getBlock()).get(blockState.getStateString()));
+        return getBlockModel(blockState.getBlock(), getRandomBlockNumberBasedOnBlockPosition(blockState.getX(), blockState.getY(), blockState.getZ()));
 
     }
 
@@ -106,13 +138,22 @@ public class BlockModelData {
         }
 
         HashMap<Object, Object> blockStateData = mapper.readValue(src, HashMap.class);
-        HashMap<String, String> blockStateModelMap = new HashMap<>();
+        HashMap<String, Object> blockStateModelMap = new HashMap<>();
         for (Map.Entry<Object, Object> entry : blockStateData.entrySet()) {
 
             String stateName = (String) entry.getKey();
-            String modelName = (String) entry.getValue();
+            if (entry.getValue() instanceof String) {
+                String modelName = (String) entry.getValue();
+                blockStateModelMap.put(stateName, modelName);
+            } else if (entry.getValue() instanceof ArrayList) {
 
-            blockStateModelMap.put(stateName, modelName);
+                blockStateModelMap.put(stateName, entry.getValue());
+
+            } else {
+                throw new RuntimeException("Failed to load blockstate of " + blockStatePath + " with name of " + stateName);
+            }
+
+
 
         }
 

@@ -1,69 +1,80 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Math;
 import org.joml.Vector3i;
+
+import java.util.Objects;
 
 public class BlockState {
 
     private final Chunk CHUNK;
     private int block = -1;
-    private int x;
-    private int y;
-    private int z;
+    private final int X;
+    private final int Y;
+    private final int Z;
+    private final int POSITION_HASH;
+    private float health = 1f;
     private IBlockProperties blockProperties = null;
 
     public BlockState(Chunk chunk, int block, int x, int y, int z) {
-        this.CHUNK = chunk;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        CHUNK = chunk;
+        X = x;
+        Y = y;
+        Z = z;
+        POSITION_HASH = Objects.hash(getWorldX(), getWorldY(), getWorldZ());
         setBlock(block);
     }
 
     public void update() {
         if (blockProperties != null) {
 
-            blockProperties.update(CHUNK, x, y, z);
+            blockProperties.update(CHUNK, X, Y, Z);
 
         }
+    }
+
+    public void damage(float damageAmount) {
+        if (damageAmount <= 0) {
+            throw new RuntimeException("Tried to damage a block with a negative break amount!");
+        }
+
+        health -= damageAmount;
+        health = Math.max(health, 0f);
+
+        if (health == 0f) {
+            breakBlock();
+            health = 1f;
+        }
+    }
+
+    public void breakBlock() {
+        setBlock(Block.AIR);
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getBreakProgress() {
+        return 1f - health;
     }
 
     public void setBlock(int newBlock) {
         setBlock(newBlock, true);
     }
 
-
-    /*
-    public RayCastResult collisionRayCast(BlockState blockState, World world, int blockX, int blockY, int blockZ, Vector3d start, Vector3d end) {
-        return rayCast(blockX, blockY, blockZ, start, end, Block.getBlockCollision(blockState.getBlock()));
-    }
-
-    public RayCastResult rayCast(int blockX, int blockY, int blockZ, Vector3d start, Vector3d end, BoundingBox boundingBox) {
-
-        if (boundingBox == null) {
-            return null;
-        }
-
-        Vector3d vec3d = start.sub(blockX, blockY, blockZ);
-        Vector3d vec3d1 = end.sub(blockX, blockY, blockZ);
-
-        RayCastResult rayCastResult = boundingBox.calculateIntercept(vec3d, vec3d1);
-        return rayCastResult == null ? null : new RayCastResult(raytraceresult.hitVec.add(blockX, blockY, blockZ), rayCastResult.sideHit, blockX, blockY, blockZ);
-    }
-     */
-
-
     public void setBlock(int newBlock, boolean regenerateChunkMesh) {
 
         int oldBlock = block;
         if (oldBlock > -1 && blockProperties != null) {
-            blockProperties.onBreak(CHUNK, x, y, z);
+            blockProperties.onBreak(CHUNK, X, Y, Z);
         }
 
         block = newBlock;
         blockProperties = Block.createBlockProperties(block);
 
         if (block > -1 && blockProperties != null) {
-            blockProperties.onPlace(CHUNK, x, y, z);
+            blockProperties.onPlace(CHUNK, X, Y, Z);
         }
 
         if (regenerateChunkMesh) {
@@ -71,7 +82,7 @@ public class BlockState {
 
             CHUNK.setShouldRegenerateMesh(true);
 
-            if (CHUNK.isBlockOnChunkBorder(x, y, z)) {
+            if (CHUNK.isBlockOnChunkBorder(X, Y, Z)) {
 
                 for (Chunk chunk : CHUNK.getNeighborChunks()) {
                     if (chunk == null) continue;
@@ -84,19 +95,35 @@ public class BlockState {
     }
 
     public int getX() {
-        return x;
+        return X;
     }
 
     public int getY() {
-        return y;
+        return Y;
     }
 
     public int getZ() {
-        return z;
+        return Z;
+    }
+
+    public int getPositionHash() {
+        return POSITION_HASH;
+    }
+
+    public int getWorldX() {
+        return CHUNK.getX() + X;
+    }
+
+    public int getWorldY() {
+        return CHUNK.getY() + Y;
+    }
+
+    public int getWorldZ() {
+        return CHUNK.getZ() + Z;
     }
 
     public Vector3i getPosition() {
-        return new Vector3i(x, y, z);
+        return new Vector3i(X, Y, Z);
     }
 
     public int getBlock() {
@@ -106,7 +133,7 @@ public class BlockState {
     public String getStateString() {
 
         if (blockProperties != null) {
-            return blockProperties.getStateString(CHUNK, x, y, z);
+            return blockProperties.getStateString(CHUNK, X, Y, Z);
         }
 
         return "default";
