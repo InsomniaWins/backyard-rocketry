@@ -11,6 +11,8 @@ public class World {
     public static final int CHUNK_AMOUNT_Y = 4;
     public static final int CHUNK_AMOUNT_Z = 5;
 
+    private static World instance;
+
     private final Map<ChunkPosition, Chunk> CHUNKS;
     public static final Random RANDOM = new Random();
 
@@ -21,6 +23,8 @@ public class World {
         seed = RANDOM.nextLong();
 
         CHUNKS = new HashMap<>();
+
+        instance = this;
 
     }
 
@@ -94,6 +98,7 @@ public class World {
         return Chunk.SIZE_Z * CHUNK_AMOUNT_Z;
     }
 
+
     public BlockState getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
@@ -103,6 +108,10 @@ public class World {
 
         return chunk.getBlockState(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));
 
+    }
+
+    public static World get() {
+        return instance;
     }
 
     /**

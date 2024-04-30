@@ -22,9 +22,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 public class Chunk implements IFixedUpdateListener {
 
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 32;
-    public static  final int SIZE_Y = 32;
-    public static  final int SIZE_Z = 32;
+    public static final int SIZE_X = 16;
+    public static  final int SIZE_Y = 16;
+    public static  final int SIZE_Z = 16;
 
     private final int X;
     private final int Y;
@@ -108,6 +108,17 @@ public class Chunk implements IFixedUpdateListener {
     }
     public int toLocalZ(int z) {
         return z - Z;
+    }
+
+    public int toGlobalX(int x) {
+        return x + X;
+    }
+
+    public int toGlobalY(int y) {
+        return y + Y;
+    }
+    public int toGlobalZ(int z) {
+        return z + Z;
     }
 
 
@@ -251,9 +262,26 @@ public class Chunk implements IFixedUpdateListener {
 
     @Override
     public void fixedUpdate() {
+
+        int randomTickAmount = 3;
+        for (int i = 0; i < randomTickAmount; i++) {
+
+            int randomBlockX = World.RANDOM.nextInt(SIZE_X);
+            int randomBlockY = World.RANDOM.nextInt(SIZE_Y);
+            int randomBlockZ = World.RANDOM.nextInt(SIZE_Z);
+
+            BlockState blockState = getBlockState(randomBlockX, randomBlockY, randomBlockZ);
+
+            if (blockState == null) continue;
+
+            blockState.update();
+
+        }
+
         if (shouldRegenerateMesh) {
             generateMesh();
         }
+
     }
 
     public BoundingBox getBoundingBox() {

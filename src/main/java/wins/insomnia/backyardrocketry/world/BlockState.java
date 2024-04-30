@@ -27,9 +27,7 @@ public class BlockState {
 
     public void update() {
         if (blockProperties != null) {
-
             blockProperties.update(CHUNK, X, Y, Z);
-
         }
     }
 
