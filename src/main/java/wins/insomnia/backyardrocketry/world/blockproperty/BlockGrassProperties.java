@@ -38,6 +38,11 @@ public class BlockGrassProperties implements IBlockProperties {
     }
 
     @Override
+    public void randomUpdate(Chunk chunk, int x, int y, int z) {
+
+    }
+
+    @Override
     public void onBreak(Chunk chunk, int x, int y, int z) {
 
     }

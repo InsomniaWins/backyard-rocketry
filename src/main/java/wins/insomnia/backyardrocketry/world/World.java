@@ -7,9 +7,9 @@ import java.util.*;
 
 public class World {
 
-    public static final int CHUNK_AMOUNT_X = 5;
-    public static final int CHUNK_AMOUNT_Y = 4;
-    public static final int CHUNK_AMOUNT_Z = 5;
+    public static final int CHUNK_AMOUNT_X = 15;
+    public static final int CHUNK_AMOUNT_Y = 6;
+    public static final int CHUNK_AMOUNT_Z = 15;
 
     private static World instance;
 

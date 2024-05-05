@@ -23,7 +23,7 @@ public class Chunk implements IFixedUpdateListener {
 
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 16;
-    public static  final int SIZE_Y = 16;
+    public static final int SIZE_Y = 16;
     public static  final int SIZE_Z = 16;
 
     private final int X;
@@ -195,10 +195,10 @@ public class Chunk implements IFixedUpdateListener {
                     int globalBlockY = y + Y;
                     int globalBlockZ = z + Z;
 
-                    int groundHeight = (int) (10 + 2 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f));
+                    int groundHeight = (int) (10 + 2 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
 
 
-                    if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
+                    if (globalBlockY > groundHeight || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
                     }
 
@@ -263,21 +263,42 @@ public class Chunk implements IFixedUpdateListener {
     @Override
     public void fixedUpdate() {
 
-        int randomTickAmount = 3;
-        for (int i = 0; i < randomTickAmount; i++) {
 
-            int randomBlockX = World.RANDOM.nextInt(SIZE_X);
-            int randomBlockY = World.RANDOM.nextInt(SIZE_Y);
-            int randomBlockZ = World.RANDOM.nextInt(SIZE_Z);
+        // random updates
+        /*
+        for (int i = 0; i < 3; i++) {
 
-            BlockState blockState = getBlockState(randomBlockX, randomBlockY, randomBlockZ);
+            BlockState blockState = getBlockState(
+                    World.RANDOM.nextInt(SIZE_X),
+                    World.RANDOM.nextInt(SIZE_Y),
+                    World.RANDOM.nextInt(SIZE_Z)
+            );
 
             if (blockState == null) continue;
+            if (blockState.getBlockProperties() == null) continue;
 
-            blockState.update();
+            blockState.randomUpdate();
 
+        }*/
+
+/*
+        for (int y = 0; y < SIZE_X; y++) {
+            for (int z = 0; z < SIZE_X; z++) {
+                for (int x = 0; x < SIZE_X; x++) {
+
+                    BlockState blockState = getBlockState(x, y, z);
+
+                    if (blockState == null) continue;
+
+                    if (blockState.getBlockProperties() == null) continue;
+
+
+                    blockState.update();
+
+                }
+            }
         }
-
+*/
         if (shouldRegenerateMesh) {
             generateMesh();
         }

@@ -25,10 +25,27 @@ public class BlockState {
         setBlock(block);
     }
 
+    public boolean hasBlockProperties() {
+        return blockProperties != null;
+    }
+
+    public IBlockProperties getBlockProperties() {
+        return blockProperties;
+    }
+
+    public void randomUpdate() {
+
+        if (blockProperties == null) return;
+
+        blockProperties.randomUpdate(CHUNK, X, Y, Z);
+    }
+
     public void update() {
-        if (blockProperties != null) {
-            blockProperties.update(CHUNK, X, Y, Z);
-        }
+
+        if (blockProperties == null) return;
+
+        blockProperties.update(CHUNK, X, Y, Z);
+
     }
 
     public void damage(float damageAmount) {

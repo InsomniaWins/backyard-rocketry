@@ -132,21 +132,7 @@ public class BackyardRocketry {
         player = new TestPlayer(world);
         world.generate();
         double[] worldCenter = world.getCenterXZ();
-        ((TestPlayer) player).getTransform().getPosition().set(worldCenter[0],20,worldCenter[1]);
-
-        BoundingBox bb1 = new BoundingBox(-3,-3,-3,5,5,5);
-        BoundingBox bb2 = new BoundingBox(-5,-5,-5,5,5,5);
-
-        Collision.AABBCollisionResultType result = bb2.collideWithBoundingBox(bb1);
-        if (result == Collision.AABBCollisionResultType.INSIDE) {
-            System.out.println("Collision inside!");
-        } else if (result == Collision.AABBCollisionResultType.CLIPPING) {
-            System.out.println("Collision clipping!");
-        } else if (result == Collision.AABBCollisionResultType.CONTAINS) {
-            System.out.println("Collision contains!");
-        } else {
-            System.out.println("Collision outside!");
-        }
+        ((TestPlayer) player).getTransform().getPosition().set(worldCenter[0], 50, worldCenter[1]);
 
     }
 

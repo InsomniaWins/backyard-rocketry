@@ -63,6 +63,8 @@ public class BlockModelData {
 
     public static BlockModelData getBlockModelFromBlockState(BlockState blockState) {
 
+        if (blockState == null) return null;
+
         return getBlockModel(blockState.getBlock(), getRandomBlockNumberBasedOnBlockPosition(blockState.getX(), blockState.getY(), blockState.getZ()));
 
     }

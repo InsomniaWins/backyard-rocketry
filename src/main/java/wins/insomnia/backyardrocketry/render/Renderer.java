@@ -110,6 +110,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         camera.updateProjectionMatrix();
         camera.updateViewMatrix();
+        camera.updateFrustum();
 
         // placeholder render code
         shaderProgram.use();

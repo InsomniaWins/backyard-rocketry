@@ -1,15 +1,13 @@
 package wins.insomnia.backyardrocketry.world;
 
-import org.joml.Vector3f;
+import org.joml.*;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
+import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -59,6 +57,18 @@ public class ChunkMesh extends Mesh {
             return;
         }
 
+        Camera camera = Renderer.get().getCamera();
+
+        // render distance culling
+        if (chunk.getPosition().distance(camera.getTransform().getPosition().get(new Vector3f())) > camera.getRenderDistance()) return;
+
+        // frustum culling
+        FrustumIntersection frustum = camera.getFrustum();
+        Vector3f boundingBoxMin = chunk.getBoundingBox().getMin().get(new Vector3f());
+        Vector3f boundingBoxMax = chunk.getBoundingBox().getMax().get(new Vector3f());
+        if (!frustum.testAab(boundingBoxMin, boundingBoxMax)) return;
+
+
         Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
         Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
 
@@ -78,8 +88,8 @@ public class ChunkMesh extends Mesh {
         ArrayList<Integer> indices = new ArrayList<>();
 
 
-        for (int y = 0; y < Chunk.SIZE_X; y++) {
-            for (int x = 0; x < Chunk.SIZE_Y; x++) {
+        for (int y = 0; y < Chunk.SIZE_Y; y++) {
+            for (int x = 0; x < Chunk.SIZE_X; x++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
                     if (chunk.getBlock(x,y,z) != Block.AIR) {
@@ -92,6 +102,7 @@ public class ChunkMesh extends Mesh {
                         int frontNeighbor = chunk.getBlock(x, y, z+1);
 
                         BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z));
+
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 
                             String faceName = faceEntry.getKey();
