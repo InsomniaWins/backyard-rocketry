@@ -22,27 +22,6 @@ public class Collision {
 
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
 
-    public static List<ICollisionBody> getBodiesTouchingBoundingBox(BoundingBox boundingBox) {
-
-        List<ICollisionBody> bodies = new ArrayList<>();
-
-        for (WeakReference bodyReference : COLLISION_BODIES) {
-
-            ICollisionBody body = (ICollisionBody) bodyReference.get();
-
-            AABBCollisionResultType result = body.getBoundingBox().collideWithBoundingBox(boundingBox);
-
-            if (result != AABBCollisionResultType.OUTSIDE) {
-
-                bodies.add(body);
-
-            }
-
-        }
-
-        return bodies;
-    }
-
     public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox) {
 
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
@@ -84,7 +63,9 @@ public class Collision {
                 for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
 
                     currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
+
                     Chunk chunk = world.getChunkAt(currentChunkPosition);
+
                     if (chunk == null) continue;
 
                     chunks.add(chunk);
@@ -93,23 +74,7 @@ public class Collision {
             }
         }
 
-        /*
-
-        // MAYBE SLOWER THAN NEWER VERSION, HARD TO TELL??? (seems like it should be slower)
-        // Would definitely get slower the more loaded chunks there are
-
-        for (Chunk chunk : world.getChunks()) {
-
-            AABBCollisionResultType collisionResult = boundingBox.collideWithBoundingBox(chunk.getBoundingBox());
-
-            if (collisionResult != AABBCollisionResultType.OUTSIDE) {
-                chunks.add(chunk);
-            }
-
-        }*/
-
         return chunks;
-
     }
 
 
@@ -250,15 +215,5 @@ public class Collision {
 
 
     // -----------------------------------------------------
-
-
-
-
-
-    public static void registerCollisionBody(ICollisionBody body) {
-
-        COLLISION_BODIES.add(new WeakReference<>(body));
-
-    }
 
 }

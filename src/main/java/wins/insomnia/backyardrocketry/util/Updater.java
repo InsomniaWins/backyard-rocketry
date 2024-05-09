@@ -4,6 +4,7 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -13,6 +14,8 @@ public class Updater {
     public static final int FIXED_UPDATES_PER_SECOND = 20;
     private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
     private final List<WeakReference<IFixedUpdateListener>> FIXED_UPDATE_LISTENERS;
+    private final List<WeakReference<IUpdateListener>> QUEUED_UPDATE_LISTENERS;
+    private final List<WeakReference<IFixedUpdateListener>> QUEUED_FIXED_UPDATE_LISTENERS;
 
 
     private int updatesPerSecond = 0;
@@ -24,36 +27,90 @@ public class Updater {
 
         UPDATE_LISTENERS = new ArrayList<>();
         FIXED_UPDATE_LISTENERS = new ArrayList<>();
-
+        QUEUED_UPDATE_LISTENERS = new ArrayList<>();
+        QUEUED_FIXED_UPDATE_LISTENERS = new ArrayList<>();
     }
 
     public void registerUpdateListener(IUpdateListener updateListener) {
-        UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+
+        QUEUED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
     }
 
     public void registerFixedUpdateListener(IFixedUpdateListener updateListener) {
-        FIXED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+
+        QUEUED_FIXED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
     }
 
     private void fixedUpdate() {
 
-        for (WeakReference<IFixedUpdateListener> updateListener : FIXED_UPDATE_LISTENERS) {
-            updateListener.get().fixedUpdate();
+
+        Iterator<WeakReference<IFixedUpdateListener>> queueIterator = QUEUED_FIXED_UPDATE_LISTENERS.iterator();
+        while (queueIterator.hasNext()) {
+            WeakReference<IFixedUpdateListener> reference = queueIterator.next();
+
+            queueIterator.remove();
+
+            if (reference.get() == null) {
+                continue;
+            }
+
+            FIXED_UPDATE_LISTENERS.add(reference);
         }
 
-        if (BackyardRocketry.getInstance().getKeyboardInput().isKeyJustPressed(GLFW_KEY_ESCAPE)) {
-            glfwSetWindowShouldClose(BackyardRocketry.getInstance().getWindow().getWindowHandle(), true);
+
+
+        Iterator<WeakReference<IFixedUpdateListener>> listenerIterator = FIXED_UPDATE_LISTENERS.iterator();
+        while (listenerIterator.hasNext()) {
+            WeakReference<IFixedUpdateListener> updateListenerReference = listenerIterator.next();
+
+            IFixedUpdateListener updateListener = updateListenerReference.get();
+
+
+
+
+            if (updateListener == null) {
+                listenerIterator.remove();
+                continue;
+            }
+
+            updateListener.fixedUpdate();
         }
 
         updatesProcessedSoFar++;
-
     }
 
     private void update(double deltaTime) {
 
-        for (WeakReference<IUpdateListener> updateListener : UPDATE_LISTENERS) {
-            updateListener.get().update(deltaTime);
+
+        Iterator<WeakReference<IUpdateListener>> queueIterator = QUEUED_UPDATE_LISTENERS.iterator();
+        while (queueIterator.hasNext()) {
+            WeakReference<IUpdateListener> reference = queueIterator.next();
+
+            queueIterator.remove();
+
+            if (reference.get() == null) {
+                continue;
+            }
+
+            UPDATE_LISTENERS.add(reference);
         }
+
+
+
+        Iterator<WeakReference<IUpdateListener>> listenerIterator = UPDATE_LISTENERS.iterator();
+        while (listenerIterator.hasNext()) {
+            WeakReference<IUpdateListener> updateListenerReference = listenerIterator.next();
+
+            IUpdateListener updateListener = updateListenerReference.get();
+
+            if (updateListener == null) {
+                listenerIterator.remove();
+                continue;
+            }
+
+            updateListener.update(deltaTime);
+        }
+
 
         upsTimer += deltaTime;
         while (upsTimer > 1.0) {

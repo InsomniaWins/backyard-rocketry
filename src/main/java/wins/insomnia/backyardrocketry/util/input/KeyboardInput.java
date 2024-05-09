@@ -1,5 +1,7 @@
 package wins.insomnia.backyardrocketry.util.input;
 
+import wins.insomnia.backyardrocketry.BackyardRocketry;
+
 import java.lang.ref.WeakReference;
 import java.util.*;
 
@@ -119,6 +121,10 @@ public class KeyboardInput {
 
         QUEUED_INPUTS.add(inputEvent);
 
+    }
+
+    public static KeyboardInput get() {
+        return BackyardRocketry.getInstance().getKeyboardInput();
     }
 
 }

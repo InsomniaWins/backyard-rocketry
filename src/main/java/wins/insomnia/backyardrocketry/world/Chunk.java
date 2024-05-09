@@ -1,23 +1,15 @@
 package wins.insomnia.backyardrocketry.world;
 
-import org.joml.SimplexNoise;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.lwjgl.stb.STBPerlin;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
-import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.Updater;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 
 public class Chunk implements IFixedUpdateListener {
 
@@ -57,28 +49,25 @@ public class Chunk implements IFixedUpdateListener {
         Updater.get().registerFixedUpdateListener(this);
     }
 
-    public List<BoundingBox> getBoundingBoxesOfBlocksPotentiallyCollidingWithBoundingBox(BoundingBox boundingBox) {
+    public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
 
-        Vector3i minPos = new Vector3i(
-                (int) boundingBox.getMin().x-1,
-                (int) boundingBox.getMin().y-1,
-                (int) boundingBox.getMin().z-1
-        );
+		int[] minPos = new int[] {
+				(int) boundingBox.getMin().x-1 - X,
+				(int) boundingBox.getMin().y-1 - Y,
+				(int) boundingBox.getMin().z-1 - Z
+		};
 
-        Vector3i maxPos = new Vector3i(
-                (int) (Math.round(boundingBox.getMax().x)+1),
-                (int) (Math.round(boundingBox.getMax().y)+1),
-                (int) (Math.round(boundingBox.getMax().z)+1)
-        );
-
-        Vector3i localMinPos = new Vector3i(minPos).sub(X, Y, Z);
-        Vector3i localMaxPos = new Vector3i(maxPos).sub(X, Y, Z);
+		int[] maxPos = new int[] {
+				(int) (Math.round(boundingBox.getMax().x)+1) - X,
+				(int) (Math.round(boundingBox.getMax().y)+1) - Y,
+				(int) (Math.round(boundingBox.getMax().z)+1) - Z
+		};
 
         List<BoundingBox> boundingBoxes = new ArrayList<>();
 
-        for (int x = localMinPos.x; x < localMaxPos.x; x++) {
-            for (int y = localMinPos.y; y < localMaxPos.y; y++) {
-                for (int z = localMinPos.z; z < localMaxPos.z; z++) {
+        for (int x = minPos[0]; x < maxPos[0]; x++) {
+            for (int y = minPos[1]; y < maxPos[1]; y++) {
+                for (int z = minPos[2]; z < maxPos[2]; z++) {
 
                     int block = getBlock(x, y, z);
 
@@ -198,7 +187,7 @@ public class Chunk implements IFixedUpdateListener {
                     int groundHeight = (int) (10 + 2 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
 
 
-                    if (globalBlockY > groundHeight || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
+                    if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
                     }
 

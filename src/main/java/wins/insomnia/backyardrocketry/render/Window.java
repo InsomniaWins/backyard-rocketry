@@ -8,7 +8,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
 
-    private long WINDOW_HANDLE;
+    private final long WINDOW_HANDLE;
     private int width;
     private int height;
 
@@ -28,7 +28,6 @@ public class Window {
 
 
         // setup callback for window
-        glfwSetKeyCallback(WINDOW_HANDLE, this::windowKeyInputCallback);
         glfwSetWindowSizeCallback(WINDOW_HANDLE, this::windowResizeCallback);
     }
 
@@ -40,19 +39,7 @@ public class Window {
         window.width = width;
         window.height = height;
 
-        glViewport(0,0,window.width, window.height);
-    }
-
-    private void windowKeyInputCallback(long windowHandle, int key, int scancode, int action, int mods) {
-
-        /*
-
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-            glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-        }
-
-        */
-
+        glViewport(0, 0, window.width, window.height);
     }
 
     public long getWindowHandle() {

@@ -1,7 +1,10 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.Math;
-import org.joml.Vector2d;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
+import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.util.IPlayer;
 
 import java.util.*;
 
@@ -21,13 +24,101 @@ public class World {
     public World() {
 
         seed = RANDOM.nextLong();
-
         CHUNKS = new HashMap<>();
-
         instance = this;
+    }
+
+
+
+    public Chunk getChunk(ChunkPosition chunkPosition) {
+
+        // if chunk is loaded, return loaded chunk
+        Chunk returnChunk = CHUNKS.get(chunkPosition);
+        if (returnChunk != null) return returnChunk;
+
+
+        // load and return chunk otherwise
+        returnChunk = loadChunk(chunkPosition);
+        return returnChunk;
+    }
+
+    private Chunk loadChunk(ChunkPosition chunkPosition) {
+
+        Chunk chunk;
+
+        // if chunk already generated, load
+        // TODO: replace with actual chunk loading
+
+        // otherwise, generate
+        chunk = generateChunk(chunkPosition);
+
+
+        CHUNKS.put(chunkPosition, chunk);
+
+
+        return chunk;
+    }
+
+    private Chunk generateChunk(ChunkPosition chunkPosition) {
+
+        return new Chunk(
+                this,
+                chunkPosition.getX(),
+                chunkPosition.getY(),
+                chunkPosition.getZ()
+        );
+    }
+
+    public void updateChunksAroundPlayer(IPlayer player) {
+
+        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
+
+        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+
+            if (!CHUNKS.containsKey(chunkPosition)) {
+                loadChunk(chunkPosition);
+            }
+
+        }
 
     }
 
+    public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
+
+        List<ChunkPosition> chunkPositions = new ArrayList<>();
+
+        Vector3i playerBlockPos = player.getBlockPosition();
+        ChunkPosition playerChunkPos = getChunkPositionFromBlockPositionClamped(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z);
+
+        int chunkRadius = 4;
+
+        for (int x = -chunkRadius; x < chunkRadius; x++) {
+            for (int y = -chunkRadius; y < chunkRadius; y++) {
+                for (int z = -chunkRadius; z < chunkRadius; z++) {
+
+                    int chunkX = x * 16 + playerChunkPos.getX();
+                    if (chunkX < 0 || chunkX >= getSizeX()) continue;
+
+
+                    int chunkY = y * 16 + playerChunkPos.getY();
+                    if (chunkY < 0 || chunkY >= getSizeY()) continue;
+
+
+                    int chunkZ = z * 16 + playerChunkPos.getZ();
+                    if (chunkZ < 0 || chunkZ >= getSizeZ()) continue;
+
+                    chunkPositions.add(new ChunkPosition(chunkX, chunkY, chunkZ));
+
+                }
+            }
+        }
+
+
+        return chunkPositions;
+    }
+
+
+    @Deprecated
     public void generate() {
         for (int y = 0; y < CHUNK_AMOUNT_Y; y++){
             for (int x = 0; x < CHUNK_AMOUNT_X; x++) {
@@ -102,6 +193,7 @@ public class World {
     public BlockState getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
+
         if (chunk == null) {
             return null;
         }
@@ -175,13 +267,6 @@ public class World {
         int chunkPosZ = Chunk.SIZE_Z * (z / Chunk.SIZE_Z);
 
         return CHUNKS.get(new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ));
-
-        /*
-        for (Chunk chunk : CHUNKS) {
-            if (chunk.getX() == chunkPosX && chunk.getY() == chunkPosY && chunk.getZ() == chunkPosZ) return chunk;
-        }
-
-        return null;*/
     }
 
     public Collection<Chunk> getChunks() {

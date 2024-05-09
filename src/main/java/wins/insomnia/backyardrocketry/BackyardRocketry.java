@@ -128,11 +128,21 @@ public class BackyardRocketry {
 
 
         // TODO: REPLACE PLACEHOLDER CODE!
+
+        world = new World();
+        player = new TestPlayer(world);
+        double[] worldCenter = world.getCenterXZ();
+        player.getTransform().getPosition().set(worldCenter[0], 50, worldCenter[1]);
+
+        /*
+
         world = new World();
         player = new TestPlayer(world);
         world.generate();
         double[] worldCenter = world.getCenterXZ();
         ((TestPlayer) player).getTransform().getPosition().set(worldCenter[0], 50, worldCenter[1]);
+
+        */
 
     }
 

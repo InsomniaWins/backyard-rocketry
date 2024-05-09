@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.util;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
@@ -148,5 +149,19 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
     @Override
     public World getWorld() {
         return null;
+    }
+
+    @Override
+    public Vector3d getPosition() {
+        return transform.getPosition();
+    }
+
+    @Override
+    public Vector3i getBlockPosition() {
+        return new Vector3i(
+                (int) transform.getPosition().x,
+                (int) transform.getPosition().y,
+                (int) transform.getPosition().z
+        );
     }
 }
