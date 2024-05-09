@@ -2,17 +2,10 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.util.DebugNoclipPlayer;
-import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
-import wins.insomnia.backyardrocketry.util.IUpdateListener;
-import wins.insomnia.backyardrocketry.util.TestPlayer;
-import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.world.BlockState;
-import wins.insomnia.backyardrocketry.world.Chunk;
-import wins.insomnia.backyardrocketry.world.ChunkMesh;
-
+import wins.insomnia.backyardrocketry.util.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -140,69 +133,58 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
 
-        for (WeakReference<IRenderable> renderableWeakReference : RENDER_LIST) {
+        // render renderables
+        Iterator<WeakReference<IRenderable>> iterator = RENDER_LIST.iterator();
+        while (iterator.hasNext()) {
+            WeakReference<IRenderable> renderableWeakReference = iterator.next();
+
             IRenderable renderable = renderableWeakReference.get();
 
-            if (renderable == null) continue;
-
-            if (renderable.shouldRender()) {
-
-                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-                renderable.render();
-
+            if (renderable == null) {
+                iterator.remove();
+                continue;
             }
 
+            if (!renderable.shouldRender()) continue;
+
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            renderable.render();
         }
+
+
+
+        // print debug information
+
+        String debugString = DebugInfo.getMemoryUsage();
+        debugString = debugString + '\n' + DebugInfo.getFramesPerSecond();
+        debugString = debugString + '\n' + DebugInfo.getFixedUpdatesPerSecond();
+        debugString = debugString + '\n' + DebugInfo.getRenderMode();
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
-
-            int targetBlockHealth = 0;
-            if (player.getTargetBlock() != null) {
-                BlockState blockState = (player.getWorld().getBlockState(
-                        player.getTargetBlock().getBlockX(),
-                        player.getTargetBlock().getBlockY(),
-                        player.getTargetBlock().getBlockZ()
-                ));
-
-                if (blockState != null) {
-                    targetBlockHealth = (int) (blockState.getHealth() * 100f);
-                }
-            }
-
-            String debugString = String.format(
-                    "Memory Usage: %sMiB / %sMiB\nFPS: %d\nFixed UPS: %d\nX: %f\nY: %f\nZ: %f\nRot X: %f\nRot Y: %f\nRot Z: %f\nRender Mode: %s\nTargeted Block health: %d",
-                    Runtime.getRuntime().freeMemory() / 1_048_576,
-                    Runtime.getRuntime().totalMemory() / 1_048_576,
-                    getFramesPerSecond(),
-                    BackyardRocketry.getInstance().getUpdater().getUpdatesPerSecond(),
-                    player.getTransform().getPosition().x,
-                    player.getTransform().getPosition().y,
-                    player.getTransform().getPosition().z,
-                    player.getTransform().getRotation().x,
-                    player.getTransform().getRotation().y,
-                    player.getTransform().getRotation().z,
-                    switch (renderMode) {
-                        case 0 -> "[Cull Back], [Fill]";
-                        case 1 -> "[Cull Back], [Wireframe]";
-                        default -> "[No Cull], [Fill]";
-                    },
-                    targetBlockHealth
-            );
-            drawText(debugString);
+            debugString = debugString + '\n' + DebugInfo.getPlayerBlockPosition(player);
+            debugString = debugString + '\n' + DebugInfo.getPlayerPosition(player);
+            debugString = debugString + '\n' + DebugInfo.getPlayerRotation(player);
+            debugString = debugString + '\n' + DebugInfo.getPlayerTargetBlockInfo(player);
         }
+
+        drawText(debugString);
     }
 
+    public int getRenderMode() {
+        return renderMode;
+    }
 
     public void drawText(String text) {
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
 
-        FONT_MESH.setText(text);
+
+
 
 
         textShaderProgram.use();
-        glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getFontTexture().getTextureHandle());
+        glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getDebugFontTexture().getTextureHandle());
         glActiveTexture(GL_TEXTURE0);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -210,15 +192,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         modelMatrix.identity();
 
         textShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        textShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(0f, BackyardRocketry.getInstance().getWindow().getWidth(), 0f, BackyardRocketry.getInstance().getWindow().getHeight(), 0.01f, 100f));
+        textShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
+                0f, // left
+                BackyardRocketry.getInstance().getWindow().getWidth(), // right
+                0f, // bottom
+                BackyardRocketry.getInstance().getWindow().getHeight(), // top
+                0.01f, // z-near
+                1f // z-far
+        ));
+
+
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glBindVertexArray(FONT_MESH.getVao());
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
 
 
         // TODO: Add back-face culling to text rendering!!!
@@ -226,14 +212,20 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
+
+        // generate and draw font mesh
+        FONT_MESH.setText(text);
+        glBindVertexArray(FONT_MESH.getVao());
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
         glDrawElements(GL_TRIANGLES, FONT_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
+
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+
+
         glBindVertexArray(0);
-
-
-
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
     }
 

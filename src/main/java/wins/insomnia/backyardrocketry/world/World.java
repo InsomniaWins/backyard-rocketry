@@ -83,28 +83,24 @@ public class World {
 
     }
 
-    public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
+    public List<ChunkPosition> getChunkPositionsBlockPosition(int x, int y, int z, int chunkRadius) {
 
         List<ChunkPosition> chunkPositions = new ArrayList<>();
+        ChunkPosition originChunkPosition = getChunkPositionFromBlockPositionClamped(x, y, z);
 
-        Vector3i playerBlockPos = player.getBlockPosition();
-        ChunkPosition playerChunkPos = getChunkPositionFromBlockPositionClamped(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z);
+        for (int xIterator = -chunkRadius; xIterator < chunkRadius; xIterator++) {
+            for (int yIterator = -chunkRadius; yIterator < chunkRadius; yIterator++) {
+                for (int zIterator = -chunkRadius; zIterator < chunkRadius; zIterator++) {
 
-        int chunkRadius = 4;
-
-        for (int x = -chunkRadius; x < chunkRadius; x++) {
-            for (int y = -chunkRadius; y < chunkRadius; y++) {
-                for (int z = -chunkRadius; z < chunkRadius; z++) {
-
-                    int chunkX = x * 16 + playerChunkPos.getX();
+                    int chunkX = xIterator * 16 + originChunkPosition.getX();
                     if (chunkX < 0 || chunkX >= getSizeX()) continue;
 
 
-                    int chunkY = y * 16 + playerChunkPos.getY();
+                    int chunkY = yIterator * 16 + originChunkPosition.getY();
                     if (chunkY < 0 || chunkY >= getSizeY()) continue;
 
 
-                    int chunkZ = z * 16 + playerChunkPos.getZ();
+                    int chunkZ = zIterator * 16 + originChunkPosition.getZ();
                     if (chunkZ < 0 || chunkZ >= getSizeZ()) continue;
 
                     chunkPositions.add(new ChunkPosition(chunkX, chunkY, chunkZ));
@@ -115,6 +111,14 @@ public class World {
 
 
         return chunkPositions;
+
+    }
+
+    public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
+
+        Vector3i playerBlockPos = player.getBlockPosition();
+
+        return getChunkPositionsBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, 4);
     }
 
 

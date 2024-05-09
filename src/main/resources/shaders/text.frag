@@ -7,7 +7,5 @@ uniform vec3 textColor;
 
 void main()
 {
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(fs_texture, fs_textureCoordinates).r);
-    color = vec4(textColor, 1.0) * sampled;
-    color = sampled;
+    color = texture(fs_texture, fs_textureCoordinates);
 }
