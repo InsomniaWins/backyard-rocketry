@@ -112,27 +112,27 @@ public class ChunkMesh extends Mesh {
 
                             String cullface = (String) faceData.get("cullface");
                             if (cullface.equals("top")) {
-                                if (topNeighbor == Block.AIR || topNeighbor == -1) {
+                                if (topNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else if (cullface.equals("bottom")) {
-                                if (bottomNeighbor == Block.AIR || bottomNeighbor == -1) {
+                                if (bottomNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else if (cullface.equals("left")) {
-                                if (leftNeighbor == Block.AIR || leftNeighbor == -1) {
+                                if (leftNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else if (cullface.equals("right")) {
-                                if (rightNeighbor == Block.AIR || rightNeighbor == -1) {
+                                if (rightNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else if (cullface.equals("front")) {
-                                if (frontNeighbor == Block.AIR || frontNeighbor == -1) {
+                                if (frontNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else if (cullface.equals("back")) {
-                                if (backNeighbor == Block.AIR || backNeighbor == -1) {
+                                if (backNeighbor == Block.AIR) {
                                     addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                                 }
                             } else {

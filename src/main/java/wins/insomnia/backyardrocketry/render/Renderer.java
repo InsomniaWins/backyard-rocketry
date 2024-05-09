@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.util.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -114,23 +115,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockAtlasTexture().getTextureHandle());
 
-        switch (renderMode) {
-            case 0 -> {
-                glEnable(GL_CULL_FACE);
-                glPolygonMode(GL_FRONT, GL_FILL);
-            }
-            case 1 -> {
-                glEnable(GL_CULL_FACE);
-                glPolygonMode(GL_FRONT, GL_LINE);
-            }
-            case 2 -> {
-                glDisable(GL_CULL_FACE);
-                glPolygonMode(GL_FRONT, GL_FILL);
-            }
-        }
+        activateRenderMode();
 
         modelMatrix.identity();
-
 
 
         // render renderables
@@ -151,6 +138,34 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             renderable.render();
         }
 
+
+        // render target block
+        if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
+
+            BlockRaycastResult raycastResult = player.getTargetBlock();
+
+            if (raycastResult != null) {
+
+                modelMatrix = modelMatrix.identity();
+                modelMatrix.translate(
+                        raycastResult.getBlockX(),
+                        raycastResult.getBlockY(),
+                        raycastResult.getBlockZ()
+                );
+
+                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+
+                glLineWidth(4f);
+                glPolygonMode(GL_FRONT, GL_LINE);
+
+                glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockOutlineTexture().getTextureHandle());
+                BlockModelData.getTargetBlockOutlineMesh().render();
+
+                activateRenderMode();
+                glLineWidth(1f);
+            }
+
+        }
 
 
         // print debug information
@@ -229,6 +244,23 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
     }
 
+
+    private void activateRenderMode() {
+        switch (renderMode) {
+            case 0 -> {
+                glEnable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_FILL);
+            }
+            case 1 -> {
+                glEnable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_LINE);
+            }
+            case 2 -> {
+                glDisable(GL_CULL_FACE);
+                glPolygonMode(GL_FRONT, GL_FILL);
+            }
+        }
+    }
 
     public void clean() {
 

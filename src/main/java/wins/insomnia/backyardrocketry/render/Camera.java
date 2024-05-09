@@ -14,7 +14,7 @@ public class Camera {
     private final FrustumIntersection FRUSTUM;
 
     private float fov;
-    private float renderDistance = 64f;
+    private float renderDistance = 264f;
 
     public Camera() {
 

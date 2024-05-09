@@ -129,6 +129,7 @@ public class Chunk implements IFixedUpdateListener {
 
     public int getBlock(int x, int y, int z) {
 
+        // if out of chunk boundaries
         if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
             return WORLD.getBlock(x + X, y + Y, z + Z);
         }

@@ -156,12 +156,13 @@ public class World {
 
     public int getBlock(int x, int y, int z) {
 
+        // if out of world border
         if (x > getSizeX()-1 || x < 0 || y > getSizeX()-1 || y < 0 || z > getSizeX()-1 || z < 0 ) {
             return Block.WORLD_BORDER;
         }
 
-        Chunk chunk = getChunkContainingBlock(x, y, z);
 
+        Chunk chunk = getChunkContainingBlock(x, y, z);
         if (chunk == null) return Block.NULL;
 
         return chunk.getBlock(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));

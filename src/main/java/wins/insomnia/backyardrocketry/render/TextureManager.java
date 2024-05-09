@@ -12,6 +12,7 @@ public class TextureManager {
     private final Texture FONT_TEXTURE;
     private final Texture DEBUG_FONT_TEXTURE;
     private final Texture BLOCK_ATLAS;
+    private final Texture BLOCK_OUTLINE_TEXTURE;
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
 
@@ -20,7 +21,11 @@ public class TextureManager {
         FONT_TEXTURE = new Texture("font.png");
         DEBUG_FONT_TEXTURE = new Texture("debug_font.png");
         BLOCK_ATLAS = new Texture("block_atlas.png");
+        BLOCK_OUTLINE_TEXTURE = new Texture("block_outline.png");
+    }
 
+    public Texture getBlockOutlineTexture() {
+        return BLOCK_OUTLINE_TEXTURE;
     }
 
     public Texture getFontTexture() {

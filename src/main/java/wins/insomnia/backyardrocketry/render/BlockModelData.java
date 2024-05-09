@@ -21,6 +21,64 @@ public class BlockModelData {
 
     private static final HashMap<Integer, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
+
+    private static final Mesh TARGET_BLOCK_OUTLINE_MESH = new Mesh(
+            new float[] {
+                    1.01f, 1.01f, 1.01f, 1.0f, 0.0f,
+                    1.01f, 1.01f, -0.01f, 1.0f, 1.0f,
+                    -0.01f, 1.01f, -0.01f, 0.0f, 1.0f,
+                    -0.01f, 1.01f, 1.01f, 0.0f, 0.0f,
+                    1.01f, -0.01f, 1.01f, 1.0f, 1.0f,
+                    1.01f, -0.01f, -0.01f, 1.0f, 0.0f,
+                    -0.01f, -0.01f, -0.01f, 0.0f, 0.0f,
+                    -0.01f, -0.01f, 1.01f, 0.0f, 1.0f,
+                    -0.01f, 1.01f, 1.01f, 1.0f, 1.0f,
+                    -0.01f, 1.01f, -0.01f, 0.0f, 1.0f,
+                    -0.01f, -0.01f, -0.01f, 0.0f, 0.0f,
+                    -0.01f, -0.01f, 1.01f, 1.0f, 0.0f,
+                    1.01f, 1.01f, 1.01f, 0.0f, 1.0f,
+                    1.01f, 1.01f, -0.01f, 1.0f, 1.0f,
+                    1.01f, -0.01f, -0.01f, 1.0f, 0.0f,
+                    1.01f, -0.01f, 1.01f, 0.0f, 0.0f,
+                    1.01f, 1.01f, -0.01f, 0.0f, 1.0f,
+                    1.01f, -0.01f, -0.01f, 0.0f, 0.0f,
+                    -0.01f, -0.01f, -0.01f, 1.0f, 0.0f,
+                    -0.01f, 1.01f, -0.01f, 1.0f, 1.0f,
+                    1.01f, 1.01f, 1.01f, 1.0f, 1.0f,
+                    1.01f, -0.01f, 1.01f, 1.0f, 0.0f,
+                    -0.01f, -0.01f, 1.01f, 0.0f, 0.0f,
+                    -0.01f, 1.01f, 1.01f, 0.0f, 1.0f
+
+            },
+            new int[] {
+                    0, 1, 3,
+                    1, 2, 3,
+
+                    4, 7, 5,
+                    5, 7, 6,
+
+                    8, 9, 11,
+                    9, 10, 11,
+
+                    12, 15, 13,
+                    13, 15, 14,
+
+                    16, 17, 19,
+                    17, 18, 19,
+
+                    20, 23, 21,
+                    21, 23, 22
+            }
+    );
+
+    public static Mesh getTargetBlockOutlineMesh() {
+        return TARGET_BLOCK_OUTLINE_MESH;
+    }
+
+    public static void clean() {
+        TARGET_BLOCK_OUTLINE_MESH.clean();
+    }
+
     public static BlockModelData getBlockModel(int block, int blockX, int blockY, int blockZ) {
 
         String currentBlockStateName = "default";
