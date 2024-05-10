@@ -1,22 +1,25 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.Math;
-import org.joml.Vector3d;
 import org.joml.Vector3i;
-import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.IPlayer;
+import wins.insomnia.backyardrocketry.util.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.Updater;
 
 import java.util.*;
 
-public class World {
+public class World implements IFixedUpdateListener, IUpdateListener {
 
-    public static final int CHUNK_AMOUNT_X = 15;
+    public static final int CHUNK_AMOUNT_X = 128;
     public static final int CHUNK_AMOUNT_Y = 6;
-    public static final int CHUNK_AMOUNT_Z = 15;
-
+    public static final int CHUNK_AMOUNT_Z = 128;
     private static World instance;
 
+    public static int chunkLoadDistance = 5;
+
     private final Map<ChunkPosition, Chunk> CHUNKS;
+    private final Queue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
     public static final Random RANDOM = new Random();
 
     private long seed;
@@ -25,7 +28,11 @@ public class World {
 
         seed = RANDOM.nextLong();
         CHUNKS = new HashMap<>();
+        UNLOAD_CHUNK_QUEUE = new LinkedList<>();
         instance = this;
+
+        Updater.get().registerFixedUpdateListener(this);
+        Updater.get().registerUpdateListener(this);
     }
 
 
@@ -60,7 +67,6 @@ public class World {
     }
 
     private Chunk generateChunk(ChunkPosition chunkPosition) {
-
         return new Chunk(
                 this,
                 chunkPosition.getX(),
@@ -69,16 +75,48 @@ public class World {
         );
     }
 
+    public void queueUnloadChunk(ChunkPosition chunkPosition) {
+
+        UNLOAD_CHUNK_QUEUE.offer(chunkPosition);
+
+    }
+
+    private void unloadChunk(ChunkPosition chunkPosition) {
+        Chunk chunk = CHUNKS.get(chunkPosition);
+
+        CHUNKS.remove(chunkPosition);
+        chunk.clean();
+
+    }
+
     public void updateChunksAroundPlayer(IPlayer player) {
 
         List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
 
+		for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
+			if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
+				// remove from positions around player: loading is not needed
+				chunkPositionsAroundPlayer.remove(entry.getKey());
+			} else {
+				// unload chunk
+				queueUnloadChunk(entry.getKey());
+			}
+		}
+
+
+        // load chunks
         for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
 
             if (!CHUNKS.containsKey(chunkPosition)) {
                 loadChunk(chunkPosition);
             }
 
+        }
+
+        // unload chunks
+        while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
+            ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
+            unloadChunk(chunkPosition);
         }
 
     }
@@ -118,32 +156,7 @@ public class World {
 
         Vector3i playerBlockPos = player.getBlockPosition();
 
-        return getChunkPositionsBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, 4);
-    }
-
-
-    @Deprecated
-    public void generate() {
-        for (int y = 0; y < CHUNK_AMOUNT_Y; y++){
-            for (int x = 0; x < CHUNK_AMOUNT_X; x++) {
-                for (int z = 0; z < CHUNK_AMOUNT_Z; z++) {
-
-                    int chunkPosX = x * Chunk.SIZE_X;
-                    int chunkPosY = y * Chunk.SIZE_Y;
-                    int chunkPosZ = z * Chunk.SIZE_Z;
-
-                    ChunkPosition chunkPosition = new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ, false);
-
-                    Chunk chunk = new Chunk(
-                            this,
-                            chunkPosX,
-                            chunkPosY,
-                            chunkPosZ
-                    );
-                    CHUNKS.put(chunkPosition, chunk);
-                }
-            }
-        }
+        return getChunkPositionsBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, chunkLoadDistance);
     }
 
     public Chunk getChunkAt(ChunkPosition chunkPosition) {
@@ -276,5 +289,17 @@ public class World {
 
     public Collection<Chunk> getChunks() {
         return CHUNKS.values();
+    }
+
+    @Override
+    public void fixedUpdate() {
+
+
+    }
+
+    @Override
+    public void update(double deltaTime) {
+
+
     }
 }

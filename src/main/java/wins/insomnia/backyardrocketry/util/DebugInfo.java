@@ -29,7 +29,7 @@ public class DebugInfo {
 
 	public static String getPlayerBlockPosition(IPlayer player) {
 		Vector3i playerBlockPosition = player.getBlockPosition();
-		return "Block Position: <" + playerBlockPosition.x + ", " + playerBlockPosition.y + ", " + playerBlockPosition.z + ">";
+		return "Block Position: " + FancyToString.toString(playerBlockPosition);
 	}
 
 	public static String getPlayerPosition(IPlayer player) {

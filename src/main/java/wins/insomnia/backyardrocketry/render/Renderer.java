@@ -4,9 +4,10 @@ import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.util.*;
-import java.lang.ref.WeakReference;
+import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.world.ChunkMesh;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -22,7 +23,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private ShaderProgram textShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
-    private final ArrayList<WeakReference<IRenderable>> RENDER_LIST;
+    private final ArrayList<IRenderable> RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
@@ -46,8 +47,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         modelMatrix = new Matrix4f().identity();
 
-        BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
-        BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
+        Updater.get().registerUpdateListener(this);
+        Updater.get().registerFixedUpdateListener(this);
 
         FONT_MESH = new FontMesh();
 
@@ -56,7 +57,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public void fixedUpdate() {
-        if (BackyardRocketry.getInstance().getKeyboardInput().isKeyJustReleased(GLFW_KEY_F3)) {
+        if (KeyboardInput.get().isKeyJustReleased(GLFW_KEY_F3)) {
             renderMode++;
             if (renderMode == 3) {
                 renderMode = 0;
@@ -88,8 +89,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public void addRenderable(IRenderable renderable) {
 
-        RENDER_LIST.add(new WeakReference<>(renderable));
+        RENDER_LIST.add(renderable);
 
+    }
+
+    public void removeRenderable(IRenderable renderable) {
+        RENDER_LIST.remove(renderable);
     }
 
     public ShaderProgram getShaderProgram() {
@@ -119,24 +124,21 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         modelMatrix.identity();
 
+        int chunkMeshCount = 0;
+        int totalMeshCount = 0;
 
         // render renderables
-        Iterator<WeakReference<IRenderable>> iterator = RENDER_LIST.iterator();
-        while (iterator.hasNext()) {
-            WeakReference<IRenderable> renderableWeakReference = iterator.next();
+		for (IRenderable renderable : RENDER_LIST) {
+			if (!renderable.shouldRender()) continue;
 
-            IRenderable renderable = renderableWeakReference.get();
-
-            if (renderable == null) {
-                iterator.remove();
-                continue;
+            if (renderable instanceof ChunkMesh) {
+                chunkMeshCount++;
             }
 
-            if (!renderable.shouldRender()) continue;
-
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-            renderable.render();
-        }
+			shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+			renderable.render();
+            totalMeshCount++;
+		}
 
 
         // render target block
@@ -170,7 +172,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // print debug information
 
-        String debugString = DebugInfo.getMemoryUsage();
+        String debugString = "Chunk Mesh Count: " + chunkMeshCount;
+        debugString = debugString + "\nOther Mesh Count: " + (totalMeshCount - chunkMeshCount);
+        debugString = debugString + '\n' + DebugInfo.getMemoryUsage();
         debugString = debugString + '\n' + DebugInfo.getFramesPerSecond();
         debugString = debugString + '\n' + DebugInfo.getFixedUpdatesPerSecond();
         debugString = debugString + '\n' + DebugInfo.getRenderMode();
@@ -264,15 +268,15 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public void clean() {
 
-        for (WeakReference<IRenderable> renderableWeakReference : RENDER_LIST) {
-
-            IRenderable renderable = renderableWeakReference.get();
+        for (IRenderable renderable : RENDER_LIST) {
 
             if (renderable == null) continue;
 
             if (!renderable.isClean()) {
                 renderable.clean();
             }
+
+            System.out.println("Renderable not unregistered when game closed: " + renderable);
 
         }
 

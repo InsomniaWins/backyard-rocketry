@@ -5,8 +5,6 @@ import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -19,11 +17,15 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 public class ChunkMesh extends Mesh {
 
     private Chunk chunk;
+    public boolean unloaded = false;
 
     public ChunkMesh(Chunk chunk) {
         this.chunk = chunk;
     }
 
+    public Chunk getChunk() {
+        return chunk;
+    }
 
     public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ) {
 
@@ -94,13 +96,6 @@ public class ChunkMesh extends Mesh {
 
                     if (chunk.getBlock(x,y,z) != Block.AIR) {
 
-                        int topNeighbor = chunk.getBlock(x, y+1, z);
-                        int bottomNeighbor = chunk.getBlock(x, y-1, z);
-                        int leftNeighbor = chunk.getBlock(x-1, y, z);
-                        int rightNeighbor = chunk.getBlock(x+1, y, z);
-                        int backNeighbor = chunk.getBlock(x, y, z-1);
-                        int frontNeighbor = chunk.getBlock(x, y, z+1);
-
                         BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z));
 
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
@@ -110,39 +105,11 @@ public class ChunkMesh extends Mesh {
                             ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
                             ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
-                            String cullface = (String) faceData.get("cullface");
-                            if (cullface.equals("top")) {
-                                if (topNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else if (cullface.equals("bottom")) {
-                                if (bottomNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else if (cullface.equals("left")) {
-                                if (leftNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else if (cullface.equals("right")) {
-                                if (rightNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else if (cullface.equals("front")) {
-                                if (frontNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else if (cullface.equals("back")) {
-                                if (backNeighbor == Block.AIR) {
-                                    addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                                }
-                            } else {
+                            if (shouldAddFaceToMesh((String) faceData.get("cullface"), x, y, z)) {
                                 addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                             }
-
                         }
-
                     }
-
                 }
             }
         }
@@ -175,5 +142,53 @@ public class ChunkMesh extends Mesh {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
 
+    }
+
+    private boolean shouldAddFaceToMesh(String cullface, int x, int y, int z) {
+
+        int topNeighbor = chunk.getBlock(x, y+1, z);
+        int bottomNeighbor = chunk.getBlock(x, y-1, z);
+        int leftNeighbor = chunk.getBlock(x-1, y, z);
+        int rightNeighbor = chunk.getBlock(x+1, y, z);
+        int backNeighbor = chunk.getBlock(x, y, z-1);
+        int frontNeighbor = chunk.getBlock(x, y, z+1);
+
+        switch (cullface) {
+            case "top" -> {
+                if (topNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+            case "bottom" -> {
+                if (bottomNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+            case "left" -> {
+                if (leftNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+            case "right" -> {
+                if (rightNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+            case "front" -> {
+                if (frontNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+            case "back" -> {
+                if (backNeighbor == Block.AIR) {
+                    return true;
+                }
+            }
+
+            default -> {
+                return true;
+            }
+        }
+        return false;
     }
 }

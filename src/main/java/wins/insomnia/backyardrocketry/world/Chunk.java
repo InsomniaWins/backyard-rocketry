@@ -167,6 +167,17 @@ public class Chunk implements IFixedUpdateListener {
 
     }
 
+    public void clean() {
+        shouldRegenerateMesh = false;
+        CHUNK_MESH.unloaded = true;
+
+        if (!CHUNK_MESH.isClean()) {
+            CHUNK_MESH.clean();
+        }
+
+        Renderer.get().removeRenderable(CHUNK_MESH);
+    }
+
     public void setShouldRegenerateMesh(boolean value) {
 
         shouldRegenerateMesh = value;
@@ -253,42 +264,6 @@ public class Chunk implements IFixedUpdateListener {
     @Override
     public void fixedUpdate() {
 
-
-        // random updates
-        /*
-        for (int i = 0; i < 3; i++) {
-
-            BlockState blockState = getBlockState(
-                    World.RANDOM.nextInt(SIZE_X),
-                    World.RANDOM.nextInt(SIZE_Y),
-                    World.RANDOM.nextInt(SIZE_Z)
-            );
-
-            if (blockState == null) continue;
-            if (blockState.getBlockProperties() == null) continue;
-
-            blockState.randomUpdate();
-
-        }*/
-
-/*
-        for (int y = 0; y < SIZE_X; y++) {
-            for (int z = 0; z < SIZE_X; z++) {
-                for (int x = 0; x < SIZE_X; x++) {
-
-                    BlockState blockState = getBlockState(x, y, z);
-
-                    if (blockState == null) continue;
-
-                    if (blockState.getBlockProperties() == null) continue;
-
-
-                    blockState.update();
-
-                }
-            }
-        }
-*/
         if (shouldRegenerateMesh) {
             generateMesh();
         }
