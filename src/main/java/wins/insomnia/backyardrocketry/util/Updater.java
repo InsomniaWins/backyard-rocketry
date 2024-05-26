@@ -31,84 +31,90 @@ public class Updater {
         QUEUED_FIXED_UPDATE_LISTENERS = new ArrayList<>();
     }
 
+    // is thread-safe
     public void registerUpdateListener(IUpdateListener updateListener) {
-
-        QUEUED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+        synchronized (this) {
+            QUEUED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+        }
     }
 
+    // is thread-safe
+    // TODO: For some reason, this method causes thread pool threads to remain open after the program closes
+    // need to figure out why??????
     public void registerFixedUpdateListener(IFixedUpdateListener updateListener) {
-
-        QUEUED_FIXED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+        synchronized (this) {
+            QUEUED_FIXED_UPDATE_LISTENERS.add(new WeakReference<>(updateListener));
+        }
     }
 
     private void fixedUpdate() {
 
 
-        Iterator<WeakReference<IFixedUpdateListener>> queueIterator = QUEUED_FIXED_UPDATE_LISTENERS.iterator();
-        while (queueIterator.hasNext()) {
-            WeakReference<IFixedUpdateListener> reference = queueIterator.next();
+        synchronized (this) {
+            Iterator<WeakReference<IFixedUpdateListener>> queueIterator = QUEUED_FIXED_UPDATE_LISTENERS.iterator();
+            while (queueIterator.hasNext()) {
+                WeakReference<IFixedUpdateListener> reference = queueIterator.next();
 
-            queueIterator.remove();
+                queueIterator.remove();
 
-            if (reference.get() == null) {
-                continue;
+                if (reference.get() == null) {
+                    continue;
+                }
+
+                FIXED_UPDATE_LISTENERS.add(reference);
             }
 
-            FIXED_UPDATE_LISTENERS.add(reference);
-        }
+
+            Iterator<WeakReference<IFixedUpdateListener>> listenerIterator = FIXED_UPDATE_LISTENERS.iterator();
+            while (listenerIterator.hasNext()) {
+                WeakReference<IFixedUpdateListener> updateListenerReference = listenerIterator.next();
+
+                IFixedUpdateListener updateListener = updateListenerReference.get();
 
 
+                if (updateListener == null) {
+                    listenerIterator.remove();
+                    continue;
+                }
 
-        Iterator<WeakReference<IFixedUpdateListener>> listenerIterator = FIXED_UPDATE_LISTENERS.iterator();
-        while (listenerIterator.hasNext()) {
-            WeakReference<IFixedUpdateListener> updateListenerReference = listenerIterator.next();
-
-            IFixedUpdateListener updateListener = updateListenerReference.get();
-
-
-
-
-            if (updateListener == null) {
-                listenerIterator.remove();
-                continue;
+                updateListener.fixedUpdate();
             }
 
-            updateListener.fixedUpdate();
+            updatesProcessedSoFar++;
         }
-
-        updatesProcessedSoFar++;
     }
 
     private void update(double deltaTime) {
 
 
-        Iterator<WeakReference<IUpdateListener>> queueIterator = QUEUED_UPDATE_LISTENERS.iterator();
-        while (queueIterator.hasNext()) {
-            WeakReference<IUpdateListener> reference = queueIterator.next();
+        synchronized (this) {
+            Iterator<WeakReference<IUpdateListener>> queueIterator = QUEUED_UPDATE_LISTENERS.iterator();
+            while (queueIterator.hasNext()) {
+                WeakReference<IUpdateListener> reference = queueIterator.next();
 
-            queueIterator.remove();
+                queueIterator.remove();
 
-            if (reference.get() == null) {
-                continue;
+                if (reference.get() == null) {
+                    continue;
+                }
+
+                UPDATE_LISTENERS.add(reference);
             }
 
-            UPDATE_LISTENERS.add(reference);
-        }
 
+            Iterator<WeakReference<IUpdateListener>> listenerIterator = UPDATE_LISTENERS.iterator();
+            while (listenerIterator.hasNext()) {
+                WeakReference<IUpdateListener> updateListenerReference = listenerIterator.next();
 
+                IUpdateListener updateListener = updateListenerReference.get();
 
-        Iterator<WeakReference<IUpdateListener>> listenerIterator = UPDATE_LISTENERS.iterator();
-        while (listenerIterator.hasNext()) {
-            WeakReference<IUpdateListener> updateListenerReference = listenerIterator.next();
+                if (updateListener == null) {
+                    listenerIterator.remove();
+                    continue;
+                }
 
-            IUpdateListener updateListener = updateListenerReference.get();
-
-            if (updateListener == null) {
-                listenerIterator.remove();
-                continue;
+                updateListener.update(deltaTime);
             }
-
-            updateListener.update(deltaTime);
         }
 
 

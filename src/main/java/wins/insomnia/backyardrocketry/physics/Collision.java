@@ -2,7 +2,10 @@ package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Math;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.*;
 
 import java.lang.ref.WeakReference;
@@ -96,8 +99,7 @@ public class Collision {
 
 
 
-
-
+    // TODO: block raycast is inaccurate when origin position is integer (0.00, 12.00, 1.00, etc.)
     // -------------------  THANK YOU { Kevin Reid } !!!!!!  ----------------------------------
     //
     //  ->   https://gamedev.stackexchange.com/users/9825/kevin-reid

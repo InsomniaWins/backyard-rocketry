@@ -10,6 +10,9 @@ import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.Updater;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Chunk implements IFixedUpdateListener {
 
@@ -17,6 +20,7 @@ public class Chunk implements IFixedUpdateListener {
     public static final int SIZE_X = 16;
     public static final int SIZE_Y = 16;
     public static  final int SIZE_Z = 16;
+    private static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
 
     private final int X;
     private final int Y;
@@ -41,9 +45,13 @@ public class Chunk implements IFixedUpdateListener {
 
         WORLD = world;
         CHUNK_MESH = new ChunkMesh(this);
-        Renderer.get().addRenderable(CHUNK_MESH);
 
         initializeBlocks();
+
+
+        Renderer.get().addRenderable(CHUNK_MESH);
+
+
         generateBlocks();
 
         Updater.get().registerFixedUpdateListener(this);
@@ -127,6 +135,10 @@ public class Chunk implements IFixedUpdateListener {
         return Z;
     }
 
+    public int getBlock(Vector3i blockPos) {
+        return getBlock(blockPos.x, blockPos.y, blockPos.z);
+    }
+
     public int getBlock(int x, int y, int z) {
 
         // if out of chunk boundaries
@@ -156,14 +168,15 @@ public class Chunk implements IFixedUpdateListener {
 
     }
 
+
+    // MAKE SURE TO clean() BEFORE RUNNING!
     private void generateMesh() {
 
-        if (!CHUNK_MESH.isClean()) {
-            CHUNK_MESH.clean();
-        }
-
         CHUNK_MESH.generateMesh();
-        shouldRegenerateMesh = false;
+
+        synchronized (this) {
+            shouldRegenerateMesh = false;
+        }
 
     }
 
@@ -264,10 +277,24 @@ public class Chunk implements IFixedUpdateListener {
     @Override
     public void fixedUpdate() {
 
-        if (shouldRegenerateMesh) {
-            generateMesh();
-        }
+        synchronized (this) {
+            if (shouldRegenerateMesh) {
 
+                shouldRegenerateMesh = false;
+
+                if (!CHUNK_MESH.isClean()) {
+                    CHUNK_MESH.clean();
+                }
+
+                chunkMeshGenerationExecutorService.execute(() -> {
+                    generateMesh();
+                });
+            }
+
+            if (CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
+                CHUNK_MESH.createOpenGLMeshData();
+            }
+        }
     }
 
     public BoundingBox getBoundingBox() {

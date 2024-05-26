@@ -1,6 +1,5 @@
 package wins.insomnia.backyardrocketry.physics;
 
-import org.joml.Vector3d;
 import wins.insomnia.backyardrocketry.world.Block;
 import wins.insomnia.backyardrocketry.world.Chunk;
 

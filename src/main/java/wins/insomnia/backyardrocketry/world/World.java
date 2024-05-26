@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.Math;
+import org.joml.Vector3d;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.IPlayer;
@@ -8,6 +9,9 @@ import wins.insomnia.backyardrocketry.util.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.Updater;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class World implements IFixedUpdateListener, IUpdateListener {
 
@@ -20,7 +24,11 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     private final Map<ChunkPosition, Chunk> CHUNKS;
     private final Queue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
+    private final Queue<ChunkPosition> LOAD_CHUNK_QUEUE;
     public static final Random RANDOM = new Random();
+
+
+    private final ExecutorService chunkManagerExecutorService = Executors.newFixedThreadPool(10);
 
     private long seed;
 
@@ -28,6 +36,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         seed = RANDOM.nextLong();
         CHUNKS = new HashMap<>();
+        LOAD_CHUNK_QUEUE = new LinkedList<>();
         UNLOAD_CHUNK_QUEUE = new LinkedList<>();
         instance = this;
 
@@ -35,37 +44,42 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         Updater.get().registerUpdateListener(this);
     }
 
-
-
-    public Chunk getChunk(ChunkPosition chunkPosition) {
-
-        // if chunk is loaded, return loaded chunk
-        Chunk returnChunk = CHUNKS.get(chunkPosition);
-        if (returnChunk != null) return returnChunk;
-
-
-        // load and return chunk otherwise
-        returnChunk = loadChunk(chunkPosition);
-        return returnChunk;
+    public static Vector3i getBlockPositionFromPosition(Vector3d position) {
+        return new Vector3i(
+                (int) position.x,
+                (int) position.y,
+                (int) position.z
+        );
     }
 
-    private Chunk loadChunk(ChunkPosition chunkPosition) {
+    private void loadChunk(ChunkPosition chunkPosition) {
 
-        Chunk chunk;
+        if (CHUNKS.containsKey(chunkPosition)) {
+            return;
+        }
 
-        // if chunk already generated, load
-        // TODO: replace with actual chunk loading
+        if (LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
+            return;
+        }
 
-        // otherwise, generate
-        chunk = generateChunk(chunkPosition);
-
-
-        CHUNKS.put(chunkPosition, chunk);
+        LOAD_CHUNK_QUEUE.add(chunkPosition);
 
 
-        return chunk;
+        chunkManagerExecutorService.submit(() -> {
+
+            // otherwise, generate
+            Chunk chunk = generateChunk(chunkPosition);
+
+            synchronized (this) {
+                CHUNKS.put(chunkPosition, chunk);
+                LOAD_CHUNK_QUEUE.remove(chunkPosition);
+                System.out.println(Thread.currentThread().getName());
+            }
+
+        });
     }
 
+    // happens on chunk generation thread -- NOT MAIN THREAD!
     private Chunk generateChunk(ChunkPosition chunkPosition) {
         return new Chunk(
                 this,
@@ -82,10 +96,12 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     private void unloadChunk(ChunkPosition chunkPosition) {
-        Chunk chunk = CHUNKS.get(chunkPosition);
 
-        CHUNKS.remove(chunkPosition);
-        chunk.clean();
+        synchronized (this) {
+            Chunk chunk = CHUNKS.get(chunkPosition);
+            CHUNKS.remove(chunkPosition);
+            chunk.clean();
+        }
 
     }
 
@@ -93,30 +109,30 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
 
-		for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
-			if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
-				// remove from positions around player: loading is not needed
-				chunkPositionsAroundPlayer.remove(entry.getKey());
-			} else {
-				// unload chunk
-				queueUnloadChunk(entry.getKey());
-			}
-		}
-
-
-        // load chunks
-        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-
-            if (!CHUNKS.containsKey(chunkPosition)) {
-                loadChunk(chunkPosition);
+        synchronized (this) {
+            for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
+                if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
+                    // remove from positions around player: loading is not needed
+                    chunkPositionsAroundPlayer.remove(entry.getKey());
+                } else {
+                    // unload chunk
+                    queueUnloadChunk(entry.getKey());
+                }
             }
 
-        }
+            // load chunks
+            for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+                if (!CHUNKS.containsKey(chunkPosition)) {
+                    loadChunk(chunkPosition);
+                }
+            }
 
-        // unload chunks
-        while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
-            ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
-            unloadChunk(chunkPosition);
+            // unload chunks
+            while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
+                ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
+                unloadChunk(chunkPosition);
+            }
+
         }
 
     }
@@ -208,6 +224,10 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
 
+    public BlockState getBlockState(Vector3i blockPos) {
+        return getBlockState(blockPos.x, blockPos.y, blockPos.z);
+    }
+
     public BlockState getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
@@ -276,6 +296,10 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
     }
 
+    public Chunk getChunkContainingBlock(Vector3i blockPos) {
+        return getChunkContainingBlock(blockPos.x, blockPos.y, blockPos.z);
+    }
+
     public Chunk getChunkContainingBlock(int x, int y, int z) {
 
         if (x < 0 || y < 0 || z < 0) return null;
@@ -301,5 +325,14 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public void update(double deltaTime) {
 
 
+    }
+
+    // called at unload of world
+    public void shutdown() {
+        chunkManagerExecutorService.shutdown();
+        int i = 0;
+        while (!chunkManagerExecutorService.isTerminated()) {
+            System.out.println("Waiting for chunkManagerExecutorService to terminate . . . " + i++);
+        }
     }
 }

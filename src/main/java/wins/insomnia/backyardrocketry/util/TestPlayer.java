@@ -234,6 +234,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
                 .rotateY(-TRANSFORM.getRotation().y);
         int rayLength = 7;
 
+
         targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
 
         if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {

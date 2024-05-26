@@ -15,7 +15,7 @@ public class DebugInfo {
 
 	public static String getMemoryUsage() {
 		return "Memory Usage: " +
-				Runtime.getRuntime().freeMemory() / 1_048_576 + "MiB / " +
+				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1_048_576 + "MiB / " +
 				Runtime.getRuntime().totalMemory() / 1_048_576 + "MiB";
 	}
 

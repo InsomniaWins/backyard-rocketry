@@ -1,5 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Vector3i;
+import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.world.blockproperty.BlockGrassProperties;
 
@@ -37,6 +39,14 @@ public class Block {
                 return null;
             }
         }
+    }
+
+    public static BlockBoundingBox getBlockBoundingBox(Chunk chunk, Vector3i blockPosition, int block) {
+        BoundingBox boundingBox = getBlockCollision(block);
+
+        if (boundingBox == null) return null;
+
+		return new BlockBoundingBox(boundingBox, chunk, blockPosition);
     }
 
     public static BoundingBox getBlockCollision(int block) {

@@ -1,10 +1,13 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.*;
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.FancyToString;
+
 import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -18,6 +21,43 @@ public class ChunkMesh extends Mesh {
 
     private Chunk chunk;
     public boolean unloaded = false;
+
+
+    int meshDataIndexCount = -1;
+    float[] meshDataVertexArray = new float[0];
+    int[] meshDataIndexArray = new int[0];
+
+
+    private boolean readyToCreateOpenGLMeshData = false;
+
+    public boolean isReadyToCreateOpenGLMeshData() {
+        return readyToCreateOpenGLMeshData;
+    }
+
+    public void createOpenGLMeshData() {
+
+        synchronized (this) {
+            indexCount = meshDataIndexCount;
+
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            ebo = glGenBuffers();
+
+            glBindVertexArray(vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, meshDataVertexArray, GL_STATIC_DRAW);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+
+
+            readyToCreateOpenGLMeshData = false;
+        }
+    }
 
     public ChunkMesh(Chunk chunk) {
         this.chunk = chunk;
@@ -77,14 +117,11 @@ public class ChunkMesh extends Mesh {
         glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
-
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
+    // MAKE SURE TO CLEAN BEFORE RUNNING!
     public void generateMesh() {
-
-        if (!isClean()) clean();
-        isClean = false;
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -125,23 +162,12 @@ public class ChunkMesh extends Mesh {
             indexArray[i] = indices.get(i);
         }
 
-        indexCount = indexArray.length;
-
-        vao = glGenVertexArrays();
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-
-        glBindVertexArray(vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-
+        synchronized (this) {
+            meshDataVertexArray = vertexArray;
+            meshDataIndexArray = indexArray;
+            meshDataIndexCount = indexArray.length;
+            readyToCreateOpenGLMeshData = true;
+        }
     }
 
     private boolean shouldAddFaceToMesh(String cullface, int x, int y, int z) {

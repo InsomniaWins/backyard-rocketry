@@ -54,15 +54,15 @@ public class BackyardRocketry {
 
         init();
         UPDATER.loop();
-
         renderer.clean();
+
+        world.shutdown();
 
         glfwFreeCallbacks(window.getWindowHandle());
         glfwDestroyWindow(window.getWindowHandle());
 
         glfwTerminate();
         glfwSetErrorCallback(null).free();
-
     }
 
     private void init() {
@@ -134,15 +134,7 @@ public class BackyardRocketry {
         double[] worldCenter = world.getCenterXZ();
         player.getTransform().getPosition().set(worldCenter[0], 50, worldCenter[1]);
 
-        /*
 
-        world = new World();
-        player = new TestPlayer(world);
-        world.generate();
-        double[] worldCenter = world.getCenterXZ();
-        ((TestPlayer) player).getTransform().getPosition().set(worldCenter[0], 50, worldCenter[1]);
-
-        */
 
     }
 

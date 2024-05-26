@@ -48,7 +48,7 @@ public class Mesh implements IRenderable {
         isClean = false;
     }
 
-    public void clean() {
+    public synchronized void clean() {
 
         isClean = true;
 
@@ -58,7 +58,7 @@ public class Mesh implements IRenderable {
 
     }
 
-    public boolean isClean() {
+    public synchronized boolean isClean() {
         return isClean;
     }
 

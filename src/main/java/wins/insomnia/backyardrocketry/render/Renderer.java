@@ -87,14 +87,20 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glfwSwapBuffers(window.getWindowHandle());
     }
 
+    // is thread-safe
     public void addRenderable(IRenderable renderable) {
 
-        RENDER_LIST.add(renderable);
+        synchronized (this) {
+            RENDER_LIST.add(renderable);
+        }
 
     }
 
+    // is thread-safe
     public void removeRenderable(IRenderable renderable) {
-        RENDER_LIST.remove(renderable);
+        synchronized (this) {
+            RENDER_LIST.remove(renderable);
+        }
     }
 
     public ShaderProgram getShaderProgram() {
@@ -128,18 +134,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         int totalMeshCount = 0;
 
         // render renderables
-		for (IRenderable renderable : RENDER_LIST) {
-			if (!renderable.shouldRender()) continue;
+        synchronized (this) {
+            for (IRenderable renderable : RENDER_LIST) {
+                if (!renderable.shouldRender()) continue;
 
-            if (renderable instanceof ChunkMesh) {
-                chunkMeshCount++;
+                if (renderable instanceof ChunkMesh) {
+                    chunkMeshCount++;
+                }
+
+                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+                renderable.render();
+                totalMeshCount++;
             }
-
-			shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-			renderable.render();
-            totalMeshCount++;
-		}
-
+        }
 
         // render target block
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
@@ -276,7 +283,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 renderable.clean();
             }
 
-            System.out.println("Renderable not unregistered when game closed: " + renderable);
+            //System.out.println("Renderable not unregistered when game closed: " + renderable);
 
         }
 
