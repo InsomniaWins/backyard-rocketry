@@ -73,7 +73,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             synchronized (this) {
                 CHUNKS.put(chunkPosition, chunk);
                 LOAD_CHUNK_QUEUE.remove(chunkPosition);
-                System.out.println(Thread.currentThread().getName());
             }
 
         });
@@ -330,6 +329,8 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     // called at unload of world
     public void shutdown() {
         chunkManagerExecutorService.shutdown();
+        Chunk.chunkMeshGenerationExecutorService.shutdown();
+
         int i = 0;
         while (!chunkManagerExecutorService.isTerminated()) {
             System.out.println("Waiting for chunkManagerExecutorService to terminate . . . " + i++);

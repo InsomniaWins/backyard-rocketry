@@ -20,7 +20,7 @@ public class Chunk implements IFixedUpdateListener {
     public static final int SIZE_X = 16;
     public static final int SIZE_Y = 16;
     public static  final int SIZE_Z = 16;
-    private static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
+    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
 
     private final int X;
     private final int Y;
@@ -286,9 +286,7 @@ public class Chunk implements IFixedUpdateListener {
                     CHUNK_MESH.clean();
                 }
 
-                chunkMeshGenerationExecutorService.execute(() -> {
-                    generateMesh();
-                });
+                chunkMeshGenerationExecutorService.submit(this::generateMesh);
             }
 
             if (CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {

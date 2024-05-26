@@ -162,6 +162,10 @@ public class ChunkMesh extends Mesh {
             indexArray[i] = indices.get(i);
         }
 
+        if (!Main.MAIN_THREAD.isAlive()){
+            return;
+        }
+
         synchronized (this) {
             meshDataVertexArray = vertexArray;
             meshDataIndexArray = indexArray;
