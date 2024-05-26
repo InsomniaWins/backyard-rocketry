@@ -39,8 +39,6 @@ public class Updater {
     }
 
     // is thread-safe
-    // TODO: For some reason, this method causes thread pool threads to remain open after the program closes
-    // need to figure out why??????
     public void registerFixedUpdateListener(IFixedUpdateListener updateListener) {
         synchronized (this) {
             QUEUED_FIXED_UPDATE_LISTENERS.add(updateListener);
