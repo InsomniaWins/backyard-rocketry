@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.Block;
-import wins.insomnia.backyardrocketry.world.BlockState;
 
 import java.io.IOException;
 import java.net.URL;

@@ -10,12 +10,10 @@ import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
-import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 import wins.insomnia.backyardrocketry.world.Block;
-import wins.insomnia.backyardrocketry.world.BlockState;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     private boolean onGround = false;
     private float cameraInterpolationFactor = 0f;
+    private int blockInteractionTimer = 0;
     private boolean lockMouseToCenterForCameraRotation = false;
     public boolean hasGravity = true;
     private BlockRaycastResult targetBlock;
@@ -237,16 +236,29 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
 
-        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-
-            breakBlock();
-
+        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
+            blockInteractionTimer = 0;
+        }
+        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+            blockInteractionTimer = 0;
         }
 
-        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+        if (blockInteractionTimer == 0) {
+            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 
-            placeBlock(Block.GRASS);
+                breakBlock();
+                blockInteractionTimer = 5;
 
+            }
+
+            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+
+                placeBlock(Block.GRASS);
+                blockInteractionTimer = 5;
+
+            }
+        } else {
+            blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
         }
     }
 

@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.util;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.world.Block;
-import wins.insomnia.backyardrocketry.world.BlockState;
 
 import java.text.DecimalFormat;
 
