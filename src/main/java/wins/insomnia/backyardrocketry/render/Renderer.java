@@ -164,14 +164,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
                 shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
-                glLineWidth(4f);
-                glPolygonMode(GL_FRONT, GL_LINE);
+                //glLineWidth(4f);
+                //glPolygonMode(GL_FRONT, GL_LINE);
 
                 glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockOutlineTexture().getTextureHandle());
-                BlockModelData.getTargetBlockOutlineMesh().render();
+                BlockModelData.getTargetBlockOutlineMesh().render(GL_LINES);
 
                 activateRenderMode();
-                glLineWidth(1f);
+                //glLineWidth(1f);
             }
 
         }

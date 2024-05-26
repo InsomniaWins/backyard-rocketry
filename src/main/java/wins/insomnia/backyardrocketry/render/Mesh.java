@@ -77,6 +77,11 @@ public class Mesh implements IRenderable {
 
     @Override
     public void render() {
+        render(GL_TRIANGLES);
+    }
+
+    public void render(int primitveRenderType) {
+
         if (vao < 0) {
             return;
         }
@@ -85,6 +90,7 @@ public class Mesh implements IRenderable {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
+        glDrawElements(primitveRenderType, getIndexCount(), GL_UNSIGNED_INT, 0);
+
     }
 }

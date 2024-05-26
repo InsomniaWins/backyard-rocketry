@@ -46,9 +46,6 @@ public class Updater {
     }
 
     private void fixedUpdate() {
-
-        System.out.println(QUEUED_UPDATE_LISTENERS.size());
-
         synchronized (this) {
             Iterator<IFixedUpdateListener> queueIterator = QUEUED_FIXED_UPDATE_LISTENERS.iterator();
             while (queueIterator.hasNext()) {
