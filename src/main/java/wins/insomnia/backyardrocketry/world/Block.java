@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.world;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.world.blockproperty.BlockGrassProperties;
 
 public class Block {
 
@@ -29,17 +28,6 @@ public class Block {
     public static final int COBBLESTONE = 2;
     public static final int DIRT = 3;
     public static final int STONE = 4;
-
-    public static IBlockProperties  createBlockProperties(int block) {
-        switch (block) {
-            case GRASS -> {
-                return new BlockGrassProperties();
-            }
-            default -> {
-                return null;
-            }
-        }
-    }
 
     public static BlockBoundingBox getBlockBoundingBox(Chunk chunk, Vector3i blockPosition, int block) {
         BoundingBox boundingBox = getBlockCollision(block);

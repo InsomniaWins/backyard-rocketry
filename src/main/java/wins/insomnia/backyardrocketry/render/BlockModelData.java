@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.Block;
 import wins.insomnia.backyardrocketry.world.BlockState;
@@ -103,12 +104,13 @@ public class BlockModelData {
         return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
-    public static BlockModelData getBlockModelFromBlockState(BlockState blockState) {
+    public static BlockModelData getBlockModelFromBlockState(int blockState) {
+        return getBlockModel(BitHelper.getBlockIdFromBlockState(blockState), 0);
+        //getRandomBlockNumberBasedOnBlockPosition(blockState.getX(), blockState.getY(), blockState.getZ())
+    }
 
-        if (blockState == null) return null;
-
-        return getBlockModel(blockState.getBlock(), getRandomBlockNumberBasedOnBlockPosition(blockState.getX(), blockState.getY(), blockState.getZ()));
-
+    public static BlockModelData getBlockModelFromBlock(int block, int variant) {
+        return getBlockModel(block, variant);
     }
 
 

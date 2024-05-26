@@ -58,15 +58,15 @@ public class DebugInfo {
 		int targetBlockHealth = 0;
 		int targetBlock = Block.NULL;
 		if (player.getTargetBlock() != null) {
-			BlockState blockState = (player.getWorld().getBlockState(
+			int blockState = (player.getWorld().getBlockState(
 					player.getTargetBlock().getBlockX(),
 					player.getTargetBlock().getBlockY(),
 					player.getTargetBlock().getBlockZ()
 			));
 
-			if (blockState != null) {
-				targetBlockHealth = (int) (blockState.getHealth() * 100f);
-				targetBlock = blockState.getBlock();
+			if (BitHelper.getBlockIdFromBlockState(blockState) != Block.NULL) {
+				targetBlockHealth = 0;
+				targetBlock = BitHelper.getBlockIdFromBlockState(blockState);
 			}
 		}
 

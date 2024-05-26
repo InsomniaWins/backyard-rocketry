@@ -11,7 +11,6 @@ import wins.insomnia.backyardrocketry.util.Updater;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class World implements IFixedUpdateListener, IUpdateListener {
 
@@ -223,16 +222,16 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
 
-    public BlockState getBlockState(Vector3i blockPos) {
+    public int getBlockState(Vector3i blockPos) {
         return getBlockState(blockPos.x, blockPos.y, blockPos.z);
     }
 
-    public BlockState getBlockState(int x, int y, int z) {
+    public int getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
 
         if (chunk == null) {
-            return null;
+            throw new RuntimeException("could not find chunk containing block at " + x + ", " + y + ", " + z);
         }
 
         return chunk.getBlockState(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));
@@ -330,10 +329,5 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public void shutdown() {
         chunkManagerExecutorService.shutdown();
         Chunk.chunkMeshGenerationExecutorService.shutdown();
-
-        int i = 0;
-        while (!chunkManagerExecutorService.isTerminated()) {
-            System.out.println("Waiting for chunkManagerExecutorService to terminate . . . " + i++);
-        }
     }
 }

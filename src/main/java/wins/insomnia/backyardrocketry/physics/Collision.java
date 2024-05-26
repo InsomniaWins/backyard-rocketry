@@ -5,6 +5,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.*;
 
@@ -88,11 +89,9 @@ public class Collision {
 
         if (chunk == null) return null;
 
-        BlockState blockState = world.getBlockState(blockX, blockY, blockZ);
+        int blockState = world.getBlockState(blockX, blockY, blockZ);
 
-        if (blockState == null) return null;
-
-        if (Block.getBlockCollision(blockState.getBlock()) == null) return null;
+        if (Block.getBlockCollision(BitHelper.getBlockIdFromBlockState(blockState)) == null) return null;
 
         return new BlockRaycastResult(chunk, blockX, blockY, blockZ, face);
     }

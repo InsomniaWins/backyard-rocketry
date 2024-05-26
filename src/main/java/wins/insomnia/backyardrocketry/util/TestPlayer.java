@@ -243,7 +243,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         }
 
-        if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+        if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
             placeBlock(Block.GRASS);
 
@@ -258,13 +258,14 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         if (targetBlock == null) return;
 
-        BlockState blockState = targetBlock.getChunk().getBlockState(
-                targetBlock.getChunk().toLocalX(targetBlock.getBlockX()),
-                targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
-                targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
+        Chunk targetBlockChunk = targetBlock.getChunk();
+        targetBlockChunk.setBlock(
+                        targetBlockChunk.toLocalX(targetBlock.getBlockX()),
+                        targetBlockChunk.toLocalY(targetBlock.getBlockY()),
+                        targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
+                        Block.AIR
         );
 
-        blockState.damage(0.1f);
     }
 
     private void placeBlock(int blockToPlace) {
@@ -308,15 +309,6 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         if (chunk == null) return;
 
-
-        BlockState blockState = chunk.getBlockState(
-                chunk.toLocalX(placePosX),
-                chunk.toLocalY(placePosY),
-                chunk.toLocalZ(placePosZ)
-        );
-
-        if (blockState == null) return;
-
         BoundingBox blockBoundingBox = Block.getBlockCollision(blockToPlace);
 
         if (blockBoundingBox != null) {
@@ -327,7 +319,12 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             }
         }
 
-        blockState.setBlock(blockToPlace);
+        chunk.setBlock(
+                chunk.toLocalX(placePosX),
+                chunk.toLocalY(placePosY),
+                chunk.toLocalZ(placePosZ),
+                blockToPlace
+        );
     }
 
     private void updateBoundingBox() {

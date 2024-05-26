@@ -86,7 +86,7 @@ public class BlockState {
         }
 
         block = newBlock;
-        blockProperties = Block.createBlockProperties(block);
+        //blockProperties = Block.createBlockProperties(block);
 
         if (block > -1 && blockProperties != null) {
             blockProperties.onPlace(CHUNK, X, Y, Z);

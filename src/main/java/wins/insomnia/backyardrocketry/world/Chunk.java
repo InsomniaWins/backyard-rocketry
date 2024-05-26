@@ -5,6 +5,7 @@ import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.Updater;
@@ -28,7 +29,7 @@ public class Chunk implements IFixedUpdateListener {
     private final ChunkMesh CHUNK_MESH;
     private final World WORLD;
 
-    private BlockState[][][] blocks;
+    private int[][][] blocks;
     protected boolean shouldRegenerateMesh = false;
 
     public Chunk(World world, int x, int y, int z) {
@@ -54,6 +55,45 @@ public class Chunk implements IFixedUpdateListener {
         generateBlocks();
 
         Updater.get().registerFixedUpdateListener(this);
+    }
+
+    public void setBlock(int x, int y, int z, int block) {
+
+        setBlock(x, y, z, block, true);
+
+    }
+
+    public void setBlock(int x, int y, int z, int block, boolean regenerateMesh) {
+
+        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
+        shouldRegenerateMesh = regenerateMesh;
+        if (shouldRegenerateMesh) {
+            updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z);
+        }
+
+    }
+
+    private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z) {
+        if (isBlockOnChunkBorder(x, y, z)) {
+
+            for (Chunk chunk : getNeighborChunks()) {
+                if (chunk == null) continue;
+
+                chunk.shouldRegenerateMesh = true;
+            }
+        }
+    }
+
+    public void setBlockState(int x, int y, int z, int blockState) {
+        setBlockState(x, y, z, blockState, true);
+    }
+
+    public void setBlockState(int x, int y, int z, int blockState, boolean regenerateMesh) {
+        blocks[x][y][z] = blockState;
+        shouldRegenerateMesh = regenerateMesh;
+        if (shouldRegenerateMesh) {
+            updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z);
+        }
     }
 
     public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
@@ -145,13 +185,13 @@ public class Chunk implements IFixedUpdateListener {
             return WORLD.getBlock(x + X, y + Y, z + Z);
         }
 
-        return blocks[x][y][z].getBlock();
+        return BitHelper.getBlockIdFromBlockState(blocks[x][y][z]);
     }
 
-    public BlockState getBlockState(int x, int y, int z) {
+    public int getBlockState(int x, int y, int z) {
 
         if (!isBlockInBounds(x, y, z)) {
-            return null;
+            throw new RuntimeException("Block is not in chunk boundaries!");
         }
 
         return blocks[x][y][z];
@@ -216,14 +256,14 @@ public class Chunk implements IFixedUpdateListener {
                     }
 
                     if (globalBlockY == groundHeight) {
-                        blocks[x][y][z].setBlock(Block.GRASS, false);
+                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.GRASS);
                     } else if (globalBlockY > groundHeight - 4) {
-                        blocks[x][y][z].setBlock(Block.DIRT, false);
+                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.DIRT);
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {
-                            blocks[x][y][z].setBlock(Block.COBBLESTONE, false);
+                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.COBBLESTONE);
                         } else {
-                            blocks[x][y][z].setBlock(Block.STONE, false);
+                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.STONE);
                         }
                     }
 
@@ -254,13 +294,15 @@ public class Chunk implements IFixedUpdateListener {
 
     private void initializeBlocks() {
 
-        blocks = new BlockState[SIZE_X][SIZE_Y][SIZE_Z];
+        blocks = new int[SIZE_X][SIZE_Y][SIZE_Z];
+
+        int airBlockState = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.AIR);
 
         for (int x = 0; x < SIZE_X; x++) {
             for (int z = 0; z < SIZE_Z; z++) {
                 for (int y = 0; y < SIZE_Y; y++) {
 
-                    blocks[x][y][z] = new BlockState(this, Block.AIR, x, y, z);
+                    blocks[x][y][z] = airBlockState;
 
                 }
             }

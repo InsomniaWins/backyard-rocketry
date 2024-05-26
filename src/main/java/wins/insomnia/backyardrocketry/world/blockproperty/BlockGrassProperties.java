@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.world.blockproperty;
+/*package wins.insomnia.backyardrocketry.world.blockproperty;
 
 import org.joml.Random;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
@@ -57,3 +57,4 @@ public class BlockGrassProperties implements IBlockProperties {
         return stateString;
     }
 }
+*/
