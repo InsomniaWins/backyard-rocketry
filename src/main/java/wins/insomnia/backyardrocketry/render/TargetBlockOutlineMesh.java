@@ -5,65 +5,70 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 public class TargetBlockOutlineMesh {
 
 
-	private static final float[] VERTICES = new float[] {
-			0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	private static final int[] INDICES = new int[] {
+			0, 1,
+			0, 2,
+			2, 3,
+			1, 3,
 	};
 
 	private static final Mesh POS_Y_MESH = new Mesh(
-			VERTICES,
-			new int[] {
-					0, 1,
-					0, 2,
-					2, 3,
-					1, 3,
-			}
+			new float[] {
+					0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+					0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			},
+			INDICES
 	);
 
 	private static final Mesh NEG_Y_MESH = new Mesh(
-			VERTICES,
-			new int[] {
-					0, 1,
-					0, 2,
-					2, 3,
-					1, 3,
-			}
+			new float[] {
+					0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+			},
+			INDICES
 	);
 
 	private static final Mesh POS_X_MESH = new Mesh(
-			VERTICES,
-			new int[] {
-					0, 1,
-					0, 2,
-					2, 3,
-					1, 3,
-			}
+			new float[] {
+					1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			},
+			INDICES
 	);
 
 	private static final Mesh NEG_X_MESH = new Mesh(
-			VERTICES,
-			new int[] {
-					0, 1,
-					0, 2,
-					2, 3,
-					1, 3,
-			}
+			new float[] {
+					0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+					0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+					0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			},
+			INDICES
 	);
 
 	private static final Mesh POS_Z_MESH = new Mesh(
-			VERTICES,
-			new int[] {
-					0, 1,
-					0, 2,
-					2, 3,
-					1, 3,
-			}
+			new float[] {
+					0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+					0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			},
+			INDICES
 	);
 
 	private static final Mesh NEG_Z_MESH = new Mesh(
-			VERTICES,
+			new float[] {
+					0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+					1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			},
 			new int[] {
 					0, 1,
 					0, 2,
