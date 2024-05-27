@@ -46,7 +46,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
         guiShaderProgram = new ShaderProgram("gui.vert", "gui.frag");
-        setGuiScale(2);
+        setGuiScale(3);
 
         modelMatrix = new Matrix4f().identity();
 
@@ -203,6 +203,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         drawText(debugString, 0,  0);
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
+
     }
 
     public void setGuiScale(int guiScale) {
@@ -247,7 +248,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
-
 
         guiShaderProgram.use();
         glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
@@ -297,6 +297,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
 
+        shaderProgram.use();
     }
 
 
@@ -304,7 +305,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
-
 
         guiShaderProgram.use();
         glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getDebugFontTexture().getTextureHandle());
@@ -354,6 +354,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
+
+        shaderProgram.use();
     }
 
 

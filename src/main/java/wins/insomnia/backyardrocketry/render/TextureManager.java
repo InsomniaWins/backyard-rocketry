@@ -13,6 +13,7 @@ public class TextureManager {
     private final Texture BLOCK_ATLAS;
     private final Texture BLOCK_OUTLINE_TEXTURE;
     private final Texture CROSSHAIR_TEXTURE;
+    public final Texture HOTBAR_TEXTURE;
 
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
@@ -24,6 +25,7 @@ public class TextureManager {
         BLOCK_ATLAS = new Texture("block_atlas.png");
         BLOCK_OUTLINE_TEXTURE = new Texture("block_outline.png");
         CROSSHAIR_TEXTURE = new Texture("gui/crosshair.png");
+        HOTBAR_TEXTURE = new Texture("gui/hotbar.png");
     }
 
     public Texture getBlockOutlineTexture() {

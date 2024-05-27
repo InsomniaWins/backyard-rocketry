@@ -11,6 +11,8 @@ import wins.insomnia.backyardrocketry.physics.ICollisionBody;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.render.gui.PlayerGui;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 import wins.insomnia.backyardrocketry.world.block.Block;
@@ -37,6 +39,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final BoundingBox BOUNDING_BOX;
     private final Transform TRANSFORM;
     private final Transform PREVIOUS_TRANSFORM;
+    private final PlayerGui GUI_ELEMENT;
     private final Vector3f INTERPOLATED_CAMERA_ROTATION;
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
 
@@ -65,7 +68,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         BOUNDING_BOX = new BoundingBox();
         updateBoundingBox();
 
-
+        GUI_ELEMENT = new PlayerGui();
+        Renderer.get().addRenderable(GUI_ELEMENT);
 
     }
 
@@ -212,6 +216,12 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             if (keyboardInput.isKeyJustPressed(GLFW_KEY_F2)) {
                 lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
+
+                glfwSetInputMode(
+                        Window.get().getWindowHandle(),
+                        GLFW_CURSOR,
+                        lockMouseToCenterForCameraRotation ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL
+                );
             }
 
             if (lockMouseToCenterForCameraRotation) {
