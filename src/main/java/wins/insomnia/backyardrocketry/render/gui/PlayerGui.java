@@ -31,6 +31,9 @@ public class PlayerGui implements IGuiRenderable {
 		// render hotbar items
 		for (int i = 0; i < 10; i++) {
 
+			int hotbarIndex = i == 9 ? 0 : i + 1;
+			renderer.drawText(Integer.toString(hotbarIndex), hotbarX + i * 24, hotbarY);
+
 			int currentBlock = player.getHotbarSlotContents(i);
 
 			BlockModelData blockModelData = BlockModelData.getBlockModel(currentBlock, 0, 0, 0);

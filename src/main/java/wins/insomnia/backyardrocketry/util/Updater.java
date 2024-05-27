@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -14,8 +15,8 @@ public class Updater {
     public static final int FIXED_UPDATES_PER_SECOND = 20;
     private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
     private final List<WeakReference<IFixedUpdateListener>> FIXED_UPDATE_LISTENERS;
-    private final List<IUpdateListener> QUEUED_UPDATE_LISTENERS;
-    private final List<IFixedUpdateListener> QUEUED_FIXED_UPDATE_LISTENERS;
+    private final ConcurrentLinkedQueue<IUpdateListener> QUEUED_UPDATE_LISTENERS;
+    private final ConcurrentLinkedQueue<IFixedUpdateListener> QUEUED_FIXED_UPDATE_LISTENERS;
 
 
     private int updatesPerSecond = 0;
@@ -27,34 +28,23 @@ public class Updater {
 
         UPDATE_LISTENERS = new ArrayList<>();
         FIXED_UPDATE_LISTENERS = new ArrayList<>();
-        QUEUED_UPDATE_LISTENERS = new ArrayList<>();
-        QUEUED_FIXED_UPDATE_LISTENERS = new ArrayList<>();
+        QUEUED_UPDATE_LISTENERS = new ConcurrentLinkedQueue<>();
+        QUEUED_FIXED_UPDATE_LISTENERS = new ConcurrentLinkedQueue<>();
     }
 
     // is thread-safe
     public void registerUpdateListener(IUpdateListener updateListener) {
-        synchronized (this) {
-            QUEUED_UPDATE_LISTENERS.add(updateListener);
-        }
+        QUEUED_UPDATE_LISTENERS.add(updateListener);
     }
 
     // is thread-safe
     public void registerFixedUpdateListener(IFixedUpdateListener updateListener) {
-        synchronized (this) {
-            QUEUED_FIXED_UPDATE_LISTENERS.add(updateListener);
-        }
+        QUEUED_FIXED_UPDATE_LISTENERS.add(updateListener);
     }
 
     private void fixedUpdate() {
-        synchronized (this) {
-            Iterator<IFixedUpdateListener> queueIterator = QUEUED_FIXED_UPDATE_LISTENERS.iterator();
-            while (queueIterator.hasNext()) {
-                IFixedUpdateListener fixedUpdateListener = queueIterator.next();
-
-                queueIterator.remove();
-
-                FIXED_UPDATE_LISTENERS.add(new WeakReference<>(fixedUpdateListener));
-            }
+        while (!QUEUED_FIXED_UPDATE_LISTENERS.isEmpty()) {
+            FIXED_UPDATE_LISTENERS.add(new WeakReference<>(QUEUED_FIXED_UPDATE_LISTENERS.poll()));
         }
 
 
@@ -79,17 +69,8 @@ public class Updater {
     private void update(double deltaTime) {
 
 
-        synchronized (this) {
-
-            Iterator<IUpdateListener> queueIterator = QUEUED_UPDATE_LISTENERS.iterator();
-            while (queueIterator.hasNext()) {
-                IUpdateListener reference = queueIterator.next();
-
-                queueIterator.remove();
-
-                UPDATE_LISTENERS.add(new WeakReference<>(reference));
-            }
-
+        while (!QUEUED_UPDATE_LISTENERS.isEmpty()) {
+            UPDATE_LISTENERS.add(new WeakReference<>(QUEUED_UPDATE_LISTENERS.poll()));
         }
 
 

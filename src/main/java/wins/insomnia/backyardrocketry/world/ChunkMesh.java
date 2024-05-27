@@ -102,7 +102,7 @@ public class ChunkMesh extends Mesh {
         Camera camera = Renderer.get().getCamera();
 
         // render distance culling
-        //if (chunk.getPosition().distance(camera.getTransform().getPosition().get(new Vector3f())) > camera.getRenderDistance()) return;
+        if (chunk.getPosition().distance(camera.getTransform().getPosition().get(new Vector3f())) > camera.getRenderDistance()) return;
 
         // frustum culling
         FrustumIntersection frustum = camera.getFrustum();

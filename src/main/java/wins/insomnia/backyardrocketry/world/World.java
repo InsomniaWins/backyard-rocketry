@@ -18,7 +18,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Z = 128;
     private static World instance;
 
-    public static int chunkLoadDistance = 5;
+    public static int chunkLoadDistance = 10;
 
     private final Map<ChunkPosition, Chunk> CHUNKS;
     private final Queue<ChunkPosition> UNLOAD_CHUNK_QUEUE;

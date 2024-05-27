@@ -7,8 +7,10 @@ import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -25,8 +27,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
-    private final ArrayList<IRenderable> RENDER_LIST;
-    private final ArrayList<IGuiRenderable> GUI_RENDER_LIST;
+    private final ConcurrentLinkedQueue<IRenderable> RENDER_LIST;
+    private final ConcurrentLinkedQueue<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
@@ -35,8 +37,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private int guiScale = 1;
 
     public Renderer() {
-        RENDER_LIST = new ArrayList<>();
-        GUI_RENDER_LIST = new ArrayList<>();
+        RENDER_LIST = new ConcurrentLinkedQueue<>();
+        GUI_RENDER_LIST = new ConcurrentLinkedQueue<>();
         TEXTURE_MANAGER = new TextureManager();
 
         camera = new Camera();
@@ -108,26 +110,20 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     // is thread-safe
     public void addRenderable(IRenderable renderable) {
 
-        synchronized (this) {
-
-            if (renderable instanceof IGuiRenderable) {
-                GUI_RENDER_LIST.add((IGuiRenderable) renderable);
-            } else {
-                RENDER_LIST.add(renderable);
-            }
-
+        if (renderable instanceof IGuiRenderable) {
+            GUI_RENDER_LIST.add((IGuiRenderable) renderable);
+        } else {
+            RENDER_LIST.add(renderable);
         }
 
     }
 
     // is thread-safe
     public void removeRenderable(IRenderable renderable) {
-        synchronized (this) {
-            if (renderable instanceof IGuiRenderable) {
-                GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
-            } else {
-                RENDER_LIST.remove(renderable);
-            }
+        if (renderable instanceof IGuiRenderable) {
+            GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
+        } else {
+            RENDER_LIST.remove(renderable);
         }
     }
 
@@ -159,14 +155,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         modelMatrix.identity();
 
         // render renderables
-        synchronized (this) {
-            for (IRenderable renderable : RENDER_LIST) {
-                if (!renderable.shouldRender()) continue;
+        for (IRenderable renderable : RENDER_LIST) {
+            if (!renderable.shouldRender()) continue;
 
-                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-                renderable.render();
-
-            }
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            renderable.render();
         }
 
         // render target block
@@ -200,15 +193,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
         // render gui
-        synchronized (this) {
-            for (IGuiRenderable renderable : GUI_RENDER_LIST) {
+        for (IGuiRenderable renderable : GUI_RENDER_LIST) {
 
-                if (!renderable.shouldRender()) continue;
+            if (!renderable.shouldRender()) continue;
 
-                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-                renderable.render();
+            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            renderable.render();
 
-            }
         }
 
         // draw debug information
@@ -226,7 +217,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
         }
 
-        drawText(debugString, 0, 0, 2);
+        drawText(debugString, 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
 
     }
@@ -415,10 +406,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
     public void drawText(String text, int guiX, int guiY) {
-        drawText(text, guiX, guiY, guiScale);
+        drawText(text, guiX, guiY, guiScale, TextureManager.get().getFontTexture());
     }
 
-    public void drawText(String text, int guiX, int guiY, int scale) {
+    public void drawText(String text, int guiX, int guiY, Texture fontTexture) {
+        drawText(text, guiX, guiY, guiScale, fontTexture);
+    }
+
+    public void drawText(String text, int guiX, int guiY, int scale, Texture fontTexture) {
 
 
         int[] previousTexture = new int[1];
@@ -430,7 +425,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             guiShaderProgram.setUniform("vs_scale", scale);
         }
 
-        glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getDebugFontTexture().getTextureHandle());
+        glBindTexture(GL_TEXTURE_2D, fontTexture.getTextureHandle());
         glActiveTexture(GL_TEXTURE0);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
