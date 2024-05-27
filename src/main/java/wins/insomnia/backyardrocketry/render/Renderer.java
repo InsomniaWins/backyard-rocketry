@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
+import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 
@@ -25,6 +26,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
     private final ArrayList<IRenderable> RENDER_LIST;
+    private final ArrayList<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
@@ -34,6 +36,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public Renderer() {
         RENDER_LIST = new ArrayList<>();
+        GUI_RENDER_LIST = new ArrayList<>();
         TEXTURE_MANAGER = new TextureManager();
 
         camera = new Camera();
@@ -106,7 +109,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     public void addRenderable(IRenderable renderable) {
 
         synchronized (this) {
-            RENDER_LIST.add(renderable);
+
+            if (renderable instanceof IGuiRenderable) {
+                GUI_RENDER_LIST.add((IGuiRenderable) renderable);
+            } else {
+                RENDER_LIST.add(renderable);
+            }
+
         }
 
     }
@@ -114,7 +123,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     // is thread-safe
     public void removeRenderable(IRenderable renderable) {
         synchronized (this) {
-            RENDER_LIST.remove(renderable);
+            if (renderable instanceof IGuiRenderable) {
+                GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
+            } else {
+                RENDER_LIST.remove(renderable);
+            }
         }
     }
 
@@ -185,6 +198,18 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         }
 
+
+        // render gui
+        synchronized (this) {
+            for (IGuiRenderable renderable : GUI_RENDER_LIST) {
+
+                if (!renderable.shouldRender()) continue;
+
+                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+                renderable.render();
+
+            }
+        }
 
         // draw debug information
 
@@ -386,7 +411,15 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 renderable.clean();
             }
 
-            //System.out.println("Renderable not unregistered when game closed: " + renderable);
+        }
+
+        for (IGuiRenderable renderable : GUI_RENDER_LIST) {
+
+            if (renderable == null) continue;
+
+            if (!renderable.isClean()) {
+                renderable.clean();
+            }
 
         }
 

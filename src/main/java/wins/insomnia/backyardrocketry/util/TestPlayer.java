@@ -44,6 +44,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
 
 
+    private int currentHotbarSlot = 0;
     private boolean onGround = false;
     private float cameraInterpolationFactor = 0f;
     private int blockInteractionTimer = 0;
@@ -68,7 +69,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         BOUNDING_BOX = new BoundingBox();
         updateBoundingBox();
 
-        GUI_ELEMENT = new PlayerGui();
+        GUI_ELEMENT = new PlayerGui(this);
         Renderer.get().addRenderable(GUI_ELEMENT);
 
     }
@@ -240,42 +241,100 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             cameraInterpolationFactor = 0f;
 
-            Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
-            Vector3d rayDirection = new Vector3d(0, 0, -1)
-                    .rotateX(-TRANSFORM.getRotation().x)
-                    .rotateY(-TRANSFORM.getRotation().y);
-            int rayLength = 7;
-
-
-            targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
-
-            if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
-                blockInteractionTimer = 0;
-            }
-            if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-                blockInteractionTimer = 0;
-            }
-
-            if (blockInteractionTimer == 0) {
-                if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-
-                    breakBlock();
-                    blockInteractionTimer = 5;
-
-                }
-
-                if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-
-                    placeBlock(Block.STONE);
-                    blockInteractionTimer = 5;
-
-                }
-            } else {
-                blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
-            }
+            hotbarManagement();
+            blockInteraction();
         }
 
         WORLD.updateChunksAroundPlayer(this);
+    }
+
+    private void hotbarManagement() {
+
+        KeyboardInput keyboardInput = KeyboardInput.get();
+        MouseInput mouseInput = MouseInput.get();
+
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_1)) {
+            setCurrentHotbarSlot(0);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_2)) {
+            setCurrentHotbarSlot(1);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_3)) {
+            setCurrentHotbarSlot(2);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_4)) {
+            setCurrentHotbarSlot(3);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_5)) {
+            setCurrentHotbarSlot(4);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_6)) {
+            setCurrentHotbarSlot(5);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_7)) {
+            setCurrentHotbarSlot(6);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_8)) {
+            setCurrentHotbarSlot(7);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_9)) {
+            setCurrentHotbarSlot(8);
+        } else if (keyboardInput.isKeyJustPressed(GLFW_KEY_0)) {
+            setCurrentHotbarSlot(9);
+        }
+
+        if (mouseInput.getMouseScrollY() != 0.0) {
+
+            int scrollDirection = (int) Math.signum(mouseInput.getMouseScrollY());
+            offsetCurrentHotbarSlot(-scrollDirection);
+
+        }
+
+    }
+
+    public void offsetCurrentHotbarSlot(int offsetAmount) {
+
+        currentHotbarSlot += offsetAmount;
+
+        while (currentHotbarSlot > 9) {
+            currentHotbarSlot -= 10;
+        }
+
+        while (currentHotbarSlot < 0) {
+            currentHotbarSlot += 10;
+        }
+
+    }
+
+    private void blockInteraction() {
+
+        MouseInput mouseInput = MouseInput.get();
+
+        Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
+        Vector3d rayDirection = new Vector3d(0, 0, -1)
+                .rotateX(-TRANSFORM.getRotation().x)
+                .rotateY(-TRANSFORM.getRotation().y);
+        int rayLength = 7;
+
+        targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+
+        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
+            blockInteractionTimer = 0;
+        }
+        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+            blockInteractionTimer = 0;
+        }
+
+        if (blockInteractionTimer == 0) {
+            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+                breakBlock();
+                blockInteractionTimer = 5;
+
+            }
+
+            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+
+                placeBlock(Block.STONE);
+                blockInteractionTimer = 5;
+
+            }
+        } else {
+            blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
+        }
+
     }
 
     public BlockRaycastResult getTargetBlock() {
@@ -429,5 +488,13 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     @Override
     public boolean isBodyStatic() {
         return false;
+    }
+
+    public int getCurrentHotbarSlot() {
+        return currentHotbarSlot;
+    }
+
+    public void setCurrentHotbarSlot(int currentHotbarSlot) {
+        this.currentHotbarSlot = currentHotbarSlot;
     }
 }

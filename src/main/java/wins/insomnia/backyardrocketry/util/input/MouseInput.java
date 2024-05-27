@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util.input;
 
 import org.joml.Vector2i;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -11,6 +12,8 @@ public class MouseInput {
 
     private final long WINDOW_HANDLE;
 
+    private double mouseScrollY = 0.0;
+    private double mouseScrollX = 0.0;
     private int previousMouseX = 0;
     private int previousMouseY = 0;
     private int currentMouseX = 0;
@@ -101,7 +104,8 @@ public class MouseInput {
         previousMouseX = currentMouseX;
         previousMouseY = currentMouseY;
 
-
+        mouseScrollY = 0.0;
+        mouseScrollX = 0.0;
 
         while (!QUEUED_INPUTS.isEmpty()) {
             InputEvent inputEvent = QUEUED_INPUTS.remove();
@@ -122,12 +126,27 @@ public class MouseInput {
 
                 INPUT_EVENT_QUEUE.add(mouseMovementInputEvent);
 
+            } else if (inputEvent instanceof MouseScrollInputEvent mouseScrollInputEvent) {
+
+                mouseScrollY += mouseScrollInputEvent.getOffsetY();
+                mouseScrollX += mouseScrollInputEvent.getOffsetX();
+
+                INPUT_EVENT_QUEUE.add(mouseScrollInputEvent);
+
             }
         }
 
 
         sendInputsToCallbacks();
 
+    }
+
+    public double getMouseScrollY() {
+        return mouseScrollY;
+    }
+
+    public double getMouseScrollX() {
+        return mouseScrollX;
     }
 
     private void sendInputsToCallbacks() {
@@ -170,7 +189,8 @@ public class MouseInput {
 
     private void mouseWheelCallback(long windowHandle, double xOffset, double yOffset) {
 
-
+        InputEvent inputEvent = new MouseScrollInputEvent(xOffset, yOffset);
+        QUEUED_INPUTS.add(inputEvent);
 
     }
 
@@ -209,4 +229,7 @@ public class MouseInput {
         }
     }
 
+    public static MouseInput get() {
+        return BackyardRocketry.getInstance().getMouseInput();
+    }
 }

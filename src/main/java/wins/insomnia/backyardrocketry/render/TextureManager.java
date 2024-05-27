@@ -14,6 +14,7 @@ public class TextureManager {
     private final Texture BLOCK_OUTLINE_TEXTURE;
     private final Texture CROSSHAIR_TEXTURE;
     public final Texture HOTBAR_TEXTURE;
+    public final Texture HOTBAR_SLOT_TEXTURE;
 
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
@@ -26,6 +27,7 @@ public class TextureManager {
         BLOCK_OUTLINE_TEXTURE = new Texture("block_outline.png");
         CROSSHAIR_TEXTURE = new Texture("gui/crosshair.png");
         HOTBAR_TEXTURE = new Texture("gui/hotbar.png");
+        HOTBAR_SLOT_TEXTURE = new Texture("gui/selected_hotbar_slot.png");
     }
 
     public Texture getBlockOutlineTexture() {
@@ -49,6 +51,8 @@ public class TextureManager {
         FONT_TEXTURE.clean();
         DEBUG_FONT_TEXTURE.clean();
         CROSSHAIR_TEXTURE.clean();
+        HOTBAR_TEXTURE.clean();
+        HOTBAR_SLOT_TEXTURE.clean();
 
     }
 
