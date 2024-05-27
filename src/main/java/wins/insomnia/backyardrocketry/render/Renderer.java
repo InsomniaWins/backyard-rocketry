@@ -179,18 +179,17 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // print debug information
 
-        String debugString = "Chunk Mesh Count: " + chunkMeshCount;
-        debugString = debugString + "\nOther Mesh Count: " + (totalMeshCount - chunkMeshCount);
-        debugString = debugString + '\n' + DebugInfo.getMemoryUsage();
-        debugString = debugString + '\n' + DebugInfo.getFramesPerSecond();
-        debugString = debugString + '\n' + DebugInfo.getFixedUpdatesPerSecond();
-        debugString = debugString + '\n' + DebugInfo.getRenderMode();
+        String debugString = "";
+        debugString = debugString + DebugInfo.getMemoryUsage();
+        debugString = debugString + "\n\n" + DebugInfo.getFramesPerSecond();
+        debugString = debugString + "\n\n" + DebugInfo.getFixedUpdatesPerSecond();
+        debugString = debugString + "\n\n" + DebugInfo.getRenderMode();
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
-            debugString = debugString + '\n' + DebugInfo.getPlayerBlockPosition(player);
-            debugString = debugString + '\n' + DebugInfo.getPlayerPosition(player);
-            debugString = debugString + '\n' + DebugInfo.getPlayerRotation(player);
-            debugString = debugString + '\n' + DebugInfo.getPlayerTargetBlockInfo(player);
+            debugString = debugString + "\n\n" + DebugInfo.getPlayerBlockPosition(player);
+            debugString = debugString + "\n\n" + DebugInfo.getPlayerPosition(player);
+            debugString = debugString + "\n\n" + DebugInfo.getPlayerRotation(player);
+            debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
         }
 
         drawText(debugString);

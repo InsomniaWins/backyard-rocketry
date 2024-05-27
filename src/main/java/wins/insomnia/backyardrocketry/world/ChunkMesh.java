@@ -6,7 +6,7 @@ import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.util.FancyToString;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
 
@@ -133,7 +133,8 @@ public class ChunkMesh extends Mesh {
 
                     if (chunk.getBlock(x,y,z) != Block.AIR) {
 
-                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z));
+                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z), x, y, z);
+
 
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 

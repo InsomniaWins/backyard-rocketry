@@ -9,6 +9,9 @@ import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.Updater;
+import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -51,8 +54,9 @@ public class Chunk implements IFixedUpdateListener {
 
         Renderer.get().addRenderable(CHUNK_MESH);
 
-
-        generateBlocks();
+        synchronized (this) {
+            generateBlocks();
+        }
 
         Updater.get().registerFixedUpdateListener(this);
     }
@@ -64,8 +68,11 @@ public class Chunk implements IFixedUpdateListener {
     }
 
     public void setBlock(int x, int y, int z, int block, boolean regenerateMesh) {
+        int blockState = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
+        BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
+        blockState = blockProperties.onPlace(blockState, this, toGlobalX(x), toGlobalY(y), toGlobalZ(z));
+        blocks[x][y][z] = blockState;
 
-        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
         shouldRegenerateMesh = regenerateMesh;
         if (shouldRegenerateMesh) {
             updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z);
@@ -256,14 +263,15 @@ public class Chunk implements IFixedUpdateListener {
                     }
 
                     if (globalBlockY == groundHeight) {
-                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.GRASS);
+
+                        setBlock(x, y, z, Block.GRASS, false);
                     } else if (globalBlockY > groundHeight - 4) {
-                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.DIRT);
+                        setBlock(x, y, z, Block.DIRT, false);
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {
-                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.COBBLESTONE);
+                            setBlock(x, y, z, Block.COBBLESTONE, false);
                         } else {
-                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.STONE);
+                            setBlock(x, y, z, Block.STONE, false);
                         }
                     }
 

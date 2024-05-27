@@ -1,10 +1,6 @@
 package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Vector3d;
-import org.joml.Vector3f;
-import wins.insomnia.backyardrocketry.world.Block;
-
-import java.util.List;
 
 public class BoundingBox {
 

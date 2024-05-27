@@ -2,7 +2,6 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.lwjgl.stb.STBImage;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.world.Block;
 
 import java.net.URL;
 import java.nio.ByteBuffer;

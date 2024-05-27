@@ -2,12 +2,10 @@ package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Math;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.*;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

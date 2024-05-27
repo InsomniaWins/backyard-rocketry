@@ -3,14 +3,14 @@ package wins.insomnia.backyardrocketry.render;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
-import wins.insomnia.backyardrocketry.world.Block;
+import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 
 public class BlockModelData {
@@ -63,6 +63,31 @@ public class BlockModelData {
         TARGET_BLOCK_OUTLINE_MESH.clean();
     }
 
+    public static BlockModelData getBlockModelFromBlockState(int blockState, int x, int y, int z) {
+
+        int block = BitHelper.getBlockIdFromBlockState(blockState);
+        BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
+        String blockModelName = blockProperties.getBlockModelName(blockState);
+
+        Object model = BLOCK_STATE_MODEL_MAP.get(block).get(blockModelName);
+
+
+        if (model instanceof ArrayList modelList) {
+
+            int randomPosNum = getRandomBlockNumberBasedOnBlockPosition(x, y, z);
+
+            int randomIndex = randomPosNum % modelList.size();
+            String modelName = (String) modelList.get(randomIndex);
+
+            return MODEL_MAP.get(modelName);
+        }
+
+        return MODEL_MAP.get(
+                (String) model
+        );
+
+    }
+
     public static BlockModelData getBlockModel(int block, int blockX, int blockY, int blockZ) {
 
         String currentBlockStateName = "default";
@@ -103,10 +128,6 @@ public class BlockModelData {
         return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
-    public static BlockModelData getBlockModelFromBlockState(int blockState) {
-        return getBlockModel(BitHelper.getBlockIdFromBlockState(blockState), 0);
-        //getRandomBlockNumberBasedOnBlockPosition(blockState.getX(), blockState.getY(), blockState.getZ())
-    }
 
     public static BlockModelData getBlockModelFromBlock(int block, int variant) {
         return getBlockModel(block, variant);
