@@ -280,9 +280,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         float[] textureCoordinates = new float[4];
         textureCoordinates[0] = textureX * texturePixelScale[0];
-        textureCoordinates[1] = textureY * texturePixelScale[1];
+        textureCoordinates[1] = -textureY * texturePixelScale[1];
         textureCoordinates[2] = (textureX + textureWidth) * texturePixelScale[0];
-        textureCoordinates[3] = (textureY + textureHeight) * texturePixelScale[1];
+        textureCoordinates[3] = -(textureY + textureHeight) * texturePixelScale[1];
 
         glBindBuffer(GL_ARRAY_BUFFER, GUI_MESH.getVbo());
         glBufferData(GL_ARRAY_BUFFER, new float[] {

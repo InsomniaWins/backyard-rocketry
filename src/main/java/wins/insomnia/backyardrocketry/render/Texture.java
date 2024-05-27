@@ -1,8 +1,15 @@
 package wins.insomnia.backyardrocketry.render;
 
+import de.matthiasmann.twl.utils.PNGDecoder;
 import org.lwjgl.stb.STBImage;
+
+import javax.imageio.ImageIO;
+import java.awt.image.*;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -37,30 +44,24 @@ public class Texture {
 
 
     public Texture(String textureName) {
+        PNGDecoder decoder = null;
+        ByteBuffer buffer = null;
 
-        URL url = Texture.class.getResource("/textures/" + textureName);
-        if (url == null) {
-            throw new RuntimeException("Could not locate texture resource: resources/textures/" + textureName);
-        }
+        try {
+            decoder = new PNGDecoder(Texture.class.getResourceAsStream("/textures/" + textureName));
 
-        String filePath = url.getPath();
+            buffer = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
+            decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+            buffer.flip();
 
-        ByteBuffer buffer;
-
-        int[] width = new int[1];
-        int[] height = new int[1];
-        int[] channels = new int[1];
-
-
-        // pass file path without the first character '/' because this doesn't work with '/' as the first char?????
-        STBImage.stbi_set_flip_vertically_on_load(true);
-        buffer = STBImage.stbi_load(filePath.substring(1), width, height, channels, 4);
-        if (buffer == null) {
-            throw new RuntimeException("Cannot load texture: \"" + textureName + "\" " + STBImage.stbi_failure_reason());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         textureIndex = glGenTextures();
+
         glBindTexture(GL_TEXTURE_2D, textureIndex);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -69,17 +70,16 @@ public class Texture {
 
         //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(), decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
         // if mipmaps should be loaded
-            //glGenerateMipmap(GL_TEXTURE_2D)
-
-        STBImage.stbi_image_free(buffer);
+        //glGenerateMipmap(GL_TEXTURE_2D)
 
         isClean = false;
 
-        this.width = width[0];
-        this.height = height[0];
+        this.width = decoder.getWidth();
+        this.height = decoder.getHeight();
+
     }
 
     public int getWidth() {

@@ -128,8 +128,8 @@ public class FontMesh {
             // calculate texture coordinates for vbo
             float rightU = characterUvs[0] + CHARACTER_UV_WIDTH;
             float leftU = characterUvs[0];
-            float topV = -characterUvs[1];
-            float bottomV = topV - CHARACTER_UV_HEIGHT;
+            float topV = characterUvs[1];
+            float bottomV = topV + CHARACTER_UV_HEIGHT;
 
             // top right vertex
             vertexArray[vertexIndex] = pixelAspect * 7 + characterOffsetAmounts[0]; // x

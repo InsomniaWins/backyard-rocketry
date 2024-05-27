@@ -106,7 +106,7 @@ public class BlockModelData {
 
                     } else {
 
-                        coordinateValue -= TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1] + TextureManager.BLOCK_SCALE_ON_ATLAS;
+                        coordinateValue -= TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];// + TextureManager.BLOCK_SCALE_ON_ATLAS;
 
                     }
 
