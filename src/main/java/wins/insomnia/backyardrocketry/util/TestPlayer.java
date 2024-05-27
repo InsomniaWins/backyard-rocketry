@@ -44,6 +44,18 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
 
 
+    private int[] hotbarItems = {
+            Block.GRASS,
+            Block.COBBLESTONE,
+            Block.DIRT,
+            Block.STONE,
+            Block.AIR,
+            Block.AIR,
+            Block.AIR,
+            Block.AIR,
+            Block.AIR,
+            Block.AIR
+    };
     private int currentHotbarSlot = 0;
     private boolean onGround = false;
     private float cameraInterpolationFactor = 0f;
@@ -327,7 +339,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
-                placeBlock(Block.STONE);
+                placeBlock(getHotbarSlotContents(currentHotbarSlot));
                 blockInteractionTimer = 5;
 
             }
@@ -496,5 +508,9 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     public void setCurrentHotbarSlot(int currentHotbarSlot) {
         this.currentHotbarSlot = currentHotbarSlot;
+    }
+
+    public int getHotbarSlotContents(int slotIndex) {
+        return hotbarItems[slotIndex];
     }
 }

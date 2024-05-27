@@ -2,6 +2,7 @@
 	"parent": "block_all",
 	"textures": {
 		"particle": "cobblestone",
-		"all": "cobblestone"
+		"all": "cobblestone",
+		"icon": "cobblestone"
 	}
 }

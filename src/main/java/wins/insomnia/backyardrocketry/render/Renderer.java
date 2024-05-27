@@ -226,7 +226,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
         }
 
-        drawText(debugString, 0,  0);
+        drawText(debugString, 0, 0, 2);
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
 
     }
@@ -269,7 +269,95 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
 
+    public void drawGuiTextureClipped(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight, int textureX, int textureY, int textureWidth, int textureHeight) {
+
+
+        // get clipped texture Uv's
+        float[] texturePixelScale = {
+                1.0f / texture.getWidth(),
+                1.0f / texture.getHeight()
+        };
+
+        float[] textureCoordinates = new float[4];
+        textureCoordinates[0] = textureX * texturePixelScale[0];
+        textureCoordinates[1] = textureY * texturePixelScale[1];
+        textureCoordinates[2] = (textureX + textureWidth) * texturePixelScale[0];
+        textureCoordinates[3] = (textureY + textureHeight) * texturePixelScale[1];
+
+        glBindBuffer(GL_ARRAY_BUFFER, GUI_MESH.getVbo());
+        glBufferData(GL_ARRAY_BUFFER, new float[] {
+                0f, 0f, textureCoordinates[0], -textureCoordinates[1],
+                1f, 0f, textureCoordinates[2], -textureCoordinates[1],
+                0f, 1f, textureCoordinates[0], -textureCoordinates[3],
+                1f, 1f, textureCoordinates[2], -textureCoordinates[3]
+        }, GL_DYNAMIC_DRAW);
+
+
+        int[] previousTexture = new int[1];
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
+
+        guiShaderProgram.use();
+        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
+        glActiveTexture(GL_TEXTURE0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        modelMatrix.identity();
+
+        guiShaderProgram.setUniform("vs_textureSizeX", guiWidth);
+        guiShaderProgram.setUniform("vs_textureSizeY", guiHeight);
+        guiShaderProgram.setUniform("vs_posX", guiX);
+        guiShaderProgram.setUniform("vs_posY", guiY);
+        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
+                0f, // left
+                BackyardRocketry.getInstance().getWindow().getWidth(), // right
+                0f, // bottom
+                BackyardRocketry.getInstance().getWindow().getHeight(), // top
+                0.01f, // z-near
+                1f // z-far
+        ));
+
+
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+        // TODO: Add back-face culling to text rendering!!!
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+
+        // draw mesh
+        glBindVertexArray(GUI_MESH.getVao());
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glDrawElements(GL_TRIANGLES, GUI_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
+
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
+
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
+
+        shaderProgram.use();
+
+
+    }
+
     public void drawGuiTexture(Texture texture, int guiX, int guiY) {
+
+        glBindBuffer(GL_ARRAY_BUFFER, GUI_MESH.getVbo());
+        glBufferData(GL_ARRAY_BUFFER, new float[] {
+                0f, 0f, 0f, 0f,
+                1f, 0f, 1f, 0f,
+                0f, 1f, 0f, 1f,
+                1f, 1f, 1f, 1f
+        }, GL_DYNAMIC_DRAW);
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
@@ -327,11 +415,21 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
     public void drawText(String text, int guiX, int guiY) {
+        drawText(text, guiX, guiY, guiScale);
+    }
+
+    public void drawText(String text, int guiX, int guiY, int scale) {
+
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
 
         guiShaderProgram.use();
+
+        if (scale != guiScale) {
+            guiShaderProgram.setUniform("vs_scale", scale);
+        }
+
         glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getDebugFontTexture().getTextureHandle());
         glActiveTexture(GL_TEXTURE0);
 
@@ -379,6 +477,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
+
+        if (scale != guiScale) {
+            guiShaderProgram.setUniform("vs_scale", this.guiScale);
+        }
 
         shaderProgram.use();
     }

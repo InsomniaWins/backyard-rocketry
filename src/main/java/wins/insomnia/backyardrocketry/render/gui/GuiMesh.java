@@ -68,6 +68,10 @@ public class GuiMesh implements IRenderable, IMesh {
 		return vao;
 	}
 
+	public int getVbo() {
+		return vbo;
+	}
+
 	@Override
 	public boolean shouldRender() {
 		return true;

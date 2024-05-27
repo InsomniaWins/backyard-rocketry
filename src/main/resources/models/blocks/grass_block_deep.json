@@ -3,7 +3,8 @@
 		"particle": "grass_block_deep_side",
 		"top": "grass_block_top",
 		"side": "grass_block_deep_side",
-		"bottom": "dirt"
+		"bottom": "dirt",
+		"icon": "grass_block_side"
 	},
 	"faces": {
 		"top": {

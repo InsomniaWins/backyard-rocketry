@@ -1,6 +1,7 @@
 {
   "textures": {
     "particle": "stone",
+    "icon": "stone",
     "all": "stone"
   },
   "faces": {

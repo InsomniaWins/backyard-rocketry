@@ -55,30 +55,14 @@ public class BlockModelData {
     public static BlockModelData getBlockModel(int block, int blockX, int blockY, int blockZ) {
 
         String currentBlockStateName = "default";
-        Object model = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
+        HashMap<String, Object> blockStateData = BLOCK_STATE_MODEL_MAP.get(block);
+
+        if (blockStateData == null) return null;
+
+        Object model = blockStateData.get(currentBlockStateName);
 
         if (model instanceof ArrayList modelList) {
             int randomIndex = getRandomBlockNumberBasedOnBlockPosition(blockX, blockY, blockZ) % modelList.size();
-            String modelName = (String) modelList.get(randomIndex);
-            return MODEL_MAP.get(modelName);
-        }
-
-        return MODEL_MAP.get(
-                (String) model
-        );
-    }
-
-    public static BlockModelData getBlockModel(int block) {
-        return getBlockModel(block, 0);
-    }
-
-    public static BlockModelData getBlockModel(int block, int blockModelIndex) {
-
-        String currentBlockStateName = "default";
-        Object model = BLOCK_STATE_MODEL_MAP.get(block).get(currentBlockStateName);
-
-        if (model instanceof ArrayList modelList) {
-            int randomIndex = blockModelIndex % modelList.size();
             String modelName = (String) modelList.get(randomIndex);
             return MODEL_MAP.get(modelName);
         }
@@ -92,10 +76,6 @@ public class BlockModelData {
         return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
-
-    public static BlockModelData getBlockModelFromBlock(int block, int variant) {
-        return getBlockModel(block, variant);
-    }
 
 
     private static void fixModelUvs(BlockModelData blockModelData) {
@@ -291,4 +271,7 @@ public class BlockModelData {
         this.parent = parent;
     }
 
+    public static HashMap<Integer, HashMap<String, Object>> getBlockStateModelMap() {
+        return BLOCK_STATE_MODEL_MAP;
+    }
 }
