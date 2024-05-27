@@ -143,8 +143,6 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             getPosition().z += VELOCITY.z;
         }
-
-        WORLD.updateChunksAroundPlayer(this);
     }
 
     public boolean isOnGround() {
@@ -188,78 +186,84 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         moveAmount.y = (upDirection - downDirection);
         moveAmount.mul(moveSpeed);
 
-        VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
-        VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
 
-        if (hasGravity) {
-            VELOCITY.add(0f, GRAVITY, 0f);
+        if (!getWorld().isPlayerInUnloadedChunk(this)) {
 
-            if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
-                VELOCITY.y = JUMP_SPEED;
-            }
-        } else {
-            float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
-            VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
-        }
+            VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
+            VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
 
-        // apply translation and rotation
-        PREVIOUS_TRANSFORM.set(TRANSFORM);
-        move();
-        updateBoundingBox();
+            if (hasGravity) {
+                VELOCITY.add(0f, GRAVITY, 0f);
 
-        if (keyboardInput.isKeyJustPressed(GLFW_KEY_F2)) {
-            lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
-        }
-
-        if (lockMouseToCenterForCameraRotation) {
-            float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
-            float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
-
-            mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
-
-            TRANSFORM.rotateX(verticalRotateAmount);
-            TRANSFORM.rotateY(horizontalRotateAmount);
-
-            // clamp vertical rotation
-            TRANSFORM.getRotation().x = Math.max(TRANSFORM.getRotation().x, (float) -Math.PI * 0.5f);
-            TRANSFORM.getRotation().x = Math.min(TRANSFORM.getRotation().x, (float) Math.PI * 0.5f);
-        }
-
-        cameraInterpolationFactor = 0f;
-
-        Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
-        Vector3d rayDirection = new Vector3d(0, 0, -1)
-                .rotateX(-TRANSFORM.getRotation().x)
-                .rotateY(-TRANSFORM.getRotation().y);
-        int rayLength = 7;
-
-
-        targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
-
-        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
-            blockInteractionTimer = 0;
-        }
-        if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-            blockInteractionTimer = 0;
-        }
-
-        if (blockInteractionTimer == 0) {
-            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-
-                breakBlock();
-                blockInteractionTimer = 5;
-
+                if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
+                    VELOCITY.y = JUMP_SPEED;
+                }
+            } else {
+                float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
+                VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
             }
 
-            if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+            // apply translation and rotation
+            PREVIOUS_TRANSFORM.set(TRANSFORM);
+            move();
+            updateBoundingBox();
 
-                placeBlock(Block.GRASS);
-                blockInteractionTimer = 5;
-
+            if (keyboardInput.isKeyJustPressed(GLFW_KEY_F2)) {
+                lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
             }
-        } else {
-            blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
+
+            if (lockMouseToCenterForCameraRotation) {
+                float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
+                float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
+
+                mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
+
+                TRANSFORM.rotateX(verticalRotateAmount);
+                TRANSFORM.rotateY(horizontalRotateAmount);
+
+                // clamp vertical rotation
+                TRANSFORM.getRotation().x = Math.max(TRANSFORM.getRotation().x, (float) -Math.PI * 0.5f);
+                TRANSFORM.getRotation().x = Math.min(TRANSFORM.getRotation().x, (float) Math.PI * 0.5f);
+            }
+
+            cameraInterpolationFactor = 0f;
+
+            Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
+            Vector3d rayDirection = new Vector3d(0, 0, -1)
+                    .rotateX(-TRANSFORM.getRotation().x)
+                    .rotateY(-TRANSFORM.getRotation().y);
+            int rayLength = 7;
+
+
+            targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+
+            if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
+                blockInteractionTimer = 0;
+            }
+            if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+                blockInteractionTimer = 0;
+            }
+
+            if (blockInteractionTimer == 0) {
+                if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+                    breakBlock();
+                    blockInteractionTimer = 5;
+
+                }
+
+                if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+
+                    placeBlock(Block.STONE);
+                    blockInteractionTimer = 5;
+
+                }
+            } else {
+                blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
+            }
         }
+
+        WORLD.updateChunksAroundPlayer(this);
     }
 
     public BlockRaycastResult getTargetBlock() {

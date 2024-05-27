@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.render;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
@@ -15,52 +16,15 @@ import java.util.Map;
 
 public class BlockModelData {
 
-    private HashMap<String, String> textures;
-    private HashMap<String, Object> faces;
+    private HashMap<String, String> textures = null;
+    private HashMap<String, Object> faces = null;
+    private String parent = null;
 
 
     private static final HashMap<Integer, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
 
-    private static final Mesh TARGET_BLOCK_OUTLINE_MESH = new Mesh(
-            new float[] {
-                    1.02f, 1.02f, 1.02f, 1.0f, 0.0f,
-                    1.02f, 1.02f, -0.02f, 1.0f, 1.0f,
-                    1.02f, -0.02f, 1.02f, 1.0f, 0.0f,
-                    1.02f, -0.02f, -0.02f, 1.0f, 1.0f,
-                    -0.02f, 1.02f, 1.02f, 1.0f, 0.0f,
-                    -0.02f, 1.02f, -0.02f, 1.0f, 1.0f,
-                    -0.02f, -0.02f, 1.02f, 1.0f, 0.0f,
-                    -0.02f, -0.02f, -0.02f, 1.0f, 1.0f
-            },
-            new int[] {
-                    4, 0,
-                    4, 5,
-                    5, 1,
-                    0, 1,
-
-                    6, 2,
-                    6, 7,
-                    7, 3,
-                    2, 3,
-
-                    4, 6,
-
-                    0, 2,
-
-                    1, 3,
-
-                    5, 7
-
-            }
-    );
-
-    public static Mesh getTargetBlockOutlineMesh() {
-        return TARGET_BLOCK_OUTLINE_MESH;
-    }
-
     public static void clean() {
-        TARGET_BLOCK_OUTLINE_MESH.clean();
     }
 
     public static BlockModelData getBlockModelFromBlockState(int blockState, int x, int y, int z) {
@@ -70,7 +34,7 @@ public class BlockModelData {
         String blockModelName = blockProperties.getBlockModelName(blockState);
 
         Object model = BLOCK_STATE_MODEL_MAP.get(block).get(blockModelName);
-
+        if (model == null) model = BLOCK_STATE_MODEL_MAP.get(block).get("default");
 
         if (model instanceof ArrayList modelList) {
 
@@ -136,7 +100,7 @@ public class BlockModelData {
 
     private static void fixModelUvs(BlockModelData blockModelData) {
 
-        int[] atlasCoordinates = new int[2];
+        int[] atlasCoordinates;
 
         for (Map.Entry<String, Object> faceEntry : blockModelData.getFaces().entrySet()) {
             HashMap<String, Object> faceData = (HashMap<String, Object>) faceEntry.getValue();
@@ -176,20 +140,64 @@ public class BlockModelData {
 
     }
 
-    private static void loadBlockModel(ObjectMapper mapper, String modelName) throws IOException {
+    private static BlockModelData loadBlockModelData(ObjectMapper mapper, String modelName) throws IOException {
 
+        // get path to model
         URL src = BlockModelData.class.getResource("/models/blocks/" + modelName + ".json");
 
+        // if could not find file
         if (src == null) {
 
             throw new RuntimeException("Failed to load block model: " + modelName);
 
         }
 
+        // load model
         BlockModelData blockModelData = mapper.readValue(src, BlockModelData.class);
+
+        if (blockModelData.parent != null) {
+
+            BlockModelData parentBlockModelData = loadBlockModelData(mapper, blockModelData.parent);
+
+
+            if (blockModelData.faces != null) {
+
+                parentBlockModelData.faces = blockModelData.faces;
+
+            }
+
+
+            if (blockModelData.textures != null) {
+
+                parentBlockModelData.textures = blockModelData.textures;
+
+            }
+
+
+            blockModelData = parentBlockModelData;
+
+        }
+
+        return blockModelData;
+    }
+
+    private static void loadBlockModel(ObjectMapper mapper, String modelName) throws IOException {
+
+        // if model already loaded, return
+        if (MODEL_MAP.get(modelName) != null) return;
+
+        // configure mapper
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // load block model
+        BlockModelData blockModelData = loadBlockModelData(mapper, modelName);
+        // fix Uvs
         fixModelUvs(blockModelData);
+
+        // put in model map
         MODEL_MAP.put(modelName, blockModelData);
 
+        // debug info
         System.out.println("Loaded block model: " + modelName);
     }
 
@@ -277,6 +285,10 @@ public class BlockModelData {
 
     public void setFaces(HashMap<String, Object> faces) {
         this.faces = faces;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 
 }

@@ -3,10 +3,8 @@ package wins.insomnia.backyardrocketry.world;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
-import wins.insomnia.backyardrocketry.util.IFixedUpdateListener;
-import wins.insomnia.backyardrocketry.util.IPlayer;
-import wins.insomnia.backyardrocketry.util.IUpdateListener;
-import wins.insomnia.backyardrocketry.util.Updater;
+import wins.insomnia.backyardrocketry.physics.Collision;
+import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
@@ -103,6 +101,13 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         }
 
     }
+
+    public boolean isPlayerInUnloadedChunk(TestPlayer player) {
+
+        List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(player.getBoundingBox(), true);
+
+		return chunksTouchingPlayer.contains(null);
+	}
 
     public void updateChunksAroundPlayer(IPlayer player) {
 

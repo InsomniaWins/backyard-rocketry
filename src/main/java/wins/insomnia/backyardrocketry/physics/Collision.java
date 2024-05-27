@@ -24,8 +24,7 @@ public class Collision {
 
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
 
-    public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox) {
-
+    public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
 
         List<Chunk> chunks = new ArrayList<>();
@@ -68,7 +67,9 @@ public class Collision {
 
                     Chunk chunk = world.getChunkAt(currentChunkPosition);
 
-                    if (chunk == null) continue;
+                    if (!includeUnloadedChunks) {
+                        if (chunk == null) continue;
+                    }
 
                     chunks.add(chunk);
 
@@ -77,6 +78,10 @@ public class Collision {
         }
 
         return chunks;
+    }
+
+    public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox) {
+        return getChunksTouchingBoundingBox(boundingBox, false);
     }
 
 

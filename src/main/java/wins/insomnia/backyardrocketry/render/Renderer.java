@@ -6,6 +6,7 @@ import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.ArrayList;
 
@@ -164,20 +165,21 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
                 shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
-                //glLineWidth(4f);
-                //glPolygonMode(GL_FRONT, GL_LINE);
+                glDisable(GL_DEPTH_TEST);
 
                 glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockOutlineTexture().getTextureHandle());
-                BlockModelData.getTargetBlockOutlineMesh().render(GL_LINES);
+
+                TargetBlockOutlineMesh.get(raycastResult.getFace()).render(GL_LINES);
+
+                glEnable(GL_DEPTH_TEST);
 
                 activateRenderMode();
-                //glLineWidth(1f);
             }
 
         }
 
 
-        // print debug information
+        // draw debug information
 
         String debugString = "";
         debugString = debugString + DebugInfo.getMemoryUsage();
