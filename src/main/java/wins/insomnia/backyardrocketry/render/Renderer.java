@@ -3,10 +3,9 @@ package wins.insomnia.backyardrocketry.render;
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
+import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.world.ChunkMesh;
-import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.ArrayList;
 
@@ -21,15 +20,17 @@ import static org.lwjgl.opengl.GL30.*;
 public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
     private ShaderProgram shaderProgram;
-    private ShaderProgram textShaderProgram;
+    private ShaderProgram guiShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
+    private final GuiMesh GUI_MESH;
     private final ArrayList<IRenderable> RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
     private Matrix4f modelMatrix;
     private int renderMode = 0;
+    private int guiScale = 1;
 
     public Renderer() {
         RENDER_LIST = new ArrayList<>();
@@ -44,7 +45,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glCullFace(GL_BACK);
 
         shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
-        textShaderProgram = new ShaderProgram("text.vert", "text.frag");
+        guiShaderProgram = new ShaderProgram("gui.vert", "gui.frag");
+        setGuiScale(2);
 
         modelMatrix = new Matrix4f().identity();
 
@@ -52,6 +54,18 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         Updater.get().registerFixedUpdateListener(this);
 
         FONT_MESH = new FontMesh();
+        GUI_MESH = new GuiMesh(
+                new float[] {
+                        0f, 0f, 0f, 0f,
+                        1f, 0f, 1f, 0f,
+                        0f, 1f, 0f, 1f,
+                        1f, 1f, 1f, 1f
+                },
+                new int[] {
+                        0, 1, 2,
+                        1, 2, 3
+                }
+        );
 
         glClearColor(0.25882352941176473f, 0.6901960784313725f, 1f, 1f);
 
@@ -131,21 +145,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         modelMatrix.identity();
 
-        int chunkMeshCount = 0;
-        int totalMeshCount = 0;
-
         // render renderables
         synchronized (this) {
             for (IRenderable renderable : RENDER_LIST) {
                 if (!renderable.shouldRender()) continue;
 
-                if (renderable instanceof ChunkMesh) {
-                    chunkMeshCount++;
-                }
-
                 shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
                 renderable.render();
-                totalMeshCount++;
+
             }
         }
 
@@ -194,23 +201,112 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
         }
 
-        drawText(debugString);
+        drawText(debugString, 0,  0);
+        drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
+    }
+
+    public void setGuiScale(int guiScale) {
+        this.guiScale = guiScale;
+
+        int[] previousShaderHandle = new int[1];
+        glGetIntegerv(GL_CURRENT_PROGRAM, previousShaderHandle);
+
+        if (previousShaderHandle[0] != guiShaderProgram.getProgramHandle()) {
+            guiShaderProgram.use();
+        }
+
+        guiShaderProgram.setUniform("vs_scale", this.guiScale);
+
+        if (previousShaderHandle[0] != guiShaderProgram.getProgramHandle()) {
+            glUseProgram(previousShaderHandle[0]);
+        }
+    }
+
+    public int getCenterAnchorX() {
+        return getRightAnchor() / 2;
+    }
+
+    public int getCenterAnchorY() {
+        return getBottomAnchor() / 2;
+    }
+
+    public int getBottomAnchor() {
+        return Window.get().getHeight() / guiScale;
+    }
+
+    public int getRightAnchor() {
+        return Window.get().getWidth() / guiScale;
     }
 
     public int getRenderMode() {
         return renderMode;
     }
 
-    public void drawText(String text) {
+
+    public void drawGuiTexture(Texture texture, int guiX, int guiY) {
 
         int[] previousTexture = new int[1];
         glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
 
 
+        guiShaderProgram.use();
+        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
+        glActiveTexture(GL_TEXTURE0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        modelMatrix.identity();
+
+        guiShaderProgram.setUniform("vs_textureSizeX", texture.getWidth());
+        guiShaderProgram.setUniform("vs_textureSizeY", texture.getHeight());
+        guiShaderProgram.setUniform("vs_posX", guiX);
+        guiShaderProgram.setUniform("vs_posY", guiY);
+        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
+                0f, // left
+                BackyardRocketry.getInstance().getWindow().getWidth(), // right
+                0f, // bottom
+                BackyardRocketry.getInstance().getWindow().getHeight(), // top
+                0.01f, // z-near
+                1f // z-far
+        ));
 
 
 
-        textShaderProgram.use();
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+        // TODO: Add back-face culling to text rendering!!!
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+
+        // draw mesh
+        glBindVertexArray(GUI_MESH.getVao());
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glDrawElements(GL_TRIANGLES, GUI_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
+
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
+
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
+
+    }
+
+
+    public void drawText(String text, int guiX, int guiY) {
+
+        int[] previousTexture = new int[1];
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
+
+
+        guiShaderProgram.use();
         glBindTexture(GL_TEXTURE_2D, TEXTURE_MANAGER.getDebugFontTexture().getTextureHandle());
         glActiveTexture(GL_TEXTURE0);
 
@@ -218,8 +314,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         modelMatrix.identity();
 
-        textShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        textShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
+        guiShaderProgram.setUniform("vs_textureSizeX", 1);
+        guiShaderProgram.setUniform("vs_textureSizeY", 1);
+        guiShaderProgram.setUniform("vs_posX", guiX);
+        guiShaderProgram.setUniform("vs_posY", guiY);
+        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
                 0f, // left
                 BackyardRocketry.getInstance().getWindow().getWidth(), // right
                 0f, // bottom
@@ -290,6 +390,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         FONT_MESH.clean();
         TEXTURE_MANAGER.clean();
+        GUI_MESH.clean();
         glDeleteProgram(shaderProgram.getProgramHandle());
 
     }

@@ -12,6 +12,8 @@ public class TextureManager {
     private final Texture DEBUG_FONT_TEXTURE;
     private final Texture BLOCK_ATLAS;
     private final Texture BLOCK_OUTLINE_TEXTURE;
+    private final Texture CROSSHAIR_TEXTURE;
+
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
 
@@ -21,6 +23,7 @@ public class TextureManager {
         DEBUG_FONT_TEXTURE = new Texture("debug_font.png");
         BLOCK_ATLAS = new Texture("block_atlas.png");
         BLOCK_OUTLINE_TEXTURE = new Texture("block_outline.png");
+        CROSSHAIR_TEXTURE = new Texture("gui/crosshair.png");
     }
 
     public Texture getBlockOutlineTexture() {
@@ -31,6 +34,10 @@ public class TextureManager {
         return FONT_TEXTURE;
     }
 
+    public Texture getCrosshairTexture() {
+        return CROSSHAIR_TEXTURE;
+    }
+
     public Texture getDebugFontTexture() {
         return DEBUG_FONT_TEXTURE;
     }
@@ -39,6 +46,7 @@ public class TextureManager {
 
         FONT_TEXTURE.clean();
         DEBUG_FONT_TEXTURE.clean();
+        CROSSHAIR_TEXTURE.clean();
 
     }
 

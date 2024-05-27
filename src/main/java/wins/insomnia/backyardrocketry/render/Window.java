@@ -58,4 +58,8 @@ public class Window {
         return new int[] {width, height};
     }
 
+    public static Window get() {
+        return BackyardRocketry.getInstance().getWindow();
+    }
+
 }

@@ -1,16 +1,12 @@
 package wins.insomnia.backyardrocketry.render;
 
-import org.joml.Matrix4f;
-import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.util.IUpdateListener;
-import wins.insomnia.backyardrocketry.util.Transform;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Mesh implements IRenderable {
+public class Mesh implements IRenderable, IMesh {
 
     protected boolean isClean;
     protected int vao;

@@ -10,6 +10,8 @@ public class Texture {
 
     private int textureIndex;
     private boolean isClean;
+    private int width;
+    private int height;
 
 
     public Texture(ByteBuffer textureData, int width, int height) {
@@ -75,6 +77,17 @@ public class Texture {
         STBImage.stbi_image_free(buffer);
 
         isClean = false;
+
+        this.width = width[0];
+        this.height = height[0];
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public boolean isClean() {

@@ -39,6 +39,8 @@ public class ShaderProgram {
         glUniform1f(glGetUniformLocation(shaderProgramHandle, uniformName), value);
     }
 
+
+
     private static String loadShaderSource(String sourcePath) {
 
         try {

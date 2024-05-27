@@ -73,119 +73,6 @@ public class FontMesh {
 
     }
 
-    @Deprecated
-    private void oldUpdateMesh() {
-
-
-        float pixelAspect = 0.015f;
-
-        int currentLine = 0;
-        int textLength = text.length();
-
-        float[] vertexArray = new float[textLength * 20];
-        int[] indexArray = new int[textLength * 6];
-
-        float[] characterOffsetAmounts = {
-                0f,
-                0f,
-                0f,
-        };
-
-        for (int i = 0; i < textLength; i++) {
-
-            char character = text.charAt(i);
-
-            if (character == '\n') {
-                currentLine++;
-                characterOffsetAmounts[1] = -currentLine * pixelAspect * CHARACTER_SIZE[1] * 2;
-                characterOffsetAmounts[0] = 0f;
-            }
-
-            int vertexIndex = i * 20;
-            int indexIndex = i * 6;
-
-            float[] characterUvs = CHARACTER_LOCATIONS.get(character);
-            if (characterUvs == null) {
-                characterUvs = CHARACTER_LOCATIONS.get(' ');
-            }
-
-
-            float rightU = characterUvs[0] + CHARACTER_UV_WIDTH;
-            float leftU = characterUvs[0];
-            float topV = -characterUvs[1];
-            float bottomV = topV - CHARACTER_UV_HEIGHT;
-
-            // top right vertex
-            vertexArray[vertexIndex] = pixelAspect * 7 + characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = pixelAspect * 12 + characterOffsetAmounts[1]; // y
-            vertexArray[vertexIndex + 2] = characterOffsetAmounts[2]; // z
-            vertexArray[vertexIndex + 3] = rightU; // u
-            vertexArray[vertexIndex + 4] = topV; // v
-
-            vertexIndex += 5;
-
-            // bottom right vertex
-            vertexArray[vertexIndex] = pixelAspect * 7 + characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = -pixelAspect * 12 + characterOffsetAmounts[1]; // y
-            vertexArray[vertexIndex + 2] = characterOffsetAmounts[2]; // z
-            vertexArray[vertexIndex + 3] = rightU; // u
-            vertexArray[vertexIndex + 4] = bottomV; // v
-
-            vertexIndex += 5;
-
-            // bottom left vertex
-            vertexArray[vertexIndex] = -pixelAspect * 7 + characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = -pixelAspect * 12 + characterOffsetAmounts[1]; // y
-            vertexArray[vertexIndex + 2] = characterOffsetAmounts[2]; // z
-            vertexArray[vertexIndex + 3] = leftU; // u
-            vertexArray[vertexIndex + 4] = bottomV; // v
-
-            vertexIndex += 5;
-
-            // top left vertex
-            vertexArray[vertexIndex] = -pixelAspect * 7 + characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = pixelAspect * 12 + characterOffsetAmounts[1]; // y
-            vertexArray[vertexIndex + 2] = characterOffsetAmounts[2]; // z
-            vertexArray[vertexIndex + 3] = leftU; // u
-            vertexArray[vertexIndex + 4] = topV; // v
-
-
-
-            // indices
-
-            indexArray[indexIndex] = 4 * i; // top right
-            indexArray[indexIndex + 1] = 1 + 4 * i; // bottom right
-            indexArray[indexIndex + 2] = 3 + 4 * i; // top left
-            indexArray[indexIndex + 3] = 1 + 4 * i; // bottom right
-            indexArray[indexIndex + 4] = 2 + 4 * i; // bottom left
-            indexArray[indexIndex + 5] = 3 + 4 * i; // top left
-
-
-            characterOffsetAmounts[0] += pixelAspect * CHARACTER_SIZE[0] * 2;
-        }
-
-        glBindVertexArray(VAO);
-
-        glDeleteBuffers(vbo);
-        glDeleteBuffers(ebo);
-
-        vbo = glGenBuffers();
-        ebo = glGenBuffers();
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-
-        indexCount = indexArray.length;
-
-
-    }
-
     public void setText(String text) {
         this.text = text;
         updateMesh();
@@ -204,7 +91,7 @@ public class FontMesh {
 
     private void updateMesh() {
 
-        float pixelAspect = 2f;
+        float pixelAspect = 1f;
         int currentLine = 0;
         int textLength = text.length();
         int specialCharacterCount = getSpecialCharacterCount(text);

@@ -65,6 +65,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         BOUNDING_BOX = new BoundingBox();
         updateBoundingBox();
 
+
+
     }
 
     public Vector3d getPosition() {
