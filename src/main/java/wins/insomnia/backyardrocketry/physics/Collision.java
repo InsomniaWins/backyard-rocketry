@@ -22,6 +22,20 @@ public class Collision {
 
     }
 
+    public static boolean isBlockInWorldBorder(int x, int y, int z) {
+
+        if (x < -1) return false;
+        if (x > World.get().getSizeX()-1) return false;
+
+        if (y < -1) return false;
+        if (y > World.get().getSizeY()-1) return false;
+
+        if (z < -1) return false;
+        if (z > World.get().getSizeZ()-1) return false;
+
+        return true;
+    }
+
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
 
     public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
@@ -58,7 +72,6 @@ public class Collision {
 
 
         // loop through chunks to find loaded chunks colliding
-
         for (int x = 0; x <= xRange; x += Chunk.SIZE_X) {
             for (int y = 0; y <= yRange; y += Chunk.SIZE_Y) {
                 for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
@@ -68,8 +81,23 @@ public class Collision {
                     Chunk chunk = world.getChunkAt(currentChunkPosition);
 
                     if (!includeUnloadedChunks) {
-                        if (chunk == null) continue;
+
+                        if (chunk == null) {
+                            continue;
+                        }
+
+                    } else {
+
+                        // if we are including null chunks,
+                        // check to see if chunk is in world border
+                        // if it's not, then it will never exist, so continue and dont add null to list
+                        if (!isBlockInWorldBorder(currentChunkPosition.getX(), currentChunkPosition.getY(), currentChunkPosition.getZ())) {
+                            continue;
+                        }
+
                     }
+
+
 
                     chunks.add(chunk);
 
