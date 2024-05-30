@@ -131,10 +131,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         RENDER_LIST.sort((renderable1, renderable2) -> {
 
-            if (!renderable1.shouldRender() || !renderable2.shouldRender()) {
-                return 0;
-            }
-
 			float distance1 = 0.0f;
 			float distance2 = 0.0f;
 
@@ -157,7 +153,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 hasTransparency2 = mesh.hasTransparency();
             }
 
-            if (hasTransparency1 == hasTransparency2) {
+            if (!renderable1.shouldRender() || !renderable2.shouldRender()) {
+                return 0;
+            } else if (hasTransparency1 == hasTransparency2) {
                 return Float.compare(distance1, distance2);
             } else if (hasTransparency1) {
                 return 1;

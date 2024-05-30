@@ -51,7 +51,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             Block.STONE,
             Block.LOG,
             Block.LEAVES,
-            Block.AIR,
+            Block.WOODEN_PLANKS,
             Block.AIR,
             Block.AIR,
             Block.AIR

@@ -8,10 +8,12 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 public class BlockModelData {
@@ -221,31 +223,55 @@ public class BlockModelData {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            loadBlockModel(mapper, "grass_block");
-            loadBlockModel(mapper, "grass_block_deep");
-            loadBlockModel(mapper, "cobblestone");
-            loadBlockModel(mapper, "dirt");
-            loadBlockModel(mapper, "stone");
-            loadBlockModel(mapper, "log");
-            loadBlockModel(mapper, "leaves");
+
+            URI uri = BlockModelData.class.getResource("/models/blocks/").toURI();
+
+            Path myPath;
+            if (uri.getScheme().equals("jar")) {
+                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                myPath = fileSystem.getPath("/models/blocks/");
+                fileSystem.close();
+            } else {
+                myPath = Paths.get(uri);
+            }
+
+            Stream<Path> walk = Files.walk(myPath, 1);
+            for (Iterator<Path> it = walk.iterator(); it.hasNext();){
+
+                String fileName = it.next().getFileName().toString();
+
+                if (fileName.equals("blocks")) continue;
+
+                if (!fileName.endsWith(".json")) continue;
+
+                fileName = fileName.replace(".json", "");
+                loadBlockModel(mapper, fileName);
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 
 
-    }
+	}
 
     public static void loadBlockStates() {
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            loadBlockState(mapper, Block.GRASS, "grass_block");
-            loadBlockState(mapper, Block.COBBLESTONE, "cobblestone");
-            loadBlockState(mapper, Block.DIRT, "dirt");
-            loadBlockState(mapper, Block.STONE, "stone");
-            loadBlockState(mapper, Block.LOG, "log");
-            loadBlockState(mapper, Block.LEAVES, "leaves");
+
+            for (int block : Block.getBlocks()) {
+
+                String blockStateFileName = Block.getBlockStateName(block);
+
+                if (blockStateFileName == null) continue;
+
+                loadBlockState(mapper, block, blockStateFileName);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

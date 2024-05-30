@@ -58,7 +58,7 @@ public class TextureManager {
 
     public int[] getBlockAtlasCoordinates(String blockTextureName) {
         switch (blockTextureName) {
-            case "cobblestone.json" -> {
+            case "cobblestone" -> {
                 return new int[] {0, 0};
             }
             case "stone" -> {
@@ -82,9 +82,11 @@ public class TextureManager {
             case "log_side" -> {
                 return new int[] {1, 1};
             }
-
             case "leaves" -> {
                 return new int[] {2, 1};
+            }
+            case "wooden_planks" -> {
+                return new int[] {3, 1};
             }
         }
         return new int[] {0, 0};
