@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.world;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.BitHelper;
@@ -30,6 +31,7 @@ public class Chunk implements IFixedUpdateListener {
     private final int Z;
 
     private final ChunkMesh CHUNK_MESH;
+    private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
 
     private int[][][] blocks;
@@ -47,12 +49,14 @@ public class Chunk implements IFixedUpdateListener {
         );
 
         WORLD = world;
-        CHUNK_MESH = new ChunkMesh(this);
+        CHUNK_MESH = new ChunkMesh(this, false);
+        TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
 
         initializeBlocks();
 
 
         Renderer.get().addRenderable(CHUNK_MESH);
+        Renderer.get().addRenderable(TRANSPARENT_CHUNK_MESH);
 
         synchronized (this) {
             generateBlocks();
@@ -81,8 +85,8 @@ public class Chunk implements IFixedUpdateListener {
     }
 
     private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z) {
-        if (isBlockOnChunkBorder(x, y, z)) {
 
+        if (isBlockOnChunkBorder(x, y, z)) {
             for (Chunk chunk : getNeighborChunks()) {
                 if (chunk == null) continue;
 
@@ -214,14 +218,17 @@ public class Chunk implements IFixedUpdateListener {
 
     }
 
-
-    // MAKE SURE TO clean() BEFORE RUNNING!
     private void generateMesh() {
 
         CHUNK_MESH.generateMesh();
+        TRANSPARENT_CHUNK_MESH.generateMesh();
 
-        synchronized (this) {
+        if (Thread.currentThread() == Main.MAIN_THREAD) {
             shouldRegenerateMesh = false;
+        } else {
+            synchronized (this) {
+                shouldRegenerateMesh = false;
+            }
         }
 
     }
@@ -229,17 +236,29 @@ public class Chunk implements IFixedUpdateListener {
     public void clean() {
         shouldRegenerateMesh = false;
         CHUNK_MESH.unloaded = true;
+        TRANSPARENT_CHUNK_MESH.unloaded = true;
 
         if (!CHUNK_MESH.isClean()) {
             CHUNK_MESH.clean();
         }
 
+        if (!TRANSPARENT_CHUNK_MESH.isClean()) {
+            TRANSPARENT_CHUNK_MESH.clean();;
+        }
+
         Renderer.get().removeRenderable(CHUNK_MESH);
+        Renderer.get().removeRenderable(TRANSPARENT_CHUNK_MESH);
     }
 
     public void setShouldRegenerateMesh(boolean value) {
+        if (Thread.currentThread() == Main.MAIN_THREAD) {
+            shouldRegenerateMesh = value;
+            return;
+        }
 
-        shouldRegenerateMesh = value;
+        synchronized (this) {
+            shouldRegenerateMesh = value;
+        }
 
     }
 
@@ -255,7 +274,7 @@ public class Chunk implements IFixedUpdateListener {
                     int globalBlockY = y + Y;
                     int globalBlockZ = z + Z;
 
-                    int groundHeight = (int) (10 + 32 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
+                    int groundHeight = (int) (10 + 5 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
 
 
                     if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
@@ -279,12 +298,26 @@ public class Chunk implements IFixedUpdateListener {
             }
         }
 
-        shouldRegenerateMesh = true;
+
+        if (Thread.currentThread() == Main.MAIN_THREAD) {
+            shouldRegenerateMesh = true;
+
+            for (Chunk chunk : getNeighborChunks()) {
+                if (chunk == null) continue;
+                chunk.shouldRegenerateMesh = true;
+            }
+        } else {
+            synchronized (this) {
+
+                shouldRegenerateMesh = true;
 
 
-        for (Chunk chunk : getNeighborChunks()) {
-            if (chunk == null) continue;
-            chunk.shouldRegenerateMesh = true;
+                for (Chunk chunk : getNeighborChunks()) {
+                    if (chunk == null) continue;
+                    chunk.shouldRegenerateMesh = true;
+                }
+
+            }
         }
 
     }
@@ -322,26 +355,39 @@ public class Chunk implements IFixedUpdateListener {
         return CHUNK_MESH;
     }
 
+    public ChunkMesh getTransparentChunkMesh() {
+        return TRANSPARENT_CHUNK_MESH;
+    }
+
 
     @Override
     public void fixedUpdate() {
 
-        synchronized (this) {
-            if (shouldRegenerateMesh) {
+        if (shouldRegenerateMesh) {
 
-                shouldRegenerateMesh = false;
+            chunkMeshGenerationExecutorService.submit(this::generateMesh);
 
-                if (!CHUNK_MESH.isClean()) {
-                    CHUNK_MESH.clean();
-                }
-
-                chunkMeshGenerationExecutorService.submit(this::generateMesh);
-            }
-
-            if (CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
-                CHUNK_MESH.createOpenGLMeshData();
-            }
+            shouldRegenerateMesh = false;
         }
+
+        if (CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
+
+            if (!CHUNK_MESH.isClean()) {
+                CHUNK_MESH.clean();
+            }
+
+            CHUNK_MESH.createOpenGLMeshData();
+        }
+
+        if (TRANSPARENT_CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
+
+            if (!TRANSPARENT_CHUNK_MESH.isClean()) {
+                TRANSPARENT_CHUNK_MESH.clean();
+            }
+
+            TRANSPARENT_CHUNK_MESH.createOpenGLMeshData();
+        }
+
     }
 
     public BoundingBox getBoundingBox() {

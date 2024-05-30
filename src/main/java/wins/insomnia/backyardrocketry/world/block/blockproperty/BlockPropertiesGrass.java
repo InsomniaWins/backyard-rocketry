@@ -27,6 +27,11 @@ public class BlockPropertiesGrass extends BlockProperties {
 	}
 
 	@Override
+	public int onTick(int blockState, Chunk chunk, int x, int y, int z) {
+		return blockState;
+	}
+
+	@Override
 	public int getBlockState(int currentBlockState, Object... properties) {
 		if ((Boolean)properties[0]) {
 			currentBlockState = BitHelper.setBitToOne(currentBlockState, 0);

@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.Math;
+import org.joml.Vector2f;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.Collision;
@@ -8,6 +9,8 @@ import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,9 +23,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     public static int chunkLoadDistance = 10;
 
-    private final Map<ChunkPosition, Chunk> CHUNKS;
-    private final Queue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
-    private final Queue<ChunkPosition> LOAD_CHUNK_QUEUE;
+    private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
+    private final ConcurrentLinkedQueue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
+    private final ConcurrentLinkedQueue<ChunkPosition> LOAD_CHUNK_QUEUE;
     public static final Random RANDOM = new Random();
 
 
@@ -33,9 +36,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public World() {
 
         seed = RANDOM.nextLong();
-        CHUNKS = new HashMap<>();
-        LOAD_CHUNK_QUEUE = new LinkedList<>();
-        UNLOAD_CHUNK_QUEUE = new LinkedList<>();
+        CHUNKS = new ConcurrentHashMap<>();
+        LOAD_CHUNK_QUEUE = new ConcurrentLinkedQueue<>();
+        UNLOAD_CHUNK_QUEUE = new ConcurrentLinkedQueue<>();
         instance = this;
 
         Updater.get().registerFixedUpdateListener(this);
@@ -68,10 +71,8 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             // otherwise, generate
             Chunk chunk = generateChunk(chunkPosition);
 
-            synchronized (this) {
-                CHUNKS.put(chunkPosition, chunk);
-                LOAD_CHUNK_QUEUE.remove(chunkPosition);
-            }
+            CHUNKS.put(chunkPosition, chunk);
+            LOAD_CHUNK_QUEUE.remove(chunkPosition);
 
         });
     }
@@ -94,11 +95,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     private void unloadChunk(ChunkPosition chunkPosition) {
 
-        synchronized (this) {
-            Chunk chunk = CHUNKS.get(chunkPosition);
-            CHUNKS.remove(chunkPosition);
-            chunk.clean();
-        }
+        Chunk chunk = CHUNKS.get(chunkPosition);
+        CHUNKS.remove(chunkPosition);
+        chunk.clean();
 
     }
 
@@ -113,30 +112,27 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
 
-        synchronized (this) {
-            for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
-                if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
-                    // remove from positions around player: loading is not needed
-                    chunkPositionsAroundPlayer.remove(entry.getKey());
-                } else {
-                    // unload chunk
-                    queueUnloadChunk(entry.getKey());
-                }
+        for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
+            if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
+                // remove from positions around player: loading is not needed
+                chunkPositionsAroundPlayer.remove(entry.getKey());
+            } else {
+                // unload chunk
+                queueUnloadChunk(entry.getKey());
             }
+        }
 
-            // load chunks
-            for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-                if (!CHUNKS.containsKey(chunkPosition)) {
-                    loadChunk(chunkPosition);
-                }
+        // load chunks
+        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+            if (!CHUNKS.containsKey(chunkPosition)) {
+                loadChunk(chunkPosition);
             }
+        }
 
-            // unload chunks
-            while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
-                ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
-                unloadChunk(chunkPosition);
-            }
-
+        // unload chunks
+        while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
+            ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
+            unloadChunk(chunkPosition);
         }
 
     }
@@ -161,7 +157,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
                     int chunkZ = zIterator * 16 + originChunkPosition.getZ();
                     if (chunkZ < 0 || chunkZ >= getSizeZ()) continue;
 
-                    chunkPositions.add(new ChunkPosition(chunkX, chunkY, chunkZ));
+                    ChunkPosition chunkPosition = new ChunkPosition(chunkX, chunkY, chunkZ);
+
+                    chunkPositions.add(chunkPosition);
 
                 }
             }
@@ -173,9 +171,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
-
         Vector3i playerBlockPos = player.getBlockPosition();
-
         return getChunkPositionsBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, chunkLoadDistance);
     }
 

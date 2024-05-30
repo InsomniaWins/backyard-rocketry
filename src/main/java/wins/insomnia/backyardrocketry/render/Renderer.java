@@ -8,8 +8,13 @@ import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
@@ -27,7 +32,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
-    private final ConcurrentLinkedQueue<IRenderable> RENDER_LIST;
+    private final ConcurrentLinkedQueue<IRenderable> RENDER_QUEUE;
+    private final ConcurrentLinkedQueue<IRenderable> REMOVE_RENDER_QUEUE;
+    private final ArrayList<IRenderable> RENDER_LIST;
     private final ConcurrentLinkedQueue<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
@@ -37,7 +44,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private int guiScale = 1;
 
     public Renderer() {
-        RENDER_LIST = new ConcurrentLinkedQueue<>();
+        RENDER_QUEUE = new ConcurrentLinkedQueue<>();
+        REMOVE_RENDER_QUEUE = new ConcurrentLinkedQueue<>();
+        RENDER_LIST = new ArrayList<>();
         GUI_RENDER_LIST = new ConcurrentLinkedQueue<>();
         TEXTURE_MANAGER = new TextureManager();
 
@@ -113,8 +122,51 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.add((IGuiRenderable) renderable);
         } else {
-            RENDER_LIST.add(renderable);
+            RENDER_QUEUE.add(renderable);
         }
+
+    }
+
+    private void sortRenderList() {
+
+        RENDER_LIST.sort((renderable1, renderable2) -> {
+
+            if (!renderable1.shouldRender() || !renderable2.shouldRender()) {
+                return 0;
+            }
+
+			float distance1 = 0.0f;
+			float distance2 = 0.0f;
+
+			if (renderable1 instanceof IPositionOwner positionOwner1) {
+				distance1 = (float) positionOwner1.getPosition().distance(getCamera().getTransform().getPosition());
+			}
+
+			if (renderable2 instanceof IPositionOwner positionOwner2) {
+				distance2 = (float) positionOwner2.getPosition().distance(getCamera().getTransform().getPosition());
+			}
+
+            boolean hasTransparency1 = false;
+            boolean hasTransparency2 = false;
+
+            if (renderable1 instanceof Mesh mesh) {
+                hasTransparency1 = mesh.hasTransparency();
+            }
+
+            if (renderable2 instanceof Mesh mesh) {
+                hasTransparency2 = mesh.hasTransparency();
+            }
+
+            if (hasTransparency1 == hasTransparency2) {
+                return Float.compare(distance1, distance2);
+            } else if (hasTransparency1) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+
+		});
 
     }
 
@@ -123,7 +175,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
         } else {
-            RENDER_LIST.remove(renderable);
+
+			RENDER_QUEUE.remove(renderable);
+
+            REMOVE_RENDER_QUEUE.add(renderable);
         }
     }
 
@@ -155,10 +210,22 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         modelMatrix.identity();
 
         // render renderables
+        while (!RENDER_QUEUE.isEmpty()) {
+            RENDER_LIST.add(RENDER_QUEUE.poll());
+        }
+
+        while (!REMOVE_RENDER_QUEUE.isEmpty()) {
+            RENDER_LIST.remove(REMOVE_RENDER_QUEUE.poll());
+        }
+
+        sortRenderList();
+        glDisable(GL_BLEND);
         for (IRenderable renderable : RENDER_LIST) {
+
             if (!renderable.shouldRender()) continue;
 
             shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+
             renderable.render();
         }
 
@@ -312,7 +379,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
         // TODO: Add back-face culling to text rendering!!!

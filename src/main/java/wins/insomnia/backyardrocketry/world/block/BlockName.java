@@ -25,6 +25,14 @@ public class BlockName {
 				return "Cobblestone";
 			}
 
+			case Block.LOG -> {
+				return "Log";
+			}
+
+			case Block.LEAVES -> {
+				return "Leaves";
+			}
+
 			case Block.WORLD_BORDER -> {
 				return "";
 			}

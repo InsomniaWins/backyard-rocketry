@@ -35,6 +35,8 @@ public class Block {
     public static final int COBBLESTONE = 2;
     public static final int DIRT = 3;
     public static final int STONE = 4;
+    public static final int LOG = 5;
+    public static final int LEAVES = 6;
 
 
     public static final HashMap<Integer, BlockProperties> BLOCK_PROPERTIES_MAP = new HashMap<>();
@@ -77,5 +79,18 @@ public class Block {
 
     public static String getBlockName(int block) {
         return BlockName.get(block);
+    }
+
+    public static boolean isBlockTransparent(int block) {
+
+        switch (block) {
+            case AIR, LEAVES -> {
+                return true;
+            }
+			default -> {
+                return false;
+            }
+        }
+
     }
 }

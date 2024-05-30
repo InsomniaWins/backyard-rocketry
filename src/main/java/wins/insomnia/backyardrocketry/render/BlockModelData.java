@@ -106,7 +106,7 @@ public class BlockModelData {
 
                     } else {
 
-                        coordinateValue -= TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];// + TextureManager.BLOCK_SCALE_ON_ATLAS;
+                        coordinateValue += TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
 
                     }
 
@@ -226,6 +226,8 @@ public class BlockModelData {
             loadBlockModel(mapper, "cobblestone");
             loadBlockModel(mapper, "dirt");
             loadBlockModel(mapper, "stone");
+            loadBlockModel(mapper, "log");
+            loadBlockModel(mapper, "leaves");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -242,6 +244,8 @@ public class BlockModelData {
             loadBlockState(mapper, Block.COBBLESTONE, "cobblestone");
             loadBlockState(mapper, Block.DIRT, "dirt");
             loadBlockState(mapper, Block.STONE, "stone");
+            loadBlockState(mapper, Block.LOG, "log");
+            loadBlockState(mapper, Block.LEAVES, "leaves");
         } catch (IOException e) {
             e.printStackTrace();
         }

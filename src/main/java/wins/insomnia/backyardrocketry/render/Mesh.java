@@ -1,6 +1,8 @@
 package wins.insomnia.backyardrocketry.render;
 
 
+import wins.insomnia.backyardrocketry.Main;
+
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -44,7 +46,11 @@ public class Mesh implements IRenderable, IMesh {
         isClean = false;
     }
 
-    public synchronized void clean() {
+    public void clean() {
+
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            throw new RuntimeException("Tried cleaning openGL data on another thread!");
+        }
 
         isClean = true;
 
@@ -54,7 +60,14 @@ public class Mesh implements IRenderable, IMesh {
 
     }
 
-    public synchronized boolean isClean() {
+    public boolean isClean() {
+
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            synchronized (this) {
+                return isClean;
+            }
+        }
+
         return isClean;
     }
 
@@ -88,5 +101,10 @@ public class Mesh implements IRenderable, IMesh {
 
         glDrawElements(primitveRenderType, getIndexCount(), GL_UNSIGNED_INT, 0);
 
+    }
+
+    @Override
+    public boolean hasTransparency() {
+        return false;
     }
 }

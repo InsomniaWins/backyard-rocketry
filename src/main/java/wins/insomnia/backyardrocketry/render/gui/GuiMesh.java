@@ -95,4 +95,9 @@ public class GuiMesh implements IRenderable, IMesh {
 		glDrawElements(primitveRenderType, getIndexCount(), GL_UNSIGNED_INT, 0);
 
 	}
+
+	@Override
+	public boolean hasTransparency() {
+		return true;
+	}
 }

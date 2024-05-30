@@ -76,6 +76,16 @@ public class TextureManager {
             case "grass_block_deep_side" -> {
                 return new int[] {5, 0};
             }
+            case "log_top" -> {
+                return new int[] {0, 1};
+            }
+            case "log_side" -> {
+                return new int[] {1, 1};
+            }
+
+            case "leaves" -> {
+                return new int[] {2, 1};
+            }
         }
         return new int[] {0, 0};
     }

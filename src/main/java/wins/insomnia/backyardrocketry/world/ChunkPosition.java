@@ -1,5 +1,8 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+
 import java.util.Objects;
 
 public class ChunkPosition {
@@ -75,6 +78,10 @@ public class ChunkPosition {
 
     public int getZ() {
         return z;
+    }
+
+    public Vector3i getVector() {
+        return new Vector3i(x, y, z);
     }
 
     @Override
