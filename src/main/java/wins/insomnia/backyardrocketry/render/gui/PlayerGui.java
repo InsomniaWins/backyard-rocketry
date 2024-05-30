@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.render.gui;
 
+import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.TextureManager;
@@ -56,6 +57,48 @@ public class PlayerGui implements IGuiRenderable {
 					16, 16 // texture width, height
 			);
 
+		}
+
+
+		// render break progress
+		BlockRaycastResult targetBlock = player.getTargetBlock();
+		if (targetBlock != null && player.getBreakProgress() > 0) {
+
+			int progressBarScreenPositionY = renderer.getCenterAnchorY() + 15;
+
+			renderer.drawGuiTextureClipped(
+					textureManager.BREAK_PROGRESS_BAR_UNDER_TEXTURE,
+					renderer.getCenterAnchorX() - 33,
+					progressBarScreenPositionY,
+					66,
+					6,
+					0,
+					0,
+					66,
+					6
+			);
+
+			int targetBlockId = targetBlock.getChunk().getBlock(
+					targetBlock.getChunk().toLocalX(targetBlock.getBlockX()),
+					targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
+					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
+			);
+
+			float breakProgressRatio = player.getBreakProgress();
+			breakProgressRatio = breakProgressRatio / (float) Block.getBlockHealth(targetBlockId);
+			int breakProgressPixels = Math.round(62f * breakProgressRatio);
+
+			renderer.drawGuiTextureClipped(
+					textureManager.BREAK_PROGRESS_BAR_PROGRESS_TEXTURE,
+					renderer.getCenterAnchorX() - 31,
+					progressBarScreenPositionY + 2,
+					breakProgressPixels,
+					2,
+					0,
+					0,
+					breakProgressPixels,
+					2
+			);
 		}
 
 	}

@@ -210,6 +210,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         if (cullface == null) return true;
 
+        int block = chunk.getBlock(x,y,z);
         int topNeighbor = chunk.getBlock(x, y+1, z);
         int bottomNeighbor = chunk.getBlock(x, y-1, z);
         int leftNeighbor = chunk.getBlock(x-1, y, z);
@@ -219,31 +220,61 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         switch (cullface) {
             case "top" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && topNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(topNeighbor)) {
                     return true;
                 }
             }
             case "bottom" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && bottomNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(bottomNeighbor)) {
                     return true;
                 }
             }
             case "left" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && leftNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(leftNeighbor)) {
                     return true;
                 }
             }
             case "right" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && rightNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(rightNeighbor)) {
                     return true;
                 }
             }
             case "front" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && frontNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(frontNeighbor)) {
                     return true;
                 }
             }
             case "back" -> {
+
+                if (Block.shouldHideNeighboringFaces(block) && backNeighbor == block) {
+                    return false;
+                }
+
                 if (Block.isBlockTransparent(backNeighbor)) {
                     return true;
                 }

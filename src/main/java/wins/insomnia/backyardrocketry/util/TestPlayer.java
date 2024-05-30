@@ -52,7 +52,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             Block.LOG,
             Block.LEAVES,
             Block.WOODEN_PLANKS,
-            Block.AIR,
+            Block.GLASS,
             Block.AIR,
             Block.AIR
     };
@@ -63,6 +63,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private boolean lockMouseToCenterForCameraRotation = false;
     public boolean hasGravity = true;
     private BlockRaycastResult targetBlock;
+    private int breakProgress = 0;
 
 
     public TestPlayer(World world) {
@@ -320,7 +321,12 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
                 .rotateY(-TRANSFORM.getRotation().y);
         int rayLength = 7;
 
+        BlockRaycastResult previousTargetBlock = targetBlock;
         targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+
+        if (previousTargetBlock != null && targetBlock != null && !previousTargetBlock.equals(targetBlock, false)) {
+            breakProgress = 0;
+        }
 
         if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
             blockInteractionTimer = 0;
@@ -333,7 +339,6 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 
                 breakBlock();
-                blockInteractionTimer = 5;
 
             }
 
@@ -347,6 +352,10 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             blockInteractionTimer = Math.max(0, blockInteractionTimer - 1);
         }
 
+        if (mouseInput.isButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+            breakProgress = 0;
+        }
+
     }
 
     public BlockRaycastResult getTargetBlock() {
@@ -358,12 +367,29 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         if (targetBlock == null) return;
 
         Chunk targetBlockChunk = targetBlock.getChunk();
-        targetBlockChunk.setBlock(
-                        targetBlockChunk.toLocalX(targetBlock.getBlockX()),
-                        targetBlockChunk.toLocalY(targetBlock.getBlockY()),
-                        targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
-                        Block.AIR
+        int blockState = targetBlockChunk.getBlockState(
+                targetBlockChunk.toLocalX(targetBlock.getBlockX()),
+                targetBlockChunk.toLocalY(targetBlock.getBlockY()),
+                targetBlockChunk.toLocalZ(targetBlock.getBlockZ())
         );
+        int block = BitHelper.getBlockIdFromBlockState(blockState);
+
+        if (Block.getBlockHealth(block) < 0) {
+            breakProgress = 0;
+            return;
+        }
+
+        breakProgress += 1;
+        if (breakProgress >= Block.getBlockHealth(block)) {
+            targetBlockChunk.setBlock(
+                    targetBlockChunk.toLocalX(targetBlock.getBlockX()),
+                    targetBlockChunk.toLocalY(targetBlock.getBlockY()),
+                    targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
+                    Block.AIR
+            );
+            breakProgress = 0;
+            blockInteractionTimer = 5;
+        }
 
     }
 
@@ -512,5 +538,9 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     public int getHotbarSlotContents(int slotIndex) {
         return hotbarItems[slotIndex];
+    }
+
+    public int getBreakProgress() {
+        return breakProgress;
     }
 }

@@ -15,6 +15,8 @@ public class TextureManager {
     private final Texture CROSSHAIR_TEXTURE;
     public final Texture HOTBAR_TEXTURE;
     public final Texture HOTBAR_SLOT_TEXTURE;
+    public final Texture BREAK_PROGRESS_BAR_UNDER_TEXTURE;
+    public final Texture BREAK_PROGRESS_BAR_PROGRESS_TEXTURE;
 
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
@@ -28,6 +30,8 @@ public class TextureManager {
         CROSSHAIR_TEXTURE = new Texture("gui/crosshair.png");
         HOTBAR_TEXTURE = new Texture("gui/hotbar.png");
         HOTBAR_SLOT_TEXTURE = new Texture("gui/selected_hotbar_slot.png");
+        BREAK_PROGRESS_BAR_UNDER_TEXTURE = new Texture("gui/break_progress_bar_under.png");
+        BREAK_PROGRESS_BAR_PROGRESS_TEXTURE = new Texture("gui/break_progress_bar_progress.png");
     }
 
     public Texture getBlockOutlineTexture() {
@@ -48,6 +52,8 @@ public class TextureManager {
 
     public void clean() {
 
+        BREAK_PROGRESS_BAR_PROGRESS_TEXTURE.clean();
+        BREAK_PROGRESS_BAR_UNDER_TEXTURE.clean();
         FONT_TEXTURE.clean();
         DEBUG_FONT_TEXTURE.clean();
         CROSSHAIR_TEXTURE.clean();
@@ -87,6 +93,9 @@ public class TextureManager {
             }
             case "wooden_planks" -> {
                 return new int[] {3, 1};
+            }
+            case "glass" -> {
+                return new int[] {4, 1};
             }
         }
         return new int[] {0, 0};

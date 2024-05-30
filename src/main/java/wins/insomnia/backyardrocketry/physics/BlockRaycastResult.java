@@ -41,4 +41,21 @@ public class BlockRaycastResult {
         return face;
     }
 
+    public boolean equals(BlockRaycastResult otherBlockRaycastResult, boolean includeFace) {
+        if (getBlockX() != otherBlockRaycastResult.getBlockX()) return false;
+        if (getBlockY() != otherBlockRaycastResult.getBlockY()) return false;
+        if (getBlockZ() != otherBlockRaycastResult.getBlockZ()) return false;
+        if (getChunk() != otherBlockRaycastResult.getChunk()) return false;
+
+        if (includeFace) {
+            if (getFace() != otherBlockRaycastResult.getFace()) return false;
+        }
+
+        return true;
+    }
+
+    public boolean equals(BlockRaycastResult otherBlockRaycastResult) {
+        return equals(otherBlockRaycastResult, true);
+    }
+
 }

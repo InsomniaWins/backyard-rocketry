@@ -40,6 +40,8 @@ public class Block {
 
     }
     private static final HashMap<Integer, String> BLOCK_STATE_NAME_MAP = new HashMap<>();
+    private static final HashMap<Integer, Integer> BLOCK_HEALTH_MAP = new HashMap<>();
+    private static final HashMap<Integer, Boolean> HIDE_NEIGHBORING_FACES_MAP = new HashMap<>();
 
     public static final int WORLD_BORDER = -2;
     public static final int NULL = -1;
@@ -50,59 +52,85 @@ public class Block {
             0,
             "Air",
             true,
+            false,
             null,
-            null
+            null,
+            -1
     );
     public static final int GRASS = registerBlock(
             1,
             "Grass",
             false,
+            true,
             new BlockPropertiesGrass(),
-            "grass_block"
+            "grass_block",
+            40
     );
     public static final int COBBLESTONE = registerBlock(2,
             "Cobblestone",
             false,
+            true,
             null,
-            "cobblestone"
+            "cobblestone",
+            120
     );
     public static final int DIRT = registerBlock(3,
             "Dirt",
             false,
+            true,
             null,
-            "dirt"
+            "dirt",
+            30
     );
     public static final int STONE = registerBlock(4,
             "Stone",
             false,
+            true,
             null,
-            "stone"
+            "stone",
+            120
     );
     public static final int LOG = registerBlock(
             5,
             "Log",
             false,
+            true,
             null,
-            "log"
+            "log",
+            90
     );
     public static final int LEAVES = registerBlock(
             6,
             "Leaves",
             true,
+            true,
             null,
-            "leaves"
+            "leaves",
+            20
     );
     public static final int WOODEN_PLANKS = registerBlock(
             7,
             "Wooden Planks",
             false,
+            true,
             null,
-            "wooden_planks"
+            "wooden_planks",
+            90
+    );
+
+    public static final int GLASS = registerBlock(
+            8,
+            "Glass",
+            true,
+            true,
+            null,
+            "glass",
+            20
     );
 
 
 
-    public static int registerBlock(int blockId, String blockName, boolean isTransparent, BlockProperties blockProperties, String blockStateFileName) {
+    public static int registerBlock(int blockId, String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
 
 		BLOCK_NAME_MAP.put(blockId, blockName);
         BLOCK_TRANSPARENCY_MAP.put(blockId, isTransparent);
@@ -115,7 +143,31 @@ public class Block {
             BLOCK_STATE_NAME_MAP.put(blockId, blockStateFileName);
         }
 
+        BLOCK_HEALTH_MAP.put(blockId, blockHealth);
+        HIDE_NEIGHBORING_FACES_MAP.put(blockId, hideNeighboringFaces);
+
 		return blockId;
+    }
+
+    public static boolean shouldHideNeighboringFaces(int block) {
+
+        Boolean result = HIDE_NEIGHBORING_FACES_MAP.get(block);
+
+        if (result == null) {
+            return true;
+        }
+
+        return result;
+    }
+
+    public static int getBlockHealth(int block) {
+        Integer blockHealth = BLOCK_HEALTH_MAP.get(block);
+
+        if (blockHealth == null) {
+            return -1;
+        }
+
+        return blockHealth;
     }
 
     public static Set<Integer> getBlocks() {
