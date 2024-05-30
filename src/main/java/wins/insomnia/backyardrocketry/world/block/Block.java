@@ -43,14 +43,62 @@ public class Block {
 
     public static final int WORLD_BORDER = -2;
     public static final int NULL = -1;
-    public static final int AIR = registerBlock(0, "Air", true, null, null);
-    public static final int GRASS = registerBlock(1, "Grass", false, new BlockPropertiesGrass(), "grass_block");
-    public static final int COBBLESTONE = registerBlock(2, "Cobblestone", false, null, "cobblestone");
-    public static final int DIRT = registerBlock(3, "Dirt", false, null, "dirt");
-    public static final int STONE = registerBlock(4, "Stone", false, null, "stone");
-    public static final int LOG = registerBlock(5, "Log", false, null, "log");
-    public static final int LEAVES = registerBlock(6, "Leaves", true, null, "leaves");
-    public static final int WOODEN_PLANKS = registerBlock(7, "Wooden Planks", false, null, "wooden_planks");
+
+
+
+    public static final int AIR = registerBlock(
+            0,
+            "Air",
+            true,
+            null,
+            null
+    );
+    public static final int GRASS = registerBlock(
+            1,
+            "Grass",
+            false,
+            new BlockPropertiesGrass(),
+            "grass_block"
+    );
+    public static final int COBBLESTONE = registerBlock(2,
+            "Cobblestone",
+            false,
+            null,
+            "cobblestone"
+    );
+    public static final int DIRT = registerBlock(3,
+            "Dirt",
+            false,
+            null,
+            "dirt"
+    );
+    public static final int STONE = registerBlock(4,
+            "Stone",
+            false,
+            null,
+            "stone"
+    );
+    public static final int LOG = registerBlock(
+            5,
+            "Log",
+            false,
+            null,
+            "log"
+    );
+    public static final int LEAVES = registerBlock(
+            6,
+            "Leaves",
+            true,
+            null,
+            "leaves"
+    );
+    public static final int WOODEN_PLANKS = registerBlock(
+            7,
+            "Wooden Planks",
+            false,
+            null,
+            "wooden_planks"
+    );
 
 
 

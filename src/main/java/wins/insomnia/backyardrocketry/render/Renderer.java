@@ -153,9 +153,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 hasTransparency2 = mesh.hasTransparency();
             }
 
-            if (!renderable1.shouldRender() || !renderable2.shouldRender()) {
-                return 0;
-            } else if (hasTransparency1 == hasTransparency2) {
+            if (hasTransparency1 == hasTransparency2) {
                 return Float.compare(distance1, distance2);
             } else if (hasTransparency1) {
                 return 1;
