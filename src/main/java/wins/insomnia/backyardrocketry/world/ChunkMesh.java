@@ -3,6 +3,9 @@ package wins.insomnia.backyardrocketry.world;
 import org.joml.*;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.util.BitHelper;
+import wins.insomnia.backyardrocketry.util.FancyToString;
+import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
@@ -11,8 +14,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 public class ChunkMesh extends Mesh implements IPositionOwner {
 
@@ -23,10 +25,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     int meshDataIndexCount = -1;
     float[] meshDataVertexArray = new float[0];
     int[] meshDataIndexArray = new int[0];
-
-
+    private boolean generating = false;
+    private boolean meshIsReadyToRender = false;
     private boolean readyToCreateOpenGLMeshData = false;
-    private boolean isTransparent = false;
+    private final boolean isTransparent;
 
     public boolean isReadyToCreateOpenGLMeshData() {
 
@@ -39,15 +41,32 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         return readyToCreateOpenGLMeshData;
     }
 
+    @Override
+    public void clean() {
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            new ConcurrentModificationException("Tried creating OpenGL mesh data on thread other than main thread!").printStackTrace();
+        }
+        super.clean();
+    }
+
     public void createOpenGLMeshData() {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
             new ConcurrentModificationException("Tried creating OpenGL mesh data on thread other than main thread!").printStackTrace();
         }
 
+        clean();
+        
+        if (unloaded) {
+            return;
+        }
+
+        meshIsReadyToRender = false;
+
         indexCount = meshDataIndexCount;
 
-        vao = glGenVertexArrays();
+        vao = OpenGLWrapper.glGenVertexArrays();
+
         vbo = glGenBuffers();
         ebo = glGenBuffers();
 
@@ -65,6 +84,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         readyToCreateOpenGLMeshData = false;
         isClean = false;
+        meshIsReadyToRender = true;
+        setGenerating(false);
     }
 
     public ChunkMesh(Chunk chunk, boolean isTransparent) {
@@ -105,26 +126,35 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     @Override
     public boolean shouldRender() {
-        if (vao < 0) {
+
+        if (!super.shouldRender()) {
+            return false;
+        }
+
+        if (vao < 0 || !meshIsReadyToRender || indexCount == 0) {
             return false;
         }
 
 
-        if (indexCount == 0) return false;
-
-
-        Camera camera = Renderer.get().getCamera();
-
         // render distance culling
+        Camera camera = Renderer.get().getCamera();
         if (chunk.getPosition().distance(camera.getTransform().getPosition().get(new Vector3f())) > camera.getRenderDistance()) return false;
+
 
         // frustum culling
         FrustumIntersection frustum = camera.getFrustum();
         Vector3f boundingBoxMin = chunk.getBoundingBox().getMin().get(new Vector3f());
         Vector3f boundingBoxMax = chunk.getBoundingBox().getMax().get(new Vector3f());
-        if (!frustum.testAab(boundingBoxMin, boundingBoxMax)) return false;
+        return frustum.testAab(boundingBoxMin, boundingBoxMax);
 
-        return true;
+    }
+
+    public void setGenerating(boolean value) {
+        generating = value;
+    }
+
+    public boolean isGenerating() {
+        return generating;
     }
 
     @Override
@@ -140,8 +170,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
-    // MAKE SURE TO CLEAN BEFORE RUNNING!
-    public void generateMesh() {
+    public void generateMesh(int[][][] blocks) {
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -151,7 +180,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
-                    int block = chunk.getBlock(x,y,z);
+                    int block = BitHelper.getBlockIdFromBlockState(blocks[x][y][z]);
 
                     if (block != Block.AIR) {
 
@@ -159,7 +188,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                             continue;
                         }
 
-                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(chunk.getBlockState(x,y,z), x, y, z);
+                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(blocks[x][y][z], x, y, z);
 
 
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
@@ -272,7 +301,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             case "back" -> {
 
                 if (Block.shouldHideNeighboringFaces(block) && backNeighbor == block) {
-                    return false;
                 }
 
                 if (Block.isBlockTransparent(backNeighbor)) {

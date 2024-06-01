@@ -33,6 +33,7 @@ public class BlockModelData {
 
         int block = BitHelper.getBlockIdFromBlockState(blockState);
         BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
+        
         String blockModelName = blockProperties.getBlockModelName(blockState);
 
         Object model = BLOCK_STATE_MODEL_MAP.get(block).get(blockModelName);

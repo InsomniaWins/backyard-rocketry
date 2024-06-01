@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
@@ -166,14 +167,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     }
 
-    // is thread-safe
+    // is thread-safe (except for GUI RENDERABLES
     public void removeRenderable(IRenderable renderable) {
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
         } else {
-
 			RENDER_QUEUE.remove(renderable);
-
             REMOVE_RENDER_QUEUE.add(renderable);
         }
     }
@@ -279,6 +278,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString = debugString + "\n\n" + DebugInfo.getPlayerRotation(player);
             debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
         }
+
+        debugString = debugString + "\n\nVAO Count: " + OpenGLWrapper.VAO_LIST.size();
 
         drawText(debugString, 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);

@@ -1,5 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
+import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
+
 import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -27,7 +29,7 @@ public class FontMesh {
         createCharacterLocations("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"\\()|}{;<>-+%?,./!:$_=&~*#][`@^ ");
 
         text = "";
-        VAO = glGenVertexArrays();
+        VAO = OpenGLWrapper.glGenVertexArrays();
 
         glBindVertexArray(VAO);
 
@@ -208,9 +210,11 @@ public class FontMesh {
 
     public void clean() {
 
-        glDeleteBuffers(vbo);
-        glDeleteBuffers(ebo);
-        glDeleteVertexArrays(VAO);
+        if (VAO > -1) {
+            glDeleteBuffers(vbo);
+            glDeleteBuffers(ebo);
+            OpenGLWrapper.glDeleteVertexArrays(VAO);
+        }
 
     }
 

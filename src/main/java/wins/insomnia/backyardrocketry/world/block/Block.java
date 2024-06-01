@@ -6,12 +6,15 @@ import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.util.BitHelper;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesGrass;
 
 import java.io.IOException;
+import java.security.KeyPair;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Block {
@@ -32,19 +35,37 @@ public class Block {
     );
 
 
-    private static final HashMap<Integer, String> BLOCK_NAME_MAP = new HashMap<>();
-    private static final HashMap<Integer, Boolean> BLOCK_TRANSPARENCY_MAP = new HashMap<>();
-    private static final HashMap<Integer, BlockProperties> BLOCK_PROPERTIES_MAP = new HashMap<>();
-    static {
-        BLOCK_PROPERTIES_MAP.put(-1, new BlockProperties());
-
+    private enum BlockDetail {
+        NAME,
+        TRANSPARENCY,
+        PROPERTIES,
+        STATE,
+        HEALTH,
+        HIDE_NEIGHBORING_FACES
     }
-    private static final HashMap<Integer, String> BLOCK_STATE_NAME_MAP = new HashMap<>();
-    private static final HashMap<Integer, Integer> BLOCK_HEALTH_MAP = new HashMap<>();
-    private static final HashMap<Integer, Boolean> HIDE_NEIGHBORING_FACES_MAP = new HashMap<>();
 
-    public static final int WORLD_BORDER = -2;
-    public static final int NULL = -1;
+
+    private static final HashMap<Integer, HashMap<BlockDetail, Object>> BLOCK_DETAILS_MAP = new HashMap<>();
+
+
+    public static final int WORLD_BORDER = registerBlock(
+            -2,
+            "WORLD BORDER",
+            true,
+            true,
+            null,
+            "cobblestone",
+            -1
+    );
+    public static final int NULL = registerBlock(
+            -1,
+            "NULL",
+            true,
+            true,
+            new BlockProperties(),
+            "cobblestone",
+            -1
+    );
 
 
 
@@ -66,7 +87,8 @@ public class Block {
             "grass_block",
             40
     );
-    public static final int COBBLESTONE = registerBlock(2,
+    public static final int COBBLESTONE = registerBlock(
+            2,
             "Cobblestone",
             false,
             true,
@@ -74,7 +96,8 @@ public class Block {
             "cobblestone",
             120
     );
-    public static final int DIRT = registerBlock(3,
+    public static final int DIRT = registerBlock(
+            3,
             "Dirt",
             false,
             true,
@@ -82,7 +105,8 @@ public class Block {
             "dirt",
             30
     );
-    public static final int STONE = registerBlock(4,
+    public static final int STONE = registerBlock(
+            4,
             "Stone",
             false,
             true,
@@ -127,31 +151,63 @@ public class Block {
             "glass",
             20
     );
-
+    static {
+        for (Map.Entry<Integer, ?> entry: BLOCK_DETAILS_MAP.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
 
 
     public static int registerBlock(int blockId, String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
 
-		BLOCK_NAME_MAP.put(blockId, blockName);
-        BLOCK_TRANSPARENCY_MAP.put(blockId, isTransparent);
+        HashMap<BlockDetail, Object> detailsMap = new HashMap<>();
+
+
+
+        detailsMap.put(BlockDetail.NAME, blockName);
+
+        detailsMap.put(BlockDetail.TRANSPARENCY, isTransparent);
+
+        detailsMap.put(BlockDetail.HIDE_NEIGHBORING_FACES, hideNeighboringFaces);
 
         if (blockProperties != null) {
-            BLOCK_PROPERTIES_MAP.put(blockId, blockProperties);
+            detailsMap.put(BlockDetail.PROPERTIES, blockProperties);
         }
 
         if (blockStateFileName != null) {
-            BLOCK_STATE_NAME_MAP.put(blockId, blockStateFileName);
+            detailsMap.put(BlockDetail.STATE, blockStateFileName);
         }
 
-        BLOCK_HEALTH_MAP.put(blockId, blockHealth);
-        HIDE_NEIGHBORING_FACES_MAP.put(blockId, hideNeighboringFaces);
+        detailsMap.put(BlockDetail.HEALTH, blockHealth);
 
-		return blockId;
+
+
+        BLOCK_DETAILS_MAP.put(blockId, detailsMap);
+
+        return blockId;
+    }
+
+    public static BlockProperties getBlockProperties(int block) {
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
+
+        if (blockDetails == null) blockDetails = BLOCK_DETAILS_MAP.get(NULL);
+
+        BlockProperties result = (BlockProperties) blockDetails.get(BlockDetail.PROPERTIES);
+
+        if (result == null) {
+            return (BlockProperties) BLOCK_DETAILS_MAP.get(NULL).get(BlockDetail.PROPERTIES);
+        }
+
+        return result;
     }
 
     public static boolean shouldHideNeighboringFaces(int block) {
 
-        Boolean result = HIDE_NEIGHBORING_FACES_MAP.get(block);
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
+
+        if (blockDetails == null) return true;
+
+        Boolean result = (Boolean) blockDetails.get(BlockDetail.HIDE_NEIGHBORING_FACES);
 
         if (result == null) {
             return true;
@@ -161,21 +217,32 @@ public class Block {
     }
 
     public static int getBlockHealth(int block) {
-        Integer blockHealth = BLOCK_HEALTH_MAP.get(block);
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
 
-        if (blockHealth == null) {
+        if (blockDetails == null) return -1;
+
+        Integer result = (Integer) blockDetails.get(BlockDetail.HEALTH);
+
+        if (result == null) {
             return -1;
         }
 
-        return blockHealth;
+        return result;
     }
 
     public static Set<Integer> getBlocks() {
-        return BLOCK_NAME_MAP.keySet();
+        return BLOCK_DETAILS_MAP.keySet();
     }
 
     public static String getBlockStateName(int block) {
-        return BLOCK_STATE_NAME_MAP.get(block);
+
+
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
+
+        if (blockDetails == null) return null;
+
+        return (String) blockDetails.get(BlockDetail.STATE);
+
     }
 
     public static BlockBoundingBox getBlockBoundingBox(Chunk chunk, Vector3i blockPosition, int block) {
@@ -183,7 +250,7 @@ public class Block {
 
         if (boundingBox == null) return null;
 
-		return new BlockBoundingBox(boundingBox, chunk, blockPosition);
+        return new BlockBoundingBox(boundingBox, chunk, blockPosition);
     }
 
     public static BoundingBox getBlockCollision(int block) {
@@ -199,18 +266,34 @@ public class Block {
 
         int block = BitHelper.getBlockIdFromBlockState(blockState);
 
-        BlockProperties blockProperties = BLOCK_PROPERTIES_MAP.get(block);
-
-        if (blockProperties == null) blockProperties = BLOCK_PROPERTIES_MAP.get(NULL);
-
-        return blockProperties;
+        return getBlockProperties(block);
     }
 
     public static String getBlockName(int block) {
-        return BLOCK_NAME_MAP.get(block);
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
+
+        if (blockDetails == null) return "UNKNOWN BLOCK";
+
+        String result = (String) blockDetails.get(BlockDetail.NAME);
+
+        if (result == null) {
+            return "UNKNOWN BLOCK";
+        }
+
+        return result;
     }
 
     public static boolean isBlockTransparent(int block) {
-        return BLOCK_TRANSPARENCY_MAP.get(block);
+        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
+
+        if (blockDetails == null) return false;
+
+        Boolean result = (Boolean) blockDetails.get(BlockDetail.TRANSPARENCY);
+
+        if (result == null) {
+            return false;
+        }
+
+        return result;
     }
 }

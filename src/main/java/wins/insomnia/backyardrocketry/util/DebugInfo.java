@@ -10,11 +10,12 @@ public class DebugInfo {
 
 	public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
 
-
-
 	public static String getMemoryUsage() {
+
+		long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
 		return "Memory Usage: \n  " +
-				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1_048_576 + "MiB / " +
+				usedMemory / 1_048_576 + "MiB / " +
 				Runtime.getRuntime().totalMemory() / 1_048_576 + "MiB";
 	}
 

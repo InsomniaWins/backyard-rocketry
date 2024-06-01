@@ -4,7 +4,11 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.util.HashMap;
+
 public class FancyToString {
+
+
 
 
     public static String toString(Vector3d vector) {

@@ -1,8 +1,12 @@
 package wins.insomnia.backyardrocketry.world.block.blockproperty;
 
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 public class BlockPropertiesGrass extends BlockProperties {
 	@Override
@@ -27,8 +31,25 @@ public class BlockPropertiesGrass extends BlockProperties {
 	}
 
 	@Override
-	public int onTick(int blockState, Chunk chunk, int x, int y, int z) {
-		return blockState;
+	public void onRandomTick(int blockState, Chunk chunk, int x, int y, int z) {
+		Chunk neighborChunk = chunk;
+		int blockAbove;
+
+		if (!chunk.isBlockInBounds(x, y+1, z)) {
+			neighborChunk = World.get().getChunkAt(new ChunkPosition(chunk.getX(), chunk.getY() + 1, chunk.getZ()));
+		}
+
+		if (neighborChunk == null) return;
+
+		if (neighborChunk == chunk) {
+			blockAbove = neighborChunk.getBlockState(x, y + 1, z);
+		} else {
+			blockAbove = neighborChunk.getBlockState(x, y - 15, z);
+		}
+
+		if (Block.isBlockTransparent(blockAbove)) {
+			chunk.setBlock(x, y, z, Block.DIRT);
+		}
 	}
 
 	@Override

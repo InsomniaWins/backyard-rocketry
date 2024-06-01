@@ -12,8 +12,7 @@ public class BlockProperties {
 		return blockState;
 	}
 
-	public int onTick(int blockState, Chunk chunk, int x, int y, int z) {
-		return blockState;
+	public void onRandomTick(int blockState, Chunk chunk, int x, int y, int z) {
 	}
 
 	public int getBlockState(int currentBlockState, Object... properties) {

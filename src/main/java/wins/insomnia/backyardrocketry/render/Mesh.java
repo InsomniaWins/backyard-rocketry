@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -28,7 +29,7 @@ public class Mesh implements IRenderable, IMesh {
 
         indexCount = indexArray.length;
 
-        vao = glGenVertexArrays();
+        vao = OpenGLWrapper.glGenVertexArrays();
         vbo = glGenBuffers();
         ebo = glGenBuffers();
 
@@ -54,9 +55,12 @@ public class Mesh implements IRenderable, IMesh {
 
         isClean = true;
 
-        glDeleteBuffers(vbo);
+        OpenGLWrapper.glDeleteVertexArrays(vao);
+        vao = -1;
         glDeleteBuffers(ebo);
-        glDeleteVertexArrays(vao);
+        ebo = -1;
+        glDeleteBuffers(vbo);
+        vbo = -1;
 
     }
 
@@ -81,7 +85,7 @@ public class Mesh implements IRenderable, IMesh {
 
     @Override
     public boolean shouldRender() {
-        return true;
+        return !isClean();
     }
 
     @Override
