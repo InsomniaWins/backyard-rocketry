@@ -21,7 +21,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Z = 128;
     private static World instance;
 
-    public static int chunkLoadDistance = 10;
+    public static int chunkLoadDistance = 5;
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
     private final ConcurrentLinkedQueue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
@@ -146,15 +146,15 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             for (int yIterator = -chunkRadius; yIterator < chunkRadius; yIterator++) {
                 for (int zIterator = -chunkRadius; zIterator < chunkRadius; zIterator++) {
 
-                    int chunkX = xIterator * 16 + originChunkPosition.getX();
+                    int chunkX = xIterator * Chunk.SIZE_X + originChunkPosition.getX();
                     if (chunkX < 0 || chunkX >= getSizeX()) continue;
 
 
-                    int chunkY = yIterator * 16 + originChunkPosition.getY();
+                    int chunkY = yIterator * Chunk.SIZE_Y + originChunkPosition.getY();
                     if (chunkY < 0 || chunkY >= getSizeY()) continue;
 
 
-                    int chunkZ = zIterator * 16 + originChunkPosition.getZ();
+                    int chunkZ = zIterator * Chunk.SIZE_Z + originChunkPosition.getZ();
                     if (chunkZ < 0 || chunkZ >= getSizeZ()) continue;
 
                     ChunkPosition chunkPosition = new ChunkPosition(chunkX, chunkY, chunkZ);
@@ -233,7 +233,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         Chunk chunk = getChunkContainingBlock(x, y, z);
 
         if (chunk == null) {
-            throw new RuntimeException("could not find chunk containing block at " + x + ", " + y + ", " + z);
+            return BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.NULL);
         }
 
         return chunk.getBlockState(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));

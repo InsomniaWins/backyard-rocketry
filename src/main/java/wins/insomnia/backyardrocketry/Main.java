@@ -1,7 +1,6 @@
 package wins.insomnia.backyardrocketry;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 
 public class Main {
 
@@ -9,6 +8,9 @@ public class Main {
     public static final Thread MAIN_THREAD = Thread.currentThread();
 
     public static void main(String[] args) {
+
+        //OpenGLWrapper.trackVaos();
+
         game = new BackyardRocketry();
         game.run();
     }

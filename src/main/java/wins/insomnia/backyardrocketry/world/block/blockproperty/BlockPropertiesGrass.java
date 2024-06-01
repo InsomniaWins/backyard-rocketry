@@ -9,6 +9,11 @@ import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 public class BlockPropertiesGrass extends BlockProperties {
+
+	private static boolean blockIsTransparent(int x, int y, int z) {
+		return Block.isBlockTransparent(BitHelper.getBlockIdFromBlockState(World.get().getBlockState(x, y, z)));
+	}
+
 	@Override
 	public String getBlockModelName(int blockState) {
 
@@ -32,24 +37,15 @@ public class BlockPropertiesGrass extends BlockProperties {
 
 	@Override
 	public void onRandomTick(int blockState, Chunk chunk, int x, int y, int z) {
-		Chunk neighborChunk = chunk;
-		int blockAbove;
 
-		if (!chunk.isBlockInBounds(x, y+1, z)) {
-			neighborChunk = World.get().getChunkAt(new ChunkPosition(chunk.getX(), chunk.getY() + 1, chunk.getZ()));
-		}
-
-		if (neighborChunk == null) return;
-
-		if (neighborChunk == chunk) {
-			blockAbove = neighborChunk.getBlockState(x, y + 1, z);
-		} else {
-			blockAbove = neighborChunk.getBlockState(x, y - 15, z);
-		}
-
-		if (Block.isBlockTransparent(blockAbove)) {
+		if (y < Chunk.SIZE_Y - 1) {
+			if (!Block.isBlockTransparent(chunk.getBlock(x, y + 1, z))) {
+				chunk.setBlock(x, y, z, Block.DIRT);
+			}
+		} else if (!blockIsTransparent(chunk.toGlobalX(x), chunk.toGlobalY(y + 1), chunk.toGlobalZ(z))) {
 			chunk.setBlock(x, y, z, Block.DIRT);
 		}
+
 	}
 
 	@Override

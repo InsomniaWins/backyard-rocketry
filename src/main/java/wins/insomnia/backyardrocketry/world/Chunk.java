@@ -18,15 +18,15 @@ import java.util.concurrent.Executors;
 public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 16;
-    public static final int SIZE_Y = 16;
-    public static  final int SIZE_Z = 16;
+    public static final int SIZE_X = 32;
+    public static final int SIZE_Y = 32;
+    public static  final int SIZE_Z = 32;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
 
     private final int X;
     private final int Y;
     private final int Z;
-
+    private final int RANDOM_TICK_AMOUNT = 9;
     private final ChunkMesh CHUNK_MESH;
     private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
@@ -55,9 +55,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         Renderer.get().addRenderable(CHUNK_MESH);
         Renderer.get().addRenderable(TRANSPARENT_CHUNK_MESH);
 
-        synchronized (this) {
-            generateBlocks();
-        }
+        generateBlocks();
 
         Updater.get().registerFixedUpdateListener(this);
         Updater.get().registerUpdateListener(this);
@@ -414,7 +412,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public void fixedUpdate() {
 
         // random block ticks
-        for (int updateIndex = 0; updateIndex < 3; updateIndex++) {
+        for (int updateIndex = 0; updateIndex < RANDOM_TICK_AMOUNT; updateIndex++) {
             int x = World.RANDOM.nextInt(SIZE_X);
             int y = World.RANDOM.nextInt(SIZE_Y);
             int z = World.RANDOM.nextInt(SIZE_Z);

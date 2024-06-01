@@ -9,6 +9,11 @@ public class OpenGLWrapper {
 	public static ArrayList<Integer> VAO_LIST = new ArrayList<>();
 	private static boolean trackingVaos = false;
 
+	public static void setTrackingVaos(boolean value) {
+		VAO_LIST.clear();
+		trackingVaos = value;
+	}
+
 	public static void trackVaos() {
 		VAO_LIST.clear();
 		trackingVaos = true;

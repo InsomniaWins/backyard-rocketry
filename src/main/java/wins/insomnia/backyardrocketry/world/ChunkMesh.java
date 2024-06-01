@@ -301,6 +301,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             case "back" -> {
 
                 if (Block.shouldHideNeighboringFaces(block) && backNeighbor == block) {
+                    return false;
                 }
 
                 if (Block.isBlockTransparent(backNeighbor)) {

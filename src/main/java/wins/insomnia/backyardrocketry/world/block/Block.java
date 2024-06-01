@@ -9,6 +9,7 @@ import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesDirt;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesGrass;
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class Block {
 
 
     public static final int WORLD_BORDER = registerBlock(
-            -2,
+            254,
             "WORLD BORDER",
             true,
             true,
@@ -58,7 +59,7 @@ public class Block {
             -1
     );
     public static final int NULL = registerBlock(
-            -1,
+            255,
             "NULL",
             true,
             true,
@@ -101,7 +102,7 @@ public class Block {
             "Dirt",
             false,
             true,
-            null,
+            new BlockPropertiesDirt(),
             "dirt",
             30
     );
