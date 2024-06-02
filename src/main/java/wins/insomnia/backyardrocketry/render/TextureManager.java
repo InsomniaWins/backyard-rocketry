@@ -8,15 +8,16 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 public class TextureManager {
-    private final Texture FONT_TEXTURE;
-    private final Texture DEBUG_FONT_TEXTURE;
-    private final Texture BLOCK_ATLAS;
-    private final Texture BLOCK_OUTLINE_TEXTURE;
-    private final Texture CROSSHAIR_TEXTURE;
+    public final Texture FONT_TEXTURE;
+    public final Texture DEBUG_FONT_TEXTURE;
+    public final Texture BLOCK_ATLAS;
+    public final Texture BLOCK_OUTLINE_TEXTURE;
+    public final Texture CROSSHAIR_TEXTURE;
     public final Texture HOTBAR_TEXTURE;
     public final Texture HOTBAR_SLOT_TEXTURE;
     public final Texture BREAK_PROGRESS_BAR_UNDER_TEXTURE;
     public final Texture BREAK_PROGRESS_BAR_PROGRESS_TEXTURE;
+    public final Texture WAILA_BACKGROUND_TEXTURE;
 
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
@@ -32,6 +33,7 @@ public class TextureManager {
         HOTBAR_SLOT_TEXTURE = new Texture("gui/selected_hotbar_slot.png");
         BREAK_PROGRESS_BAR_UNDER_TEXTURE = new Texture("gui/break_progress_bar_under.png");
         BREAK_PROGRESS_BAR_PROGRESS_TEXTURE = new Texture("gui/break_progress_bar_progress.png");
+        WAILA_BACKGROUND_TEXTURE = new Texture("gui/waila.png");
     }
 
     public Texture getBlockOutlineTexture() {
@@ -59,7 +61,7 @@ public class TextureManager {
         CROSSHAIR_TEXTURE.clean();
         HOTBAR_TEXTURE.clean();
         HOTBAR_SLOT_TEXTURE.clean();
-
+        WAILA_BACKGROUND_TEXTURE.clean();
     }
 
     public int[] getBlockAtlasCoordinates(String blockTextureName) {

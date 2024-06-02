@@ -44,7 +44,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     @Override
     public void clean() {
         if (Thread.currentThread() != Main.MAIN_THREAD) {
-            new ConcurrentModificationException("Tried creating OpenGL mesh data on thread other than main thread!").printStackTrace();
+            new ConcurrentModificationException("Tried deleting OpenGL mesh data on thread other than main thread!").printStackTrace();
         }
         super.clean();
     }

@@ -31,16 +31,22 @@ public class BlockPropertiesDirt extends BlockProperties {
 			}
 		}
 
-		if (blockIsGrass(globalX, globalY + 1, globalZ) ||
-				blockIsGrass(globalX + 1, globalY + 1, globalZ) ||
+		if (blockIsGrass(globalX + 1, globalY + 1, globalZ) ||
 				blockIsGrass(globalX - 1, globalY + 1, globalZ) ||
 				blockIsGrass(globalX, globalY + 1, globalZ + 1) ||
 				blockIsGrass(globalX, globalY + 1, globalZ - 1) ||
-				blockIsGrass(globalX, globalY - 1, globalZ) ||
-				blockIsGrass(globalX - 1, globalY - 1, globalZ) ||
-				blockIsGrass(globalX + 1, globalY - 1, globalZ) ||
-				blockIsGrass(globalX, globalY - 1, globalZ - 1) ||
-				blockIsGrass(globalX, globalY - 1, globalZ + 1) ||
+
+				// the bottom y-layer check should check if neighbor has block above it
+				// if it does, then it shouldn't spread
+				(blockIsGrass(globalX - 1, globalY - 1, globalZ) &&
+						blockIsTransparent(globalX - 1, globalY, globalZ)) ||
+				(blockIsGrass(globalX + 1, globalY - 1, globalZ) &&
+						blockIsTransparent(globalX + 1, globalY, globalZ)) ||
+				(blockIsGrass(globalX, globalY - 1, globalZ - 1) &&
+						blockIsTransparent(globalX, globalY, globalZ - 1)) ||
+				(blockIsGrass(globalX, globalY - 1, globalZ + 1) &&
+						blockIsTransparent(globalX, globalY, globalZ + 1)) ||
+
 				blockIsGrass(globalX - 1, globalY, globalZ - 1) ||
 				blockIsGrass(globalX - 1, globalY, globalZ) ||
 				blockIsGrass(globalX - 1, globalY, globalZ + 1) ||

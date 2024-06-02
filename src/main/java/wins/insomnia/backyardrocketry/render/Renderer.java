@@ -281,7 +281,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         debugString = debugString + "\n\nVAO Count: " + OpenGLWrapper.VAO_LIST.size();
 
-        drawText(debugString, 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
+        TextRenderer.drawText(debugString, 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
 
     }
@@ -469,82 +469,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
 
-    public void drawText(String text, int guiX, int guiY) {
-        drawText(text, guiX, guiY, guiScale, TextureManager.get().getFontTexture());
-    }
-
-    public void drawText(String text, int guiX, int guiY, Texture fontTexture) {
-        drawText(text, guiX, guiY, guiScale, fontTexture);
-    }
-
-    public void drawText(String text, int guiX, int guiY, int scale, Texture fontTexture) {
-
-
-        int[] previousTexture = new int[1];
-        glGetIntegerv(GL_TEXTURE_BINDING_2D, previousTexture);
-
-        guiShaderProgram.use();
-
-        if (scale != guiScale) {
-            guiShaderProgram.setUniform("vs_scale", scale);
-        }
-
-        glBindTexture(GL_TEXTURE_2D, fontTexture.getTextureHandle());
-        glActiveTexture(GL_TEXTURE0);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        modelMatrix.identity();
-
-        guiShaderProgram.setUniform("vs_textureSizeX", 1);
-        guiShaderProgram.setUniform("vs_textureSizeY", 1);
-        guiShaderProgram.setUniform("vs_posX", guiX);
-        guiShaderProgram.setUniform("vs_posY", guiY);
-        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
-                0f, // left
-                BackyardRocketry.getInstance().getWindow().getWidth(), // right
-                0f, // bottom
-                BackyardRocketry.getInstance().getWindow().getHeight(), // top
-                0.01f, // z-near
-                1f // z-far
-        ));
-
-
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-
-        // TODO: Add back-face culling to text rendering!!!
-
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
-
-        // generate and draw font mesh
-        FONT_MESH.setText(text);
-        glBindVertexArray(FONT_MESH.getVao());
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glDrawElements(GL_TRIANGLES, FONT_MESH.getIndexCount(), GL_UNSIGNED_INT, 0);
-
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-
-
-        glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
-
-        if (scale != guiScale) {
-            guiShaderProgram.setUniform("vs_scale", this.guiScale);
-        }
-
-        shaderProgram.use();
-    }
-
-
     private void activateRenderMode() {
         switch (renderMode) {
             case 0 -> {
@@ -606,4 +530,17 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     public static Renderer get() {
         return BackyardRocketry.getInstance().getRenderer();
     }
+
+    public FontMesh getFontMesh() {
+        return FONT_MESH;
+    }
+
+    public int getGuiScale() {
+        return guiScale;
+    }
+
+    public ShaderProgram getGuiShaderProgram() {
+        return guiShaderProgram;
+    }
+
 }

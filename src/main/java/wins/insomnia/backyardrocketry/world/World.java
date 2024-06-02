@@ -1,14 +1,13 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.*;
 import org.joml.Math;
-import org.joml.Vector2f;
-import org.joml.Vector3d;
-import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +21,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     private static World instance;
 
     public static int chunkLoadDistance = 5;
+    public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
     private final ConcurrentLinkedQueue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
@@ -135,6 +135,14 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             unloadChunk(chunkPosition);
         }
 
+        // set chunks as processing or not
+        for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
+
+            chunkEntry.getValue().setShouldProcess(
+                    chunkProcessDistance >= new Vector3d(chunkEntry.getKey().getVector()).distance(player.getPosition())
+            );
+
+        }
     }
 
     public List<ChunkPosition> getChunkPositionsBlockPosition(int x, int y, int z, int chunkRadius) {

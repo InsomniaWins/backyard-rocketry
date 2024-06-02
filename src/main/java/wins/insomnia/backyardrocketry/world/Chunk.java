@@ -26,11 +26,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private final int X;
     private final int Y;
     private final int Z;
-    private final int RANDOM_TICK_AMOUNT = 9;
+    private final int RANDOM_TICK_AMOUNT = 18;
     private final ChunkMesh CHUNK_MESH;
     private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
 
+    private boolean shouldProcess = false;
     private int[][][] blocks;
     protected boolean shouldRegenerateMesh = false;
 
@@ -296,23 +297,31 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                     int globalBlockY = y + Y;
                     int globalBlockZ = z + Z;
 
-                    int groundHeight = (int) (10 + 5 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
+                    int groundHeight = (int) (10 + 1 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
 
 
                     if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
                         continue;
                     }
 
+                    int block;
+
                     if (globalBlockY == groundHeight) {
-                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.GRASS);
+                        block = Block.GRASS;
                     } else if (globalBlockY > groundHeight - 4) {
-                        blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.DIRT);
+                        block = Block.DIRT;
                     } else {
                         if (World.RANDOM.nextInt(2) == 0) {
-                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.COBBLESTONE);
+                            block = Block.COBBLESTONE;
                         } else {
-                            blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.STONE);
+                            block = Block.STONE;
                         }
+                    }
+
+                    blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
+                    BlockProperties blockProperties = Block.getBlockProperties(block);
+                    if (blockProperties != null) {
+                        blocks[x][y][z] = blockProperties.onPlace(blocks[x][y][z], this, x, y, z);
                     }
 
                 }
@@ -408,19 +417,29 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         // END OF BLOCK
     }
 
+    public boolean isProcessing() {
+        return shouldProcess;
+    }
+
+    public void setShouldProcess(boolean value) {
+        shouldProcess = value;
+    }
+
     @Override
     public void fixedUpdate() {
 
-        // random block ticks
-        for (int updateIndex = 0; updateIndex < RANDOM_TICK_AMOUNT; updateIndex++) {
-            int x = World.RANDOM.nextInt(SIZE_X);
-            int y = World.RANDOM.nextInt(SIZE_Y);
-            int z = World.RANDOM.nextInt(SIZE_Z);
+        if (isProcessing()) {
+            // random block ticks
+            for (int updateIndex = 0; updateIndex < RANDOM_TICK_AMOUNT; updateIndex++) {
+                int x = World.RANDOM.nextInt(SIZE_X);
+                int y = World.RANDOM.nextInt(SIZE_Y);
+                int z = World.RANDOM.nextInt(SIZE_Z);
 
-            int blockState = blocks[x][y][z];
+                int blockState = blocks[x][y][z];
 
-            BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
-            blockProperties.onRandomTick(blockState, this, x, y, z);
+                BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
+                blockProperties.onRandomTick(blockState, this, x, y, z);
+            }
         }
 
     }
