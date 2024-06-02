@@ -228,7 +228,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             move();
             updateBoundingBox();
 
-            if (keyboardInput.isKeyJustPressed(GLFW_KEY_F2)) {
+            if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
                 lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
 
                 glfwSetInputMode(
