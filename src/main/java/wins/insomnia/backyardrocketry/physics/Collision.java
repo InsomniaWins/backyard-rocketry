@@ -24,16 +24,7 @@ public class Collision {
 
     public static boolean isBlockInWorldBorder(int x, int y, int z) {
 
-        if (x < -1) return false;
-        if (x > World.get().getSizeX()-1) return false;
-
-        if (y < -1) return false;
-        if (y > World.get().getSizeY()-1) return false;
-
-        if (z < -1) return false;
-        if (z > World.get().getSizeZ()-1) return false;
-
-        return true;
+        return World.get().isBlockInWorldBorder(x, y, z);
     }
 
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();

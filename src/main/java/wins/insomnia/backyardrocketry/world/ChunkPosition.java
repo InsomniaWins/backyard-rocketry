@@ -14,6 +14,15 @@ public class ChunkPosition {
 
     private final boolean CAN_MODIFY;
 
+    public ChunkPosition(ChunkPosition other) {
+        this.x = other.getX();
+        this.y = other.getY();
+        this.z = other.getZ();
+        this.hashCode = other.hashCode;
+        CAN_MODIFY = other.CAN_MODIFY;
+    }
+
+
     public ChunkPosition(int x, int y, int z) {
         this.x = x;
         this.y = y;

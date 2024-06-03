@@ -5,24 +5,36 @@ import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class Chunk implements IFixedUpdateListener, IUpdateListener {
+
+    public enum GenerationPhase {
+        UNLOADED,
+        FILLING,
+        LAZY_WAITING_FOR_DECORATION,
+        DECORATING,
+        GENERATED
+    }
 
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 32;
     public static final int SIZE_Y = 32;
     public static  final int SIZE_Z = 32;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
-
     private final int X;
     private final int Y;
     private final int Z;
@@ -31,9 +43,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
 
+    private GenerationPhase generationPhase = GenerationPhase.UNLOADED;
     private boolean shouldProcess = false;
     private int[][][] blocks;
     protected boolean shouldRegenerateMesh = false;
+
+
 
     public Chunk(World world, int x, int y, int z) {
 
@@ -50,6 +65,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         CHUNK_MESH = new ChunkMesh(this, false);
         TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
 
+
         initializeBlocks();
 
 
@@ -62,10 +78,20 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         Updater.get().registerUpdateListener(this);
     }
 
+
+
+    public GenerationPhase getGenerationPhase() {
+        return generationPhase;
+    }
+
+
+
     public void setBlock(int x, int y, int z, int block) {
         setBlock(x, y, z, block, true);
 
     }
+
+
 
     public void setBlock(int x, int y, int z, int block, boolean regenerateMesh) {
 
@@ -227,6 +253,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return blocks[x][y][z];
     }
 
+    // IN LOCAL SPACE
     public boolean isBlockInBounds(int x, int y, int z) {
         return !((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1));
     }
@@ -285,9 +312,20 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    private void generateBlocks() {
-
+    public int getGroundHeight(int globalBlockX, int globalBlockZ) {
         long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
+
+        int noiseAmplitude = 3;
+        float noiseScale = 0.025f;
+
+        return (int) (10 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
+    }
+
+    protected void generateBlocks() {
+
+        synchronized (this) {
+            generationPhase = GenerationPhase.FILLING;
+        }
 
         for (int y = 0; y < SIZE_Y; y++) {
             for (int x = 0; x < SIZE_X; x++) {
@@ -297,7 +335,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                     int globalBlockY = y + Y;
                     int globalBlockZ = z + Z;
 
-                    int groundHeight = (int) (10 + 1 * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * 0.025, globalBlockZ * 0.025) + 1f)) + 16;
+                    int groundHeight = getGroundHeight(globalBlockX, globalBlockZ);
 
 
                     if (globalBlockY > groundHeight) {// || (OpenSimplex2.noise3_ImproveXZ(seed, x * 0.15, y * 0.15, z * 0.15) + 1f) < 1f) {
@@ -330,27 +368,150 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
 
         if (Thread.currentThread() == Main.MAIN_THREAD) {
-            shouldRegenerateMesh = true;
-
-            for (Chunk chunk : getNeighborChunks()) {
-                if (chunk == null) continue;
-                chunk.shouldRegenerateMesh = true;
-            }
+            generationPhase = GenerationPhase.LAZY_WAITING_FOR_DECORATION;
         } else {
             synchronized (this) {
-
-                shouldRegenerateMesh = true;
-
-
-                for (Chunk chunk : getNeighborChunks()) {
-                    if (chunk == null) continue;
-                    chunk.shouldRegenerateMesh = true;
-                }
-
+                generationPhase = GenerationPhase.LAZY_WAITING_FOR_DECORATION;
             }
         }
 
     }
+
+    protected void decorate() {
+        performDecorationPhase();
+    }
+
+    private void performDecorationPhase() {
+
+        synchronized (this) {
+            if (generationPhase == GenerationPhase.GENERATED || generationPhase == GenerationPhase.DECORATING) {
+                return;
+            }
+
+            generationPhase = GenerationPhase.DECORATING;
+        }
+
+        // generate trees
+
+        int treeCount = 10;
+        for (int i = 0; i < treeCount; i++) {
+
+            int treeX = X + World.RANDOM.nextInt(16);
+            int treeZ = Z + World.RANDOM.nextInt(16);
+            int treeTrunkY = getGroundHeight(treeX, treeZ) + 1;
+
+            if (isBlockInBounds(toLocalX(treeX), toLocalY(treeTrunkY), toLocalZ(treeZ))) {
+
+                placeDecoration(treeX, treeTrunkY, treeZ, WorldDecorations.TREE);
+
+            }
+
+        }
+
+        synchronized (this) {
+            shouldRegenerateMesh = true;
+        }
+    }
+
+    public ChunkPosition getChunkPosition() {
+        return World.get().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
+    }
+
+    private void placeDecoration(int globalX, int globalY, int globalZ, int[][] decoration) {
+
+        // prepare neighboring chunks for decoration placing
+        BoundingBox decorationBoundingBox = new BoundingBox();
+
+        List<ChunkPosition> chunkPositionsTouchingDecoration = World.getChunkPositionsTouchingBoundingBox(decorationBoundingBox, true);
+
+
+        for (ChunkPosition chunkPosition : chunkPositionsTouchingDecoration) {
+
+            if (chunkPosition != getChunkPosition()) {
+
+                Chunk chunk = WORLD.getChunkAt(chunkPosition);
+
+                synchronized (this) {
+                    if (chunk == null && !WORLD.LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
+                        chunk = WORLD.loadChunk(chunkPosition, false, true);
+                    }
+                }
+
+                // if chunk is generating in another thread, wait until finished
+                // also wait until chunk can be decorated / added to
+
+                while (chunk == null) {
+
+                    chunk = WORLD.getChunkAt(chunkPosition);
+
+
+
+                }
+
+                while (WORLD.LOAD_CHUNK_QUEUE.contains(chunkPosition) &&
+                        (chunk.getGenerationPhase() != GenerationPhase.LAZY_WAITING_FOR_DECORATION ||
+                                chunk.getGenerationPhase() != GenerationPhase.GENERATED)) {
+
+                    // wait for chunk to be loaded and to be either ready for decorating or finished generating
+                }
+            }
+        }
+
+        // safe to place blocks now
+
+        ArrayList<Integer[]> blocksToPlaceOutOfChunkBoundaries = new ArrayList<>();
+
+		for (int[] blockData : decoration) {
+
+			int x = blockData[0];
+			int y = blockData[1];
+			int z = blockData[2];
+			int blockId = blockData[3];
+
+			int globalBlockX = globalX + x;
+			int globalBlockY = globalY + y;
+			int globalBlockZ = globalZ + z;
+
+			int localBlockX = toLocalX(globalBlockX);
+			int localBlockY = toLocalY(globalBlockY);
+			int localBlockZ = toLocalZ(globalBlockZ);
+
+			if (isBlockInBounds(localBlockX, localBlockY, localBlockZ)) {
+				setBlock(localBlockX, localBlockY, localBlockZ, blockId, false);
+			} else {
+				blocksToPlaceOutOfChunkBoundaries.add(new Integer[]{
+                        globalBlockX, globalBlockY, globalBlockZ, blockId
+				});
+			}
+
+		}
+
+        synchronized (this) {
+            WORLD.setBlocks(blocksToPlaceOutOfChunkBoundaries);
+        }
+    }
+
+    public boolean isDecorating() {
+        return getGenerationPhase() == GenerationPhase.DECORATING;
+    }
+
+    public boolean isWaitingForDecoration() {
+        return getGenerationPhase() == GenerationPhase.LAZY_WAITING_FOR_DECORATION;
+    }
+
+    public boolean isWaitingForGeneration() {
+        return getGenerationPhase() == GenerationPhase.UNLOADED;
+    }
+
+    public boolean isFilling() {
+        return getGenerationPhase() == GenerationPhase.FILLING;
+    }
+
+    public boolean isGenerated() {
+        return getGenerationPhase() == GenerationPhase.GENERATED;
+    }
+
+
 
     public Chunk[] getNeighborChunks() {
         return new Chunk[] {
@@ -393,7 +554,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     @Override
     public void update(double deltaTime) {
 
-
         if (shouldRegenerateMesh && !CHUNK_MESH.isGenerating() && !TRANSPARENT_CHUNK_MESH.isGenerating()) {
 
             shouldRegenerateMesh = false;
@@ -401,7 +561,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             CHUNK_MESH.setGenerating(true);
             TRANSPARENT_CHUNK_MESH.setGenerating(true);
 
-            chunkMeshGenerationExecutorService.submit(this::generateMesh);
+            Future futureTask = chunkMeshGenerationExecutorService.submit(this::generateMesh);
         }
 
 

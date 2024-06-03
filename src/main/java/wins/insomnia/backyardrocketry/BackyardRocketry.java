@@ -130,7 +130,7 @@ public class BackyardRocketry {
         world = new World();
         player = new TestPlayer(world);
         double[] worldCenter = world.getCenterXZ();
-        player.getTransform().getPosition().set(worldCenter[0], 90, worldCenter[1]);
+        player.getTransform().getPosition().set(64, 90, 64);
 
 
 
