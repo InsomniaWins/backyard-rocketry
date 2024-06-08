@@ -4,9 +4,7 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -14,6 +12,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public class Updater {
 
     public static final int FIXED_UPDATES_PER_SECOND = 20;
+    private final List<UpdateListener> MANUAL_UPDATE_LISTENERS;
     private final List<WeakReference<IUpdateListener>> UPDATE_LISTENERS;
     private final List<WeakReference<IFixedUpdateListener>> FIXED_UPDATE_LISTENERS;
     private final ConcurrentLinkedQueue<IUpdateListener> QUEUED_UPDATE_LISTENERS;
@@ -26,11 +25,22 @@ public class Updater {
 
 
     public Updater() {
-
+        MANUAL_UPDATE_LISTENERS = new ArrayList<>();
         UPDATE_LISTENERS = new ArrayList<>();
         FIXED_UPDATE_LISTENERS = new ArrayList<>();
         QUEUED_UPDATE_LISTENERS = new ConcurrentLinkedQueue<>();
         QUEUED_FIXED_UPDATE_LISTENERS = new ConcurrentLinkedQueue<>();
+    }
+
+
+    @CalledFromMainThread
+    public void registerManualUpdateListener(UpdateListener updateListener) {
+        MANUAL_UPDATE_LISTENERS.add(updateListener);
+    }
+
+    @CalledFromMainThread
+    public void unregisterManualUpdateListener(UpdateListener updateListener) {
+        MANUAL_UPDATE_LISTENERS.remove(updateListener);
     }
 
     // is thread-safe
@@ -64,6 +74,12 @@ public class Updater {
             updateListener.fixedUpdate();
         }
 
+        Iterator<UpdateListener> updateListenerIterator = MANUAL_UPDATE_LISTENERS.listIterator();
+        while (updateListenerIterator.hasNext()) {
+            UpdateListener updateListener = updateListenerIterator.next();
+            updateListener.fixedUpdate();
+        }
+
         updatesProcessedSoFar++;
     }
 
@@ -89,6 +105,11 @@ public class Updater {
             updateListener.update(deltaTime);
         }
 
+        Iterator<UpdateListener> updateListenerIterator = MANUAL_UPDATE_LISTENERS.listIterator();
+        while (updateListenerIterator.hasNext()) {
+            UpdateListener updateListener = updateListenerIterator.next();
+            updateListener.update(deltaTime);
+        }
 
         upsTimer += deltaTime;
         while (upsTimer > 1.0) {

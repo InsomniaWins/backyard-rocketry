@@ -4,13 +4,17 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import wins.insomnia.backyardrocketry.entity.player.IPlayer;
+import wins.insomnia.backyardrocketry.entity.player.Player;
+import wins.insomnia.backyardrocketry.level.Level;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
-import wins.insomnia.backyardrocketry.world.World;
 
 import java.nio.IntBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -18,6 +22,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class BackyardRocketry {
 
+    private static final ExecutorService CHUNK_GENERATION_THREAD_POOL = Executors.newFixedThreadPool(10);
     private static BackyardRocketry instance;
     private Window window;
     private Renderer renderer;
@@ -30,8 +35,8 @@ public class BackyardRocketry {
 
     // TODO: REMOVE PLACEHOLDER CODE!
 
-    private IPlayer player;
-    private World world;
+    private Player player;
+    private Level level;
 
 
 
@@ -40,6 +45,19 @@ public class BackyardRocketry {
     public BackyardRocketry() {
         UPDATER = new Updater();
     }
+
+
+    private void startGameWithPlaceholderCode() {
+
+        // TODO: REPLACE PLACEHOLDER CODE!
+
+        level = new Level();
+        player = new Player(level);
+        player.getTransform().getPosition().set(0, 0, 0);
+
+    }
+
+
 
     public void run() {
 
@@ -54,13 +72,13 @@ public class BackyardRocketry {
         UPDATER.loop();
         renderer.clean();
 
-        world.shutdown();
-
         glfwFreeCallbacks(window.getWindowHandle());
         glfwDestroyWindow(window.getWindowHandle());
 
         glfwTerminate();
         glfwSetErrorCallback(null).free();
+
+        shutdownThreadPools();
     }
 
     private void init() {
@@ -125,19 +143,14 @@ public class BackyardRocketry {
         BlockModelData.loadBlockStates();
 
 
-        // TODO: REPLACE PLACEHOLDER CODE!
-
-        world = new World();
-        player = new TestPlayer(world);
-        double[] worldCenter = world.getCenterXZ();
-        player.getTransform().getPosition().set(64, 90, 64);
-
-
+        startGameWithPlaceholderCode();
 
     }
 
-    public IPlayer getPlayer() {
-        return player;
+    private void shutdownThreadPools() {
+
+        CHUNK_GENERATION_THREAD_POOL.shutdown();
+
     }
 
     public Window getWindow() {
@@ -160,5 +173,9 @@ public class BackyardRocketry {
 
     public Updater getUpdater() {
         return UPDATER;
+    }
+
+    public ExecutorService getChunkGenerationThreadPool() {
+        return CHUNK_GENERATION_THREAD_POOL;
     }
 }

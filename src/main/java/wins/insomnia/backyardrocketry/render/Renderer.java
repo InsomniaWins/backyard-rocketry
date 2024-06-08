@@ -2,20 +2,14 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.entity.player.Player;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.world.ChunkMesh;
-import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
@@ -108,6 +102,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         }
 
+        camera.interpolate(deltaTime);
     }
 
     // master draw method used in game loop
@@ -225,7 +220,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         }
 
         // render target block
-        if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
+        /*
+        if (Player.get() instanceof TestPlayer player) {
 
             BlockRaycastResult raycastResult = player.getTargetBlock();
 
@@ -251,7 +247,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 activateRenderMode();
             }
 
-        }
+        }*/
 
 
         // render gui
@@ -272,12 +268,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         debugString = debugString + "\n\n" + DebugInfo.getFixedUpdatesPerSecond();
         debugString = debugString + "\n\n" + DebugInfo.getRenderMode();
 
+        /*
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
             debugString = debugString + "\n\n" + DebugInfo.getPlayerBlockPosition(player);
             debugString = debugString + "\n\n" + DebugInfo.getPlayerPosition(player);
             debugString = debugString + "\n\n" + DebugInfo.getPlayerRotation(player);
             debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
-        }
+        }*/
 
         debugString = debugString + "\n\nVAO Count: " + OpenGLWrapper.VAO_LIST.size();
 

@@ -1,6 +1,6 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.old;
 
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 public class WorldDecorations {
 

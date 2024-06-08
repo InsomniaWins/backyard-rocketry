@@ -1,12 +1,13 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.old;
 
 import org.joml.*;
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.util.*;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 import java.util.*;
 import java.util.Random;
@@ -504,6 +505,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
 
 
+    /*
     public static List<ChunkPosition> getChunkPositionsTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
 
@@ -571,5 +573,5 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         }
 
         return chunks;
-    }
+    }*/
 }

@@ -1,24 +1,20 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.old;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.*;
-import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.blockproperty.BlockProperties;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
@@ -313,7 +309,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
     public int getGroundHeight(int globalBlockX, int globalBlockZ) {
-        long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
+        long seed = World.get().getSeed();
 
         int noiseAmplitude = 3;
         float noiseScale = 0.025f;
@@ -378,117 +374,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
     protected void decorate() {
-        performDecorationPhase();
+
     }
 
-    private void performDecorationPhase() {
-
-        synchronized (this) {
-            if (generationPhase == GenerationPhase.GENERATED || generationPhase == GenerationPhase.DECORATING) {
-                return;
-            }
-
-            generationPhase = GenerationPhase.DECORATING;
-        }
-
-        // generate trees
-
-        int treeCount = 10;
-        for (int i = 0; i < treeCount; i++) {
-
-            int treeX = X + World.RANDOM.nextInt(16);
-            int treeZ = Z + World.RANDOM.nextInt(16);
-            int treeTrunkY = getGroundHeight(treeX, treeZ) + 1;
-
-            if (isBlockInBounds(toLocalX(treeX), toLocalY(treeTrunkY), toLocalZ(treeZ))) {
-
-                placeDecoration(treeX, treeTrunkY, treeZ, WorldDecorations.TREE);
-
-            }
-
-        }
-
-        synchronized (this) {
-            shouldRegenerateMesh = true;
-        }
-    }
 
     public ChunkPosition getChunkPosition() {
         return World.get().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
-    }
-
-    private void placeDecoration(int globalX, int globalY, int globalZ, int[][] decoration) {
-
-        // prepare neighboring chunks for decoration placing
-        BoundingBox decorationBoundingBox = new BoundingBox();
-
-        List<ChunkPosition> chunkPositionsTouchingDecoration = World.getChunkPositionsTouchingBoundingBox(decorationBoundingBox, true);
-
-
-        for (ChunkPosition chunkPosition : chunkPositionsTouchingDecoration) {
-
-            if (chunkPosition != getChunkPosition()) {
-
-                Chunk chunk = WORLD.getChunkAt(chunkPosition);
-
-                synchronized (this) {
-                    if (chunk == null && !WORLD.LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
-                        chunk = WORLD.loadChunk(chunkPosition, false, true);
-                    }
-                }
-
-                // if chunk is generating in another thread, wait until finished
-                // also wait until chunk can be decorated / added to
-
-                while (chunk == null) {
-
-                    chunk = WORLD.getChunkAt(chunkPosition);
-
-
-
-                }
-
-                while (WORLD.LOAD_CHUNK_QUEUE.contains(chunkPosition) &&
-                        (chunk.getGenerationPhase() != GenerationPhase.LAZY_WAITING_FOR_DECORATION ||
-                                chunk.getGenerationPhase() != GenerationPhase.GENERATED)) {
-
-                    // wait for chunk to be loaded and to be either ready for decorating or finished generating
-                }
-            }
-        }
-
-        // safe to place blocks now
-
-        ArrayList<Integer[]> blocksToPlaceOutOfChunkBoundaries = new ArrayList<>();
-
-		for (int[] blockData : decoration) {
-
-			int x = blockData[0];
-			int y = blockData[1];
-			int z = blockData[2];
-			int blockId = blockData[3];
-
-			int globalBlockX = globalX + x;
-			int globalBlockY = globalY + y;
-			int globalBlockZ = globalZ + z;
-
-			int localBlockX = toLocalX(globalBlockX);
-			int localBlockY = toLocalY(globalBlockY);
-			int localBlockZ = toLocalZ(globalBlockZ);
-
-			if (isBlockInBounds(localBlockX, localBlockY, localBlockZ)) {
-				setBlock(localBlockX, localBlockY, localBlockZ, blockId, false);
-			} else {
-				blocksToPlaceOutOfChunkBoundaries.add(new Integer[]{
-                        globalBlockX, globalBlockY, globalBlockZ, blockId
-				});
-			}
-
-		}
-
-        synchronized (this) {
-            WORLD.setBlocks(blocksToPlaceOutOfChunkBoundaries);
-        }
     }
 
     public boolean isDecorating() {

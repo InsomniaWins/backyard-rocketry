@@ -1,12 +1,11 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.old;
 
 import org.joml.*;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 import java.util.*;
 

@@ -4,8 +4,10 @@ import org.joml.Math;
 import org.joml.Vector3d;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.*;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.Chunk;
+import wins.insomnia.backyardrocketry.world.old.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.old.World;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class Collision {
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
 
     public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
-        World world = BackyardRocketry.getInstance().getPlayer().getWorld();
+        World world = World.get();
 
         List<Chunk> chunks = new ArrayList<>();
 
@@ -106,7 +108,7 @@ public class Collision {
 
     private static BlockRaycastResult blockCollisionCheck(int blockX, int blockY, int blockZ, Block.Face face) {
 
-        World world = BackyardRocketry.getInstance().getPlayer().getWorld();
+        World world = World.get();
         Chunk chunk = world.getChunkContainingBlock(blockX, blockY, blockZ);
 
         if (chunk == null) return null;
@@ -164,7 +166,7 @@ public class Collision {
         // compare with 't'.
         length /= Math.sqrt(dx*dx+dy*dy+dz*dz);
 
-        World world = BackyardRocketry.getInstance().getPlayer().getWorld();
+        World world = World.get();
 
         while (/* ray has not gone past bounds of world */
                 (stepX > 0 ? x < world.getSizeX() : x >= 0) &&
