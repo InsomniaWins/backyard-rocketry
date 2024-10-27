@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.world.old;
+package wins.insomnia.backyardrocketry.world;
 
 public interface IBlockProperties {
     void update(Chunk chunk, int x, int y, int z);

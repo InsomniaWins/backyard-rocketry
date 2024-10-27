@@ -1,13 +1,13 @@
-package wins.insomnia.backyardrocketry.world.old.block;
+package wins.insomnia.backyardrocketry.world.block;
 
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.old.Chunk;
-import wins.insomnia.backyardrocketry.world.old.block.blockproperty.BlockProperties;
-import wins.insomnia.backyardrocketry.world.old.block.blockproperty.BlockPropertiesDirt;
-import wins.insomnia.backyardrocketry.world.old.block.blockproperty.BlockPropertiesGrass;
+import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesDirt;
+import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesGrass;
 
 import java.util.HashMap;
 import java.util.Map;

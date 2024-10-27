@@ -2,7 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
@@ -11,14 +11,10 @@ import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
-import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -235,6 +231,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
             renderable.render();
+            if (renderable instanceof ChunkMesh chunkMesh) {
+
+
+            }
 
         }
 
@@ -279,6 +279,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         }
 
         // draw debug information
+
         StringBuilder debugString = new StringBuilder();
         debugString.append(DebugInfo.getMemoryUsage());
         debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
@@ -296,6 +297,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         debugString.append("\n\nVAO Count: ").append(OpenGLWrapper.VAO_LIST.size());
 
         TextRenderer.drawText(debugString.toString(), 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
+
 
 
 

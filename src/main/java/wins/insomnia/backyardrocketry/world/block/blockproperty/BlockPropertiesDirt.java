@@ -1,9 +1,8 @@
-package wins.insomnia.backyardrocketry.world.old.block.blockproperty;
+package wins.insomnia.backyardrocketry.world.block.blockproperty;
 
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.old.Chunk;
-import wins.insomnia.backyardrocketry.world.old.World;
-import wins.insomnia.backyardrocketry.world.old.block.Block;
+import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 public class BlockPropertiesDirt extends BlockProperties {
 

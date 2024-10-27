@@ -1,6 +1,6 @@
-package wins.insomnia.backyardrocketry.world.old.block.blockproperty;
+package wins.insomnia.backyardrocketry.world.block.blockproperty;
 
-import wins.insomnia.backyardrocketry.world.old.Chunk;
+import wins.insomnia.backyardrocketry.world.Chunk;
 
 public class BlockProperties {
 

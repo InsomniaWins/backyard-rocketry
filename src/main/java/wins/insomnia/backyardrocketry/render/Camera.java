@@ -3,7 +3,7 @@ package wins.insomnia.backyardrocketry.render;
 import org.joml.*;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.Transform;
-import wins.insomnia.backyardrocketry.util.Updater;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 
 import java.lang.Math;
 

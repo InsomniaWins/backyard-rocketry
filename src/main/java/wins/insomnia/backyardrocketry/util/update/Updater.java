@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util.update;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;

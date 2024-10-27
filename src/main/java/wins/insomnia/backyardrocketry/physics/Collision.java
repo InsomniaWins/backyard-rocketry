@@ -2,12 +2,11 @@ package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Math;
 import org.joml.Vector3d;
-import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.old.Chunk;
-import wins.insomnia.backyardrocketry.world.old.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.old.World;
-import wins.insomnia.backyardrocketry.world.old.block.Block;
+import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
