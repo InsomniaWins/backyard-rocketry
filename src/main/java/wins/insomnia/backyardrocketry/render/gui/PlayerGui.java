@@ -3,7 +3,7 @@ package wins.insomnia.backyardrocketry.render.gui;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.TestPlayer;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 public class PlayerGui implements IGuiRenderable {
 

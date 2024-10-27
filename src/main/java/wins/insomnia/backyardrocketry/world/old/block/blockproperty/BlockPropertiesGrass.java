@@ -1,12 +1,10 @@
-package wins.insomnia.backyardrocketry.world.block.blockproperty;
+package wins.insomnia.backyardrocketry.world.old.block.blockproperty;
 
-import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.Chunk;
-import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.old.Chunk;
+import wins.insomnia.backyardrocketry.world.old.World;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
 
 public class BlockPropertiesGrass extends BlockProperties {
 

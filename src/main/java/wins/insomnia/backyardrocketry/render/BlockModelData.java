@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
-import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+import wins.insomnia.backyardrocketry.world.old.block.Block;
+import wins.insomnia.backyardrocketry.world.old.block.blockproperty.BlockProperties;
 
 import java.io.IOException;
 import java.net.URI;
