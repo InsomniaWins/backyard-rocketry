@@ -41,7 +41,7 @@ public class Camera {
         Window gameWindow = backyardRocketryInstance.getWindow();
         int[] gameWindowSize = gameWindow.getSize();
 
-        PROJECTION_MATRIX.setPerspective(fov, (float) gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, renderDistance);
+        PROJECTION_MATRIX.setPerspective(fov, (float) gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, renderDistance * 2);
     }
 
     public void updateViewMatrix() {

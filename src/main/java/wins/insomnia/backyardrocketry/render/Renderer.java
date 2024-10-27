@@ -8,14 +8,16 @@ import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
@@ -33,10 +35,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
-    private final ConcurrentLinkedQueue<IRenderable> RENDER_QUEUE;
-    private final ConcurrentLinkedQueue<IRenderable> REMOVE_RENDER_QUEUE;
-    private final ArrayList<IRenderable> RENDER_LIST;
-    private final ConcurrentLinkedQueue<IGuiRenderable> GUI_RENDER_LIST;
+    private final LinkedList<IRenderable> RENDER_LIST;
+    private final LinkedList<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
     private double fpsTimer = 0.0;
@@ -45,10 +45,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private int guiScale = 1;
 
     public Renderer() {
-        RENDER_QUEUE = new ConcurrentLinkedQueue<>();
-        REMOVE_RENDER_QUEUE = new ConcurrentLinkedQueue<>();
-        RENDER_LIST = new ArrayList<>();
-        GUI_RENDER_LIST = new ConcurrentLinkedQueue<>();
+        RENDER_LIST = new LinkedList<>();
+        GUI_RENDER_LIST = new LinkedList<>();
         TEXTURE_MANAGER = new TextureManager();
 
         camera = new Camera();
@@ -95,6 +93,16 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         }
     }
 
+    @Override
+    public void registeredFixedUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredFixedUpdateListener() {
+
+    }
+
     public void update(double deltaTime) {
         draw(BackyardRocketry.getInstance().getWindow());
         framesRenderedSoFar++;
@@ -107,6 +115,16 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             framesRenderedSoFar = 0;
 
         }
+
+    }
+
+    @Override
+    public void registeredUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredUpdateListener() {
 
     }
 
@@ -123,7 +141,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.add((IGuiRenderable) renderable);
         } else {
-            RENDER_QUEUE.add(renderable);
+            RENDER_LIST.add(renderable);
         }
 
     }
@@ -167,13 +185,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     }
 
-    // is thread-safe (except for GUI RENDERABLES
+    //  NOT THREAD SAFE
     public void removeRenderable(IRenderable renderable) {
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
         } else {
-			RENDER_QUEUE.remove(renderable);
-            REMOVE_RENDER_QUEUE.add(renderable);
+            RENDER_LIST.remove(renderable);
         }
     }
 
@@ -205,16 +222,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         modelMatrix.identity();
 
         // render renderables
-        while (!RENDER_QUEUE.isEmpty()) {
-            RENDER_LIST.add(RENDER_QUEUE.poll());
-        }
-
-        while (!REMOVE_RENDER_QUEUE.isEmpty()) {
-            RENDER_LIST.remove(REMOVE_RENDER_QUEUE.poll());
-        }
 
         sortRenderList();
         glDisable(GL_BLEND);
+
+        ArrayList<String> activeChunks = new ArrayList<>();
+
         for (IRenderable renderable : RENDER_LIST) {
 
             if (!renderable.shouldRender()) continue;
@@ -222,6 +235,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
             renderable.render();
+
         }
 
         // render target block
@@ -265,23 +279,27 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         }
 
         // draw debug information
-
-        String debugString = "";
-        debugString = debugString + DebugInfo.getMemoryUsage();
-        debugString = debugString + "\n\n" + DebugInfo.getFramesPerSecond();
-        debugString = debugString + "\n\n" + DebugInfo.getFixedUpdatesPerSecond();
-        debugString = debugString + "\n\n" + DebugInfo.getRenderMode();
+        StringBuilder debugString = new StringBuilder();
+        debugString.append(DebugInfo.getMemoryUsage());
+        debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
+        debugString.append("\n\n").append(DebugInfo.getFixedUpdatesPerSecond());
+        debugString.append("\n\n").append(DebugInfo.getRenderMode());
 
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
-            debugString = debugString + "\n\n" + DebugInfo.getPlayerBlockPosition(player);
-            debugString = debugString + "\n\n" + DebugInfo.getPlayerPosition(player);
-            debugString = debugString + "\n\n" + DebugInfo.getPlayerRotation(player);
-            debugString = debugString + "\n\n" + DebugInfo.getPlayerTargetBlockInfo(player);
+            debugString.append("\n\n").append(DebugInfo.getPlayerBlockPosition(player));
+            debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
+            debugString.append("\n\n").append(DebugInfo.getPlayerPosition(player));
+            debugString.append("\n\n").append(DebugInfo.getPlayerRotation(player));
+            debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
         }
 
-        debugString = debugString + "\n\nVAO Count: " + OpenGLWrapper.VAO_LIST.size();
+        debugString.append("\n\nVAO Count: ").append(OpenGLWrapper.VAO_LIST.size());
 
-        TextRenderer.drawText(debugString, 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
+        TextRenderer.drawText(debugString.toString(), 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
+
+
+
+
         drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
 
     }

@@ -2,6 +2,8 @@ package wins.insomnia.backyardrocketry.util;
 
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.text.DecimalFormat;
@@ -27,6 +29,11 @@ public class DebugInfo {
 		return "Fixed Updates: \n  " + Updater.get().getUpdatesPerSecond();
 	}
 
+	public static String getPlayerChunkPosition(IPlayer player) {
+		Vector3i playerBlockPosition = player.getBlockPosition();
+		ChunkPosition chunkPosition = player.getWorld().getChunkPositionFromBlockPosition(playerBlockPosition.x, playerBlockPosition.y, playerBlockPosition.z);
+		return "Chunk Position: \n  " + (chunkPosition != null ? FancyToString.toString(chunkPosition) : "NULL");
+	}
 	public static String getPlayerBlockPosition(IPlayer player) {
 		Vector3i playerBlockPosition = player.getBlockPosition();
 		return "Block Position: \n  " + FancyToString.toString(playerBlockPosition);

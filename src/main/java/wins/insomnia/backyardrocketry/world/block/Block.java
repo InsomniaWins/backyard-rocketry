@@ -154,7 +154,7 @@ public class Block {
     );
     static {
         for (Map.Entry<Integer, ?> entry: BLOCK_DETAILS_MAP.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+            System.out.println("Loaded block: " + entry.getKey() + " (" + ((HashMap) entry.getValue()).get(BlockDetail.NAME) + "): " + entry.getValue());
         }
     }
 

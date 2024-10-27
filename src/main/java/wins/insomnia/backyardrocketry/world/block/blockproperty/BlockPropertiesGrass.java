@@ -35,6 +35,7 @@ public class BlockPropertiesGrass extends BlockProperties {
 		return getBlockState(blockState, deep);
 	}
 
+	/*
 	@Override
 	public void onRandomTick(int blockState, Chunk chunk, int x, int y, int z) {
 
@@ -58,4 +59,6 @@ public class BlockPropertiesGrass extends BlockProperties {
 
 		return currentBlockState;
 	}
+
+	 */
 }

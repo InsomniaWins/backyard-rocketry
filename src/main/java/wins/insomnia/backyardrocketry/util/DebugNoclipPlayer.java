@@ -8,6 +8,9 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -109,9 +112,29 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
     }
 
     @Override
+    public void registeredFixedUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredFixedUpdateListener() {
+
+    }
+
+    @Override
     public void update(double deltaTime) {
 
         interpolateCameraTransform(deltaTime);
+
+    }
+
+    @Override
+    public void registeredUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredUpdateListener() {
 
     }
 

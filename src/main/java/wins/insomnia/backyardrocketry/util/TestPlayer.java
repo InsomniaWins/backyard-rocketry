@@ -15,6 +15,9 @@ import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.render.gui.PlayerGui;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
@@ -29,6 +32,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
     private final float GRAVITY = -0.1f;
     private final float WALK_SPEED = 0.22f;
+    private final float FLY_SPEED = 3f;
     private final float SPRINT_SPEED = 0.5f;
     private final float JUMP_SPEED = 0.5f;
     private final float EYE_HEIGHT = 1.57f;
@@ -61,7 +65,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private float cameraInterpolationFactor = 0f;
     private int blockInteractionTimer = 0;
     private boolean lockMouseToCenterForCameraRotation = false;
-    public boolean hasGravity = true;
+    public boolean hasGravity = false;
+    private boolean hasCollision = false;
     private BlockRaycastResult targetBlock;
     private int breakProgress = 0;
 
@@ -84,6 +89,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         GUI_ELEMENT = new PlayerGui(this);
         Renderer.get().addRenderable(GUI_ELEMENT);
+        TRANSFORM.getRotation().x = Math.toRadians(90);
 
     }
 
@@ -132,35 +138,40 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
 
         // move and collide
-
-        if (VELOCITY.x != 0f) {
-            for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                VELOCITY.x = boundingBox.collideX(getBoundingBox(), VELOCITY.x);
-            }
-
-            getPosition().x += VELOCITY.x;
-        }
-
-        onGround = false;
-        if (VELOCITY.y != 0f) {
-            for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                double newVelocity = boundingBox.collideY(getBoundingBox(), VELOCITY.y);
-
-                if (newVelocity != VELOCITY.y && Math.signum(VELOCITY.y) < 0d) {
-                    onGround = true;
+        if (hasCollision) {
+            if (VELOCITY.x != 0f) {
+                for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
+                    VELOCITY.x = boundingBox.collideX(getBoundingBox(), VELOCITY.x);
                 }
 
-                VELOCITY.y = newVelocity;
+                getPosition().x += VELOCITY.x;
             }
 
+            onGround = false;
+            if (VELOCITY.y != 0f) {
+                for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
+                    double newVelocity = boundingBox.collideY(getBoundingBox(), VELOCITY.y);
+
+                    if (newVelocity != VELOCITY.y && Math.signum(VELOCITY.y) < 0d) {
+                        onGround = true;
+                    }
+
+                    VELOCITY.y = newVelocity;
+                }
+
+                getPosition().y += VELOCITY.y;
+            }
+
+            if (VELOCITY.z != 0f) {
+                for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
+                    VELOCITY.z = boundingBox.collideZ(getBoundingBox(), VELOCITY.z);
+                }
+
+                getPosition().z += VELOCITY.z;
+            }
+        } else {
+            getPosition().x += VELOCITY.x;
             getPosition().y += VELOCITY.y;
-        }
-
-        if (VELOCITY.z != 0f) {
-            for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                VELOCITY.z = boundingBox.collideZ(getBoundingBox(), VELOCITY.z);
-            }
-
             getPosition().z += VELOCITY.z;
         }
     }
@@ -178,6 +189,9 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         KeyboardInput keyboardInput = KeyboardInput.get();
         float moveSpeed = KeyboardInput.get().isKeyPressed(GLFW_KEY_LEFT_CONTROL) ? SPRINT_SPEED : WALK_SPEED;
+        if (!hasGravity) {
+            moveSpeed = FLY_SPEED;
+        }
         float rotateSpeed = 0.0025f;
 
 
@@ -207,7 +221,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         moveAmount.mul(moveSpeed);
 
 
-        if (!getWorld().isPlayerInUnloadedChunk(this)) {
+        //if (!getWorld().isPlayerInUnloadedChunk(this)) {
 
             VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
             VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
@@ -256,9 +270,19 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
             hotbarManagement();
             blockInteraction();
-        }
+        //}
 
         WORLD.updateChunksAroundPlayer(this);
+    }
+
+    @Override
+    public void registeredFixedUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredFixedUpdateListener() {
+
     }
 
     private void hotbarManagement() {
@@ -368,9 +392,9 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         Chunk targetBlockChunk = targetBlock.getChunk();
         int blockState = targetBlockChunk.getBlockState(
-                targetBlockChunk.toLocalX(targetBlock.getBlockX()),
-                targetBlockChunk.toLocalY(targetBlock.getBlockY()),
-                targetBlockChunk.toLocalZ(targetBlock.getBlockZ())
+                targetBlock.getBlockX(),
+                targetBlock.getBlockY(),
+                targetBlock.getBlockZ()
         );
         int block = BitHelper.getBlockIdFromBlockState(blockState);
 
@@ -448,7 +472,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
                 chunk.toLocalX(placePosX),
                 chunk.toLocalY(placePosY),
                 chunk.toLocalZ(placePosZ),
-                blockToPlace
+                blockToPlace,
+                true
         );
     }
 
@@ -467,6 +492,16 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     public void update(double deltaTime) {
 
         interpolateCameraTransform(deltaTime);
+
+    }
+
+    @Override
+    public void registeredUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredUpdateListener() {
 
     }
 

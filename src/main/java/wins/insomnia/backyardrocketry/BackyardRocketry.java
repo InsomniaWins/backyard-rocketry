@@ -8,6 +8,7 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.nio.IntBuffer;
@@ -130,7 +131,7 @@ public class BackyardRocketry {
         world = new World();
         player = new TestPlayer(world);
         double[] worldCenter = world.getCenterXZ();
-        player.getTransform().getPosition().set(64, 90, 64);
+        player.getTransform().getPosition().set(worldCenter[0], 140, worldCenter[1]);
 
 
 

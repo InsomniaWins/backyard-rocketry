@@ -3,9 +3,15 @@ package wins.insomnia.backyardrocketry.world;
 import org.joml.*;
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
+import wins.insomnia.backyardrocketry.render.TextRenderer;
+import wins.insomnia.backyardrocketry.render.TextureManager;
 import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
@@ -14,23 +20,24 @@ import java.util.concurrent.*;
 
 public class World implements IFixedUpdateListener, IUpdateListener {
 
-    public static final int CHUNK_AMOUNT_X = 128;
-    public static final int CHUNK_AMOUNT_Y = 6;
-    public static final int CHUNK_AMOUNT_Z = 128;
+    private enum ChunkManagementType {
+        LOAD,
+        UNLOAD
+    }
+
+    public static final int CHUNK_AMOUNT_X = 45;
+    public static final int CHUNK_AMOUNT_Y = 15;
+    public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
 
-    public static int chunkLoadDistance = 5;
+    public static int chunkLoadDistance = 3;
     public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
-    protected final ConcurrentLinkedQueue<ChunkPosition> UNLOAD_CHUNK_QUEUE;
-    protected final ConcurrentLinkedQueue<ChunkPosition> LOAD_CHUNK_QUEUE;
-    protected final ConcurrentLinkedQueue<ChunkPosition> DECORATE_CHUNK_QUEUE;
-    protected final ConcurrentLinkedQueue<Future> FUTURE_LIST;
     public static final Random RANDOM = new Random();
-
-
-    private final ExecutorService chunkManagerExecutorService = Executors.newFixedThreadPool(10);
+    private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
+    public final ArrayList<ChunkPosition> CHUNKS_CURRENTLY_LOADING;
+    private final Queue<ChunkManagementData> CHUNK_MANAGEMENT_QUEUE;
 
     private long seed;
 
@@ -38,43 +45,22 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         seed = RANDOM.nextLong();
         CHUNKS = new ConcurrentHashMap<>();
-        LOAD_CHUNK_QUEUE = new ConcurrentLinkedQueue<>();
-        UNLOAD_CHUNK_QUEUE = new ConcurrentLinkedQueue<>();
-        DECORATE_CHUNK_QUEUE = new ConcurrentLinkedQueue<>();
-        FUTURE_LIST = new ConcurrentLinkedQueue<>();
+        CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+        CHUNK_MANAGEMENT_QUEUE = new LinkedList<>();
+        CHUNKS_CURRENTLY_LOADING = new ArrayList<>();
         instance = this;
 
         Updater.get().registerFixedUpdateListener(this);
         Updater.get().registerUpdateListener(this);
     }
 
-    public static Vector3i getBlockPositionFromPosition(Vector3d position) {
-        return new Vector3i(
-                (int) position.x,
-                (int) position.y,
-                (int) position.z
-        );
-    }
-
-    public void setBlocks(ArrayList<Integer[]> blockList) {
-
-        for (Integer[] blockData : blockList) {
-
-            setBlock(blockData[0], blockData[1], blockData[2], blockData[3]);
-
-        }
-
-    }
-
     public boolean isChunkPositionInWorldBorder(ChunkPosition chunkPosition) {
-
         return isBlockInWorldBorder(
                 chunkPosition.getX() * Chunk.SIZE_X,
                 chunkPosition.getY() * Chunk.SIZE_Y,
                 chunkPosition.getZ() * Chunk.SIZE_Z
 
                 );
-
     }
 
     public boolean isBlockInWorldBorder(int x, int y, int z) {
@@ -91,155 +77,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return true;
     }
 
-    public void setBlock(int x, int y, int z, int blockId) {
-
-        if (!isBlockInWorldBorder(x, y, z)) {
-            return;
-        }
-
-        ChunkPosition chunkPosition = getChunkPositionFromBlockPosition(x, y, z);
-        Chunk chunk = getChunkAt(chunkPosition);
-
-        if (LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
-            while (chunk == null) {
-                chunk = getChunkAt(chunkPosition);
-            }
-        }
-
-        if (chunk == null) {
-            chunk = loadChunk(chunkPosition, false, true);
-        }
-
-        if (chunk == null) {
-            System.out.println("could not load chunk: " + chunkPosition);
-        }
-
-        chunk.setBlock(
-                chunk.toLocalX(x),
-                chunk.toLocalY(y),
-                chunk.toLocalZ(z),
-                blockId
-        );
-
-    }
-
-    // returns loaded chunk if generateOnSameThread is true;
-    // otherwise, returns null
-    protected Chunk loadChunk(ChunkPosition chunkPosition, boolean shouldDecorateChunk, boolean generateOnSameThread) {
-
-
-
-        if (CHUNKS.containsKey(chunkPosition)) {
-
-            Chunk chunk = CHUNKS.get(chunkPosition);
-
-            if (!(chunk.isWaitingForGeneration() && !chunk.isDecorating() && shouldDecorateChunk)) {
-                return null;
-            }
-        }
-
-        if (LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
-            return null;
-        }
-
-        LOAD_CHUNK_QUEUE.add(chunkPosition);
-
-        if (generateOnSameThread) {
-
-            // otherwise, generate
-            Chunk chunk = generateChunk(chunkPosition);
-
-            CHUNKS.put(chunkPosition, chunk);
-            LOAD_CHUNK_QUEUE.remove(chunkPosition);
-
-            if (shouldDecorateChunk) {
-                chunk.decorate();
-            }
-
-            return chunk;
-
-        } else {
-
-            FUTURE_LIST.add(chunkManagerExecutorService.submit(() -> {
-
-                // otherwise, generate
-                Chunk chunk = generateChunk(chunkPosition);
-
-                CHUNKS.put(chunkPosition, chunk);
-                LOAD_CHUNK_QUEUE.remove(chunkPosition);
-
-                if (shouldDecorateChunk) {
-                    chunk.decorate();
-                }
-
-            }));
-        }
-
-        return null;
-    }
-
-    protected void loadChunk(ChunkPosition chunkPosition, boolean shouldDecorateChunk) {
-        loadChunk(chunkPosition, shouldDecorateChunk, false);
-    }
-
-    private void decorateChunk(ChunkPosition chunkPosition) {
-
-        if (CHUNKS.containsKey(chunkPosition)) {
-            return;
-        }
-
-        if (LOAD_CHUNK_QUEUE.contains(chunkPosition)) {
-            return;
-        }
-
-        DECORATE_CHUNK_QUEUE.add(chunkPosition);
-
-        chunkManagerExecutorService.submit(() -> {
-
-            Chunk chunk = CHUNKS.get(chunkPosition);
-
-            if (chunk == null) return;
-
-            chunk.decorate();
-            DECORATE_CHUNK_QUEUE.remove(chunkPosition);
-
-        });
-
-    }
-
-    // happens on chunk generation thread -- NOT MAIN THREAD!
-    private Chunk generateChunk(ChunkPosition chunkPosition) {
-
-        Chunk chunk;
-        try {
-            chunk = new Chunk(
-                    this,
-                    chunkPosition.getX(),
-                    chunkPosition.getY(),
-                    chunkPosition.getZ()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            chunk = null;
-        }
-
-        return chunk;
-    }
-
-    public void queueUnloadChunk(ChunkPosition chunkPosition) {
-
-        UNLOAD_CHUNK_QUEUE.offer(chunkPosition);
-
-    }
-
-    private void unloadChunk(ChunkPosition chunkPosition) {
-
-        Chunk chunk = CHUNKS.get(chunkPosition);
-        CHUNKS.remove(chunkPosition);
-        chunk.clean();
-
-    }
-
     public boolean isPlayerInUnloadedChunk(TestPlayer player) {
 
         List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(player.getBoundingBox(), true);
@@ -247,63 +84,25 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 		return chunksTouchingPlayer.contains(null);
 	}
 
-    public void updateChunksAroundPlayer(IPlayer player) {
-
-        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
-
-        for (Map.Entry<ChunkPosition, Chunk> entry : CHUNKS.entrySet()) {
-            if (chunkPositionsAroundPlayer.contains(entry.getKey())) {
-                // remove from positions around player: loading is not needed
-                chunkPositionsAroundPlayer.remove(entry.getKey());
-            } else {
-                // unload chunk
-                queueUnloadChunk(entry.getKey());
-            }
-        }
-
-        // load chunks
-        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-            if (!CHUNKS.containsKey(chunkPosition)) {
-                loadChunk(chunkPosition, true);
-            }
-        }
-
-
-        // unload chunks
-        while (!UNLOAD_CHUNK_QUEUE.isEmpty()) {
-            ChunkPosition chunkPosition = UNLOAD_CHUNK_QUEUE.poll();
-            unloadChunk(chunkPosition);
-        }
-
-        // set chunks as processing or not
-        for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
-
-            chunkEntry.getValue().setShouldProcess(
-                    chunkProcessDistance >= new Vector3d(chunkEntry.getKey().getVector()).distance(player.getPosition())
-            );
-
-        }
-    }
-
-    public List<ChunkPosition> getChunkPositionsBlockPosition(int x, int y, int z, int chunkRadius) {
+    public List<ChunkPosition> getChunkPositionsAroundBlockPosition(int x, int y, int z, int chunkRadius) {
 
         List<ChunkPosition> chunkPositions = new ArrayList<>();
         ChunkPosition originChunkPosition = getChunkPositionFromBlockPositionClamped(x, y, z);
 
-        for (int xIterator = -chunkRadius; xIterator < chunkRadius; xIterator++) {
-            for (int yIterator = -chunkRadius; yIterator < chunkRadius; yIterator++) {
-                for (int zIterator = -chunkRadius; zIterator < chunkRadius; zIterator++) {
+        for (int xIterator = -chunkRadius; xIterator <= chunkRadius; xIterator++) {
+            for (int yIterator = -chunkRadius; yIterator <= chunkRadius; yIterator++) {
+                for (int zIterator = -chunkRadius; zIterator <= chunkRadius; zIterator++) {
 
-                    int chunkX = xIterator * Chunk.SIZE_X + originChunkPosition.getX();
-                    if (chunkX < 0 || chunkX >= getSizeX()) continue;
-
-
-                    int chunkY = yIterator * Chunk.SIZE_Y + originChunkPosition.getY();
-                    if (chunkY < 0 || chunkY >= getSizeY()) continue;
+                    int chunkX = xIterator + originChunkPosition.getX();
+                    if (chunkX < 0 || chunkX >= CHUNK_AMOUNT_X) continue;
 
 
-                    int chunkZ = zIterator * Chunk.SIZE_Z + originChunkPosition.getZ();
-                    if (chunkZ < 0 || chunkZ >= getSizeZ()) continue;
+                    int chunkY = yIterator + originChunkPosition.getY();
+                    if (chunkY < 0 || chunkY >= CHUNK_AMOUNT_Y) continue;
+
+
+                    int chunkZ = zIterator + originChunkPosition.getZ();
+                    if (chunkZ < 0 || chunkZ >= CHUNK_AMOUNT_Z) continue;
 
                     ChunkPosition chunkPosition = new ChunkPosition(chunkX, chunkY, chunkZ);
 
@@ -320,27 +119,32 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
         Vector3i playerBlockPos = player.getBlockPosition();
-        return getChunkPositionsBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, chunkLoadDistance);
+        return getChunkPositionsAroundBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, chunkLoadDistance);
     }
 
+    // thread-safe
     public Chunk getChunkAt(ChunkPosition chunkPosition) {
         return CHUNKS.get(chunkPosition);
-    }
-
-    public Chunk getChunkAt(int chunkX, int chunkY, int chunkZ) {
-        return CHUNKS.get(new ChunkPosition(chunkX, chunkY, chunkZ));
     }
 
     public int getBlock(int x, int y, int z) {
 
         // if out of world border
-        if (x > getSizeX()-1 || x < 0 || y > getSizeX()-1 || y < 0 || z > getSizeX()-1 || z < 0 ) {
+        if (x > getSizeX()-1 || x < 0 || y > getSizeY()-1 || y < 0 || z > getSizeZ()-1 || z < 0 ) {
             return Block.WORLD_BORDER;
         }
 
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
         if (chunk == null) return Block.NULL;
+
+        if (!chunk.isBlockInBounds(x, y, z)) {
+            System.out.println("failed at: " + chunk.getChunkPosition() + " : " + x + ", " + y + ", " + z + " : " + getChunkPositionFromBlockPosition(x, y, z));
+            for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+                System.out.println(element);
+            }
+            System.exit(1);
+        }
 
         return chunk.getBlock(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));
 
@@ -371,11 +175,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return Chunk.SIZE_Z * CHUNK_AMOUNT_Z;
     }
 
-
-    public int getBlockState(Vector3i blockPos) {
-        return getBlockState(blockPos.x, blockPos.y, blockPos.z);
-    }
-
     public int getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
@@ -384,8 +183,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             return BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.NULL);
         }
 
-        return chunk.getBlockState(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z));
-
+        return chunk.getBlockState(x, y, z);
     }
 
     public static World get() {
@@ -414,9 +212,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         blockY = Math.clamp(blockY, 0, worldSizeY-1);
         blockZ = Math.clamp(blockZ, 0, worldSizeZ-1);
 
-        int chunkPosX = Chunk.SIZE_X * (blockX / Chunk.SIZE_X);
-        int chunkPosY = Chunk.SIZE_Y * (blockY / Chunk.SIZE_Y);
-        int chunkPosZ = Chunk.SIZE_Z * (blockZ / Chunk.SIZE_Z);
+        int chunkPosX = blockX / (Chunk.SIZE_X);
+        int chunkPosY = blockY / (Chunk.SIZE_Y);
+        int chunkPosZ = blockZ / (Chunk.SIZE_Z);
 
         return new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
     }
@@ -437,9 +235,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         if (blockX < 0 || blockY < 0 || blockZ < 0) return null;
         if (blockX > getSizeX()-1 || blockY > getSizeY()-1 || blockZ > getSizeZ()-1) return null;
 
-        int chunkPosX = Chunk.SIZE_X * (blockX / Chunk.SIZE_X);
-        int chunkPosY = Chunk.SIZE_Y * (blockY / Chunk.SIZE_Y);
-        int chunkPosZ = Chunk.SIZE_Z * (blockZ / Chunk.SIZE_Z);
+        int chunkPosX = blockX / (Chunk.SIZE_X);
+        int chunkPosY = blockY / (Chunk.SIZE_Y);
+        int chunkPosZ = blockZ / (Chunk.SIZE_Z);
 
         return new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
     }
@@ -450,59 +248,242 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     public Chunk getChunkContainingBlock(int x, int y, int z) {
 
-        if (x < 0 || y < 0 || z < 0) return null;
+        ChunkPosition chunkPosition = getChunkPositionFromBlockPosition(x, y, z);
+        if (chunkPosition == null) {
+            return null;
+        }
 
-        int chunkPosX = Chunk.SIZE_X * (x / Chunk.SIZE_X);
-        int chunkPosY = Chunk.SIZE_Y * (y / Chunk.SIZE_Y);
-        int chunkPosZ = Chunk.SIZE_Z * (z / Chunk.SIZE_Z);
-
-        return CHUNKS.get(new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ));
+        return CHUNKS.get(chunkPosition);
     }
 
     public Collection<Chunk> getChunks() {
         return CHUNKS.values();
     }
 
+
+
+    /**
+     *
+     * Queues a chunk at chunkPosition to be loaded.
+     *
+     * <p>
+     *     >> Should be thread safe.
+     * </p>
+     *
+     * @param chunkPosition
+     */
+    public void queueChunkForLoading(ChunkPosition chunkPosition) {
+
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            Updater.get().queueMainThreadInstruction(() -> _queueChunkForLoading(chunkPosition));
+        } else {
+            _queueChunkForLoading(chunkPosition);
+        }
+
+    }
+
+    private void _queueChunkForLoading(ChunkPosition chunkPosition) {
+
+        // check already loaded
+        if (getChunkAt(chunkPosition) != null) {
+            return;
+        }
+
+        // check already queued
+        for (ChunkManagementData chunkManagementData : CHUNK_MANAGEMENT_QUEUE) {
+            if (chunkManagementData.managementType == ChunkManagementType.LOAD &&
+                    chunkManagementData.chunkPosition.equals(chunkPosition)) {
+                return;
+            }
+        }
+
+        CHUNK_MANAGEMENT_QUEUE.offer(new ChunkManagementData(ChunkManagementType.LOAD, chunkPosition));
+    }
+
+
+
+
+    /**
+     *
+     * Queues a chunk at chunkPosition to be unloaded.
+     *
+     * <p>
+     *     >> Should be thread safe.
+     * </p>
+     *
+     * @param chunkPosition
+     */
+    public void queueChunkForUnloading(ChunkPosition chunkPosition) {
+
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            Updater.get().queueMainThreadInstruction(() -> _queueChunkForUnloading(chunkPosition));
+        } else {
+            _queueChunkForUnloading(chunkPosition);
+        }
+
+    }
+
+    private void _queueChunkForUnloading(ChunkPosition chunkPosition) {
+        CHUNK_MANAGEMENT_QUEUE.offer(new ChunkManagementData(
+                ChunkManagementType.UNLOAD,
+                chunkPosition
+        ));
+    }
+
+
+    public void updateChunksAroundPlayer(IPlayer player) {
+
+        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
+
+        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+            if (CHUNKS.get(chunkPosition) == null) {
+                queueChunkForLoading(chunkPosition);
+            }
+        }
+
+        // loop through chunks
+        for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
+
+            Chunk chunk = chunkEntry.getValue();
+            ChunkPosition chunkPosition = chunkEntry.getKey();
+
+            // set if chunk should process or not
+            chunk.setShouldProcess(
+                    chunkProcessDistance >= new Vector3d(chunkPosition.getVector()).distance(player.getPosition())
+            );
+
+            if (!chunkPositionsAroundPlayer.contains(chunk.getChunkPosition())) {
+                chunk.ticksToLive -= 1;
+            }
+
+            if (chunk.isProcessing()) {
+                chunk.ticksToLive = Math.max(1, chunk.ticksToLive);
+            } else {
+                if (chunk.ticksToLive <= 0) {
+                    queueChunkForUnloading(chunkPosition);
+                }
+            }
+
+        }
+    }
+
+
+    /**
+     *
+     * DO NOT USE DIRECTLY! This method is used ONLY in the World.update(double deltaTime) method.
+     *
+     *
+     * @param chunkPosition
+     */
+    private void loadChunk(ChunkPosition chunkPosition) {
+
+        if (CHUNKS.get(chunkPosition) != null) return;
+
+        Chunk chunk = new Chunk(this, chunkPosition);
+        chunk.generateLand();
+
+        CHUNKS.put(chunkPosition, chunk);
+        Updater.get().queueMainThreadInstruction(() -> {
+            CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
+        });
+    }
+
+
+    /**
+     *
+     * DO NOT USE DIRECTLY! This method is used ONLY in the World.update(double deltaTime) method.
+     *
+     *
+     * @param chunkPosition
+     */
+    private void unloadChunk(ChunkPosition chunkPosition) {
+
+        if (CHUNKS.get(chunkPosition) != null) {
+            Chunk chunk = CHUNKS.get(chunkPosition);
+            CHUNKS.remove(chunkPosition);
+
+            Updater.get().unregisterUpdateListener(chunk);
+            Updater.get().unregisterFixedUpdateListener(chunk);
+        }
+
+    }
+
     @Override
     public void fixedUpdate() {
 
+
+
+    }
+
+    @Override
+    public void registeredFixedUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredFixedUpdateListener() {
 
     }
 
     @Override
     public void update(double deltaTime) {
 
-        Iterator<Future> futureIterator = FUTURE_LIST.iterator();
-        while (futureIterator.hasNext()) {
-            Future future = futureIterator.next();
+        int chunkManagementQueueSize = CHUNK_MANAGEMENT_QUEUE.size();
+        for (int i = 0; i < chunkManagementQueueSize; i++) {
 
-            if (!future.isDone() && !future.isCancelled()) {
-                continue;
+            ChunkManagementData chunkManagementData = CHUNK_MANAGEMENT_QUEUE.poll();
+
+            if (chunkManagementData == null) continue;
+
+            switch (chunkManagementData.managementType) {
+                case LOAD -> {
+
+                    if (!CHUNKS_CURRENTLY_LOADING.contains(chunkManagementData.chunkPosition)) {
+                        if (CHUNKS.get(chunkManagementData.chunkPosition) == null) {
+                            CHUNKS_CURRENTLY_LOADING.add(chunkManagementData.chunkPosition);
+                            CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(() -> loadChunk(chunkManagementData.chunkPosition));
+                        }
+                    }
+
+                }
+                case UNLOAD -> {
+                    ChunkPosition chunkPosition = chunkManagementData.chunkPosition;
+
+                    // if chunk is still loading, wait for it to finish loading before unloading it
+                    if (CHUNKS_CURRENTLY_LOADING.contains(chunkPosition)) {
+
+                        CHUNK_MANAGEMENT_QUEUE.offer(chunkManagementData);
+
+                    } else {
+                        unloadChunk(chunkPosition);
+                    }
+                }
+                default -> {
+
+                }
             }
 
-            try {
-                Object futureResult = future.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            futureIterator.remove();
         }
 
     }
 
-    // called at unload of world
-    public void shutdown() {
-        chunkManagerExecutorService.shutdown();
-        Chunk.chunkMeshGenerationExecutorService.shutdown();
+    @Override
+    public void registeredUpdateListener() {
+
+    }
+
+    @Override
+    public void unregisteredUpdateListener() {
+
     }
 
 
-
-
-
-
-
+    // called at unload of world
+    public void shutdown() {
+        CHUNK_MANAGEMENT_EXECUTOR_SERVICE.shutdown();
+        Chunk.chunkMeshGenerationExecutorService.shutdown();
+    }
 
     public static List<ChunkPosition> getChunkPositionsTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
         World world = BackyardRocketry.getInstance().getPlayer().getWorld();
@@ -538,9 +519,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
 
         // loop through chunks to find loaded chunks colliding
-        for (int x = 0; x <= xRange; x += Chunk.SIZE_X) {
-            for (int y = 0; y <= yRange; y += Chunk.SIZE_Y) {
-                for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
+        for (int x = 0; x <= xRange; x++) {
+            for (int y = 0; y <= yRange; y++) {
+                for (int z = 0; z <= zRange; z++) {
 
                     currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
 
@@ -571,5 +552,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         }
 
         return chunks;
+    }
+
+    private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {
+
     }
 }

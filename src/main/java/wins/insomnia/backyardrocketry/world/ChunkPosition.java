@@ -43,6 +43,19 @@ public class ChunkPosition {
         CAN_MODIFY = modifiable;
     }
 
+    public ChunkPosition add(int x, int y, int z) {
+
+        if (!CAN_MODIFY) {
+            System.out.println("Tried modifying unmodifiable chunk-position: " + this);
+            return this;
+        }
+
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        return this;
+    }
+
     public void set(int x, int y, int z) {
         if (!CAN_MODIFY) {
             throw new RuntimeException("Attempted to modify constant ChunkPosition!");
@@ -89,6 +102,18 @@ public class ChunkPosition {
         return z;
     }
 
+    public int getBlockX() {
+        return x * Chunk.SIZE_X;
+    }
+
+    public int getBlockY() {
+        return y * Chunk.SIZE_Y;
+    }
+
+    public int getBlockZ() {
+        return z * Chunk.SIZE_Z;
+    }
+
     public Vector3i getVector() {
         return new Vector3i(x, y, z);
     }
@@ -107,6 +132,7 @@ public class ChunkPosition {
 
     @Override
     public int hashCode() {
+        generateHashCode();
         return hashCode;
     }
 

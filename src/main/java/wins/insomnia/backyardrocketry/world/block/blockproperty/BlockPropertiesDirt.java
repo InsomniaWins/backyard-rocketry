@@ -15,6 +15,7 @@ public class BlockPropertiesDirt extends BlockProperties {
 		return Block.isBlockTransparent(BitHelper.getBlockIdFromBlockState(World.get().getBlockState(x, y, z)));
 	}
 
+	/*
 	public void onRandomTick(int blockState, Chunk chunk, int x, int y, int z) {
 
 		int globalX = chunk.toGlobalX(x);
@@ -59,5 +60,5 @@ public class BlockPropertiesDirt extends BlockProperties {
 			chunk.setBlock(x,y,z, Block.GRASS);
 		}
 	}
-
+*/
 }

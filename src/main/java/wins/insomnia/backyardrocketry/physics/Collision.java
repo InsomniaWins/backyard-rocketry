@@ -63,9 +63,9 @@ public class Collision {
 
 
         // loop through chunks to find loaded chunks colliding
-        for (int x = 0; x <= xRange; x += Chunk.SIZE_X) {
-            for (int y = 0; y <= yRange; y += Chunk.SIZE_Y) {
-                for (int z = 0; z <= zRange; z += Chunk.SIZE_Z) {
+        for (int x = 0; x <= xRange; x++) {
+            for (int y = 0; y <= yRange; y++) {
+                for (int z = 0; z <= zRange; z++) {
 
                     currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
 
@@ -82,7 +82,7 @@ public class Collision {
                         // if we are including null chunks,
                         // check to see if chunk is in world border
                         // if it's not, then it will never exist, so continue and dont add null to list
-                        if (!isBlockInWorldBorder(currentChunkPosition.getX(), currentChunkPosition.getY(), currentChunkPosition.getZ())) {
+                        if (!World.get().isChunkPositionInWorldBorder(currentChunkPosition)) {
                             continue;
                         }
 

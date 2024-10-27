@@ -4,6 +4,8 @@ import wins.insomnia.backyardrocketry.render.IMesh;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -11,7 +13,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class GuiMesh implements IRenderable, IMesh {
 
-	protected boolean isClean;
+	protected AtomicBoolean isClean;
 	protected int vao;
 	protected int vbo;
 	protected int ebo;
@@ -22,7 +24,7 @@ public class GuiMesh implements IRenderable, IMesh {
 		vbo = -1;
 		ebo = -1;
 		indexCount = 0;
-		isClean = true;
+		isClean = new AtomicBoolean(true);
 	}
 
 	public GuiMesh(float[] vertexArray, int[] indexArray) {
@@ -44,12 +46,10 @@ public class GuiMesh implements IRenderable, IMesh {
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
 
-		isClean = false;
+		isClean = new AtomicBoolean(false);
 	}
 
 	public void clean() {
-
-		isClean = true;
 
 		if (vao > -1) {
 			glDeleteBuffers(vbo);
@@ -57,10 +57,12 @@ public class GuiMesh implements IRenderable, IMesh {
 			OpenGLWrapper.glDeleteVertexArrays(vao);
 		}
 
+
+		isClean.set(true);
 	}
 
-	public synchronized boolean isClean() {
-		return isClean;
+	public boolean isClean() {
+		return isClean.get();
 	}
 
 	public int getIndexCount() {

@@ -6,9 +6,11 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -25,20 +27,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     int meshDataIndexCount = -1;
     float[] meshDataVertexArray = new float[0];
     int[] meshDataIndexArray = new int[0];
-    private boolean generating = false;
+    private AtomicBoolean generating = new AtomicBoolean(false);
     private boolean meshIsReadyToRender = false;
-    private boolean readyToCreateOpenGLMeshData = false;
+    private AtomicBoolean readyToCreateOpenGLMeshData = new AtomicBoolean(false);
     private final boolean isTransparent;
 
     public boolean isReadyToCreateOpenGLMeshData() {
-
-        if (Main.MAIN_THREAD != Thread.currentThread()) {
-            synchronized (this) {
-                return readyToCreateOpenGLMeshData;
-            }
-        }
-
-        return readyToCreateOpenGLMeshData;
+        return readyToCreateOpenGLMeshData.get();
     }
 
     @Override
@@ -46,7 +41,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         if (Thread.currentThread() != Main.MAIN_THREAD) {
             new ConcurrentModificationException("Tried deleting OpenGL mesh data on thread other than main thread!").printStackTrace();
         }
+
         super.clean();
+    }
+
+    protected void destroy() {
+        unloaded = true;
+        if (!isClean()) clean();
+        chunk = null;
     }
 
     public void createOpenGLMeshData() {
@@ -82,8 +84,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
 
 
-        readyToCreateOpenGLMeshData = false;
-        isClean = false;
+        readyToCreateOpenGLMeshData.set(false);
+        isClean.set(false);
         meshIsReadyToRender = true;
         setGenerating(false);
     }
@@ -126,20 +128,25 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     @Override
     public boolean shouldRender() {
-
         if (!super.shouldRender()) {
             return false;
         }
+
 
         if (vao < 0 || !meshIsReadyToRender || indexCount == 0) {
             return false;
         }
 
+        Camera camera = Renderer.get().getCamera();
+
+        /*
+
 
         // render distance culling
-        Camera camera = Renderer.get().getCamera();
         if (chunk.getPosition().distance(camera.getTransform().getPosition().get(new Vector3f())) > camera.getRenderDistance()) return false;
 
+
+        */
 
         // frustum culling
         FrustumIntersection frustum = camera.getFrustum();
@@ -150,11 +157,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     }
 
     public void setGenerating(boolean value) {
-        generating = value;
+        generating.set(value);
     }
 
     public boolean isGenerating() {
-        return generating;
+        return generating.get();
     }
 
     @Override
@@ -171,6 +178,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     }
 
     public void generateMesh(int[][][] blocks) {
+
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -217,20 +225,22 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             indexArray[i] = indices.get(i);
         }
 
+
+
         if (Main.MAIN_THREAD != Thread.currentThread()){
-            synchronized (this) {
+            Updater.get().queueMainThreadInstruction(() -> {
                 meshDataVertexArray = vertexArray;
                 meshDataIndexArray = indexArray;
                 meshDataIndexCount = indexArray.length;
-                readyToCreateOpenGLMeshData = true;
-                isClean = false;
-            }
+                readyToCreateOpenGLMeshData.set(true);
+                isClean.set(false);
+            });
         } else {
             meshDataVertexArray = vertexArray;
             meshDataIndexArray = indexArray;
             meshDataIndexCount = indexArray.length;
-            readyToCreateOpenGLMeshData = true;
-            isClean = false;
+            readyToCreateOpenGLMeshData.set(true);
+            isClean.set(false);
         }
 
     }
@@ -247,8 +257,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         int backNeighbor = chunk.getBlock(x, y, z-1);
         int frontNeighbor = chunk.getBlock(x, y, z+1);
 
+
+
         switch (cullface) {
             case "top" -> {
+                if (topNeighbor == Block.WORLD_BORDER || topNeighbor == Block.NULL) {
+                    return false;
+                }
 
                 if (Block.shouldHideNeighboringFaces(block) && topNeighbor == block) {
                     return false;
@@ -260,6 +275,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             }
             case "bottom" -> {
 
+                if (bottomNeighbor == Block.WORLD_BORDER || bottomNeighbor == Block.NULL) {
+                    return false;
+                }
+
                 if (Block.shouldHideNeighboringFaces(block) && bottomNeighbor == block) {
                     return false;
                 }
@@ -269,6 +288,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 }
             }
             case "left" -> {
+                if (leftNeighbor == Block.WORLD_BORDER || leftNeighbor == Block.NULL) {
+                    return false;
+                }
 
                 if (Block.shouldHideNeighboringFaces(block) && leftNeighbor == block) {
                     return false;
@@ -279,6 +301,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 }
             }
             case "right" -> {
+                if (rightNeighbor == Block.WORLD_BORDER || rightNeighbor == Block.NULL) {
+                    return false;
+                }
 
                 if (Block.shouldHideNeighboringFaces(block) && rightNeighbor == block) {
                     return false;
@@ -289,6 +314,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 }
             }
             case "front" -> {
+                if (frontNeighbor == Block.WORLD_BORDER || frontNeighbor == Block.NULL) {
+                    return false;
+                }
 
                 if (Block.shouldHideNeighboringFaces(block) && frontNeighbor == block) {
                     return false;
@@ -299,6 +327,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 }
             }
             case "back" -> {
+                if (backNeighbor == Block.WORLD_BORDER || backNeighbor == Block.NULL) {
+                    return false;
+                }
 
                 if (Block.shouldHideNeighboringFaces(block) && backNeighbor == block) {
                     return false;

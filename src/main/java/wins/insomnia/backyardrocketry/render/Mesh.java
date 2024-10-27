@@ -4,6 +4,8 @@ package wins.insomnia.backyardrocketry.render;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -11,7 +13,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Mesh implements IRenderable, IMesh {
 
-    protected boolean isClean;
+    protected AtomicBoolean isClean;
     protected int vao;
     protected int vbo;
     protected int ebo;
@@ -22,7 +24,7 @@ public class Mesh implements IRenderable, IMesh {
         vbo = -1;
         ebo = -1;
         indexCount = 0;
-        isClean = true;
+        isClean = new AtomicBoolean(true);
     }
 
     public Mesh(float[] vertexArray, int[] indexArray) {
@@ -44,7 +46,7 @@ public class Mesh implements IRenderable, IMesh {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
 
-        isClean = false;
+        isClean = new AtomicBoolean(false);
     }
 
     public void clean() {
@@ -53,7 +55,7 @@ public class Mesh implements IRenderable, IMesh {
             throw new RuntimeException("Tried cleaning openGL data on another thread!");
         }
 
-        isClean = true;
+        isClean.set(true);
 
         OpenGLWrapper.glDeleteVertexArrays(vao);
         vao = -1;
@@ -67,12 +69,10 @@ public class Mesh implements IRenderable, IMesh {
     public boolean isClean() {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
-            synchronized (this) {
-                return isClean;
-            }
+            throw new RuntimeException("Tried checking if openGL data is clean on another thread!");
         }
 
-        return isClean;
+        return isClean.get();
     }
 
     public int getIndexCount() {
