@@ -33,7 +33,7 @@ public class PlayerGui implements IGuiRenderable {
 			int hotbarIndex = i == 9 ? 0 : i + 1;
 			TextRenderer.drawText(Integer.toString(hotbarIndex), hotbarX + 11 + i * 28, hotbarY + 5);
 
-			int currentBlock = player.getHotbarSlotContents(i);
+			byte currentBlock = player.getHotbarSlotContents(i);
 
 			BlockModelData blockModelData = BlockModelData.getBlockModel(currentBlock, 0, 0, 0);
 
@@ -62,7 +62,7 @@ public class PlayerGui implements IGuiRenderable {
 		BlockRaycastResult targetBlock = player.getTargetBlock();
 		if (targetBlock != null) {
 
-			int targetBlockId = targetBlock.getChunk().getBlock(
+			byte targetBlockId = targetBlock.getChunk().getBlock(
 					targetBlock.getChunk().toLocalX(targetBlock.getBlockX()),
 					targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
 					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())

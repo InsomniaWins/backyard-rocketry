@@ -65,21 +65,17 @@ public class DebugInfo {
 	public static String getPlayerTargetBlockInfo(TestPlayer player) {
 
 		int targetBlockHealth = 0;
-		int targetBlock = Block.NULL;
-		int targetBlockState = Block.NULL;
+		byte targetBlock = Block.NULL;
 
 		if (player.getTargetBlock() != null) {
-			int blockState = (player.getWorld().getBlockState(
+
+			targetBlock = player.getWorld().getBlock(
 					player.getTargetBlock().getBlockX(),
 					player.getTargetBlock().getBlockY(),
-					player.getTargetBlock().getBlockZ()
-			));
+					player.getTargetBlock().getBlockZ());
 
-			if (BitHelper.getBlockIdFromBlockState(blockState) != Block.NULL) {
-				targetBlockHealth = 0;
-				targetBlockState = blockState;
-				targetBlock = BitHelper.getBlockIdFromBlockState(targetBlockState);
-			}
+			targetBlockHealth = Block.getBlockHealth(targetBlock);
+
 		}
 
 		if (player.getTargetBlock() == null) {
@@ -89,8 +85,9 @@ public class DebugInfo {
 					player.getTargetBlock().getBlockX() + ", " +
 					player.getTargetBlock().getBlockY() + ", " +
 					player.getTargetBlock().getBlockZ() + ">" +
-					"\n  " + String.format("%32s", Integer.toBinaryString(targetBlockState)).replace(' ', '0') +
-					"\n  " + Block.getBlockName(targetBlock);
+					"\n  " + Integer.toBinaryString(targetBlock & 0xFF) +
+					"\n  " + Block.getBlockName(targetBlock) +
+					"\n  Block Health: " + targetBlockHealth;
 		}
 
 	}

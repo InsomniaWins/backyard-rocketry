@@ -23,22 +23,24 @@ public class BlockModelData {
     private String parent = null;
 
 
-    private static final HashMap<Integer, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
+    private static final HashMap<Byte, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
 
     public static void clean() {
     }
 
-    public static BlockModelData getBlockModelFromBlockState(int blockState, int x, int y, int z) {
+    public static BlockModelData getBlockModelFromBlock(byte block, int x, int y, int z) {
 
+        /*
         int block = BitHelper.getBlockIdFromBlockState(blockState);
         BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
-        
+
         String blockModelName = blockProperties.getBlockModelName(blockState);
 
         Object model = BLOCK_STATE_MODEL_MAP.get(block).get(blockModelName);
         if (model == null) model = BLOCK_STATE_MODEL_MAP.get(block).get("default");
-
+        */
+        Object model = BLOCK_STATE_MODEL_MAP.get(block).get("default");
         if (model instanceof ArrayList modelList) {
 
             int randomPosNum = getRandomBlockNumberBasedOnBlockPosition(x, y, z);
@@ -55,7 +57,7 @@ public class BlockModelData {
 
     }
 
-    public static BlockModelData getBlockModel(int block, int blockX, int blockY, int blockZ) {
+    public static BlockModelData getBlockModel(byte block, int blockX, int blockY, int blockZ) {
 
         String currentBlockStateName = "default";
         HashMap<String, Object> blockStateData = BLOCK_STATE_MODEL_MAP.get(block);
@@ -184,7 +186,7 @@ public class BlockModelData {
         System.out.println("Loaded block model: " + modelName);
     }
 
-    private static void loadBlockState(ObjectMapper mapper, int block, String blockStatePath) throws IOException {
+    private static void loadBlockState(ObjectMapper mapper, byte block, String blockStatePath) throws IOException {
 
         URL src = BlockModelData.class.getResource("/blockstates/" + blockStatePath + ".json");
 
@@ -264,7 +266,7 @@ public class BlockModelData {
 
         try {
 
-            for (int block : Block.getBlocks()) {
+            for (byte block : Block.getBlocks()) {
 
                 String blockStateFileName = Block.getBlockStateName(block);
 
@@ -302,7 +304,7 @@ public class BlockModelData {
         this.parent = parent;
     }
 
-    public static HashMap<Integer, HashMap<String, Object>> getBlockStateModelMap() {
+    public static HashMap<Byte, HashMap<String, Object>> getBlockStateModelMap() {
         return BLOCK_STATE_MODEL_MAP;
     }
 }

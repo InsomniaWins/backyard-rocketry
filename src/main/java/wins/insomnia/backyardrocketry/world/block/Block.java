@@ -41,11 +41,10 @@ public class Block {
     }
 
 
-    private static final HashMap<Integer, HashMap<BlockDetail, Object>> BLOCK_DETAILS_MAP = new HashMap<>();
+    private static final HashMap<Byte, HashMap<BlockDetail, Object>> BLOCK_DETAILS_MAP = new HashMap<>();
+    private static byte nextAvailableBlockIdForRegistration = Byte.MIN_VALUE;
 
-
-    public static final int WORLD_BORDER = registerBlock(
-            254,
+    public static final byte WORLD_BORDER = registerBlock(
             "WORLD BORDER",
             true,
             true,
@@ -53,8 +52,7 @@ public class Block {
             "cobblestone",
             -1
     );
-    public static final int NULL = registerBlock(
-            255,
+    public static final byte NULL = registerBlock(
             "NULL",
             true,
             true,
@@ -65,8 +63,7 @@ public class Block {
 
 
 
-    public static final int AIR = registerBlock(
-            0,
+    public static final byte AIR = registerBlock(
             "Air",
             true,
             false,
@@ -74,8 +71,7 @@ public class Block {
             null,
             -1
     );
-    public static final int GRASS = registerBlock(
-            1,
+    public static final byte GRASS = registerBlock(
             "Grass",
             false,
             true,
@@ -83,8 +79,7 @@ public class Block {
             "grass_block",
             40
     );
-    public static final int COBBLESTONE = registerBlock(
-            2,
+    public static final byte COBBLESTONE = registerBlock(
             "Cobblestone",
             false,
             true,
@@ -92,8 +87,7 @@ public class Block {
             "cobblestone",
             120
     );
-    public static final int DIRT = registerBlock(
-            3,
+    public static final byte DIRT = registerBlock(
             "Dirt",
             false,
             true,
@@ -101,8 +95,7 @@ public class Block {
             "dirt",
             30
     );
-    public static final int STONE = registerBlock(
-            4,
+    public static final byte STONE = registerBlock(
             "Stone",
             false,
             true,
@@ -110,8 +103,7 @@ public class Block {
             "stone",
             120
     );
-    public static final int LOG = registerBlock(
-            5,
+    public static final byte LOG = registerBlock(
             "Log",
             false,
             true,
@@ -119,8 +111,7 @@ public class Block {
             "log",
             90
     );
-    public static final int LEAVES = registerBlock(
-            6,
+    public static final byte LEAVES = registerBlock(
             "Leaves",
             true,
             true,
@@ -128,8 +119,7 @@ public class Block {
             "leaves",
             20
     );
-    public static final int WOODEN_PLANKS = registerBlock(
-            7,
+    public static final byte WOODEN_PLANKS = registerBlock(
             "Wooden Planks",
             false,
             true,
@@ -138,8 +128,7 @@ public class Block {
             90
     );
 
-    public static final int GLASS = registerBlock(
-            8,
+    public static final byte GLASS = registerBlock(
             "Glass",
             true,
             true,
@@ -148,13 +137,15 @@ public class Block {
             20
     );
     static {
-        for (Map.Entry<Integer, ?> entry: BLOCK_DETAILS_MAP.entrySet()) {
-            System.out.println("Loaded block: " + entry.getKey() + " (" + ((HashMap) entry.getValue()).get(BlockDetail.NAME) + "): " + entry.getValue());
+        for (Map.Entry<Byte, ?> entry: BLOCK_DETAILS_MAP.entrySet()) {
+            System.out.println("Loaded block: " + entry.getKey() + " (" + ((HashMap<?, ?>) entry.getValue()).get(BlockDetail.NAME) + "): " + entry.getValue());
         }
     }
 
 
-    public static int registerBlock(int blockId, String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
+    public static byte registerBlock(String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
+
+        byte blockId = nextAvailableBlockIdForRegistration++;
 
         HashMap<BlockDetail, Object> detailsMap = new HashMap<>();
 
@@ -183,7 +174,7 @@ public class Block {
         return blockId;
     }
 
-    public static BlockProperties getBlockProperties(int block) {
+    public static BlockProperties getBlockProperties(byte block) {
         HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
 
         if (blockDetails == null) blockDetails = BLOCK_DETAILS_MAP.get(NULL);
@@ -212,7 +203,8 @@ public class Block {
         return result;
     }
 
-    public static int getBlockHealth(int block) {
+    public static int getBlockHealth(byte block) {
+
         HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
 
         if (blockDetails == null) return -1;
@@ -226,11 +218,11 @@ public class Block {
         return result;
     }
 
-    public static Set<Integer> getBlocks() {
+    public static Set<Byte> getBlocks() {
         return BLOCK_DETAILS_MAP.keySet();
     }
 
-    public static String getBlockStateName(int block) {
+    public static String getBlockStateName(byte block) {
 
 
         HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
@@ -241,7 +233,7 @@ public class Block {
 
     }
 
-    public static BlockBoundingBox getBlockBoundingBox(Chunk chunk, Vector3i blockPosition, int block) {
+    public static BlockBoundingBox getBlockBoundingBox(Chunk chunk, Vector3i blockPosition, byte block) {
         BoundingBox boundingBox = getBlockCollision(block);
 
         if (boundingBox == null) return null;
@@ -249,7 +241,7 @@ public class Block {
         return new BlockBoundingBox(boundingBox, chunk, blockPosition);
     }
 
-    public static BoundingBox getBlockCollision(int block) {
+    public static BoundingBox getBlockCollision(byte block) {
         if (block == AIR) {
             return null;
         } else {
@@ -258,14 +250,7 @@ public class Block {
 
     }
 
-    public static BlockProperties getBlockPropertiesFromBlockState(int blockState) {
-
-        int block = BitHelper.getBlockIdFromBlockState(blockState);
-
-        return getBlockProperties(block);
-    }
-
-    public static String getBlockName(int block) {
+    public static String getBlockName(byte block) {
         HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
 
         if (blockDetails == null) return "UNKNOWN BLOCK";
@@ -279,7 +264,7 @@ public class Block {
         return result;
     }
 
-    public static boolean isBlockTransparent(int block) {
+    public static boolean isBlockTransparent(byte block) {
         HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
 
         if (blockDetails == null) return false;

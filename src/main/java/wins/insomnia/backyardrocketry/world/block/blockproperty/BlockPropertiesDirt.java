@@ -11,7 +11,7 @@ public class BlockPropertiesDirt extends BlockProperties {
 	}
 
 	private static boolean blockIsTransparent(int x, int y, int z) {
-		return Block.isBlockTransparent(BitHelper.getBlockIdFromBlockState(World.get().getBlockState(x, y, z)));
+		return Block.isBlockTransparent(World.get().getBlock(x, y, z));
 	}
 
 	/*

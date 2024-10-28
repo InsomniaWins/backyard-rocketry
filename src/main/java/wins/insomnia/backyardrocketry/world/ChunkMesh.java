@@ -177,18 +177,17 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
     }
 
-    public void generateMesh(int[][][] blocks) {
+    public void generateMesh(byte[][][] blocks) {
 
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
 
-
         for (int y = 0; y < Chunk.SIZE_Y; y++) {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
-                    int block = BitHelper.getBlockIdFromBlockState(blocks[x][y][z]);
+                    byte block = blocks[x][y][z];
 
                     if (block != Block.AIR) {
 
@@ -196,7 +195,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                             continue;
                         }
 
-                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlockState(blocks[x][y][z], x, y, z);
+                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(blocks[x][y][z], x, y, z);
 
 
                         for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
@@ -213,7 +212,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 }
             }
         }
-
 
         float[] vertexArray = new float[vertices.size()];
         for (int i = 0; i < vertexArray.length; i++) {
@@ -249,13 +247,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         if (cullface == null) return true;
 
-        int block = chunk.getBlock(x,y,z);
-        int topNeighbor = chunk.getBlock(x, y+1, z);
-        int bottomNeighbor = chunk.getBlock(x, y-1, z);
-        int leftNeighbor = chunk.getBlock(x-1, y, z);
-        int rightNeighbor = chunk.getBlock(x+1, y, z);
-        int backNeighbor = chunk.getBlock(x, y, z-1);
-        int frontNeighbor = chunk.getBlock(x, y, z+1);
+        byte block = chunk.getBlock(x,y,z);
+        byte topNeighbor = chunk.getBlock(x, y+1, z);
+        byte bottomNeighbor = chunk.getBlock(x, y-1, z);
+        byte leftNeighbor = chunk.getBlock(x-1, y, z);
+        byte rightNeighbor = chunk.getBlock(x+1, y, z);
+        byte backNeighbor = chunk.getBlock(x, y, z-1);
+        byte frontNeighbor = chunk.getBlock(x, y, z+1);
 
 
 

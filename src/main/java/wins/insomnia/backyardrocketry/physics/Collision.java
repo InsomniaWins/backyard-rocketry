@@ -112,9 +112,9 @@ public class Collision {
 
         if (chunk == null) return null;
 
-        int blockState = world.getBlockState(blockX, blockY, blockZ);
+        byte blockId = world.getBlock(blockX, blockY, blockZ);
 
-        if (Block.getBlockCollision(BitHelper.getBlockIdFromBlockState(blockState)) == null) return null;
+        if (Block.getBlockCollision(blockId) == null) return null;
 
         return new BlockRaycastResult(chunk, blockX, blockY, blockZ, face);
     }

@@ -13,7 +13,6 @@ import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.render.gui.PlayerGui;
-import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
@@ -50,7 +49,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
 
 
-    private int[] hotbarItems = {
+    private byte[] hotbarItems = {
             Block.GRASS,
             Block.COBBLESTONE,
             Block.DIRT,
@@ -223,6 +222,11 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         moveAmount.mul(moveSpeed);
 
 
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_F4)) {
+            hasGravity = !hasGravity;
+            hasCollision = !hasCollision;
+        }
+
         //if (!getWorld().isPlayerInUnloadedChunk(this)) {
 
             VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
@@ -392,13 +396,14 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         if (targetBlock == null) return;
 
-        Chunk targetBlockChunk = targetBlock.getChunk();
-        int blockState = targetBlockChunk.getBlockState(
+
+
+
+        byte block = getWorld().getBlock(
                 targetBlock.getBlockX(),
                 targetBlock.getBlockY(),
                 targetBlock.getBlockZ()
         );
-        int block = BitHelper.getBlockIdFromBlockState(blockState);
 
         if (Block.getBlockHealth(block) < 0) {
             breakProgress = 0;
@@ -407,6 +412,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         breakProgress += 1;
         if (breakProgress >= Block.getBlockHealth(block)) {
+            Chunk targetBlockChunk = targetBlock.getChunk();
             targetBlockChunk.setBlock(
                     targetBlockChunk.toLocalX(targetBlock.getBlockX()),
                     targetBlockChunk.toLocalY(targetBlock.getBlockY()),
@@ -419,7 +425,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     }
 
-    private void placeBlock(int blockToPlace) {
+    private void placeBlock(byte blockToPlace) {
 
         if (targetBlock == null) return;
 
@@ -573,7 +579,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         this.currentHotbarSlot = currentHotbarSlot;
     }
 
-    public int getHotbarSlotContents(int slotIndex) {
+    public byte getHotbarSlotContents(int slotIndex) {
         return hotbarItems[slotIndex];
     }
 

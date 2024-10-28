@@ -43,7 +43,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private final World WORLD;
     private AtomicInteger generationPhase = new AtomicInteger(GenerationPhase.UNLOADED.ordinal());
     private boolean shouldProcess = false;
-    private int[][][] blocks;
+    private byte[][][] blocks;
     protected AtomicBoolean shouldRegenerateMesh = new AtomicBoolean(false);
     protected int ticksToLive = 100;
 
@@ -91,7 +91,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                         continue;
                     }
 
-                    int block;
+                    byte block;
 
                     if (globalBlockY == groundHeight) {
                         block = Block.GRASS;
@@ -106,11 +106,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                     }
 
 
-                    blocks[x][y][z] = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
-                    BlockProperties blockProperties = Block.getBlockProperties(block);
-                    if (blockProperties != null) {
-                        blocks[x][y][z] = blockProperties.onPlace(blocks[x][y][z], this, x, y, z);
-                    }
+                    blocks[x][y][z] = block;
 
                 }
             }
@@ -129,14 +125,14 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
 
 
-    public void setBlock(int x, int y, int z, int block) {
+    public void setBlock(int x, int y, int z, byte block) {
         setBlock(x, y, z, block, true);
 
     }
 
 
 
-    public void setBlock(int x, int y, int z, int block, boolean regenerateMesh) {
+    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
 
@@ -144,15 +140,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         }
 
-
-        int blockState = BitHelper.getBlockStateWithoutPropertiesFromBlockId(block);
-        BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
-
-        if (blockProperties != null) {
-            blockState = blockProperties.onPlace(blockState, this, toGlobalX(x), toGlobalY(y), toGlobalZ(z));
-        }
-
-        blocks[x][y][z] = blockState;
+        blocks[x][y][z] = block;
 
         setShouldRegenerateMesh(regenerateMesh);
         if (shouldRegenerateMesh.get()) {
@@ -186,23 +174,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         }
     }
 
-    public void setBlockState(int x, int y, int z, int blockState) {
-        setBlockState(x, y, z, blockState, true);
-    }
-
-    public void setBlockState(int x, int y, int z, int blockState, boolean regenerateMesh) {
-
-        if (Thread.currentThread() != Main.MAIN_THREAD) {
-            throw new ConcurrentModificationException("Tried \"setBlockState\" from thread other than main thread!");
-        }
-
-        blocks[x][y][z] = blockState;
-        shouldRegenerateMesh.set(regenerateMesh);
-        if (shouldRegenerateMesh.get()) {
-            updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z);
-        }
-    }
-
     public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
 
 		int[] minPos = new int[] {
@@ -227,7 +198,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                         continue;
                     }
 
-                    int block = getBlock(x, y, z);
+                    byte block = getBlock(x, y, z);
 
                     if (block == Block.NULL) continue;
 
@@ -289,14 +260,14 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return getBlock(blockPos.x, blockPos.y, blockPos.z);
     }
 
-    public int getBlock(int x, int y, int z) {
+    public byte getBlock(int x, int y, int z) {
 
         // if out of chunk boundaries
         if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
             return WORLD.getBlock(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
         }
 
-        return BitHelper.getBlockIdFromBlockState(blocks[x][y][z]);
+        return blocks[x][y][z];
     }
 
 
@@ -368,7 +339,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public int getGroundHeight(int globalBlockX, int globalBlockZ) {
         long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
 
-        int noiseAmplitude = 32;
+        int noiseAmplitude = 6;
         float noiseScale = 0.025f;
 
         return (int) (130 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
@@ -392,15 +363,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     private void initializeBlocks() {
 
-        blocks = new int[SIZE_X][SIZE_Y][SIZE_Z];
-
-        int airBlockState = BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.AIR);
+        blocks = new byte[SIZE_X][SIZE_Y][SIZE_Z];
 
         for (int x = 0; x < SIZE_X; x++) {
             for (int z = 0; z < SIZE_Z; z++) {
                 for (int y = 0; y < SIZE_Y; y++) {
 
-                    blocks[x][y][z] = airBlockState;
+                    blocks[x][y][z] = Block.AIR;
 
                 }
             }
@@ -471,20 +440,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     @Override
     public void fixedUpdate() {
-
-        if (isProcessing() && isFinishedGenerating()) {
-            // random block ticks
-            for (int updateIndex = 0; updateIndex < RANDOM_TICK_AMOUNT; updateIndex++) {
-                int x = World.RANDOM.nextInt(SIZE_X);
-                int y = World.RANDOM.nextInt(SIZE_Y);
-                int z = World.RANDOM.nextInt(SIZE_Z);
-
-                int blockState = blocks[x][y][z];
-
-                BlockProperties blockProperties = Block.getBlockPropertiesFromBlockState(blockState);
-                blockProperties.onRandomTick(blockState, this, x, y, z);
-            }
-        }
 
     }
 

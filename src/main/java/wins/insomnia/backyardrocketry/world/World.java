@@ -30,7 +30,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
 
-    public static int chunkLoadDistance = 3;
+    public static int chunkLoadDistance = 6; // chunk loading RADIUS
     public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
@@ -127,7 +127,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return CHUNKS.get(chunkPosition);
     }
 
-    public int getBlock(int x, int y, int z) {
+    public byte getBlock(int x, int y, int z) {
 
         // if out of world border
         if (x > getSizeX()-1 || x < 0 || y > getSizeY()-1 || y < 0 || z > getSizeZ()-1 || z < 0 ) {
