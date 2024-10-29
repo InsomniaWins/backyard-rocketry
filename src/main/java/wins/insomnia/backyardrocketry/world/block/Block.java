@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.world.block;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesDirt;

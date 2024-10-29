@@ -18,7 +18,7 @@ public class Camera {
 
     private float interpolationFactor = 0.0f;
     private float fov;
-    private float renderDistance = 264f;
+    private float renderDistance = 364f;
 
     public Camera() {
 

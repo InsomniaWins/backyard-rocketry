@@ -171,6 +171,11 @@ public class DebugNoclipPlayer implements IUpdateListener, IFixedUpdateListener,
     }
 
     @Override
+    public Vector3d getInterpolatedPosition() {
+        return interpolatedPosition;
+    }
+
+    @Override
     public World getWorld() {
         return null;
     }

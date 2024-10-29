@@ -146,6 +146,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         RENDER_LIST.sort((renderable1, renderable2) -> {
 
+
+            if (renderable1.getRenderPriority() > renderable2.getRenderPriority()) {
+                return 1;
+            } else if (renderable1.getRenderPriority() < renderable2.getRenderPriority()) {
+                return -1;
+            }
+
+
 			float distance1 = 0.0f;
 			float distance2 = 0.0f;
 
@@ -167,6 +175,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             if (renderable2 instanceof Mesh mesh) {
                 hasTransparency2 = mesh.hasTransparency();
             }
+
+
 
             if (hasTransparency1 == hasTransparency2) {
                 return Float.compare(distance1, distance2);
@@ -231,11 +241,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
             renderable.render();
-            if (renderable instanceof ChunkMesh chunkMesh) {
-
-
-            }
-
         }
 
         // render target block
@@ -273,7 +278,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             if (!renderable.shouldRender()) continue;
 
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
             renderable.render();
 
         }

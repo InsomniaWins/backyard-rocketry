@@ -30,9 +30,9 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 32;
-    public static final int SIZE_Y = 32;
-    public static  final int SIZE_Z = 32;
+    public static final int SIZE_X = 30;
+    public static final int SIZE_Y = 128;
+    public static  final int SIZE_Z = 30;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
     private final int X;
     private final int Y;
@@ -342,7 +342,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         int noiseAmplitude = 6;
         float noiseScale = 0.025f;
 
-        return (int) (130 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
+        return (int) (60 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
     }
 
     public ChunkPosition getChunkPosition() {

@@ -32,6 +32,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
     private final float GRAVITY = -0.1f;
+    private final float CROUCH_SPEED = 0.1f;
     private final float WALK_SPEED = 0.22f;
     private final float FLY_SPEED = 3f;
     private final float SPRINT_SPEED = 0.5f;
@@ -47,7 +48,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private final PlayerGui GUI_ELEMENT;
     private final Vector3f INTERPOLATED_CAMERA_ROTATION;
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
-
+    private final FirstPersonHandItemRenderable FIRST_PERSON_HAND_ITEM;
 
     private byte[] hotbarItems = {
             Block.GRASS,
@@ -92,10 +93,17 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
         Renderer.get().addRenderable(GUI_ELEMENT);
         TRANSFORM.getRotation().x = Math.toRadians(90);
 
+        FIRST_PERSON_HAND_ITEM = new FirstPersonHandItemRenderable();
+        Renderer.get().addRenderable(FIRST_PERSON_HAND_ITEM);
+        FIRST_PERSON_HAND_ITEM.setBlock(Block.GRASS);
     }
 
     public Vector3d getPosition() {
         return getTransform().getPosition();
+    }
+
+    public Vector3d getInterpolatedPosition() {
+        return INTERPOLATED_CAMERA_POSITION;
     }
 
     @Override
@@ -190,6 +198,10 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
         KeyboardInput keyboardInput = KeyboardInput.get();
         float moveSpeed = KeyboardInput.get().isKeyPressed(GLFW_KEY_LEFT_CONTROL) ? SPRINT_SPEED : WALK_SPEED;
+        if (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+            moveSpeed = CROUCH_SPEED;
+        }
+
         if (!hasGravity) {
             moveSpeed = FLY_SPEED;
         }
@@ -339,6 +351,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             currentHotbarSlot += 10;
         }
 
+        setCurrentHotbarSlot(currentHotbarSlot);
     }
 
     private void blockInteraction() {
@@ -577,6 +590,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     public void setCurrentHotbarSlot(int currentHotbarSlot) {
         this.currentHotbarSlot = currentHotbarSlot;
+        FIRST_PERSON_HAND_ITEM.setBlock(getHotbarSlotContents(currentHotbarSlot));
     }
 
     public byte getHotbarSlotContents(int slotIndex) {

@@ -12,4 +12,5 @@ public interface IPlayer {
     Vector3d getPosition();
     Vector3i getBlockPosition();
     Transform getTransform();
+    Vector3d getInterpolatedPosition();
 }

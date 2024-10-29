@@ -66,6 +66,11 @@ public class Mesh implements IRenderable, IMesh {
 
     }
 
+    @Override
+    public int getRenderPriority() {
+        return 0;
+    }
+
     public boolean isClean() {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {

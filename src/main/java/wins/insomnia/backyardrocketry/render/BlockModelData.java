@@ -2,10 +2,8 @@ package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 
 import java.io.IOException;
 import java.net.URI;
@@ -40,7 +38,11 @@ public class BlockModelData {
         Object model = BLOCK_STATE_MODEL_MAP.get(block).get(blockModelName);
         if (model == null) model = BLOCK_STATE_MODEL_MAP.get(block).get("default");
         */
-        Object model = BLOCK_STATE_MODEL_MAP.get(block).get("default");
+        HashMap<String, Object> modelStates = BLOCK_STATE_MODEL_MAP.get(block);
+
+        if (modelStates == null) return null;
+
+        Object model = modelStates.get("default");
         if (model instanceof ArrayList modelList) {
 
             int randomPosNum = getRandomBlockNumberBasedOnBlockPosition(x, y, z);

@@ -5,5 +5,5 @@ public interface IRenderable {
     boolean shouldRender();
     boolean isClean();
     void clean();
-
+    int getRenderPriority();
 }

@@ -61,6 +61,11 @@ public class GuiMesh implements IRenderable, IMesh {
 		isClean.set(true);
 	}
 
+	@Override
+	public int getRenderPriority() {
+		return 0;
+	}
+
 	public boolean isClean() {
 		return isClean.get();
 	}

@@ -26,7 +26,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     public static final int CHUNK_AMOUNT_X = 45;
-    public static final int CHUNK_AMOUNT_Y = 15;
+    public static final int CHUNK_AMOUNT_Y = 1;
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
 

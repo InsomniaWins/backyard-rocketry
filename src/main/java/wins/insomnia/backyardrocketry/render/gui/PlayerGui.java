@@ -138,4 +138,9 @@ public class PlayerGui implements IGuiRenderable {
 	public void clean() {
 
 	}
+
+	@Override
+	public int getRenderPriority() {
+		return 0;
+	}
 }
