@@ -202,6 +202,10 @@ public class Updater {
         }
     }
 
+    public static double getCurrentTime() {
+        return glfwGetTime();
+    }
+
     public static int getFixedUpdatesPerSecond() {
         return FIXED_UPDATES_PER_SECOND;
     }

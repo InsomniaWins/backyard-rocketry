@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.Map;
 public class FirstPersonHandItemRenderable implements IRenderable {
 
 	private Mesh handMesh = null;
-
 
 
 	//region TODO: replace with method(s) that works with item stacks when item and item stacks are implemented
@@ -80,48 +80,17 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 
 	@Override
 	public void render() {
-
-		IPlayer player = BackyardRocketry.getInstance().getPlayer();
-
-		Transform transform = new Transform();
-		transform.getRotation().set(Renderer.get().getCamera().getTransform().getRotation());
-		transform.getPosition().set(player.getInterpolatedPosition());
-
-		Vector3d cameraDirectionVector = new Vector3d(0, 0, -1)
-				.rotateX(-transform.getRotation().x)
-				.rotateY(-transform.getRotation().y);
-
-		Vector3d uiRightVector = new Vector3d(1, 0, 0)
-				.rotateX(-transform.getRotation().x)
-				.rotateY(-transform.getRotation().y);
-		Vector3d uiUpVector = new Vector3d(0, 1, 0)
-				.rotateX(-transform.getRotation().x)
-				.rotateY(-transform.getRotation().y);
-
-		transform.getPosition().add(new Vector3d(uiRightVector).mul(0.5));
-		transform.getPosition().add(new Vector3d(uiUpVector).negate().mul(0.7));
-
-
-
 		Renderer.get().getModelMatrix().identity()
-				.translate(
-						(float) transform.getPosition().x,
-						(float) transform.getPosition().y,
-						(float) transform.getPosition().z
-				).translate(
-						(float) cameraDirectionVector.x * 0.75f,
-						(float) cameraDirectionVector.y * 0.75f,
-						(float) cameraDirectionVector.z * 0.75f
-				)
-				.scale(0.5f)
-				.rotateY(-transform.getRotation().y)
-				.rotateX(-transform.getRotation().x)
 				.translate(-0.5f, -0.5f, -0.5f)
-				.rotateY(0.45f);
+				.translate(1.75f, -1.4f + (float) Math.sin(Updater.getCurrentTime() * 0.75) * 0.05f, -3f)
+				.rotateY(0.45f)
+				.rotateX((float) Math.sin(Updater.getCurrentTime() * 0.75) * 0.02f);
 
+		int[] gameWindowSize = Window.get().getSize();
+		Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", new Matrix4f().setPerspective(70f, gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, 16f));
 		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", new Matrix4f().identity());
 		Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
-		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
+
 
 		if (handMesh == null || handMesh.isClean()) {
 			return;
@@ -130,6 +99,9 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		handMesh.render();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+		Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
+		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
 	}
 
 	@Override
