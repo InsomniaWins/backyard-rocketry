@@ -5,6 +5,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
@@ -16,8 +17,6 @@ import wins.insomnia.backyardrocketry.render.gui.PlayerGui;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
-import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
-import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.Chunk;
@@ -28,13 +27,12 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
-public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlayer, ICollisionBody {
+public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
-    private final float GRAVITY = -0.1f;
     private final float CROUCH_SPEED = 0.1f;
     private final float WALK_SPEED = 0.22f;
-    private final float FLY_SPEED = 3f;
+    private final float FLY_SPEED = 1f;
     private final float SPRINT_SPEED = 0.5f;
     private final float JUMP_SPEED = 0.5f;
     private final float EYE_HEIGHT = 1.57f;
@@ -59,8 +57,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             Block.LEAVES,
             Block.WOODEN_PLANKS,
             Block.GLASS,
-            Block.AIR,
-            Block.AIR
+            Block.BRICKS,
+            Block.WOOD
     };
     private int currentHotbarSlot = 0;
     private boolean onGround = false;
@@ -71,6 +69,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     private boolean hasCollision = false;
     private BlockRaycastResult targetBlock;
     private int breakProgress = 0;
+    private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
 
 
     public TestPlayer(World world) {
@@ -239,58 +238,64 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
             hasCollision = !hasCollision;
         }
 
-        //if (!getWorld().isPlayerInUnloadedChunk(this)) {
 
-            VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
-            VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
+        VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
+        VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
 
-            if (hasGravity) {
-                VELOCITY.add(0f, GRAVITY, 0f);
+        if (hasGravity) {
+            VELOCITY.add(0f, World.get().getGravity(), 0f);
 
-                if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
-                    VELOCITY.y = JUMP_SPEED;
-                }
-            } else {
-                float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
-                VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
+            if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
+                VELOCITY.y = JUMP_SPEED;
             }
+        } else {
+            float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
+            VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
+        }
 
-            // apply translation and rotation
-            PREVIOUS_TRANSFORM.set(TRANSFORM);
-            move();
-            updateBoundingBox();
+        // apply translation and rotation
+        PREVIOUS_TRANSFORM.set(TRANSFORM);
+        move();
+        updateBoundingBox();
 
-            if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
-                lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
+            lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
+            updateCursorVisibility();
+        }
 
-                glfwSetInputMode(
-                        Window.get().getWindowHandle(),
-                        GLFW_CURSOR,
-                        lockMouseToCenterForCameraRotation ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL
-                );
-            }
+        if (lockMouseToCenterForCameraRotation && INVENTORY_MANAGER.isClosed()) {
+            float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
+            float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
 
-            if (lockMouseToCenterForCameraRotation) {
-                float verticalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().y;
-                float horizontalRotateAmount = rotateSpeed * mouseInput.getMouseMotion().x;
+            mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
 
-                mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
+            TRANSFORM.rotateX(verticalRotateAmount);
+            TRANSFORM.rotateY(horizontalRotateAmount);
 
-                TRANSFORM.rotateX(verticalRotateAmount);
-                TRANSFORM.rotateY(horizontalRotateAmount);
+            // clamp vertical rotation
+            TRANSFORM.getRotation().x = Math.max(TRANSFORM.getRotation().x, (float) -Math.PI * 0.5f);
+            TRANSFORM.getRotation().x = Math.min(TRANSFORM.getRotation().x, (float) Math.PI * 0.5f);
+        }
 
-                // clamp vertical rotation
-                TRANSFORM.getRotation().x = Math.max(TRANSFORM.getRotation().x, (float) -Math.PI * 0.5f);
-                TRANSFORM.getRotation().x = Math.min(TRANSFORM.getRotation().x, (float) Math.PI * 0.5f);
-            }
+        cameraInterpolationFactor = 0f;
 
-            cameraInterpolationFactor = 0f;
+        hotbarManagement();
+        blockInteraction();
 
-            hotbarManagement();
-            blockInteraction();
-        //}
+        if (keyboardInput.isKeyJustPressed(GLFW_KEY_E)) {
+            INVENTORY_MANAGER.toggleInventory();
+            updateCursorVisibility();
+        }
 
         WORLD.updateChunksAroundPlayer(this);
+    }
+
+    public void updateCursorVisibility() {
+        glfwSetInputMode(
+                Window.get().getWindowHandle(),
+                GLFW_CURSOR,
+                lockMouseToCenterForCameraRotation && INVENTORY_MANAGER.isClosed() ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL
+        );
     }
 
     @Override
@@ -304,6 +309,8 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
     }
 
     private void hotbarManagement() {
+
+        if (INVENTORY_MANAGER.isOpen()) return;
 
         KeyboardInput keyboardInput = KeyboardInput.get();
         MouseInput mouseInput = MouseInput.get();
@@ -407,6 +414,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     private void breakBlock() {
 
+        if (INVENTORY_MANAGER.isOpen()) return;
         if (targetBlock == null) return;
 
 
@@ -440,6 +448,7 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     private void placeBlock(byte blockToPlace) {
 
+        if (INVENTORY_MANAGER.isOpen()) return;
         if (targetBlock == null) return;
 
         Block.Face face = targetBlock.getFace();
@@ -599,5 +608,9 @@ public class TestPlayer implements IUpdateListener, IFixedUpdateListener, IPlaye
 
     public int getBreakProgress() {
         return breakProgress;
+    }
+
+    public PlayerInventoryManager getInventoryManager() {
+        return INVENTORY_MANAGER;
     }
 }

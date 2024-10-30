@@ -10,16 +10,41 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class TextRenderer {
 
+	private static Color fontColor = Color.WHITE;
+
 	public static int getTextPixelWidth(String text) {
 		return text.length() * 7;
 	}
 
 	public static void drawText(String text, int guiX, int guiY) {
-		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.get().getFontTexture());
+		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));
 	}
 
 	public static void drawText(String text, int guiX, int guiY, Texture fontTexture) {
 		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), fontTexture);
+	}
+
+	public static void drawTextShadow(String text, int guiX, int guiY, int scale, Texture fontTexture) {
+		Color previousColor = fontColor;
+		fontColor = new Color(Color.BLACK);
+		drawText(text, guiX + 1, guiY + 1, scale, fontTexture);
+		fontColor = previousColor;
+		drawText(text, guiX, guiY, scale, fontTexture);
+	}
+
+	public static void drawTextOutline(String text, int guiX, int guiY, int scale, Texture fontTexture) {
+		Color previousColor = fontColor;
+		fontColor = new Color(Color.BLACK);
+		drawText(text, guiX + 1, guiY, scale, fontTexture);
+		drawText(text, guiX + 1, guiY + 1, scale, fontTexture);
+		drawText(text, guiX, guiY + 1, scale, fontTexture);
+		drawText(text, guiX - 1, guiY + 1, scale, fontTexture);
+		drawText(text, guiX - 1, guiY, scale, fontTexture);
+		drawText(text, guiX - 1, guiY - 1, scale, fontTexture);
+		drawText(text, guiX, guiY - 1, scale, fontTexture);
+		drawText(text, guiX + 1, guiY - 1, scale, fontTexture);
+		fontColor = previousColor;
+		drawText(text, guiX, guiY, scale, fontTexture);
 	}
 
 	public static void drawText(String text, int guiX, int guiY, int scale, Texture fontTexture) {
@@ -46,6 +71,7 @@ public class TextRenderer {
 		Renderer.get().getGuiShaderProgram().setUniform("vs_posX", guiX);
 		Renderer.get().getGuiShaderProgram().setUniform("vs_posY", guiY);
 		Renderer.get().getGuiShaderProgram().setUniform("fs_texture", GL_TEXTURE0);
+		Renderer.get().getGuiShaderProgram().setUniform("fs_colorModulation", fontColor.getRGB());
 		Renderer.get().getGuiShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getModelMatrix().ortho(
 				0f, // left
 				BackyardRocketry.getInstance().getWindow().getWidth(), // right
@@ -74,6 +100,7 @@ public class TextRenderer {
 		glEnableVertexAttribArray(1);
 		glDrawElements(GL_TRIANGLES, Renderer.get().getFontMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
 
+		Renderer.get().getGuiShaderProgram().setUniform("fs_colorModulation", Color.WHITE.getRGB());
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -87,6 +114,14 @@ public class TextRenderer {
 		}
 
 		Renderer.get().getShaderProgram().use();
+	}
+
+	public static void setFontColor(Color color) {
+		fontColor = color;
+	}
+
+	public static Color getFontColor() {
+		return fontColor;
 	}
 
 }

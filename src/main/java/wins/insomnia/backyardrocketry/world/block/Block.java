@@ -48,7 +48,7 @@ public class Block {
             true,
             true,
             null,
-            "cobblestone",
+            null,
             -1
     );
     public static final byte NULL = registerBlock(
@@ -56,7 +56,7 @@ public class Block {
             true,
             true,
             new BlockProperties(),
-            "cobblestone",
+            null,
             -1
     );
 
@@ -67,7 +67,7 @@ public class Block {
             true,
             false,
             null,
-            null,
+            "",
             -1
     );
     public static final byte GRASS = registerBlock(
@@ -110,6 +110,16 @@ public class Block {
             "log",
             90
     );
+
+    public static final byte WOOD = registerBlock(
+            "Wood",
+            false,
+            true,
+            null,
+            "wood",
+            90
+    );
+
     public static final byte LEAVES = registerBlock(
             "Leaves",
             true,
@@ -135,6 +145,18 @@ public class Block {
             "glass",
             20
     );
+
+    public static final byte BRICKS = registerBlock(
+            "Bricks",
+            false,
+            true,
+            null,
+            "bricks",
+            120
+    );
+
+
+
     static {
         for (Map.Entry<Byte, ?> entry: BLOCK_DETAILS_MAP.entrySet()) {
             System.out.println("Loaded block: " + entry.getKey() + " (" + ((HashMap<?, ?>) entry.getValue()).get(BlockDetail.NAME) + "): " + entry.getValue());
@@ -164,7 +186,7 @@ public class Block {
             detailsMap.put(BlockDetail.STATE, blockStateFileName);
         }
 
-        detailsMap.put(BlockDetail.HEALTH, blockHealth);
+        detailsMap.put(BlockDetail.HEALTH, 1);//blockHealth);
 
 
 

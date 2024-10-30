@@ -15,6 +15,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Texture {
 
+    private String textureName;
     private int textureIndex;
     private boolean isClean;
     private int width;
@@ -44,6 +45,8 @@ public class Texture {
 
 
     public Texture(String textureName) {
+        this.textureName = textureName;
+
         PNGDecoder decoder = null;
         ByteBuffer buffer = null;
 
@@ -80,6 +83,10 @@ public class Texture {
         this.width = decoder.getWidth();
         this.height = decoder.getHeight();
 
+    }
+
+    public String getTextureName() {
+        return textureName;
     }
 
     public int getWidth() {

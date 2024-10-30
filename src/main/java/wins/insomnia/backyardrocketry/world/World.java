@@ -39,6 +39,8 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public final ArrayList<ChunkPosition> CHUNKS_CURRENTLY_LOADING;
     private final Queue<ChunkManagementData> CHUNK_MANAGEMENT_QUEUE;
 
+    private final float GRAVITY = -0.1f;
+
     private long seed;
 
     public World() {
@@ -554,7 +556,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return chunks;
     }
 
-    private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {
+    private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}
 
+    public float getGravity() {
+        return GRAVITY;
     }
 }

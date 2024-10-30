@@ -272,7 +272,7 @@ public class BlockModelData {
 
                 String blockStateFileName = Block.getBlockStateName(block);
 
-                if (blockStateFileName == null) continue;
+                if (blockStateFileName == null || blockStateFileName.isEmpty()) continue;
 
                 loadBlockState(mapper, block, blockStateFileName);
             }

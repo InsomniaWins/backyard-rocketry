@@ -17,13 +17,12 @@ public class PlayerGui implements IGuiRenderable {
 	public void render() {
 
 		Renderer renderer = Renderer.get();
-		TextureManager textureManager = TextureManager.get();
 
 		int hotbarX = renderer.getCenterAnchorX() - 139;
 		int hotbarY = renderer.getBottomAnchor() - 41;
 		int selectedHotbarSlotX = hotbarX + player.getCurrentHotbarSlot() * 28;
-		renderer.drawGuiTexture(textureManager.HOTBAR_TEXTURE, hotbarX, hotbarY);
-		renderer.drawGuiTexture(textureManager.HOTBAR_SLOT_TEXTURE, selectedHotbarSlotX, hotbarY);
+		renderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
+		renderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
 
 
 
@@ -43,12 +42,12 @@ public class PlayerGui implements IGuiRenderable {
 
 			if (iconName == null) continue;
 
-			int[] blockAtlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(iconName);
+			int[] blockAtlasCoordinates = TextureManager.getBlockAtlasCoordinates(iconName);
 			blockAtlasCoordinates[0] *= 16;
 			blockAtlasCoordinates[1] *= 16;
 
 			renderer.drawGuiTextureClipped(
-					textureManager.getBlockAtlasTexture(), //texture
+					TextureManager.getBlockAtlasTexture(), //texture
 					hotbarX + 5 + 28 * i, hotbarY + 20, // screen x, y
 					16, 16, // screen width, height
 					blockAtlasCoordinates[0], blockAtlasCoordinates[1], // texture x, y
@@ -73,7 +72,7 @@ public class PlayerGui implements IGuiRenderable {
 				int progressBarScreenPositionY = renderer.getCenterAnchorY() + 16;
 
 				renderer.drawGuiTextureClipped(
-						textureManager.BREAK_PROGRESS_BAR_UNDER_TEXTURE,
+						TextureManager.getTexture("break_progress_bar_under"),
 						renderer.getCenterAnchorX() - 34,
 						progressBarScreenPositionY,
 						68,
@@ -89,7 +88,7 @@ public class PlayerGui implements IGuiRenderable {
 				int breakProgressPixels = Math.round(62f * breakProgressRatio);
 
 				renderer.drawGuiTextureClipped(
-						textureManager.BREAK_PROGRESS_BAR_PROGRESS_TEXTURE,
+						TextureManager.getTexture("break_progress_bar_progress"),
 						renderer.getCenterAnchorX() - 31,
 						progressBarScreenPositionY + 3,
 						breakProgressPixels,
@@ -102,7 +101,7 @@ public class PlayerGui implements IGuiRenderable {
 			}
 
 			// render w.a.i.l.a gui
-			Texture wailaTexture = TextureManager.get().WAILA_BACKGROUND_TEXTURE;
+			Texture wailaTexture = TextureManager.getTexture("waila");
 			int wailaPosY = 0;
 			renderer.drawGuiTexture(
 					wailaTexture,
@@ -115,6 +114,19 @@ public class PlayerGui implements IGuiRenderable {
 			int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
 			TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
 
+		}
+
+
+		// draw crosshair
+		renderer.drawGuiTexture(TextureManager.getTexture("crosshair"), renderer.getCenterAnchorX() - 8, renderer.getCenterAnchorY() - 8);
+
+
+		// render inventory
+		if (player.getInventoryManager().isOpen()) {
+			Texture inventoryTexture = TextureManager.getTexture("placeholder_inventory");
+			int textureX = renderer.getCenterAnchorX() - inventoryTexture.getWidth() / 2;
+			int textureY = renderer.getCenterAnchorY() - inventoryTexture.getHeight() / 2;
+			renderer.drawGuiTexture(inventoryTexture, textureX, textureY);
 		}
 
 

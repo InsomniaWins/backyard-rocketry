@@ -261,7 +261,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
                 glDisable(GL_DEPTH_TEST);
 
-                glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockOutlineTexture().getTextureHandle());
+                glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_outline").getTextureHandle());
 
                 TargetBlockOutlineMesh.get(raycastResult.getFace()).render(GL_LINES);
 
@@ -300,13 +300,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         debugString.append("\n\nVAO Count: ").append(OpenGLWrapper.VAO_LIST.size());
 
-        TextRenderer.drawText(debugString.toString(), 0, 0, 2, TEXTURE_MANAGER.getDebugFontTexture());
+        TextRenderer.drawText(debugString.toString(), 0, 0, 2, TextureManager.getTexture("debug_font"));
 
-
-
-
-
-        drawGuiTexture(TEXTURE_MANAGER.getCrosshairTexture(), getCenterAnchorX() - 8, getCenterAnchorY() - 8);
 
     }
 

@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.entity.player;
 
 import org.joml.Math;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -98,7 +99,7 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 				.rotateY(-transform.getRotation().y);
 
 		transform.getPosition().add(new Vector3d(uiRightVector).mul(0.5));
-		transform.getPosition().add(new Vector3d(uiUpVector).negate().mul(0.6));//.mul(Window.get().getHeight() * 0.002));
+		transform.getPosition().add(new Vector3d(uiUpVector).negate().mul(0.7));
 
 
 
@@ -108,9 +109,9 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 						(float) transform.getPosition().y,
 						(float) transform.getPosition().z
 				).translate(
-						(float) cameraDirectionVector.x * 0.5f,
-						(float) cameraDirectionVector.y * 0.5f,
-						(float) cameraDirectionVector.z * 0.5f
+						(float) cameraDirectionVector.x * 0.75f,
+						(float) cameraDirectionVector.y * 0.75f,
+						(float) cameraDirectionVector.z * 0.75f
 				)
 				.scale(0.5f)
 				.rotateY(-transform.getRotation().y)
@@ -118,7 +119,9 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 				.translate(-0.5f, -0.5f, -0.5f)
 				.rotateY(0.45f);
 
+		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", new Matrix4f().identity());
 		Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
+		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
 
 		if (handMesh == null || handMesh.isClean()) {
 			return;

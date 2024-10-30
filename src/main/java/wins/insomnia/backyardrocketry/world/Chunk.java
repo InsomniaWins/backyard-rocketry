@@ -11,7 +11,6 @@ import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -31,7 +30,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 30;
-    public static final int SIZE_Y = 128;
+    public static final int SIZE_Y = 256;
     public static  final int SIZE_Z = 30;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
     private final int X;
@@ -340,7 +339,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
 
         int noiseAmplitude = 6;
-        float noiseScale = 0.025f;
+        float noiseScale = 0.0125f;
 
         return (int) (60 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
     }

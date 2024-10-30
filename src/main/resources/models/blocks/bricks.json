@@ -1,0 +1,8 @@
+{
+	"parent": "block_all",
+	"textures": {
+		"particle": "bricks",
+		"all": "bricks",
+		"icon": "bricks"
+	}
+}

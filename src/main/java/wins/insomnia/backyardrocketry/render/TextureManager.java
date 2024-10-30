@@ -6,65 +6,67 @@ import wins.insomnia.backyardrocketry.BackyardRocketry;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TextureManager {
-    public final Texture FONT_TEXTURE;
-    public final Texture DEBUG_FONT_TEXTURE;
-    public final Texture BLOCK_ATLAS;
-    public final Texture BLOCK_OUTLINE_TEXTURE;
-    public final Texture CROSSHAIR_TEXTURE;
-    public final Texture HOTBAR_TEXTURE;
-    public final Texture HOTBAR_SLOT_TEXTURE;
-    public final Texture BREAK_PROGRESS_BAR_UNDER_TEXTURE;
-    public final Texture BREAK_PROGRESS_BAR_PROGRESS_TEXTURE;
-    public final Texture WAILA_BACKGROUND_TEXTURE;
+
+    private static final HashMap<String, Texture> TEXTURE_HASH_MAP = new HashMap<>();
 
     public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
 
 
     public TextureManager() {
-
-        FONT_TEXTURE = new Texture("font.png");
-        DEBUG_FONT_TEXTURE = new Texture("debug_font.png");
-        BLOCK_ATLAS = new Texture("block_atlas.png");
-        BLOCK_OUTLINE_TEXTURE = new Texture("block_outline.png");
-        CROSSHAIR_TEXTURE = new Texture("gui/crosshair.png");
-        HOTBAR_TEXTURE = new Texture("gui/hotbar.png");
-        HOTBAR_SLOT_TEXTURE = new Texture("gui/selected_hotbar_slot.png");
-        BREAK_PROGRESS_BAR_UNDER_TEXTURE = new Texture("gui/break_progress_bar_under.png");
-        BREAK_PROGRESS_BAR_PROGRESS_TEXTURE = new Texture("gui/break_progress_bar_progress.png");
-        WAILA_BACKGROUND_TEXTURE = new Texture("gui/waila.png");
+        registerTextures();
     }
 
-    public Texture getBlockOutlineTexture() {
-        return BLOCK_OUTLINE_TEXTURE;
+    private static void registerTextures() {
+
+        registerTexture("placeholder_inventory", "gui/inventory/placeholder_inventory.png");
+        registerTexture("font", "font.png");
+        registerTexture("debug_font", "debug_font.png");
+        registerTexture("block_atlas", "block_atlas.png");
+        registerTexture("block_outline", "block_outline.png");
+        registerTexture("crosshair", "gui/crosshair.png");
+        registerTexture("hotbar", "gui/hotbar.png");
+        registerTexture("selected_hotbar_slot", "gui/selected_hotbar_slot.png");
+        registerTexture("break_progress_bar_under", "gui/break_progress_bar_under.png");
+        registerTexture("break_progress_bar_progress", "gui/break_progress_bar_progress.png");
+        registerTexture("waila", "gui/waila.png");
+
     }
 
-    public Texture getFontTexture() {
-        return FONT_TEXTURE;
+    public static Texture getTexture(String textureId) {
+        return TEXTURE_HASH_MAP.get(textureId);
     }
 
-    public Texture getCrosshairTexture() {
-        return CROSSHAIR_TEXTURE;
+
+    public static Texture registerTexture(String textureFilePath) {
+        return registerTexture(textureFilePath, textureFilePath);
     }
 
-    public Texture getDebugFontTexture() {
-        return DEBUG_FONT_TEXTURE;
+    public static void unregisterTexture(String textureId) {
+        Texture texture = TEXTURE_HASH_MAP.get(textureId);
+
+        if (texture != null && !texture.isClean()) {
+            texture.clean();
+        }
+
+        TEXTURE_HASH_MAP.remove(textureId);
     }
 
-    public void clean() {
-
-        BREAK_PROGRESS_BAR_PROGRESS_TEXTURE.clean();
-        BREAK_PROGRESS_BAR_UNDER_TEXTURE.clean();
-        FONT_TEXTURE.clean();
-        DEBUG_FONT_TEXTURE.clean();
-        CROSSHAIR_TEXTURE.clean();
-        HOTBAR_TEXTURE.clean();
-        HOTBAR_SLOT_TEXTURE.clean();
-        WAILA_BACKGROUND_TEXTURE.clean();
+    public static Texture registerTexture(String textureId, String textureFilePath) {
+        Texture texture = new Texture(textureFilePath);
+        TEXTURE_HASH_MAP.put(textureId, texture);
+        return texture;
     }
 
-    public int[] getBlockAtlasCoordinates(String blockTextureName) {
+    public static void clean() {
+        for (Map.Entry<String, Texture> textureEntry : TEXTURE_HASH_MAP.entrySet()) {
+            textureEntry.getValue().clean();
+        }
+    }
+
+    public static int[] getBlockAtlasCoordinates(String blockTextureName) {
         switch (blockTextureName) {
             case "cobblestone" -> {
                 return new int[] {0, 0};
@@ -98,6 +100,13 @@ public class TextureManager {
             }
             case "glass" -> {
                 return new int[] {4, 1};
+            }
+            case "bricks" -> {
+                return new int[] {5, 1};
+            }
+
+            case "wood" -> {
+                return new int[] {0, 2};
             }
         }
         return new int[] {0, 0};
@@ -133,8 +142,8 @@ public class TextureManager {
         return textureData;
     }
 
-    public Texture getBlockAtlasTexture() {
-        return BLOCK_ATLAS;
+    public static Texture getBlockAtlasTexture() {
+        return getTexture("block_atlas");
     }
 
     public static TextureManager get() {
