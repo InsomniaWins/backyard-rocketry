@@ -9,6 +9,7 @@ The goal of this project is to make a game with most of the features from Minecr
 
 ![Screenshot of early build](/screenshot.png)
 ![Screenshot of another early build](/screenshot2.png)
+![Screenshot of yet another early build](/screenshot3.png)
 
 ## Compilation
 
