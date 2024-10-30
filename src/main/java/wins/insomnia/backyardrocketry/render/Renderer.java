@@ -49,7 +49,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         camera = new Camera();
         camera.getTransform().getPosition().set(0f, 0f, -3f);
 
-        glClearColor(1f, 0f, 0f, 1f);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -77,7 +76,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 }
         );
 
-        glClearColor(0.25882352941176473f, 0.6901960784313725f, 1f, 1f);
+        glClearColor(120 / 255f, 167 / 255f, 255 / 255f, 1f);
 
     }
 
@@ -299,6 +298,22 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             TextRenderer.drawText(debugString.toString(), 0, 0, 2, TextureManager.getTexture("debug_font"));
         }
 
+
+        StringBuilder controlsStringBuilder = new StringBuilder();
+        controlsStringBuilder.append("W,A,S,D : move\n");
+        controlsStringBuilder.append("Spacebar : jump\n");
+        controlsStringBuilder.append("Left Shift : sneak\n");
+        controlsStringBuilder.append("Left Control : sprint\n");
+        controlsStringBuilder.append("Left Mouse : break block\n");
+        controlsStringBuilder.append("Right Mouse : place block\n");
+        controlsStringBuilder.append("F3 : toggle debug menu\n");
+        controlsStringBuilder.append("F4 : toggle noclip\n");
+        String controlsString = controlsStringBuilder.toString();
+
+        TextRenderer.drawText(
+                controlsString,
+                0, getBottomAnchor(2) - TextRenderer.getTextPixelHeight(controlsString.length() - controlsString.replace("\n", "").length()), 2, TextureManager.getTexture("debug_font"));
+
     }
 
     public void setGuiScale(int guiScale) {
@@ -330,8 +345,16 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         return Window.get().getHeight() / guiScale;
     }
 
+    public int getBottomAnchor(int customGuiScale) {
+        return Window.get().getHeight() / customGuiScale;
+    }
+
     public int getRightAnchor() {
         return Window.get().getWidth() / guiScale;
+    }
+
+    public int getRightAnchor(int customGuiScale) {
+        return Window.get().getWidth() / customGuiScale;
     }
 
     public int getRenderMode() {

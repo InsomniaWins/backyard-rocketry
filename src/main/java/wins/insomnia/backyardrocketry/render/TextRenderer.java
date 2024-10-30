@@ -16,6 +16,10 @@ public class TextRenderer {
 		return text.length() * 7;
 	}
 
+	public static int getTextPixelHeight(int lineAmount) {
+		return lineAmount * 12;
+	}
+
 	public static void drawText(String text, int guiX, int guiY) {
 		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));
 	}

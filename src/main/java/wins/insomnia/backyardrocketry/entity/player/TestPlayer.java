@@ -377,6 +377,9 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         if (previousTargetBlock != null && targetBlock != null && !previousTargetBlock.equals(targetBlock, false)) {
             breakProgress = 0;
         }
+        if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+            FIRST_PERSON_HAND_ITEM.playSwingAnimation(false);
+        }
 
         if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_RIGHT)) {
             blockInteractionTimer = 0;
@@ -459,7 +462,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     }
 
     private boolean shouldInstantlyBreakBlocks() {
-        return true;
+        return false;
     }
 
     private void placeBlock(byte blockToPlace) {

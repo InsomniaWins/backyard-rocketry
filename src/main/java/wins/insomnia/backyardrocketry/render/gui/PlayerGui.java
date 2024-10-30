@@ -30,7 +30,7 @@ public class PlayerGui implements IGuiRenderable {
 		previousDeltaTime = Updater.getCurrentTime();
 
 
-		blockMeshRotationValue.x += deltaTime * 2.5;
+		blockMeshRotationValue.x += deltaTime * 1.5;
 		blockMeshRotationValue.y += deltaTime * 15.0;
 
 
