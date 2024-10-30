@@ -65,8 +65,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private float cameraInterpolationFactor = 0f;
     private int blockInteractionTimer = 0;
     private boolean lockMouseToCenterForCameraRotation = false;
-    public boolean hasGravity = false;
-    private boolean hasCollision = false;
+    public boolean hasGravity = true;
+    private boolean hasCollision = true;
     private BlockRaycastResult targetBlock;
     private int breakProgress = 0;
     private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
@@ -417,7 +417,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         if (INVENTORY_MANAGER.isOpen()) return;
         if (targetBlock == null) return;
 
-
+        FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
 
 
         byte block = getWorld().getBlock(
@@ -431,7 +431,12 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             return;
         }
 
-        breakProgress += 1;
+        if (shouldInstantlyBreakBlocks()) {
+            breakProgress = Block.getBlockHealth(block);
+        } else {
+            breakProgress += 1;
+        }
+
         if (breakProgress >= Block.getBlockHealth(block)) {
             Chunk targetBlockChunk = targetBlock.getChunk();
             targetBlockChunk.setBlock(
@@ -441,9 +446,20 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                     Block.AIR
             );
             breakProgress = 0;
-            blockInteractionTimer = 5;
+
+            if (shouldInstantlyBreakBlocks()) {
+                blockInteractionTimer = 5;
+            } else if (Block.getBlockHealth(block) > 1) {
+                blockInteractionTimer = 2;
+            }
         }
 
+
+
+    }
+
+    private boolean shouldInstantlyBreakBlocks() {
+        return true;
     }
 
     private void placeBlock(byte blockToPlace) {
@@ -505,6 +521,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                 blockToPlace,
                 true
         );
+
+        FIRST_PERSON_HAND_ITEM.playSwingAnimation(false);
     }
 
     private void updateBoundingBox() {

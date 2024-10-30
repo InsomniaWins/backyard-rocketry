@@ -1,13 +1,22 @@
 package wins.insomnia.backyardrocketry.render.gui;
 
+import org.joml.*;
+import org.joml.Math;
+import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
+
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
 
 public class PlayerGui implements IGuiRenderable {
 
 	private TestPlayer player;
+	private double previousDeltaTime = 0.0;
+	private Vector3d blockMeshRotationValue = new Vector3d();
 
 	public PlayerGui(TestPlayer player) {
 		this.player = player;
@@ -15,6 +24,23 @@ public class PlayerGui implements IGuiRenderable {
 
 	@Override
 	public void render() {
+
+
+		double deltaTime = Updater.getCurrentTime() - previousDeltaTime;
+		previousDeltaTime = Updater.getCurrentTime();
+
+
+		blockMeshRotationValue.x += deltaTime * 2.5;
+		blockMeshRotationValue.y += deltaTime * 15.0;
+
+
+		while (blockMeshRotationValue.x >= 360) {
+			blockMeshRotationValue.x -= 360;
+		}
+		while (blockMeshRotationValue.y >= 360) {
+			blockMeshRotationValue.y -= 360;
+		}
+
 
 		Renderer renderer = Renderer.get();
 
@@ -27,6 +53,11 @@ public class PlayerGui implements IGuiRenderable {
 
 
 		// render hotbar items
+		int[] gameWindowSize = Window.get().getSize();
+		float gameWindowAspect = gameWindowSize[0] / (float) gameWindowSize[1];
+		float modelAspectScale = (750f / gameWindowSize[1]);
+		glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas").getTextureHandle());
+
 		for (int i = 0; i < 10; i++) {
 
 			int hotbarIndex = i == 9 ? 0 : i + 1;
@@ -34,13 +65,63 @@ public class PlayerGui implements IGuiRenderable {
 
 			byte currentBlock = player.getHotbarSlotContents(i);
 
+
+			Mesh handMesh = BlockModelData.getMeshFromBlock(currentBlock);
+
+			if (handMesh == null || handMesh.isClean()) {
+				continue;
+			}
+
+			float blockMeshScale = player.getCurrentHotbarSlot() + 1!= hotbarIndex ? 0.045f : 0.055f;
+
+			Renderer.get().getModelMatrix().identity()
+					.translate(0f, 0f, -1f)
+					.scale(1f, 1f, 0f)
+					.rotateX((float) Math.sin(blockMeshRotationValue.x) * 0.3f)
+					.rotateY((float) Math.toRadians(blockMeshRotationValue.y))
+					.scale(
+							blockMeshScale * modelAspectScale,
+							blockMeshScale * modelAspectScale,
+							blockMeshScale * modelAspectScale
+					)
+					.translate(-0.5f, -0.5f, -0.5f);
+
+
+			int guiX = hotbarX + 13 + 28 * i;
+			int guiY = hotbarY + 28;
+			Vector2f viewportOffset = new Vector2f(
+					2f * (((renderer.getGuiScale() * guiX) / (float) gameWindowSize[0]) - 0.5f),
+					2f * (((renderer.getGuiScale() * guiY) / (float) gameWindowSize[1]) - 0.5f)
+			);
+
+			Matrix4f projectionMatrix = new Matrix4f().setPerspective(70f, gameWindowAspect, 0.01f, 1f);
+			projectionMatrix.m20(-viewportOffset.x);
+			projectionMatrix.m21(viewportOffset.y);
+
+			Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", projectionMatrix);
+			Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", new Matrix4f().identity());
+			Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
+
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			handMesh.render();
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+			Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
+			Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
+
+
+
+
+			/*     OLD 2D ICON RENDERING
 			BlockModelData blockModelData = BlockModelData.getBlockModel(currentBlock, 0, 0, 0);
 
 			if (blockModelData == null) continue;
 
 			String iconName = blockModelData.getTextures().get("icon");
 
-			if (iconName == null) continue;
+			if (iconName == null) {
+				continue;
+			}
 
 			int[] blockAtlasCoordinates = TextureManager.getBlockAtlasCoordinates(iconName);
 			blockAtlasCoordinates[0] *= 16;
@@ -54,7 +135,15 @@ public class PlayerGui implements IGuiRenderable {
 					16, 16 // texture width, height
 			);
 
+			 */
+
+
+
 		}
+
+
+
+
 
 
 

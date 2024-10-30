@@ -39,6 +39,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Matrix4f modelMatrix;
     private int renderMode = 0;
     private int guiScale = 1;
+    private boolean renderDebugInformation = false;
 
     public Renderer() {
         RENDER_LIST = new LinkedList<>();
@@ -81,12 +82,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public void fixedUpdate() {
-        if (KeyboardInput.get().isKeyJustReleased(GLFW_KEY_F3)) {
-            renderMode++;
-            if (renderMode == 3) {
-                renderMode = 0;
-            }
+
+
+        if (KeyboardInput.get().isKeyJustPressed(GLFW_KEY_F3)) {
+            renderDebugInformation = !renderDebugInformation;
         }
+
     }
 
     @Override
@@ -243,6 +244,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             renderable.render();
         }
 
+
         // render target block
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
 
@@ -272,7 +274,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         }
 
-
         // render gui
         for (IGuiRenderable renderable : GUI_RENDER_LIST) {
 
@@ -284,24 +285,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // draw debug information
 
-        StringBuilder debugString = new StringBuilder();
-        debugString.append(DebugInfo.getMemoryUsage());
-        debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
-        debugString.append("\n\n").append(DebugInfo.getFixedUpdatesPerSecond());
-        debugString.append("\n\n").append(DebugInfo.getRenderMode());
+        if (renderDebugInformation) {
+            StringBuilder debugString = new StringBuilder();
+            debugString.append(DebugInfo.getMemoryUsage());
+            debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
 
-        if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
-            debugString.append("\n\n").append(DebugInfo.getPlayerBlockPosition(player));
-            debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
-            debugString.append("\n\n").append(DebugInfo.getPlayerPosition(player));
-            debugString.append("\n\n").append(DebugInfo.getPlayerRotation(player));
-            debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
+            if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
+                debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
+                debugString.append("\n\n").append(DebugInfo.getPlayerBlockPosition(player));
+                debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
+            }
+
+            TextRenderer.drawText(debugString.toString(), 0, 0, 2, TextureManager.getTexture("debug_font"));
         }
-
-        debugString.append("\n\nVAO Count: ").append(OpenGLWrapper.VAO_LIST.size());
-
-        TextRenderer.drawText(debugString.toString(), 0, 0, 2, TextureManager.getTexture("debug_font"));
-
 
     }
 

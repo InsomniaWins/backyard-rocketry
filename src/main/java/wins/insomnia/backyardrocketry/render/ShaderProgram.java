@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -40,6 +41,10 @@ public class ShaderProgram {
 
     public void setUniform(String uniformName, float value) {
         glUniform1f(glGetUniformLocation(shaderProgramHandle, uniformName), value);
+    }
+
+    public void setUniform(String uniformName, Vector2f value) {
+        glUniform2f(glGetUniformLocation(shaderProgramHandle, uniformName), value.x, value.y);
     }
 
     public void setUniform(String uniformName, Vector3f value) {

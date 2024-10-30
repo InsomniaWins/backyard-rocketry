@@ -23,8 +23,26 @@ public class BlockModelData {
 
     private static final HashMap<Byte, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
+    private static final HashMap<Byte, Mesh> BLOCK_MESH_MAP = new HashMap<>();
+
+    public static void init() {
+        loadBlockModels();
+        loadBlockStates();
+        registerBlockMeshes();
+    }
+
+    public static void registerBlockMeshes() {
+
+        for (Byte block : Block.getBlocks()) {
+            registerBlockMesh(block);
+        }
+
+
+
+    }
 
     public static void clean() {
+        cleanBlockMeshes();
     }
 
     public static BlockModelData getBlockModelFromBlock(byte block, int x, int y, int z) {
@@ -308,5 +326,77 @@ public class BlockModelData {
 
     public static HashMap<Byte, HashMap<String, Object>> getBlockStateModelMap() {
         return BLOCK_STATE_MODEL_MAP;
+    }
+
+    public static Mesh getMeshFromBlock(byte block) {
+        return BLOCK_MESH_MAP.get(block);
+    }
+
+    private static void unregisterBlockMesh(byte block) {
+        Mesh blockMesh = BLOCK_MESH_MAP.get(block);
+        if (blockMesh != null && !blockMesh.isClean()) {
+            blockMesh.clean();
+        }
+        BLOCK_MESH_MAP.remove(blockMesh);
+    }
+
+    private static void cleanBlockMeshes() {
+
+        Iterator<Map.Entry<Byte, Mesh>> iterator = BLOCK_MESH_MAP.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Byte, Mesh> entry = iterator.next();
+            Mesh blockMesh = entry.getValue();
+
+            iterator.remove();
+
+            if (blockMesh != null && !blockMesh.isClean()) {
+                blockMesh.clean();
+            }
+        }
+
+    }
+
+    private static void registerBlockMesh(byte block) {
+
+        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, 0, 0, 0);
+        if (blockModelData == null) return;
+
+        ArrayList<Float> vertexArray = new ArrayList<>();
+        ArrayList<Integer> indexArray = new ArrayList<>();
+
+        int indexOffset = 0;
+
+        for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
+
+            HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
+
+            ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
+            ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
+
+            for (Double vertexValue : faceVertexArray) {
+                vertexArray.add(vertexValue.floatValue());
+            }
+
+            int greatestIndexValue = 0;
+            for (Integer indexValue : faceIndexArray) {
+                indexArray.add(indexValue + indexOffset);
+                if (indexValue > greatestIndexValue) {
+                    greatestIndexValue = indexValue;
+                }
+            }
+            indexOffset += greatestIndexValue + 1;
+        }
+
+        float[] primitiveVertexArray = new float[vertexArray.size()];
+        for (int i = 0; i < primitiveVertexArray.length; i++) {
+            primitiveVertexArray[i] = vertexArray.get(i);
+        }
+
+        int[] primitiveIndexArray = new int[indexArray.size()];
+        for (int i = 0; i < primitiveIndexArray.length; i++) {
+            primitiveIndexArray[i] = indexArray.get(i);
+        }
+
+        BLOCK_MESH_MAP.put(block, new Mesh(primitiveVertexArray, primitiveIndexArray));
     }
 }

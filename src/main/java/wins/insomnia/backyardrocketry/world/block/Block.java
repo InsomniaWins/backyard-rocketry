@@ -186,7 +186,7 @@ public class Block {
             detailsMap.put(BlockDetail.STATE, blockStateFileName);
         }
 
-        detailsMap.put(BlockDetail.HEALTH, 1);//blockHealth);
+        detailsMap.put(BlockDetail.HEALTH, blockHealth);
 
 
 

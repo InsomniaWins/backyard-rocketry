@@ -55,6 +55,7 @@ public class BackyardRocketry {
         init();
         UPDATER.loop();
         renderer.clean();
+        BlockModelData.clean();
 
         world.shutdown();
 
@@ -123,8 +124,7 @@ public class BackyardRocketry {
         renderer = new Renderer();
 
         // load block models
-        BlockModelData.loadBlockModels();
-        BlockModelData.loadBlockStates();
+        BlockModelData.init();
 
 
         // TODO: REPLACE PLACEHOLDER CODE!

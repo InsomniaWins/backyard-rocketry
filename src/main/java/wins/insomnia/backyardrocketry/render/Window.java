@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.render;
 
+import org.lwjgl.glfw.GLFW;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -61,5 +62,6 @@ public class Window {
     public static Window get() {
         return BackyardRocketry.getInstance().getWindow();
     }
+
 
 }
