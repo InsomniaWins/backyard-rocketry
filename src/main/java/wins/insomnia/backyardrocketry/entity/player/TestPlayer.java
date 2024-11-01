@@ -442,11 +442,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         if (breakProgress >= Block.getBlockHealth(block)) {
             Chunk targetBlockChunk = targetBlock.getChunk();
-            targetBlockChunk.setBlock(
+            targetBlockChunk.breakBlock(
                     targetBlockChunk.toLocalX(targetBlock.getBlockX()),
                     targetBlockChunk.toLocalY(targetBlock.getBlockY()),
-                    targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
-                    Block.AIR
+                    targetBlockChunk.toLocalZ(targetBlock.getBlockZ())
             );
             breakProgress = 0;
 

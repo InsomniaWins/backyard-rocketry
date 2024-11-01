@@ -11,6 +11,8 @@ import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
+
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -126,6 +128,21 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     public void setBlock(int x, int y, int z, byte block) {
         setBlock(x, y, z, block, true);
+
+    }
+
+    public void breakBlock(int x, int y, int z) {
+
+        byte block = getBlock(x, y, z);
+        setBlock(x, y, z, Block.AIR);
+
+        BlockLoot blockLoot = BlockLoot.getBlockLoot(block);
+
+        if (blockLoot == null) {
+            return;
+        }
+
+        System.out.println(BlockLoot.getItemFromLootAtIndex(blockLoot.getLootOfType("default"), 0));
 
     }
 

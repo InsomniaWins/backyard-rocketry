@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.nio.IntBuffer;
 
@@ -125,6 +126,7 @@ public class BackyardRocketry {
 
         // load block models
         BlockModelData.init();
+        BlockLoot.init();
 
 
         // TODO: REPLACE PLACEHOLDER CODE!

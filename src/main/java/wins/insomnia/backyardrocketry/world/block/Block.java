@@ -41,8 +41,8 @@ public class Block {
 
 
     private static final HashMap<Byte, HashMap<BlockDetail, Object>> BLOCK_DETAILS_MAP = new HashMap<>();
+    private static final HashMap<String, Byte> BLOCK_SYNONYM_MAP = new HashMap<>();
     private static byte nextAvailableBlockIdForRegistration = Byte.MIN_VALUE;
-
     public static final byte WORLD_BORDER = registerBlock(
             "WORLD BORDER",
             true,
@@ -55,26 +55,23 @@ public class Block {
             "NULL",
             true,
             true,
-            new BlockProperties(),
+            null,
             null,
             -1
     );
-
-
-
     public static final byte AIR = registerBlock(
             "Air",
             true,
             false,
             null,
-            "",
+            null,
             -1
     );
     public static final byte GRASS = registerBlock(
             "Grass",
             false,
             true,
-            new BlockPropertiesGrass(),
+            null,
             "grass_block",
             40
     );
@@ -90,7 +87,7 @@ public class Block {
             "Dirt",
             false,
             true,
-            new BlockPropertiesDirt(),
+            null,
             "dirt",
             30
     );
@@ -164,6 +161,10 @@ public class Block {
     }
 
 
+    public static byte getBlockIdFromSynonym(String blockSynonym) {
+        return BLOCK_SYNONYM_MAP.get(blockSynonym);
+    }
+
     public static byte registerBlock(String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
 
         byte blockId = nextAvailableBlockIdForRegistration++;
@@ -184,6 +185,7 @@ public class Block {
 
         if (blockStateFileName != null) {
             detailsMap.put(BlockDetail.STATE, blockStateFileName);
+            BLOCK_SYNONYM_MAP.put(blockStateFileName, blockId);
         }
 
         detailsMap.put(BlockDetail.HEALTH, blockHealth);
