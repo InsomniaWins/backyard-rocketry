@@ -72,7 +72,7 @@ public class Block {
             false,
             true,
             null,
-            "grass_block",
+            "grass",
             40
     );
     public static final byte COBBLESTONE = registerBlock(

@@ -1,0 +1,13 @@
+{
+	"parent": "block",
+	"textures": {
+		"particle": "grass_top",
+		"pos_y": "grass_top",
+		"pos_x": "grass_top",
+		"neg_x": "grass_top",
+		"pos_z": "grass_top",
+		"neg_z": "grass_top",
+		"neg_y": "grass_top",
+		"icon": "grass_top"
+	}
+}

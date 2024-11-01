@@ -77,13 +77,13 @@ public class TextureManager {
             case "dirt" -> {
                 return new int[] {2, 0};
             }
-            case "grass_block_side" -> {
+            case "grass_side" -> {
                 return new int[] {3, 0};
             }
-            case "grass_block_top" -> {
+            case "grass_top" -> {
                 return new int[] {4, 0};
             }
-            case "grass_block_deep_side" -> {
+            case "grass_deep_side" -> {
                 return new int[] {5, 0};
             }
             case "log_top" -> {

@@ -4,6 +4,7 @@ import org.joml.*;
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
@@ -29,11 +30,13 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Y = 1;
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
-
     public static int chunkLoadDistance = 6; // chunk loading RADIUS
     public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
+
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
+    private final HashMap<ChunkPosition, Entity> ENTITIES;
+
     public static final Random RANDOM = new Random();
     private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
     public final ArrayList<ChunkPosition> CHUNKS_CURRENTLY_LOADING;
@@ -47,6 +50,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         seed = RANDOM.nextLong();
         CHUNKS = new ConcurrentHashMap<>();
+        ENTITIES = new HashMap<>();
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
         CHUNK_MANAGEMENT_QUEUE = new LinkedList<>();
         CHUNKS_CURRENTLY_LOADING = new ArrayList<>();
@@ -560,5 +564,13 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     public float getGravity() {
         return GRAVITY;
+    }
+
+    public void addEntity(Entity entity, int x, int y, int z) {
+
+        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped(x, y, z);
+
+
+
     }
 }

@@ -4,6 +4,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.item.Item;
+import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.*;
@@ -142,8 +144,18 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             return;
         }
 
-        System.out.println(BlockLoot.getItemFromLootAtIndex(blockLoot.getLootOfType("default"), 0));
+        ArrayList<ArrayList<Object>> defaultLoot = blockLoot.getLootOfType("default");
+        for (ArrayList<Object> lootEntry : defaultLoot) {
 
+            String itemSynonym = (String) lootEntry.get(0);
+            int volume = (Integer) lootEntry.get(1);
+
+            Item item = Item.getItem(itemSynonym);
+            ItemStack itemStack = new ItemStack(item, volume);
+
+            System.out.println(itemStack);
+
+        }
     }
 
 
