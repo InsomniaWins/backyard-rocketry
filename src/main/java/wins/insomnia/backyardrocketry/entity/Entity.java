@@ -98,4 +98,11 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 	public void removedFromWorld() {
 
 	}
+
+	public void teleport(double x, double y, double z, float rotX, float rotY, float rotZ) {
+
+		getPosition().set(x, y, z);
+		getRotation().set(rotX, rotY, rotZ);
+
+	}
 }

@@ -51,6 +51,15 @@ public class Transform {
         wrapRotation();
     }
 
+    public Transform setPosition(Vector3d newValue) {
+        position.set(newValue);
+        return this;
+    }
+
+    public Transform setRotation(Vector3f newValue) {
+        rotation.set(newValue);
+        return this;
+    }
 
     // makes sure angles outside the -π to π are wrapped to avoid overflow (angles outside float bounds)
     public void wrapRotation() {

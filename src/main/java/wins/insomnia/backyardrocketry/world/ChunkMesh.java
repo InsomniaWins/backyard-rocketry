@@ -169,7 +169,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
         Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
-        Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
+        Renderer.get().getShaderProgram().setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
 
         glBindVertexArray(vao);
         glEnableVertexAttribArray(0);

@@ -5,6 +5,8 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentStandardPlayer;
@@ -277,6 +279,27 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         }
 
         getWorld().updateChunksAroundPlayer(this);
+
+        pickupNearbyItems();
+
+    }
+
+    private void pickupNearbyItems() {
+
+        ArrayList<Entity> entities = getWorld().getEntityList();
+        for (Entity entity : entities) {
+            if (entity instanceof IBoundingBoxEntity boundingBoxEntity) {
+
+                Collision.AABBCollisionResultType collisionResult = boundingBoxEntity.getBoundingBox().collideWithBoundingBox(getBoundingBox());
+                if (collisionResult != Collision.AABBCollisionResultType.OUTSIDE) {
+
+                    getWorld().removeEntity(entity);
+
+                }
+
+            }
+        }
+
     }
 
     public void updateCursorVisibility() {

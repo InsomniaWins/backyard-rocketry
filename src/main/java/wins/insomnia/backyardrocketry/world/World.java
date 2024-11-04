@@ -37,6 +37,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
     private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
+    private final ArrayList<Entity> ENTITY_LIST;
 
     public static final Random RANDOM = new Random();
     private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
@@ -52,6 +53,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         seed = RANDOM.nextLong();
         CHUNKS = new ConcurrentHashMap<>();
         ENTITIES = new HashMap<>();
+        ENTITY_LIST = new ArrayList<>();
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
         CHUNK_MANAGEMENT_QUEUE = new LinkedList<>();
         CHUNKS_CURRENTLY_LOADING = new ArrayList<>();
@@ -427,8 +429,13 @@ public class World implements IFixedUpdateListener, IUpdateListener {
             Chunk chunk = CHUNKS.get(chunkPosition);
             CHUNKS.remove(chunkPosition);
 
-            for (Entity entity : entitiesInChunk) {
+            Iterator<Entity> entityIterator = entitiesInChunk.iterator();
+            while (entityIterator.hasNext()) {
+                Entity entity = entityIterator.next();
                 entity.removedFromWorld();
+
+                ENTITY_LIST.remove(entity);
+                entityIterator.remove();
             }
 
             Updater.get().unregisterUpdateListener(chunk);
@@ -595,8 +602,24 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return GRAVITY;
     }
 
+    public void removeEntity(Entity entity) {
 
-    protected void addEntity(Entity entity, double x, double y, double z) {
+        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) entity.getPosition().x, (int) entity.getPosition().y, (int) entity.getPosition().z);
+
+        ArrayList<Entity> entityList = ENTITIES.get(chunkPosition);
+
+        if (entityList == null) {
+            throw new RuntimeException("Tried removing entity in chunk which is not loaded: " + entity + " : " + chunkPosition);
+        }
+
+        entity.removedFromWorld();
+
+        entityList.remove(entity);
+        ENTITY_LIST.remove(entity);
+
+    }
+
+    public void addEntity(Entity entity, double x, double y, double z) {
 
         ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) x, (int) y, (int) z);
 
@@ -617,8 +640,17 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         }
 
         entityList.add(entity);
-        entity.getTransform().getPosition().set(x, y, z);
+        ENTITY_LIST.add(entity);
+        entity.teleport(x, y, z, 0, 0, 0);
         entity.addedToWorld();
 
+    }
+
+    public ArrayList<Entity> getEntityList() {
+        return new ArrayList<>(ENTITY_LIST);
+    }
+
+    public Random getRandom() {
+        return RANDOM;
     }
 }
