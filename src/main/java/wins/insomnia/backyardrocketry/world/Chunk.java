@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.entity.EntityItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
@@ -153,8 +154,8 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             Item item = Item.getItem(itemSynonym);
             ItemStack itemStack = new ItemStack(item, volume);
 
-            System.out.println(itemStack);
-
+            EntityItem itemEntity = new EntityItem(itemStack, WORLD);
+            WORLD.addEntity(itemEntity, X + x + 0.5f, Y + y + 0.5f, Z + z + 0.5f);
         }
     }
 

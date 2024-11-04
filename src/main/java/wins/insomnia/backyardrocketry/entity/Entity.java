@@ -1,13 +1,33 @@
 package wins.insomnia.backyardrocketry.entity;
 
+import org.joml.Vector3d;
+import org.joml.Vector3f;
+import wins.insomnia.backyardrocketry.entity.component.Component;
+import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Entity implements IUpdateListener, IFixedUpdateListener {
 
+	private final World WORLD;
+	private final List<Component> COMPONENTS = new ArrayList<>();
+	private final Transform TRANSFORM = new Transform();
+	private final Vector3d VELOCITY = new Vector3d();
+
+	public Entity(World world) {
+		WORLD = world;
+	}
+
 	@Override
 	public void fixedUpdate() {
-
+		for (Component component : COMPONENTS) {
+			component.fixedUpdate();
+		}
 	}
 
 	@Override
@@ -22,7 +42,9 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 
 	@Override
 	public void update(double deltaTime) {
-
+		for (Component component : COMPONENTS) {
+			component.update(deltaTime);
+		}
 	}
 
 	@Override
@@ -35,5 +57,45 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 
 	}
 
+	public boolean hasEntityComponent(Class<? extends Component> componentClass) {
 
+		return COMPONENTS.stream().anyMatch(c -> c.getClass() == componentClass);
+
+	}
+
+	public void addEntityComponent(Component component) {
+		COMPONENTS.add(component);
+	}
+
+	public void removeEntityComponent(Component component) {
+		COMPONENTS.remove(component);
+	}
+
+	public World getWorld() {
+		return WORLD;
+	}
+
+	public Transform getTransform() {
+		return TRANSFORM;
+	}
+
+	public Vector3d getPosition() {
+		return TRANSFORM.getPosition();
+	}
+
+	public Vector3f getRotation() {
+		return TRANSFORM.getRotation();
+	}
+
+	public Vector3d getVelocity() {
+		return VELOCITY;
+	}
+
+	public void addedToWorld() {
+
+	}
+
+	public void removedFromWorld() {
+
+	}
 }

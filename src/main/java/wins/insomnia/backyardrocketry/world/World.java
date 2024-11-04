@@ -9,6 +9,7 @@ import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
+import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
@@ -35,7 +36,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
-    private final HashMap<ChunkPosition, Entity> ENTITIES;
+    private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
 
     public static final Random RANDOM = new Random();
     private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
@@ -388,11 +389,26 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         Chunk chunk = new Chunk(this, chunkPosition);
         chunk.generateLand();
 
-        CHUNKS.put(chunkPosition, chunk);
-        Updater.get().queueMainThreadInstruction(() -> {
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            Updater.get().queueMainThreadInstruction(() -> {
+                CHUNKS.put(chunkPosition, chunk);
+                CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
+                ENTITIES.put(chunkPosition, new ArrayList<>());
+            });
+        } else {
+            CHUNKS.put(chunkPosition, chunk);
             CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-        });
+            ENTITIES.put(chunkPosition, new ArrayList<>());
+        }
     }
+
+	public boolean isChunkLoaded(ChunkPosition chunkPosition) {
+		return CHUNKS.get(chunkPosition) != null;
+	}
+
+	public Chunk getChunk(ChunkPosition chunkPosition) {
+		return CHUNKS.get(chunkPosition);
+	}
 
 
     /**
@@ -405,11 +421,20 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     private void unloadChunk(ChunkPosition chunkPosition) {
 
         if (CHUNKS.get(chunkPosition) != null) {
+            ArrayList<Entity> entitiesInChunk = ENTITIES.get(chunkPosition);
+            ENTITIES.remove(chunkPosition);
+
             Chunk chunk = CHUNKS.get(chunkPosition);
             CHUNKS.remove(chunkPosition);
 
+            for (Entity entity : entitiesInChunk) {
+                entity.removedFromWorld();
+            }
+
             Updater.get().unregisterUpdateListener(chunk);
             Updater.get().unregisterFixedUpdateListener(chunk);
+
+
         }
 
     }
@@ -417,7 +442,11 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     @Override
     public void fixedUpdate() {
 
-
+        for (ArrayList<Entity> entityList : ENTITIES.values()) {
+            for (Entity entity : entityList) {
+                entity.fixedUpdate();
+            }
+        }
 
     }
 
@@ -566,11 +595,30 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return GRAVITY;
     }
 
-    public void addEntity(Entity entity, int x, int y, int z) {
 
-        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped(x, y, z);
+    protected void addEntity(Entity entity, double x, double y, double z) {
 
+        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) x, (int) y, (int) z);
 
+		// if chunk is not loaded
+		if (!isChunkLoaded(chunkPosition)) {
+			// force chunk to load on main thread (very slow, but idc rn)
+			loadChunk(chunkPosition);
+		}
+
+        ArrayList<Entity> entityList = ENTITIES.get(chunkPosition);
+
+        if (entityList == null) {
+            throw new RuntimeException("Could not get list of entities when adding entity to chunk at: " + chunkPosition);
+        }
+
+        if (entityList.contains(entity)) {
+            System.out.println("Tried adding already added entity to the world: " + entity);
+        }
+
+        entityList.add(entity);
+        entity.getTransform().getPosition().set(x, y, z);
+        entity.addedToWorld();
 
     }
 }

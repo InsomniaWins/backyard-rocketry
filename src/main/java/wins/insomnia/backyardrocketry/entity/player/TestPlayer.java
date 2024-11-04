@@ -6,6 +6,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
+import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
+import wins.insomnia.backyardrocketry.entity.component.ComponentStandardPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
@@ -38,10 +40,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private final float EYE_HEIGHT = 1.57f;
     private final float HEIGHT = 1.73f;
     private final float HALF_WIDTH = 0.3f;
-    private final Vector3d VELOCITY = new Vector3d();
-    private final World WORLD;
     private final BoundingBox BOUNDING_BOX;
-    private final Transform TRANSFORM;
     private final Transform PREVIOUS_TRANSFORM;
     private final PlayerGui GUI_ELEMENT;
     private final Vector3f INTERPOLATED_CAMERA_ROTATION;
@@ -65,18 +64,15 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private float cameraInterpolationFactor = 0f;
     private int blockInteractionTimer = 0;
     private boolean lockMouseToCenterForCameraRotation = false;
-    public boolean hasGravity = true;
-    private boolean hasCollision = true;
     private BlockRaycastResult targetBlock;
     private int breakProgress = 0;
+    private boolean hasCollision = true;
     private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
 
 
     public TestPlayer(World world) {
+        super(world);
 
-        WORLD = world;
-
-        TRANSFORM = new Transform();
         PREVIOUS_TRANSFORM = new Transform();
 
         INTERPOLATED_CAMERA_ROTATION = new Vector3f(PREVIOUS_TRANSFORM.getRotation());
@@ -90,11 +86,14 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         GUI_ELEMENT = new PlayerGui(this);
         Renderer.get().addRenderable(GUI_ELEMENT);
-        TRANSFORM.getRotation().x = Math.toRadians(90);
+        getRotation().x = Math.toRadians(90);
 
         FIRST_PERSON_HAND_ITEM = new FirstPersonHandItemRenderable();
         Renderer.get().addRenderable(FIRST_PERSON_HAND_ITEM);
         FIRST_PERSON_HAND_ITEM.setBlock(Block.GRASS);
+
+        addEntityComponent(new ComponentStandardPlayer(this));
+        addEntityComponent(new ComponentGravity(this, 1f));
     }
 
     public Vector3d getPosition() {
@@ -131,7 +130,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         // get bounding boxes of blocks near player
 
-        BoundingBox broadPhaseBoundingBox = new BoundingBox(getBoundingBox()).grow(VELOCITY.length() * 2);
+        BoundingBox broadPhaseBoundingBox = new BoundingBox(getBoundingBox()).grow(getVelocity().length() * 2);
 
         List<Chunk> broadPhaseChunks = Collision.getChunksTouchingBoundingBox(broadPhaseBoundingBox);
         List<BoundingBox> blockBoundingBoxesNearPlayer = new ArrayList<>();
@@ -147,40 +146,40 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         // move and collide
         if (hasCollision) {
-            if (VELOCITY.x != 0f) {
+            if (getVelocity().x != 0f) {
                 for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                    VELOCITY.x = boundingBox.collideX(getBoundingBox(), VELOCITY.x);
+                    getVelocity().x = boundingBox.collideX(getBoundingBox(), getVelocity().x);
                 }
 
-                getPosition().x += VELOCITY.x;
+                getPosition().x += getVelocity().x;
             }
 
             onGround = false;
-            if (VELOCITY.y != 0f) {
+            if (getVelocity().y != 0f) {
                 for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                    double newVelocity = boundingBox.collideY(getBoundingBox(), VELOCITY.y);
+                    double newVelocity = boundingBox.collideY(getBoundingBox(), getVelocity().y);
 
-                    if (newVelocity != VELOCITY.y && Math.signum(VELOCITY.y) < 0d) {
+                    if (newVelocity != getVelocity().y && Math.signum(getVelocity().y) < 0d) {
                         onGround = true;
                     }
 
-                    VELOCITY.y = newVelocity;
+                    getVelocity().y = newVelocity;
                 }
 
-                getPosition().y += VELOCITY.y;
+                getPosition().y += getVelocity().y;
             }
 
-            if (VELOCITY.z != 0f) {
+            if (getVelocity().z != 0f) {
                 for (BoundingBox boundingBox : blockBoundingBoxesNearPlayer) {
-                    VELOCITY.z = boundingBox.collideZ(getBoundingBox(), VELOCITY.z);
+                    getVelocity().z = boundingBox.collideZ(getBoundingBox(), getVelocity().z);
                 }
 
-                getPosition().z += VELOCITY.z;
+                getPosition().z += getVelocity().z;
             }
         } else {
-            getPosition().x += VELOCITY.x;
-            getPosition().y += VELOCITY.y;
-            getPosition().z += VELOCITY.z;
+            getPosition().x += getVelocity().x;
+            getPosition().y += getVelocity().y;
+            getPosition().z += getVelocity().z;
         }
     }
 
@@ -190,9 +189,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
     @Override
     public void fixedUpdate() {
+        super.fixedUpdate();
 
         // make sure interpolation of camera transformation is complete
-        Renderer.get().getCamera().getTransform().getRotation().set(TRANSFORM.getRotation());
+        Renderer.get().getCamera().getTransform().getRotation().set(getRotation());
         Renderer.get().getCamera().getTransform().getPosition().set(getCameraPosition());
 
         KeyboardInput keyboardInput = KeyboardInput.get();
@@ -201,9 +201,6 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             moveSpeed = CROUCH_SPEED;
         }
 
-        if (!hasGravity) {
-            moveSpeed = FLY_SPEED;
-        }
         float rotateSpeed = 0.0025f;
 
 
@@ -223,7 +220,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                 (rightDirection - leftDirection),
                 0f,
                 (backwardDirection - forwardDirection)
-        ).rotateY(-TRANSFORM.getRotation().y);
+        ).rotateY(-getRotation().y);
 
         if (moveAmount.length() > 0f) {
             moveAmount.normalize();
@@ -233,28 +230,20 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         moveAmount.mul(moveSpeed);
 
 
-        if (keyboardInput.isKeyJustPressed(GLFW_KEY_F4)) {
-            hasGravity = !hasGravity;
-            hasCollision = !hasCollision;
+        getVelocity().x = Math.lerp(getVelocity().x, moveAmount.x, 0.5f);
+        getVelocity().z = Math.lerp(getVelocity().z, moveAmount.z, 0.5f);
+
+        if (!hasEntityComponent(ComponentGravity.class)) {
+            float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
+            getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
         }
 
-
-        VELOCITY.x = Math.lerp(VELOCITY.x, moveAmount.x, 0.5f);
-        VELOCITY.z = Math.lerp(VELOCITY.z, moveAmount.z, 0.5f);
-
-        if (hasGravity) {
-            VELOCITY.add(0f, World.get().getGravity(), 0f);
-
-            if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
-                VELOCITY.y = JUMP_SPEED;
-            }
-        } else {
-            float verticalMoveAmount = (keyboardInput.isKeyPressed(GLFW_KEY_SPACE) ? 1 : 0) - (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT) ? 1 : 0);
-            VELOCITY.y = Math.lerp(VELOCITY.y, verticalMoveAmount * moveSpeed, 0.6f);
+        if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
+            getVelocity().y = JUMP_SPEED;
         }
 
         // apply translation and rotation
-        PREVIOUS_TRANSFORM.set(TRANSFORM);
+        PREVIOUS_TRANSFORM.set(getTransform());
         move();
         updateBoundingBox();
 
@@ -269,12 +258,12 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
             mouseInput.setMousePosition(BackyardRocketry.getInstance().getWindow().getWidth() / 2, BackyardRocketry.getInstance().getWindow().getHeight() / 2, false);
 
-            TRANSFORM.rotateX(verticalRotateAmount);
-            TRANSFORM.rotateY(horizontalRotateAmount);
+            getTransform().rotateX(verticalRotateAmount);
+            getTransform().rotateY(horizontalRotateAmount);
 
             // clamp vertical rotation
-            TRANSFORM.getRotation().x = Math.max(TRANSFORM.getRotation().x, (float) -Math.PI * 0.5f);
-            TRANSFORM.getRotation().x = Math.min(TRANSFORM.getRotation().x, (float) Math.PI * 0.5f);
+            getTransform().getRotation().x = Math.max(getTransform().getRotation().x, (float) -Math.PI * 0.5f);
+            getTransform().getRotation().x = Math.min(getTransform().getRotation().x, (float) Math.PI * 0.5f);
         }
 
         cameraInterpolationFactor = 0f;
@@ -287,7 +276,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             updateCursorVisibility();
         }
 
-        WORLD.updateChunksAroundPlayer(this);
+        getWorld().updateChunksAroundPlayer(this);
     }
 
     public void updateCursorVisibility() {
@@ -367,8 +356,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
         Vector3d rayDirection = new Vector3d(0, 0, -1)
-                .rotateX(-TRANSFORM.getRotation().x)
-                .rotateY(-TRANSFORM.getRotation().y);
+                .rotateX(-getTransform().getRotation().x)
+                .rotateY(-getTransform().getRotation().y);
         int rayLength = 7;
 
         BlockRaycastResult previousTargetBlock = targetBlock;
@@ -540,7 +529,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
     @Override
     public void update(double deltaTime) {
-
+        super.update(deltaTime);
         interpolateCameraTransform(deltaTime);
 
     }
@@ -580,9 +569,9 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         // interpolate camera rotation and position
         INTERPOLATED_CAMERA_ROTATION.set(
-                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.x, TRANSFORM.getRotation().x, cameraInterpolationFactor),
-                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.y, TRANSFORM.getRotation().y, cameraInterpolationFactor),
-                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.z, TRANSFORM.getRotation().z, cameraInterpolationFactor)
+                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.x, getTransform().getRotation().x, cameraInterpolationFactor),
+                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.y, getTransform().getRotation().y, cameraInterpolationFactor),
+                Transform.lerpAngle(INTERPOLATED_CAMERA_ROTATION.z, getTransform().getRotation().z, cameraInterpolationFactor)
         );
         INTERPOLATED_CAMERA_POSITION.lerp(getCameraPosition(), cameraInterpolationFactor);
 
@@ -590,14 +579,6 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         camera.getTransform().getRotation().set(INTERPOLATED_CAMERA_ROTATION);
         camera.getTransform().getPosition().set(INTERPOLATED_CAMERA_POSITION);
 
-    }
-
-    public Transform getTransform() {
-        return TRANSFORM;
-    }
-
-    public World getWorld() {
-        return WORLD;
     }
 
     @Override
