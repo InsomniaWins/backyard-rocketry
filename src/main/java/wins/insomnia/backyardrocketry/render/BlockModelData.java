@@ -135,8 +135,8 @@ public class BlockModelData {
                         faceVertexArray.set(addIndex - 2, u);
                         faceVertexArray.set(addIndex - 1, v);
 
-                        faceVertexArray.add(addIndex, blockV);
-                        faceVertexArray.add(addIndex, blockU);
+                        //faceVertexArray.add(addIndex, blockV);
+                        //faceVertexArray.add(addIndex, blockU);
 
                     }
                 }

@@ -40,7 +40,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private boolean renderDebugInformation = false;
     private ShaderProgram defaultShaderProgram = null;
     private ShaderProgram guiShaderProgram = null;
-    private ShaderProgram chunkMeshShaderProgram = null;
 
     private final HashMap<String, ShaderProgram> SHADER_PROGRAM_MAP = new HashMap<>();
 
@@ -58,9 +57,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         defaultShaderProgram = registerShaderProgram("default", "vertex.vert", "fragment.frag");
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
-        chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
-        chunkMeshShaderProgram.use();
-        chunkMeshShaderProgram.setUniform("vs_atlasBlockScale", TextureManager.BLOCK_SCALE_ON_ATLAS);
 
         setGuiScale(3);
 
@@ -230,12 +226,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
-
-        chunkMeshShaderProgram.use();
-        chunkMeshShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        chunkMeshShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
-        chunkMeshShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
-
         defaultShaderProgram.use();
         defaultShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         defaultShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
@@ -258,21 +248,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             if (!renderable.shouldRender()) continue;
 
-            if (renderable instanceof ChunkMesh chunkMesh) {
-
-                if (ShaderProgram.getShaderProgramHandleInUse() != chunkMeshShaderProgram.getProgramHandle()) {
-                    chunkMeshShaderProgram.use();
-                }
-
-                chunkMeshShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
-            } else {
-
-                if (ShaderProgram.getShaderProgramHandleInUse() != defaultShaderProgram.getProgramHandle()) {
-                    defaultShaderProgram.use();
-                }
-
-                defaultShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            if (ShaderProgram.getShaderProgramHandleInUse() != defaultShaderProgram.getProgramHandle()) {
+                defaultShaderProgram.use();
             }
+
+            defaultShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
             renderable.render();
         }
