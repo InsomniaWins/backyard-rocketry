@@ -14,6 +14,8 @@ import static org.lwjgl.opengl.GL20.*;
 public class ShaderProgram {
     private int shaderProgramHandle;
 
+    private static int shaderProgramHandleInUse = -1;
+
     public ShaderProgram(String vertexSourcePath, String fragmentSourcePath) {
         String vertexShaderSource = loadShaderSource(vertexSourcePath);
         String fragmentShaderSource = loadShaderSource(fragmentSourcePath);
@@ -21,8 +23,13 @@ public class ShaderProgram {
         createAndLinkShaderProgram(vertexShaderSource, fragmentShaderSource);
     }
 
+    public static int getShaderProgramHandleInUse() {
+        return shaderProgramHandleInUse;
+    }
+
     public void use() {
         glUseProgram(shaderProgramHandle);
+        shaderProgramHandleInUse = shaderProgramHandle;
     }
 
     public void setUniform(String uniformName, boolean value) {

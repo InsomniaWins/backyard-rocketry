@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util.update;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.*;
@@ -149,13 +150,32 @@ public class Updater {
         }
 
 
-        Iterator<Runnable> mainThreadInstructionQueueIterator = MAIN_THREAD_INSTRUCTION_QUEUE.iterator();
-        while (mainThreadInstructionQueueIterator.hasNext()) {
-            Runnable instruction = mainThreadInstructionQueueIterator.next();
+        boolean processedDelayedInstruction = false;
+        for (Runnable instruction : MAIN_THREAD_INSTRUCTION_QUEUE) {
+
+            if (instruction instanceof DelayedMainThreadInstruction delayedInstruction) {
+
+                if (delayedInstruction.isOnePerTick()) {
+
+                    if (!processedDelayedInstruction) {
+                        processedDelayedInstruction = true;
+                        delayedInstruction.run();
+                        MAIN_THREAD_INSTRUCTION_QUEUE.remove(instruction);
+                    }
+
+                } else if (delayedInstruction.getDelaysRemaining() == 0) {
+                    delayedInstruction.run();
+                    MAIN_THREAD_INSTRUCTION_QUEUE.remove(instruction);
+                } else {
+                    delayedInstruction.tickDelay();
+                }
+
+                continue;
+            }
+
             instruction.run();
             MAIN_THREAD_INSTRUCTION_QUEUE.remove(instruction);
         }
-
 
 
         upsTimer += deltaTime;
@@ -169,6 +189,11 @@ public class Updater {
 
     // thread-safe
     public void queueMainThreadInstruction(Runnable instruction) {
+        MAIN_THREAD_INSTRUCTION_QUEUE.add(instruction);
+    }
+
+    // thread-safe
+    public void queueDelayedMainThreadInstruction(DelayedMainThreadInstruction instruction) {
         MAIN_THREAD_INSTRUCTION_QUEUE.add(instruction);
     }
 

@@ -68,6 +68,8 @@ public class BlockModelData {
             int randomIndex = randomPosNum % modelList.size();
             String modelName = (String) modelList.get(randomIndex);
 
+
+
             return MODEL_MAP.get(modelName);
         }
 
@@ -103,7 +105,7 @@ public class BlockModelData {
 
 
 
-    private static void fixModelUvs(BlockModelData blockModelData) {
+    private static BlockModelData fixModelUvs(BlockModelData blockModelData) {
 
         int[] atlasCoordinates;
 
@@ -115,33 +117,35 @@ public class BlockModelData {
             atlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(faceTextureName);
 
 
-            // modify uv coordinates to fit texture atlas
-            for (int i = 0; i < faceVertexArray.size(); i++) {
+            // modify uv coordinates to fit texture atlas and move block uvs over by 2
+            for (int dataIndex = faceVertexArray.size() - 1; dataIndex > -1; dataIndex -= 5) {
 
-                int vertexDataIndex = i % 5;
-                if (vertexDataIndex == 3 || vertexDataIndex == 4) {
+                // 0 = x, 1 = y, 2 = z, 3 = u, 4 = v,
+                // then append: 5 = blockU, 6 = blockV
+                for (int vertexDataIndex = 0; vertexDataIndex < 5; vertexDataIndex++) {
+                    if (vertexDataIndex == 4) {
+                        int addIndex = dataIndex - vertexDataIndex + 5;
 
-                    double coordinateValue = faceVertexArray.get(i);
+                        double blockU = faceVertexArray.get(addIndex - 2);
+                        double blockV = faceVertexArray.get(addIndex - 1);
 
-                    coordinateValue *= TextureManager.BLOCK_SCALE_ON_ATLAS;
+                        double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
+                        double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
 
-                    if (vertexDataIndex == 3) {
+                        faceVertexArray.set(addIndex - 2, u);
+                        faceVertexArray.set(addIndex - 1, v);
 
-                        coordinateValue += TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
-
-                    } else {
-
-                        coordinateValue += TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
+                        faceVertexArray.add(addIndex, blockV);
+                        faceVertexArray.add(addIndex, blockU);
 
                     }
-
-                    faceVertexArray.set(i, coordinateValue);
                 }
-
             }
 
             faceData.put("vertices", faceVertexArray);
         }
+
+        return blockModelData;
 
     }
 
@@ -197,13 +201,13 @@ public class BlockModelData {
         // load block model
         BlockModelData blockModelData = loadBlockModelData(mapper, modelName);
         // fix Uvs
-        fixModelUvs(blockModelData);
+        blockModelData = fixModelUvs(blockModelData);
 
         // put in model map
         MODEL_MAP.put(modelName, blockModelData);
 
         // debug info
-        System.out.println("Loaded block model: " + modelName);
+        System.out.println("Loaded block model: " + blockModelData);
     }
 
     private static void loadBlockState(ObjectMapper mapper, byte block, String blockStatePath) throws IOException {
@@ -398,5 +402,10 @@ public class BlockModelData {
         }
 
         BLOCK_MESH_MAP.put(block, new Mesh(primitiveVertexArray, primitiveIndexArray));
+    }
+
+    @Override
+    public String toString() {
+        return faces.toString();
     }
 }

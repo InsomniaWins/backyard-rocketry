@@ -7,14 +7,14 @@ import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -26,8 +26,6 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
-    private ShaderProgram shaderProgram;
-    private ShaderProgram guiShaderProgram;
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
@@ -40,6 +38,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private int renderMode = 0;
     private int guiScale = 1;
     private boolean renderDebugInformation = false;
+    private ShaderProgram defaultShaderProgram = null;
+    private ShaderProgram guiShaderProgram = null;
+    private ShaderProgram chunkMeshShaderProgram = null;
+
+    private final HashMap<String, ShaderProgram> SHADER_PROGRAM_MAP = new HashMap<>();
 
     public Renderer() {
         RENDER_LIST = new LinkedList<>();
@@ -53,8 +56,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        shaderProgram = new ShaderProgram("vertex.vert", "fragment.frag");
-        guiShaderProgram = new ShaderProgram("gui.vert", "gui.frag");
+        defaultShaderProgram = registerShaderProgram("default", "vertex.vert", "fragment.frag");
+        guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
+        chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
+        chunkMeshShaderProgram.use();
+        chunkMeshShaderProgram.setUniform("vs_atlasBlockScale", TextureManager.BLOCK_SCALE_ON_ATLAS);
+
         setGuiScale(3);
 
         modelMatrix = new Matrix4f().identity();
@@ -201,7 +208,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public ShaderProgram getShaderProgram() {
-        return shaderProgram;
+        return SHADER_PROGRAM_MAP.get("default");
+    }
+
+    public ShaderProgram getShaderProgram(String programName) {
+        return SHADER_PROGRAM_MAP.get(programName);
     }
 
     public Matrix4f getModelMatrix() {
@@ -215,33 +226,57 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         camera.updateFrustum();
 
         // placeholder render code
-        shaderProgram.use();
-        shaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-        shaderProgram.setUniform("vs_viewMatrix", camera.getViewMatrix());
-        shaderProgram.setUniform("vs_projectionMatrix", camera.getProjectionMatrix());
+
+        Matrix4f viewMatrix = camera.getViewMatrix();
+        Matrix4f projectionMatrix = camera.getProjectionMatrix();
+
+
+        chunkMeshShaderProgram.use();
+        chunkMeshShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        chunkMeshShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
+        chunkMeshShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
+
+        defaultShaderProgram.use();
+        defaultShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+        defaultShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
+        defaultShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
+
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, TextureManager.get().getBlockAtlasTexture().getTextureHandle());
+        glBindTexture(GL_TEXTURE_2D, TextureManager.getBlockAtlasTexture().getTextureHandle());
 
         activateRenderMode();
 
         modelMatrix.identity();
 
         // render renderables
-
         sortRenderList();
         glDisable(GL_BLEND);
 
-        ArrayList<String> activeChunks = new ArrayList<>();
-
+        long renderTime = System.currentTimeMillis();
         for (IRenderable renderable : RENDER_LIST) {
 
             if (!renderable.shouldRender()) continue;
 
-            shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            if (renderable instanceof ChunkMesh chunkMesh) {
+
+                if (ShaderProgram.getShaderProgramHandleInUse() != chunkMeshShaderProgram.getProgramHandle()) {
+                    chunkMeshShaderProgram.use();
+                }
+
+                chunkMeshShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            } else {
+
+                if (ShaderProgram.getShaderProgramHandleInUse() != defaultShaderProgram.getProgramHandle()) {
+                    defaultShaderProgram.use();
+                }
+
+                defaultShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+            }
 
             renderable.render();
         }
+        renderTime = DebugTime.getElapsedTime(renderTime);
 
 
         // render target block
@@ -258,7 +293,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                         raycastResult.getBlockZ()
                 );
 
-                shaderProgram.setUniform("vs_modelMatrix", modelMatrix);
+                defaultShaderProgram.setUniform("vs_modelMatrix", modelMatrix);
 
                 glDisable(GL_DEPTH_TEST);
 
@@ -286,8 +321,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         if (renderDebugInformation) {
             StringBuilder debugString = new StringBuilder();
-            debugString.append(DebugInfo.getMemoryUsage());
+            debugString.append("Render Time: ").append(renderTime).append("ms");
+            debugString.append("\n\n").append(DebugInfo.getMemoryUsage());
             debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
+
 
             if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
                 debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
@@ -437,7 +474,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
 
-        shaderProgram.use();
+        defaultShaderProgram.use();
 
 
     }
@@ -503,7 +540,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, previousTexture[0]);
 
-        shaderProgram.use();
+        defaultShaderProgram.use();
     }
 
 
@@ -547,9 +584,23 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         }
 
         FONT_MESH.clean();
-        TEXTURE_MANAGER.clean();
+        TextureManager.clean();
         GUI_MESH.clean();
-        glDeleteProgram(shaderProgram.getProgramHandle());
+
+        Iterator<Map.Entry<String, ShaderProgram>> shaderIterator = SHADER_PROGRAM_MAP.entrySet().iterator();
+        while (shaderIterator.hasNext()) {
+            Map.Entry<String, ShaderProgram> shaderProgramEntry = shaderIterator.next();
+
+            ShaderProgram shaderProgram = shaderProgramEntry.getValue();
+
+            if (shaderProgram != null) {
+
+                glDeleteProgram(shaderProgram.getProgramHandle());
+                shaderIterator.remove();
+
+            }
+        }
+
 
     }
 
@@ -579,6 +630,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public ShaderProgram getGuiShaderProgram() {
         return guiShaderProgram;
+    }
+
+    public ShaderProgram registerShaderProgram(String programName, String vertexName, String fragmentName) {
+
+        ShaderProgram program = new ShaderProgram(vertexName, fragmentName);
+        SHADER_PROGRAM_MAP.put(programName, program);
+        return program;
+
     }
 
 }

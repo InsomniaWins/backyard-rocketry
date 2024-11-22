@@ -10,6 +10,7 @@ import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -35,7 +36,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 30;
-    public static final int SIZE_Y = 256;
+    public static final int SIZE_Y = 260;
     public static  final int SIZE_Z = 30;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
     private final int X;
@@ -49,7 +50,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private boolean shouldProcess = false;
     private byte[][][] blocks;
     protected AtomicBoolean shouldRegenerateMesh = new AtomicBoolean(false);
-    protected int ticksToLive = 100;
+    protected int ticksToLive = 240;
 
     public Chunk(World world, ChunkPosition chunkPosition) {
 
@@ -115,7 +116,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                 }
             }
         }
-
 
         setShouldRegenerateMesh(true);
         Updater.get().queueMainThreadInstruction(this::updateNeighborChunkMeshes);
@@ -346,8 +346,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         shouldRegenerateMesh.set(false);
 
+
         CHUNK_MESH.generateMesh(blocks);
         TRANSPARENT_CHUNK_MESH.generateMesh(blocks);
+
+
+
     }
 
     public void clean() {

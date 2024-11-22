@@ -6,9 +6,12 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
+import wins.insomnia.backyardrocketry.util.debug.DebugTime;
+import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
+import java.lang.Math;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,11 +80,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, meshDataVertexArray, GL_STATIC_DRAW);
 
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(2, 2, GL_FLOAT, false, 7 * Float.BYTES, 5 * Float.BYTES);
 
 
         readyToCreateOpenGLMeshData.set(false);
@@ -101,7 +106,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ) {
 
-        int indexOffset = vertices.size() / 5;
+        int indexOffset = vertices.size() / 7;
 
         for (int faceIndex : faceIndexArray) {
             indices.add(faceIndex + indexOffset);
@@ -109,7 +114,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         for (int i = 0; i < faceVertexArray.size(); i++) {
 
-            int vertexDataIndex = i % 5;
+            int vertexDataIndex = i % 7;
             float vertexData = faceVertexArray.get(i).floatValue();
 
             if (vertexDataIndex == 0) {
@@ -167,18 +172,22 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     @Override
     public void render() {
 
+        ShaderProgram chunkMeshShaderProgram = Renderer.get().getShaderProgram("chunk_mesh");
 
         Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
-        Renderer.get().getShaderProgram().setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
-
+        chunkMeshShaderProgram.setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
         glBindVertexArray(vao);
+
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
+
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
+
+        glDisableVertexAttribArray(2);
     }
 
-    public void generateMesh(byte[][][] blocks) {
 
+    public void generateMesh(byte[][][] blocks) {
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -188,25 +197,22 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
                     byte block = blocks[x][y][z];
+                    if (block == Block.AIR) continue;
 
-                    if (block != Block.AIR) {
-
-                        if (isTransparent != Block.isBlockTransparent(block)) {
-                            continue;
-                        }
-
-                        BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(blocks[x][y][z], x, y, z);
+                    if (isTransparent != Block.isBlockTransparent(block)) continue;
 
 
-                        for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
+                    BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
 
-                            HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
-                            ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
-                            ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
-                            if (shouldAddFaceToMesh((String) faceData.get("cullface"), x, y, z)) {
-                                addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
-                            }
+                    for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
+
+                        HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
+                        ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
+                        ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
+
+                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), x, y, z)) {
+                            addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
                         }
                     }
                 }
@@ -223,16 +229,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             indexArray[i] = indices.get(i);
         }
 
-
-
         if (Main.MAIN_THREAD != Thread.currentThread()){
-            Updater.get().queueMainThreadInstruction(() -> {
+            Updater.get().queueDelayedMainThreadInstruction(new DelayedMainThreadInstruction(() -> {
                 meshDataVertexArray = vertexArray;
                 meshDataIndexArray = indexArray;
                 meshDataIndexCount = indexArray.length;
                 readyToCreateOpenGLMeshData.set(true);
                 isClean.set(false);
-            });
+            }));
         } else {
             meshDataVertexArray = vertexArray;
             meshDataIndexArray = indexArray;
@@ -246,6 +250,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     private boolean shouldAddFaceToMesh(String cullface, int x, int y, int z) {
 
         if (cullface == null) return true;
+
+
+        // TODO: implement ao calc here?
+
 
         byte block = chunk.getBlock(x,y,z);
         byte topNeighbor = chunk.getBlock(x, y+1, z);

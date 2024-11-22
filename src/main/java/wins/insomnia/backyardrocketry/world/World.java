@@ -31,7 +31,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Y = 1;
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
-    public static int chunkLoadDistance = 6; // chunk loading RADIUS
+    public static int chunkLoadDistance = 1; // chunk loading RADIUS
     public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
 
@@ -388,16 +388,17 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         if (CHUNKS.get(chunkPosition) != null) return;
 
-        Chunk chunk = new Chunk(this, chunkPosition);
-        chunk.generateLand();
-
         if (Thread.currentThread() != Main.MAIN_THREAD) {
             Updater.get().queueMainThreadInstruction(() -> {
+                Chunk chunk = new Chunk(this, chunkPosition);
+                chunk.generateLand();
                 CHUNKS.put(chunkPosition, chunk);
                 CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
                 ENTITIES.put(chunkPosition, new ArrayList<>());
             });
         } else {
+            Chunk chunk = new Chunk(this, chunkPosition);
+            chunk.generateLand();
             CHUNKS.put(chunkPosition, chunk);
             CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
             ENTITIES.put(chunkPosition, new ArrayList<>());
