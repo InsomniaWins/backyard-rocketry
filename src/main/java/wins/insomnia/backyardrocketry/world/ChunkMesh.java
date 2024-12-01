@@ -186,8 +186,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDisableVertexAttribArray(3);
     }
 
-
     public void generateMesh(byte[][][] blocks) {
+        generateMesh(blocks, true);
+    }
+
+    public void generateMesh(byte[][][] blocks, boolean isDelayed) {
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -242,13 +245,23 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         }
 
         if (Main.MAIN_THREAD != Thread.currentThread()){
-            Updater.get().queueDelayedMainThreadInstruction(new DelayedMainThreadInstruction(() -> {
-                meshDataVertexArray = vertexArray;
-                meshDataIndexArray = indexArray;
-                meshDataIndexCount = indexArray.length;
-                readyToCreateOpenGLMeshData.set(true);
-                isClean.set(false);
-            }));
+            if (isDelayed) {
+                Updater.get().queueDelayedMainThreadInstruction(new DelayedMainThreadInstruction(() -> {
+                    meshDataVertexArray = vertexArray;
+                    meshDataIndexArray = indexArray;
+                    meshDataIndexCount = indexArray.length;
+                    readyToCreateOpenGLMeshData.set(true);
+                    isClean.set(false);
+                }));
+            } else {
+                Updater.get().queueMainThreadInstruction(() -> {
+                    meshDataVertexArray = vertexArray;
+                    meshDataIndexArray = indexArray;
+                    meshDataIndexCount = indexArray.length;
+                    readyToCreateOpenGLMeshData.set(true);
+                    isClean.set(false);
+                });
+            }
         } else {
             meshDataVertexArray = vertexArray;
             meshDataIndexArray = indexArray;

@@ -533,6 +533,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                 chunk.toLocalY(placePosY),
                 chunk.toLocalZ(placePosZ),
                 blockToPlace,
+                true,
                 true
         );
 

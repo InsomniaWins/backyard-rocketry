@@ -50,6 +50,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private boolean shouldProcess = false;
     private byte[][][] blocks;
     protected AtomicBoolean shouldRegenerateMesh = new AtomicBoolean(false);
+    protected AtomicBoolean shouldInstantlyGenerateMesh = new AtomicBoolean(false);
     protected int ticksToLive = 240;
 
     public Chunk(World world, ChunkPosition chunkPosition) {
@@ -159,9 +160,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         }
     }
 
-
-
-    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
+    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh, boolean instantly) {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
 
@@ -171,10 +170,17 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         blocks[x][y][z] = block;
 
-        setShouldRegenerateMesh(regenerateMesh);
+        setShouldRegenerateMesh(regenerateMesh, instantly);
+
         if (shouldRegenerateMesh.get()) {
             updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
         }
+
+    }
+
+    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
+
+        setBlock(x, y, z, block, regenerateMesh, false);
 
     }
 
@@ -343,14 +349,16 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
     private void generateMesh() {
+        generateMesh(true);
+    }
+
+    private void generateMesh(boolean isDelayed) {
 
         shouldRegenerateMesh.set(false);
 
 
-        CHUNK_MESH.generateMesh(blocks);
-        TRANSPARENT_CHUNK_MESH.generateMesh(blocks);
-
-
+        CHUNK_MESH.generateMesh(blocks, isDelayed);
+        TRANSPARENT_CHUNK_MESH.generateMesh(blocks, isDelayed);
 
     }
 
@@ -365,7 +373,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    public void setShouldRegenerateMesh(boolean value, boolean instantly) {
+        shouldInstantlyGenerateMesh.set(instantly);
+        shouldRegenerateMesh.set(value);
+    }
+
     public void setShouldRegenerateMesh(boolean value) {
+        shouldInstantlyGenerateMesh.set(false);
         shouldRegenerateMesh.set(value);
     }
 
@@ -419,6 +433,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
 
+
     @Override
     public void update(double deltaTime) {
 
@@ -431,7 +446,14 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                 CHUNK_MESH.setGenerating(true);
                 TRANSPARENT_CHUNK_MESH.setGenerating(true);
 
-                chunkMeshGenerationExecutorService.submit(this::generateMesh);
+                boolean instantly = shouldInstantlyGenerateMesh.get();
+                shouldInstantlyGenerateMesh.set(false);
+
+                chunkMeshGenerationExecutorService.submit(() -> {
+
+                    generateMesh(instantly);
+
+                });
             }
         }
 
