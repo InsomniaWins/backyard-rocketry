@@ -20,7 +20,7 @@ public class Updater {
     private int updatesPerSecond = 0;
     private int updatesProcessedSoFar = 0; // updates processed before ups-polling occurs
     private double upsTimer = 0.0;
-
+    private double tickDeltaStart;
 
     public Updater() {
 
@@ -28,6 +28,8 @@ public class Updater {
         FIXED_UPDATE_LISTENERS = new ArrayList<>();
         UPDATE_LISTENER_INSTRUCTION_QUEUE = new ConcurrentLinkedQueue<>();
         MAIN_THREAD_INSTRUCTION_QUEUE = new ConcurrentLinkedQueue<>();
+
+        tickDeltaStart = getCurrentTime();
     }
 
     // is thread-safe
@@ -64,6 +66,8 @@ public class Updater {
 
 
     private void fixedUpdate() {
+
+        tickDeltaStart = getCurrentTime();
 
         Queue<UpdateListenerInstruction> fixedListenerInstructionsQueue = UPDATE_LISTENER_INSTRUCTION_QUEUE.stream().filter(
                 instruction -> (
@@ -106,8 +110,12 @@ public class Updater {
         updatesProcessedSoFar++;
     }
 
-    private void update(double deltaTime) {
+    // time since previous fixed update tick
+    public double getTickDelta() {
+        return getCurrentTime() - tickDeltaStart;
+    }
 
+    private void update(double deltaTime) {
 
         Queue<UpdateListenerInstruction> listenerInstructionsQueue = UPDATE_LISTENER_INSTRUCTION_QUEUE.stream().filter(
                 instruction -> (

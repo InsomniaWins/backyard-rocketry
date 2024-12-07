@@ -87,6 +87,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         updateBoundingBox();
 
         GUI_ELEMENT = new PlayerGui(this);
+        Updater.get().registerUpdateListener(GUI_ELEMENT);
         Renderer.get().addRenderable(GUI_ELEMENT);
         getRotation().x = Math.toRadians(90);
 
@@ -565,7 +566,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
     @Override
     public void unregisteredUpdateListener() {
-
+        Updater.get().unregisterUpdateListener(GUI_ELEMENT);
     }
 
     public Vector3d getCameraPosition() {

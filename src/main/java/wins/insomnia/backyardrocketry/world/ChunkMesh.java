@@ -26,7 +26,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     private Chunk chunk;
     public boolean unloaded = false;
 
-
     int meshDataIndexCount = -1;
     float[] meshDataVertexArray = new float[0];
     int[] meshDataIndexArray = new int[0];
@@ -171,19 +170,18 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     @Override
     public void render() {
 
+        ShaderProgram chunkMeshShaderProgram = Renderer.get().getShaderProgram();
+        chunkMeshShaderProgram.use();
+
         Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
-        Renderer.get().getShaderProgram().setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
+        chunkMeshShaderProgram.setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
         glBindVertexArray(vao);
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        glEnableVertexAttribArray(3);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
-        glDisableVertexAttribArray(2);
-        glDisableVertexAttribArray(3);
     }
 
     public void generateMesh(byte[][][] blocks) {
@@ -205,12 +203,12 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     if (isTransparent != Block.isBlockTransparent(block)) continue;
 
                     // use Chunk.getBlock because blocks could be in neighboring chunk(s)
-                    byte topNeighbor = chunk.getBlock(x, y+1, z);
-                    byte bottomNeighbor = chunk.getBlock(x, y-1, z);
-                    byte leftNeighbor = chunk.getBlock(x-1, y, z);
-                    byte rightNeighbor = chunk.getBlock(x+1, y, z);
-                    byte backNeighbor = chunk.getBlock(x, y, z-1);
-                    byte frontNeighbor = chunk.getBlock(x, y, z+1);
+                    byte posYNeighbor = chunk.getBlock(x, y+1, z);
+                    byte negYNeighbor = chunk.getBlock(x, y-1, z);
+                    byte negXNeighbor = chunk.getBlock(x-1, y, z);
+                    byte posXNeighbor = chunk.getBlock(x+1, y, z);
+                    byte negZNeighbor = chunk.getBlock(x, y, z-1);
+                    byte posZNeighbor = chunk.getBlock(x, y, z+1);
 
 
 
@@ -223,7 +221,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
-                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, topNeighbor, bottomNeighbor, leftNeighbor, rightNeighbor, backNeighbor, frontNeighbor)) {
+                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, posYNeighbor, negYNeighbor, negXNeighbor, posXNeighbor, negZNeighbor, posZNeighbor)) {
 
                             addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
 
@@ -272,7 +270,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     }
 
-    private boolean shouldAddFaceToMesh(String cullface, byte block, byte topNeighbor, byte bottomNeighbor, byte leftNeighbor, byte rightNeighbor, byte backNeighbor, byte frontNeighbor) {
+    private boolean shouldAddFaceToMesh(String cullface, byte block, byte posYNeighbor, byte negYNeighbor, byte negXNeighbor, byte posXNeighbor, byte negZNeighbor, byte posZNeighbor) {
 
         if (cullface == null) return true;
 
@@ -280,81 +278,81 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         switch (cullface) {
             case "top" -> {
-                if (topNeighbor == Block.WORLD_BORDER || topNeighbor == Block.NULL) {
+                if (posYNeighbor == Block.WORLD_BORDER || posYNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && topNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && posYNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(topNeighbor)) {
+                if (Block.isBlockTransparent(posYNeighbor)) {
                     return true;
                 }
             }
             case "bottom" -> {
 
-                if (bottomNeighbor == Block.WORLD_BORDER || bottomNeighbor == Block.NULL) {
+                if (negYNeighbor == Block.WORLD_BORDER || negYNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && bottomNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && negYNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(bottomNeighbor)) {
+                if (Block.isBlockTransparent(negYNeighbor)) {
                     return true;
                 }
             }
             case "left" -> {
-                if (leftNeighbor == Block.WORLD_BORDER || leftNeighbor == Block.NULL) {
+                if (negXNeighbor == Block.WORLD_BORDER || negXNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && leftNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && negXNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(leftNeighbor)) {
+                if (Block.isBlockTransparent(negXNeighbor)) {
                     return true;
                 }
             }
             case "right" -> {
-                if (rightNeighbor == Block.WORLD_BORDER || rightNeighbor == Block.NULL) {
+                if (posXNeighbor == Block.WORLD_BORDER || posXNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && rightNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && posXNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(rightNeighbor)) {
+                if (Block.isBlockTransparent(posXNeighbor)) {
                     return true;
                 }
             }
             case "front" -> {
-                if (frontNeighbor == Block.WORLD_BORDER || frontNeighbor == Block.NULL) {
+                if (posZNeighbor == Block.WORLD_BORDER || posZNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && frontNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && posZNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(frontNeighbor)) {
+                if (Block.isBlockTransparent(posZNeighbor)) {
                     return true;
                 }
             }
             case "back" -> {
-                if (backNeighbor == Block.WORLD_BORDER || backNeighbor == Block.NULL) {
+                if (negZNeighbor == Block.WORLD_BORDER || negZNeighbor == Block.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && backNeighbor == block) {
+                if (Block.shouldHideNeighboringFaces(block) && negZNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(backNeighbor)) {
+                if (Block.isBlockTransparent(negZNeighbor)) {
                     return true;
                 }
             }

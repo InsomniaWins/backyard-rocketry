@@ -1,5 +1,5 @@
 {
-	"parent": "block_all",
+	"parent": "block_all_transparent",
 	"textures": {
 		"particle": "leaves",
 		"all": "leaves",

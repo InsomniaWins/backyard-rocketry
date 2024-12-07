@@ -38,8 +38,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private int renderMode = 0;
     private int guiScale = 1;
     private boolean renderDebugInformation = false;
-    private ShaderProgram defaultShaderProgram = null;
-    private ShaderProgram guiShaderProgram = null;
+    private ShaderProgram defaultShaderProgram = null, guiShaderProgram = null, chunkMeshShaderProgram = null;
 
     private final HashMap<String, ShaderProgram> SHADER_PROGRAM_MAP = new HashMap<>();
 
@@ -56,7 +55,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glCullFace(GL_BACK);
 
         defaultShaderProgram = registerShaderProgram("default", "vertex.vert", "fragment.frag");
+        defaultShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
+        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+
+        chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
+        chunkMeshShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
 
         setGuiScale(3);
 
@@ -227,7 +232,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
         defaultShaderProgram.use();
-        defaultShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         defaultShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
         defaultShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
 

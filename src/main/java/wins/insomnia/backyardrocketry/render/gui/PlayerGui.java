@@ -6,21 +6,26 @@ import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 
-public class PlayerGui implements IGuiRenderable {
+public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
+	private float breakProgressRatio = 0.0f;
 	private TestPlayer player;
 	private double previousDeltaTime = 0.0;
 	private Vector3d blockMeshRotationValue = new Vector3d();
+	private float desiredBreakProgress = 0f;
 
 	public PlayerGui(TestPlayer player) {
 		this.player = player;
 	}
+
+
 
 	@Override
 	public void render() {
@@ -172,8 +177,7 @@ public class PlayerGui implements IGuiRenderable {
 						8
 				);
 
-				float breakProgressRatio = player.getBreakProgress();
-				breakProgressRatio = breakProgressRatio / (float) Block.getBlockHealth(targetBlockId);
+
 				int breakProgressPixels = Math.round(62f * breakProgressRatio);
 
 				renderer.drawGuiTextureClipped(
@@ -243,5 +247,40 @@ public class PlayerGui implements IGuiRenderable {
 	@Override
 	public int getRenderPriority() {
 		return 0;
+	}
+
+	@Override
+	public void update(double deltaTime) {
+
+		float tickUpdateFactor = (float) (Updater.get().getTickDelta() / (1f / Updater.FIXED_UPDATES_PER_SECOND));
+
+
+
+		BlockRaycastResult targetBlock = player.getTargetBlock();
+
+		if (targetBlock != null) {
+			byte targetBlockId = targetBlock.getChunk().getBlock(
+					targetBlock.getChunk().toLocalX(targetBlock.getBlockX()),
+					targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
+					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
+			);
+
+			desiredBreakProgress = (player.getBreakProgress()) / (float) Block.getBlockHealth(targetBlockId);
+
+			breakProgressRatio = desiredBreakProgress + (tickUpdateFactor / (float) Block.getBlockHealth(targetBlockId));
+
+		} else {
+			breakProgressRatio = 0f;
+		}
+	}
+
+	@Override
+	public void registeredUpdateListener() {
+
+	}
+
+	@Override
+	public void unregisteredUpdateListener() {
+
 	}
 }

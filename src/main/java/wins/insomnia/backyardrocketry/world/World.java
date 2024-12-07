@@ -31,7 +31,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Y = 1;
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
-    public static int chunkLoadDistance = 1; // chunk loading RADIUS
+    public static int chunkLoadDistance = 3; // chunk loading RADIUS
     public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
 
 

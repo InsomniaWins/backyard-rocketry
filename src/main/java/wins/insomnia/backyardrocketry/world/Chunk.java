@@ -14,6 +14,7 @@ import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.util.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
@@ -90,14 +91,14 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                     int globalBlockY = y + Y;
                     int globalBlockZ = z + Z;
 
-                    int groundHeight = getGroundHeight(globalBlockX, globalBlockZ);
+                    int groundHeight = WorldGeneration.getGroundHeight(globalBlockX, globalBlockZ);
 
 
                     if (globalBlockY > groundHeight) {
                         continue;
                     }
 
-                    byte block;
+                    byte block = Block.AIR;
 
                     if (globalBlockY == groundHeight) {
                         block = Block.GRASS;
@@ -383,14 +384,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         shouldRegenerateMesh.set(value);
     }
 
-    public int getGroundHeight(int globalBlockX, int globalBlockZ) {
-        long seed = BackyardRocketry.getInstance().getPlayer().getWorld().getSeed();
 
-        int noiseAmplitude = 6;
-        float noiseScale = 0.0125f;
-
-        return (int) (60 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
-    }
 
     public ChunkPosition getChunkPosition() {
         return World.get().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
