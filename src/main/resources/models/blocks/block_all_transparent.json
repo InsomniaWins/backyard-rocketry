@@ -16,7 +16,10 @@
         0, 1, 3,
         1, 2, 3
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        0.0, 1.0, 0.0
+      ]
     },
     "bottom": {
       "vertices": [
@@ -29,7 +32,10 @@
         0, 3, 1,
         1, 3, 2
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        0.0, -1.0, 0.0
+      ]
     },
     "left": {
       "vertices": [
@@ -42,7 +48,10 @@
         0, 1, 3,
         1, 2, 3
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        -1.0, 0.0, 0.0
+      ]
     },
     "right": {
       "vertices": [
@@ -55,7 +64,10 @@
         0, 3, 1,
         1, 3, 2
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        1.0, 0.0, 0.0
+      ]
     },
     "back": {
       "vertices": [
@@ -68,7 +80,10 @@
         0, 1, 3,
         1, 2, 3
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        0.0, 0.0, -1.0
+      ]
     },
     "front": {
       "vertices": [
@@ -81,7 +96,10 @@
         0, 3, 1,
         1, 3, 2
       ],
-      "texture": "all"
+      "texture": "all",
+      "normal": [
+        0.0, 0.0, 1.0
+      ]
     }
   }
 }

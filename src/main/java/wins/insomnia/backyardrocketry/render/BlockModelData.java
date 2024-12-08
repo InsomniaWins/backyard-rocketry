@@ -396,12 +396,9 @@ public class BlockModelData {
             indexOffset += greatestIndexValue + 1;
 
             if (faceNormalArray == null) {
-                // this face has no normal, so add default normal for the vertices of this face
-                for (int i = 0; i < faceVertexArray.size(); i++) {
-                    normalArray.add(0f);
-                    normalArray.add(1f);
-                    normalArray.add(0f);
-                }
+                // this face has no normal
+                // this is NOT supposed to happen, so tell the user (probably me) that I fucked up
+                throw new RuntimeException("Face \"" + faceEntry.getKey() + "\" in model for \"" + Block.getBlockName(block) + "\" is missing normals");
             } else {
                 // for the next [x] amount of vertices of this face, use faceNormalArray normal
                 for (int i = 0; i < faceVertexArray.size(); i++) {

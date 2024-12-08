@@ -105,48 +105,51 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ) {
 
         try {
-        int indexOffset = vertices.size() / 8;
+            int indexOffset = vertices.size() / 8;
 
-        for (int faceIndex : faceIndexArray) {
-            indices.add(faceIndex + indexOffset);
-        }
-
-        for (int i = 0; i < faceVertexArray.size(); i++) {
-
-            int vertexDataIndex = i % 5;
-            float vertexData = faceVertexArray.get(i).floatValue();
-
-            if (vertexDataIndex == 0) {
-                vertexData += offX;
-            } else if (vertexDataIndex == 1) {
-                vertexData += offY;
-            } else if (vertexDataIndex == 2) {
-                vertexData += offZ;
+            for (int faceIndex : faceIndexArray) {
+                indices.add(faceIndex + indexOffset);
             }
 
-            vertices.add(vertexData);
+            for (int i = 0; i < faceVertexArray.size(); i++) {
+
+                int vertexDataIndex = i % 5;
+                float vertexData = faceVertexArray.get(i).floatValue();
+
+                if (vertexDataIndex == 0) {
+                    vertexData += offX;
+                } else if (vertexDataIndex == 1) {
+                    vertexData += offY;
+                } else if (vertexDataIndex == 2) {
+                    vertexData += offZ;
+                }
+
+                vertices.add(vertexData);
 
 
 
-            // if vertexDataIndex is last bit of vertex data
-            if (vertexDataIndex == 4) {
+                // if vertexDataIndex is last bit of vertex data
+                if (vertexDataIndex == 4) {
 
-                // if face does not have normals
-                if (faceNormalsArray == null) {
-                    // make "up" normal
-                    vertices.add(0f);
-                    vertices.add(1f);
-                    vertices.add(0f);
-                } else {
-                    vertices.add(faceNormalsArray.get(0).floatValue());
-                    vertices.add(faceNormalsArray.get(1).floatValue());
-                    vertices.add(faceNormalsArray.get(2).floatValue());
+                    // if face does not have normals
+                    if (faceNormalsArray == null) {
+                        // make "up" normal
+                        vertices.add(0f);
+                        vertices.add(1f);
+                        vertices.add(0f);
+                    } else {
+                        vertices.add(faceNormalsArray.get(0).floatValue());
+                        vertices.add(faceNormalsArray.get(1).floatValue());
+                        vertices.add(faceNormalsArray.get(2).floatValue());
+                    }
+
                 }
 
             }
+        } catch (Exception e) {
 
-        }}
-        catch (Exception e) {
+            // I know this try-catch is useless. it's just for debugging purposes.
+
             e.printStackTrace();
             throw e;
         }

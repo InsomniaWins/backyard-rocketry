@@ -11,8 +11,7 @@ uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;
 uniform vec2 vs_uvOffset;
 
-void main()
-{
+void main() {
     gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = vs_normal;
