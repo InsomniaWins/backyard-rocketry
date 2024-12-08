@@ -22,7 +22,10 @@
         1, 2, 3
       ],
       "texture": "pos_y",
-      "cullface": "top"
+      "cullface": "top",
+      "normal": [
+        0.0, 1.0, 0.0
+      ]
     },
     "bottom": {
       "vertices": [
@@ -36,7 +39,10 @@
         1, 3, 2
       ],
       "texture": "neg_y",
-      "cullface": "bottom"
+      "cullface": "bottom",
+      "normal": [
+        0.0, -1.0, 0.0
+      ]
     },
     "left": {
       "vertices": [
@@ -50,7 +56,10 @@
         1, 2, 3
       ],
       "texture": "neg_x",
-      "cullface": "left"
+      "cullface": "left",
+      "normal": [
+        -1.0, 0.0, 0.0
+      ]
     },
     "right": {
       "vertices": [
@@ -64,7 +73,10 @@
         1, 3, 2
       ],
       "texture": "pos_x",
-      "cullface": "right"
+      "cullface": "right",
+      "normal": [
+        1.0, 0.0, 0.0
+      ]
     },
     "back": {
       "vertices": [
@@ -78,7 +90,10 @@
         1, 2, 3
       ],
       "texture": "neg_z",
-      "cullface": "back"
+      "cullface": "back",
+      "normal": [
+        0.0, 0.0, -1.0
+      ]
     },
     "front": {
       "vertices": [
@@ -92,7 +107,10 @@
         1, 3, 2
       ],
       "texture": "pos_z",
-      "cullface": "front"
+      "cullface": "front",
+      "normal": [
+        0.0, 0.0, 1.0
+      ]
     }
   }
 }

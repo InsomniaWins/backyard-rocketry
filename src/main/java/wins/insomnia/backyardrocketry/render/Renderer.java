@@ -231,10 +231,16 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
+        // TODO: implement dynamic way for shaders to listen for default uniforms like camera uniforms
+        chunkMeshShaderProgram.use();
+
+        chunkMeshShaderProgram.setUniform("vs_viewMatrix",Renderer.get().getCamera().getViewMatrix());
+        chunkMeshShaderProgram.setUniform("vs_projectionMatrix",Renderer.get().getCamera().getProjectionMatrix());
+
         defaultShaderProgram.use();
+
         defaultShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
         defaultShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
-
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, TextureManager.getBlockAtlasTexture().getTextureHandle());

@@ -151,7 +151,6 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 
 
-
 		BlockRaycastResult targetBlock = player.getTargetBlock();
 		if (targetBlock != null) {
 
@@ -160,52 +159,10 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					targetBlock.getChunk().toLocalY(targetBlock.getBlockY()),
 					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
 			);
-
-			// render break progress
-			if (player.getBreakProgress() > 0) {
-				int progressBarScreenPositionY = renderer.getCenterAnchorY() + 16;
-
-				renderer.drawGuiTextureClipped(
-						TextureManager.getTexture("break_progress_bar_under"),
-						renderer.getCenterAnchorX() - 34,
-						progressBarScreenPositionY,
-						68,
-						8,
-						0,
-						0,
-						68,
-						8
-				);
-
-
-				int breakProgressPixels = Math.round(62f * breakProgressRatio);
-
-				renderer.drawGuiTextureClipped(
-						TextureManager.getTexture("break_progress_bar_progress"),
-						renderer.getCenterAnchorX() - 31,
-						progressBarScreenPositionY + 3,
-						breakProgressPixels,
-						2,
-						0,
-						0,
-						breakProgressPixels,
-						2
-				);
+			
+			if (targetBlockId != Block.AIR) {
+				renderTargetBlock(targetBlockId);
 			}
-
-			// render w.a.i.l.a gui
-			Texture wailaTexture = TextureManager.getTexture("waila");
-			int wailaPosY = 0;
-			renderer.drawGuiTexture(
-					wailaTexture,
-					renderer.getCenterAnchorX() - wailaTexture.getWidth() / 2,
-					wailaPosY
-					);
-
-			String blockName = Block.getBlockName(targetBlockId);
-			int textWidth = TextRenderer.getTextPixelWidth(blockName);
-			int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
-			TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
 
 		}
 
@@ -227,6 +184,56 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	}
 
 
+	private void renderTargetBlock(byte targetBlockId) {
+
+		Renderer renderer = Renderer.get();
+
+		// render break progress
+		if (player.getBreakProgress() > 0) {
+			int progressBarScreenPositionY = renderer.getCenterAnchorY() + 16;
+
+			renderer.drawGuiTextureClipped(
+					TextureManager.getTexture("break_progress_bar_under"),
+					renderer.getCenterAnchorX() - 34,
+					progressBarScreenPositionY,
+					68,
+					8,
+					0,
+					0,
+					68,
+					8
+			);
+
+
+			int breakProgressPixels = Math.round(62f * breakProgressRatio);
+
+			renderer.drawGuiTextureClipped(
+					TextureManager.getTexture("break_progress_bar_progress"),
+					renderer.getCenterAnchorX() - 31,
+					progressBarScreenPositionY + 3,
+					breakProgressPixels,
+					2,
+					0,
+					0,
+					breakProgressPixels,
+					2
+			);
+		}
+
+		// render w.a.i.l.a gui
+		Texture wailaTexture = TextureManager.getTexture("waila");
+		int wailaPosY = 0;
+		renderer.drawGuiTexture(
+				wailaTexture,
+				renderer.getCenterAnchorX() - wailaTexture.getWidth() / 2,
+				wailaPosY
+		);
+
+		String blockName = Block.getBlockName(targetBlockId);
+		int textWidth = TextRenderer.getTextPixelWidth(blockName);
+		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
+		TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
+	}
 
 
 	@Override

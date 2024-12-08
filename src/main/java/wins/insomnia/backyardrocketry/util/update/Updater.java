@@ -168,6 +168,7 @@ public class Updater {
                     if (!processedDelayedInstruction) {
                         processedDelayedInstruction = true;
                         delayedInstruction.run();
+
                         MAIN_THREAD_INSTRUCTION_QUEUE.remove(instruction);
                     }
 
@@ -177,6 +178,8 @@ public class Updater {
                 } else {
                     delayedInstruction.tickDelay();
                 }
+
+
 
                 continue;
             }

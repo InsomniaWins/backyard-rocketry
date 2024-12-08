@@ -2,10 +2,12 @@ package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -367,6 +369,7 @@ public class BlockModelData {
 
         ArrayList<Float> vertexArray = new ArrayList<>();
         ArrayList<Integer> indexArray = new ArrayList<>();
+        ArrayList<Float> normalArray = new ArrayList<>();
 
         int indexOffset = 0;
 
@@ -376,6 +379,8 @@ public class BlockModelData {
 
             ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
             ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
+
+            ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
 
             for (Double vertexValue : faceVertexArray) {
                 vertexArray.add(vertexValue.floatValue());
@@ -389,6 +394,22 @@ public class BlockModelData {
                 }
             }
             indexOffset += greatestIndexValue + 1;
+
+            if (faceNormalArray == null) {
+                // this face has no normal, so add default normal for the vertices of this face
+                for (int i = 0; i < faceVertexArray.size(); i++) {
+                    normalArray.add(0f);
+                    normalArray.add(1f);
+                    normalArray.add(0f);
+                }
+            } else {
+                // for the next [x] amount of vertices of this face, use faceNormalArray normal
+                for (int i = 0; i < faceVertexArray.size(); i++) {
+                    normalArray.add(faceNormalArray.get(0).floatValue());
+                    normalArray.add(faceNormalArray.get(1).floatValue());
+                    normalArray.add(faceNormalArray.get(2).floatValue());
+                }
+            }
         }
 
         float[] primitiveVertexArray = new float[vertexArray.size()];

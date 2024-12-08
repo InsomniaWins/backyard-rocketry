@@ -2,6 +2,7 @@
 out vec4 FragColor;
 
 in vec2 fs_textureCoordinates;
+in vec3 fs_normal;
 
 uniform sampler2D fs_texture;
 
@@ -16,6 +17,10 @@ void main()
     {
         discard;
     }
+
+
+
+
 
     FragColor = color;
 }

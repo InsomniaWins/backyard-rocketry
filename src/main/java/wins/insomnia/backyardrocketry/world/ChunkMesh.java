@@ -79,12 +79,12 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, meshDataVertexArray, GL_STATIC_DRAW);
 
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * Float.BYTES, 5 * Float.BYTES);
 
 
         readyToCreateOpenGLMeshData.set(false);
@@ -102,9 +102,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         return chunk;
     }
 
-    public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ) {
+    public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ) {
 
-        int indexOffset = vertices.size() / 5;
+        try {
+        int indexOffset = vertices.size() / 8;
 
         for (int faceIndex : faceIndexArray) {
             indices.add(faceIndex + indexOffset);
@@ -125,7 +126,31 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
             vertices.add(vertexData);
 
+
+
+            // if vertexDataIndex is last bit of vertex data
+            if (vertexDataIndex == 4) {
+
+                // if face does not have normals
+                if (faceNormalsArray == null) {
+                    // make "up" normal
+                    vertices.add(0f);
+                    vertices.add(1f);
+                    vertices.add(0f);
+                } else {
+                    vertices.add(faceNormalsArray.get(0).floatValue());
+                    vertices.add(faceNormalsArray.get(1).floatValue());
+                    vertices.add(faceNormalsArray.get(2).floatValue());
+                }
+
+            }
+
+        }}
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
+
     }
 
 
@@ -170,7 +195,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     @Override
     public void render() {
 
-        ShaderProgram chunkMeshShaderProgram = Renderer.get().getShaderProgram();
+        ShaderProgram chunkMeshShaderProgram = Renderer.get().getShaderProgram("chunk_mesh");
         chunkMeshShaderProgram.use();
 
         Renderer.get().getModelMatrix().identity().translate(chunk.getPosition());
@@ -179,9 +204,12 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
+
+        glDisableVertexAttribArray(2);
     }
 
     public void generateMesh(byte[][][] blocks) {
@@ -220,10 +248,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
                         ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
+                        ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
 
                         if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, posYNeighbor, negYNeighbor, negXNeighbor, posXNeighbor, negZNeighbor, posZNeighbor)) {
 
-                            addFace(vertices, indices, faceVertexArray, faceIndexArray, x, y, z);
+                            addFace(vertices, indices, faceVertexArray, faceIndexArray, faceNormalArray, x, y, z);
 
                         }
 
