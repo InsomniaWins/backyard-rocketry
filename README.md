@@ -7,9 +7,12 @@ Currently in broken state due to time restraints, so do not expect to get it wor
 
 The goal of this project is to make a game with most of the features from Minecraft with faster speeds. This will likely not include features such as smooth lighting, mod support, detailed lighting shaders, etc. It will focus on core mechanics and features rather than quality-of-life bloaty mechanics.
 
-![Screenshot of early build](/screenshot.png)
-![Screenshot of another early build](/screenshot2.png)
+
+![Screenshot of first implementation of fog](/screenshot4.png)
 ![Screenshot of yet another early build](/screenshot3.png)
+![Screenshot of another early build](/screenshot2.png)
+![Screenshot of early build](/screenshot.png)
+
 
 ## Compilation
 
