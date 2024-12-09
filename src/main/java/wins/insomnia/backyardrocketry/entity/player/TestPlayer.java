@@ -34,14 +34,16 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
-    private final float CROUCH_SPEED = 0.1f;
-    private final float WALK_SPEED = 0.22f;
-    private final float FLY_SPEED = 1f;
-    private final float SPRINT_SPEED = 0.5f;
+
+    // movement speeds (meters per tick)
+    private final float CROUCH_SPEED = 1f / Updater.getFixedUpdatesPerSecond();
+    private final float WALK_SPEED = 3f / Updater.getFixedUpdatesPerSecond();
+    private final float SPRINT_SPEED = 6f / Updater.getFixedUpdatesPerSecond();
+
     private final float JUMP_SPEED = 0.5f;
-    private final float EYE_HEIGHT = 1.57f;
     private final float HEIGHT = 1.73f;
-    private final float HALF_WIDTH = 0.3f;
+    private final float EYE_HEIGHT = HEIGHT - 0.1778f;
+    private final float HALF_WIDTH = 0.4f;
     private final BoundingBox BOUNDING_BOX;
     private final Transform PREVIOUS_TRANSFORM;
     private final PlayerGui GUI_ELEMENT;
@@ -458,7 +460,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             targetBlockChunk.breakBlock(
                     targetBlockChunk.toLocalX(targetBlock.getBlockX()),
                     targetBlockChunk.toLocalY(targetBlock.getBlockY()),
-                    targetBlockChunk.toLocalZ(targetBlock.getBlockZ())
+                    targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
+                    true
             );
             breakProgress = 0;
 

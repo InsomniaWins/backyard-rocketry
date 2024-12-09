@@ -37,7 +37,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 30;
-    public static final int SIZE_Y = 260;
+    public static final int SIZE_Y = 320;
     public static  final int SIZE_Z = 30;
     public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
     private final int X;
@@ -136,10 +136,10 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    public void breakBlock(int x, int y, int z) {
+    public void breakBlock(int x, int y, int z, boolean regenerateMeshInstantly) {
 
         byte block = getBlock(x, y, z);
-        setBlock(x, y, z, Block.AIR);
+        setBlock(x, y, z, Block.AIR, true, regenerateMeshInstantly);
 
         BlockLoot blockLoot = BlockLoot.getBlockLoot(block);
 

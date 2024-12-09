@@ -32,8 +32,8 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
     public static int chunkLoadDistance = 3; // chunk loading RADIUS
-    public static int chunkProcessDistance = 100;//in block units NOT chunk positional units
-
+    public static int chunkUnloadDistance = 5; // chunk unloading RADIUS
+    public static int chunkProcessDistance = 3;
 
     private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
     private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
@@ -126,9 +126,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player) {
+    public List<ChunkPosition> getChunkPositionsAroundPlayer(IPlayer player, int radius) {
         Vector3i playerBlockPos = player.getBlockPosition();
-        return getChunkPositionsAroundBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, chunkLoadDistance);
+        return getChunkPositionsAroundBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, radius);
     }
 
     // thread-safe
@@ -339,35 +339,55 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         ));
     }
 
+    public ChunkPosition getChunkPositionFromBlockPositionClamped(Vector3i blockPosition) {
+        return getChunkPositionFromBlockPositionClamped(blockPosition.x, blockPosition.y, blockPosition.z);
+    }
+
+    public ChunkPosition getChunkPositionFromBlockPosition(Vector3i blockPosition) {
+        return getChunkPositionFromBlockPosition(blockPosition.x, blockPosition.y, blockPosition.z);
+    }
+
+    public ChunkPosition getPlayersChunkPosition(IPlayer player) {
+        return getChunkPositionFromBlockPositionClamped(player.getBlockPosition());
+    }
+
+    public double getChunkDistanceToPlayer(ChunkPosition chunkPosition, IPlayer player) {
+        return new Vector3d(chunkPosition.getVector()).distance(new Vector3d(getPlayersChunkPosition(player).getVector()));
+    }
 
     public void updateChunksAroundPlayer(IPlayer player) {
 
-        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player);
-
+        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player, chunkLoadDistance);
         for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-            if (CHUNKS.get(chunkPosition) == null) {
-                queueChunkForLoading(chunkPosition);
+
+            Chunk chunk = CHUNKS.get(chunkPosition);
+            double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
+
+            if (chunk == null) {
+
+                if (chunkDistance <= chunkLoadDistance) {
+                    queueChunkForLoading(chunkPosition);
+                }
             }
         }
 
-        // loop through chunks
         for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
 
-            Chunk chunk = chunkEntry.getValue();
             ChunkPosition chunkPosition = chunkEntry.getKey();
+            Chunk chunk = chunkEntry.getValue();
+            double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
 
-            // set if chunk should process or not
-            chunk.setShouldProcess(
-                    chunkProcessDistance >= new Vector3d(chunkPosition.getVector()).distance(player.getPosition())
-            );
+            chunk.setShouldProcess(chunkDistance <= chunkProcessDistance);
 
-            if (!chunkPositionsAroundPlayer.contains(chunk.getChunkPosition())) {
+            if (chunkDistance >= chunkUnloadDistance) {
                 chunk.ticksToLive -= 1;
             }
 
             if (chunk.isProcessing()) {
+                // if chunk is processing, make it stay alive
                 chunk.ticksToLive = Math.max(1, chunk.ticksToLive);
             } else {
+                // check for chunk unloading
                 if (chunk.ticksToLive <= 0) {
                     queueChunkForUnloading(chunkPosition);
                 }

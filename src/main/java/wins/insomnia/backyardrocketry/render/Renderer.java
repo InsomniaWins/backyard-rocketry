@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
@@ -26,6 +27,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
+    private final Vector3f CLEAR_COLOR = new Vector3f();
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
@@ -55,13 +57,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         glCullFace(GL_BACK);
 
         defaultShaderProgram = registerShaderProgram("default", "vertex.vert", "fragment.frag");
-        defaultShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
-        guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
-
         chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
-        chunkMeshShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
 
         setGuiScale(3);
 
@@ -84,8 +81,17 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 }
         );
 
-        glClearColor(120 / 255f, 167 / 255f, 255 / 255f, 1f);
+        setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
 
+    }
+
+    public void setClearColor(float r, float g, float b) {
+        CLEAR_COLOR.x = r;
+        CLEAR_COLOR.y = g;
+        CLEAR_COLOR.z = b;
+        glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, 1f);
+        chunkMeshShaderProgram.use();
+        chunkMeshShaderProgram.setUniform("fs_fogColor", CLEAR_COLOR);
     }
 
     public void fixedUpdate() {

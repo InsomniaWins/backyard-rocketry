@@ -5,6 +5,7 @@ layout (location = 2) in vec3 vs_normal;
 
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
+out vec4 fs_eyeSpacePosition;
 
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
@@ -12,7 +13,14 @@ uniform mat4 vs_projectionMatrix;
 uniform vec2 vs_uvOffset;
 
 void main() {
-    gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);
+    vec4 vertexVector = vec4(vs_vertexPosition, 1.0);
+
+    mat4 modelViewMatrix = vs_viewMatrix * vs_modelMatrix;
+    mat4 modelViewProjectionMatrix = vs_projectionMatrix * modelViewMatrix;
+
+    gl_Position = modelViewProjectionMatrix * vertexVector;
+
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = vs_normal;
+    fs_eyeSpacePosition = modelViewMatrix * vertexVector;
 }

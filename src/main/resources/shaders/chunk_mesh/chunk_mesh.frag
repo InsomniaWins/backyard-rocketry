@@ -3,14 +3,16 @@ out vec4 FragColor;
 
 in vec2 fs_textureCoordinates;
 in vec3 fs_normal;
+in vec4 fs_eyeSpacePosition;
 
 uniform sampler2D fs_texture;
+uniform vec3 fs_fogColor;
 
 // transparency
 float alphaThreshold = 0.25;
 
 // lighting
-vec3 lightDirection = normalize(-vec3(0.5, -0.9, 0.5));
+vec3 lightDirection = normalize(-vec3(0.7, -0.9, 0.45));
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
 float ambientLightStrength = 0.7;
 
@@ -23,14 +25,36 @@ void main() {
         discard;
     }
 
-    // lighting
-    vec3 ambientLighting = ambientLightStrength * lightColor;
+    // fog calculations
+    float fogCoordinate = abs(fs_eyeSpacePosition.z / fs_eyeSpacePosition.w);
 
-    fragmentColor.rgb = fragmentColor.rgb * ambientLighting;
+    float linearEnd = 200.0;
+    float linearStart = 0.0;
+    float fogLength = linearEnd - linearStart;
+    float fogFactor = (linearEnd - fogCoordinate) / fogLength;
+    fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
 
-    vec3 diffuseLighting = lightColor * (max(dot(normalize(fs_normal), lightDirection), 0.0));
 
-    fragmentColor.rgb = (ambientLighting + diffuseLighting) * fragmentColor.rgb;
+    if (fogFactor < 1.0) {
+
+        // lighting
+        vec3 ambientLighting = ambientLightStrength * lightColor;
+
+        fragmentColor.rgb = fragmentColor.rgb * ambientLighting;
+
+        vec3 diffuseLighting = lightColor * (max(dot(normalize(fs_normal), lightDirection), 0.0));
+
+        fragmentColor.rgb = (ambientLighting + diffuseLighting) * fragmentColor.rgb;
+
+
+        // apply fog
+        fragmentColor = mix(fragmentColor, vec4(fs_fogColor, 1.0), fogFactor);
+
+    } else {
+
+        fragmentColor.rgb = fs_fogColor;
+
+    }
 
     FragColor = fragmentColor;
 }
