@@ -15,6 +15,11 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 
 public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
+
+	private final float NORMAL_HOTBAR_ITEM_SCALE = 0.015f;
+	private final float SELECTED_HOTBAR_ITEM_SCALE = 0.02f;
+	private float[] hotbarItemScales = new float[10];
+
 	private float breakProgressRatio = 0.0f;
 	private TestPlayer player;
 	private double previousDeltaTime = 0.0;
@@ -77,7 +82,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 				continue;
 			}
 
-			float blockMeshScale = player.getCurrentHotbarSlot() + 1!= hotbarIndex ? 0.045f : 0.055f;
+			float blockMeshScale = hotbarItemScales[i] * modelAspectScale * renderer.getGuiScale();
 
 			Renderer.get().getModelMatrix().identity()
 					.translate(0f, 0f, -1f)
@@ -85,9 +90,9 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					.rotateX((float) Math.sin(blockMeshRotationValue.x) * 0.3f)
 					.rotateY((float) Math.toRadians(blockMeshRotationValue.y))
 					.scale(
-							blockMeshScale * modelAspectScale,
-							blockMeshScale * modelAspectScale,
-							blockMeshScale * modelAspectScale
+							blockMeshScale,
+							blockMeshScale,
+							blockMeshScale
 					)
 					.translate(-0.5f, -0.5f, -0.5f);
 
@@ -279,6 +284,18 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		} else {
 			breakProgressRatio = 0f;
 		}
+
+
+
+		// update hotbar item scales
+		for (int i = 0; i < 10; i++) {
+			if (player.getCurrentHotbarSlot() == i) {
+				hotbarItemScales[i] = (float) Math.lerp(hotbarItemScales[i], SELECTED_HOTBAR_ITEM_SCALE, deltaTime * 12f);
+			} else {
+				hotbarItemScales[i] = (float) Math.lerp(hotbarItemScales[i], NORMAL_HOTBAR_ITEM_SCALE, deltaTime * 12f);
+			}
+		}
+
 	}
 
 	@Override
