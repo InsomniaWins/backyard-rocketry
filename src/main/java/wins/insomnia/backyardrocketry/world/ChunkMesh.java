@@ -103,77 +103,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         return chunk;
     }
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
 
-        try {
-            int indexOffset = vertices.size() / 9;
-
-            for (int faceIndex : faceIndexArray) {
-                indices.add(faceIndex + indexOffset);
-            }
-
-            float[] vertexPosition = new float[3];
-
-            for (int i = 0; i < faceVertexArray.size(); i++) {
-
-                int vertexDataIndex = i % 5;
-                float vertexData = faceVertexArray.get(i).floatValue();
-
-                if (vertexDataIndex == 0) {
-                    vertexPosition[0] = vertexData;
-                    vertexData += offX;
-                } else if (vertexDataIndex == 1) {
-                    vertexPosition[1] = vertexData;
-                    vertexData += offY;
-                } else if (vertexDataIndex == 2) {
-                    vertexPosition[2] = vertexData;
-                    vertexData += offZ;
-                }
-
-                vertices.add(vertexData);
-
-
-
-                // if vertexDataIndex is last bit of vertex data
-                if (vertexDataIndex == 4) {
-
-                    // if face does not have normals
-                    if (faceNormalsArray == null) {
-                        // make "up" normal
-                        vertices.add(0f);
-                        vertices.add(1f);
-                        vertices.add(0f);
-                    } else {
-                        // normals
-                        vertices.add(faceNormalsArray.get(0).floatValue());
-                        vertices.add(faceNormalsArray.get(1).floatValue());
-                        vertices.add(faceNormalsArray.get(2).floatValue());
-                    }
-
-                    // ambient occlusion value
-                    if (ambientOcclusion) {
-
-                        if (vertexPosition[0] == 0.0f) {
-                            vertices.add(0f);
-                        }else {
-                            vertices.add(1f);
-                        }
-                    } else {
-                        vertices.add(1f);
-                    }
-
-                }
-
-            }
-        } catch (Exception e) {
-
-            // I know this try-catch is useless. it's just for debugging purposes.
-
-            e.printStackTrace();
-            throw e;
-        }
-
-    }
 
 
     @Override
@@ -301,7 +231,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
                         ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
 
-                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, blockNeighbors)) {
+                        String cullface = (String) faceData.get("cullface");
+
+                        if (shouldAddFaceToMesh(cullface, block, blockNeighbors)) {
 
                             addFace(
                                     true,
@@ -458,6 +390,175 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             }
         }
         return false;
+    }
+
+    private float getVertexAo(float[] vertexPosition, byte[][][] blockNeighbors) {
+
+        boolean side1 = false;
+        boolean side2 = false;
+        boolean corner = false;
+
+        // negative x
+        if (vertexPosition[0] == 0f) {
+
+            // negative z
+            if (vertexPosition[2] == 0f) {
+
+                // negative y
+                if (vertexPosition[1] == 0f) {
+                    //side1 = blockNeighbors[0][0][1] != Block.AIR;
+                    //side2 = blockNeighbors[1][0][0] != Block.AIR;
+                    //corner = blockNeighbors[0][0][0] != Block.AIR;
+                }
+                // positive y
+                else if (vertexPosition[1] == 1f) {
+                    // correct
+                    side1 = blockNeighbors[0][2][1] != Block.AIR;
+                    side2 = blockNeighbors[1][2][0] != Block.AIR;
+                    corner = blockNeighbors[0][2][0] != Block.AIR;
+                }
+
+            }
+            // positive z
+            else if (vertexPosition[2] == 1f) {
+
+                // negative y
+                if (vertexPosition[1] == 0f) {
+                    //side1 = blockNeighbors[1][0][2] != Block.AIR;
+                    //side2 = blockNeighbors[0][0][1] != Block.AIR;
+                    //corner = blockNeighbors[0][0][2] != Block.AIR;
+                }
+                // positive y
+                else if (vertexPosition[1] == 1f) {
+                    // correct
+                    side1 = blockNeighbors[1][2][2] != Block.AIR;
+                    side2 = blockNeighbors[0][2][1] != Block.AIR;
+                    corner = blockNeighbors[0][2][2] != Block.AIR;
+                }
+
+            }
+
+        }
+        // positive x
+        else if (vertexPosition[0] == 1f) {
+
+            // negative z
+            if (vertexPosition[2] == 0f) {
+
+                // negative y
+                if (vertexPosition[1] == 0f) {
+                    //side1 = blockNeighbors[2][0][1] != Block.AIR;
+                    //side2 = blockNeighbors[1][0][0] != Block.AIR;
+                    //corner = blockNeighbors[2][0][0] != Block.AIR;
+                }
+                // positive y
+                else if (vertexPosition[1] == 1f) {
+                    // correct
+                    side1 = blockNeighbors[2][2][1] != Block.AIR;
+                    side2 = blockNeighbors[1][2][0] != Block.AIR;
+                    corner = blockNeighbors[2][2][0] != Block.AIR;
+                }
+
+            }
+            // positive z
+            else if (vertexPosition[2] == 1f) {
+
+                // negative y
+                if (vertexPosition[1] == 0f) {
+                    //side1 = blockNeighbors[1][0][2] != Block.AIR;
+                    //side2 = blockNeighbors[2][0][1] != Block.AIR;
+                    //corner = blockNeighbors[2][0][2] != Block.AIR;
+                }
+                // positive y
+                else if (vertexPosition[1] == 1f) {
+                    // correct
+                    side1 = blockNeighbors[1][2][2] != Block.AIR;
+                    side2 = blockNeighbors[2][2][1] != Block.AIR;
+                    corner = blockNeighbors[2][2][2] != Block.AIR;
+                }
+
+            }
+
+        }
+
+
+
+
+        if (side1 && side2) return 0.1f;
+        if ((side1 && corner && !side2) || (side2 && corner && !side1)) return 0.25f;
+        if (!side1 && !side2 && !corner) return 1f;
+
+        return 0.5f;
+    }
+
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
+
+        try {
+            int indexOffset = vertices.size() / 9;
+
+            for (int faceIndex : faceIndexArray) {
+                indices.add(faceIndex + indexOffset);
+            }
+
+            float[] vertexPosition = new float[3];
+
+            for (int i = 0; i < faceVertexArray.size(); i++) {
+
+                int vertexDataIndex = i % 5;
+                float vertexData = faceVertexArray.get(i).floatValue();
+
+                if (vertexDataIndex == 0) {
+                    vertexPosition[0] = vertexData;
+                    vertexData += offX;
+                } else if (vertexDataIndex == 1) {
+                    vertexPosition[1] = vertexData;
+                    vertexData += offY;
+                } else if (vertexDataIndex == 2) {
+                    vertexPosition[2] = vertexData;
+                    vertexData += offZ;
+                }
+
+                vertices.add(vertexData);
+
+
+
+                // if vertexDataIndex is last bit of vertex data
+                if (vertexDataIndex == 4) {
+
+                    // if face does not have normals
+                    if (faceNormalsArray == null) {
+                        // make "up" normal
+                        vertices.add(0f);
+                        vertices.add(1f);
+                        vertices.add(0f);
+                    } else {
+                        // normals
+                        vertices.add(faceNormalsArray.get(0).floatValue());
+                        vertices.add(faceNormalsArray.get(1).floatValue());
+                        vertices.add(faceNormalsArray.get(2).floatValue());
+                    }
+
+                    // ambient occlusion value
+                    if (ambientOcclusion) {
+
+                        float aoValue = getVertexAo(vertexPosition, blockNeighbors);
+                        vertices.add(aoValue);
+
+                    } else {
+                        vertices.add(1f);
+                    }
+
+                }
+
+            }
+        } catch (Exception e) {
+
+            // I know this try-catch is useless. it's just for debugging purposes.
+
+            e.printStackTrace();
+            throw e;
+        }
+
     }
 
     @Override
