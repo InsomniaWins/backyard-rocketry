@@ -36,10 +36,10 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 30;
-    public static final int SIZE_Y = 320;
-    public static  final int SIZE_Z = 30;
-    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(10);
+    public static final int SIZE_X = 20;
+    public static final int SIZE_Y = 20;
+    public static  final int SIZE_Z = 20;
+    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(4);
     private final int X;
     private final int Y;
     private final int Z;
@@ -93,22 +93,28 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
                     int groundHeight = WorldGeneration.getGroundHeight(globalBlockX, globalBlockZ);
 
-
-                    if (globalBlockY > groundHeight) {
-                        continue;
-                    }
-
                     byte block = Block.AIR;
 
-                    if (globalBlockY == groundHeight) {
-                        block = Block.GRASS;
-                    } else if (globalBlockY > groundHeight - 4) {
-                        block = Block.DIRT;
-                    } else {
-                        if (World.RANDOM.nextInt(2) == 0) {
-                            block = Block.COBBLESTONE;
+                    if (globalBlockY > groundHeight) {
+
+                        if (globalBlockY <= WORLD.getSeaLevel()) {
+                            block = Block.WATER;
                         } else {
-                            block = Block.STONE;
+                            continue;
+                        }
+
+                    } else {
+
+                        if (globalBlockY == groundHeight) {
+                            block = Block.GRASS;
+                        } else if (globalBlockY > groundHeight - 4) {
+                            block = Block.DIRT;
+                        } else {
+                            if (World.RANDOM.nextInt(2) == 0) {
+                                block = Block.COBBLESTONE;
+                            } else {
+                                block = Block.STONE;
+                            }
                         }
                     }
 
@@ -207,6 +213,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             }
 
             chunk.shouldRegenerateMesh.set(true);
+            chunk.shouldInstantlyGenerateMesh.set(false);
         }
     }
 
@@ -296,11 +303,42 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return getBlock(blockPos.x, blockPos.y, blockPos.z);
     }
 
-    public byte getBlock(int x, int y, int z) {
-
+    public byte getBlockOrNull(int x, int y, int z) {
         // if out of chunk boundaries
         if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
-            return WORLD.getBlock(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
+            return Block.NULL;
+        }
+
+        return blocks[x][y][z];
+    }
+
+    public byte getBlock(int x, int y, int z) {
+
+        // if block is out of chunk bounds
+        if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
+
+            int globalX = toGlobalX(x);
+            int globalY = toGlobalY(y);
+            int globalZ = toGlobalZ(z);
+
+            // if block is out of world border
+            if (globalX > WORLD.getSizeX()-1 || globalX < 0 || globalY > WORLD.getSizeY()-1 || globalY < 0 || globalZ > WORLD.getSizeZ()-1 || globalZ < 0 ) {
+                return Block.WORLD_BORDER;
+            }
+
+            // get neighbor chunk with block
+            int chunkPosX = globalX / (Chunk.SIZE_X);
+            int chunkPosY = globalY / (Chunk.SIZE_Y);
+            int chunkPosZ = globalZ / (Chunk.SIZE_Z);
+
+            ChunkPosition chunkPosition = new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
+            Chunk chunk = WORLD.getChunk(chunkPosition);
+
+            if (chunk == null) {
+                return Block.NULL;
+            }
+
+            return chunk.getBlock(chunk.toLocalX(globalX), chunk.toLocalY(globalY), chunk.toLocalZ(globalZ));
         }
 
         return blocks[x][y][z];

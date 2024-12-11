@@ -3,10 +3,10 @@
 	"textures": {
 		"particle": "grass_top",
 		"pos_y": "grass_top",
-		"pos_x": "grass_side",
-		"neg_x": "grass_side",
-		"pos_z": "grass_side",
-		"neg_z": "grass_side",
+		"pos_x": "grass_top",
+		"neg_x": "grass_top",
+		"pos_z": "grass_top",
+		"neg_z": "grass_top",
 		"neg_y": "dirt",
 		"icon": "grass_top"
 	}

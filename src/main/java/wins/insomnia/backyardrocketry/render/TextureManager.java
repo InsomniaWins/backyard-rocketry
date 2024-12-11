@@ -108,6 +108,10 @@ public class TextureManager {
             case "wood" -> {
                 return new int[] {0, 2};
             }
+
+            case "water" -> {
+                return new int[] {6, 0};
+            }
         }
         return new int[] {0, 0};
     }

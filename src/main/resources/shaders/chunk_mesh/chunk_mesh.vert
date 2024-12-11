@@ -1,11 +1,14 @@
 #version 330 core
+
 layout (location = 0) in vec3 vs_vertexPosition;
 layout (location = 1) in vec2 vs_textureCoordinates;
 layout (location = 2) in vec3 vs_normal;
+layout (location = 3) in float vs_ambientOcclusionValue;
 
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
 out vec4 fs_eyeSpacePosition;
+out float fs_ambientOcclusionValue;
 
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
@@ -23,4 +26,5 @@ void main() {
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = vs_normal;
     fs_eyeSpacePosition = modelViewMatrix * vertexVector;
+    fs_ambientOcclusionValue = vs_ambientOcclusionValue;
 }

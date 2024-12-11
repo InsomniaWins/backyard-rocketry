@@ -257,7 +257,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // render renderables
         sortRenderList();
-        glDisable(GL_BLEND);
+        //glDisable(GL_BLEND);
 
         long renderTime = System.currentTimeMillis();
         for (IRenderable renderable : RENDER_LIST) {

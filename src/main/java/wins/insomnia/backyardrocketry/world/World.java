@@ -28,14 +28,14 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     public static final int CHUNK_AMOUNT_X = 45;
-    public static final int CHUNK_AMOUNT_Y = 1;
+    public static final int CHUNK_AMOUNT_Y = 45;
     public static final int CHUNK_AMOUNT_Z = 45;
     private static World instance;
-    public static int chunkLoadDistance = 3; // chunk loading RADIUS
-    public static int chunkUnloadDistance = 5; // chunk unloading RADIUS
+    public static int chunkLoadDistance = 6; // chunk loading RADIUS
+    public static int chunkUnloadDistance = 8; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
 
-    private final ConcurrentHashMap<ChunkPosition, Chunk> CHUNKS;
+    private final HashMap<ChunkPosition, Chunk> CHUNKS;
     private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
     private final ArrayList<Entity> ENTITY_LIST;
 
@@ -45,13 +45,14 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     private final Queue<ChunkManagementData> CHUNK_MANAGEMENT_QUEUE;
 
     private final float GRAVITY = -0.1f;
+    private int seaLevel = 80;
 
     private long seed;
 
     public World() {
 
         seed = RANDOM.nextLong();
-        CHUNKS = new ConcurrentHashMap<>();
+        CHUNKS = new HashMap<>();
         ENTITIES = new HashMap<>();
         ENTITY_LIST = new ArrayList<>();
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
@@ -131,7 +132,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return getChunkPositionsAroundBlockPosition(playerBlockPos.x, playerBlockPos.y, playerBlockPos.z, radius);
     }
 
-    // thread-safe
+    // MUST RUN IN MAIN THREAD
     public Chunk getChunkAt(ChunkPosition chunkPosition) {
         return CHUNKS.get(chunkPosition);
     }
@@ -265,6 +266,8 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return CHUNKS.get(chunkPosition);
     }
 
+
+    // must run in main thread
     public Collection<Chunk> getChunks() {
         return CHUNKS.values();
     }
@@ -291,6 +294,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    // MUST RUN IN MAIN THREAD
     private void _queueChunkForLoading(ChunkPosition chunkPosition) {
 
         // check already loaded
@@ -548,75 +552,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         Chunk.chunkMeshGenerationExecutorService.shutdown();
     }
 
-    public static List<ChunkPosition> getChunkPositionsTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
-        World world = BackyardRocketry.getInstance().getPlayer().getWorld();
-
-        List<ChunkPosition> chunks = new ArrayList<>();
-
-
-        // get min chunk position, and get range for chunk loops
-
-        ChunkPosition currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
-                (int) boundingBox.getMax().x,
-                (int) boundingBox.getMax().y,
-                (int) boundingBox.getMax().z
-        );
-
-        int xRange = currentChunkPosition.getX();
-        int yRange = currentChunkPosition.getY();
-        int zRange = currentChunkPosition.getZ();
-
-        currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
-                (int) boundingBox.getMin().x,
-                (int) boundingBox.getMin().y,
-                (int) boundingBox.getMin().z
-        );
-
-        int minChunkX = currentChunkPosition.getX();
-        int minChunkY = currentChunkPosition.getY();
-        int minChunkZ = currentChunkPosition.getZ();
-
-        xRange -= currentChunkPosition.getX();
-        yRange -= currentChunkPosition.getY();
-        zRange -= currentChunkPosition.getZ();
-
-
-        // loop through chunks to find loaded chunks colliding
-        for (int x = 0; x <= xRange; x++) {
-            for (int y = 0; y <= yRange; y++) {
-                for (int z = 0; z <= zRange; z++) {
-
-                    currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
-
-                    Chunk chunk = world.getChunkAt(currentChunkPosition);
-
-                    if (!includeUnloadedChunks) {
-
-                        if (chunk == null) {
-                            continue;
-                        }
-
-                    } else {
-
-                        // if we are including null chunks,
-                        // check to see if chunk is in world border
-                        // if it's not, then it will never exist, so continue and dont add null to list
-                        if (!Collision.isBlockInWorldBorder(currentChunkPosition.getX(), currentChunkPosition.getY(), currentChunkPosition.getZ())) {
-                            continue;
-                        }
-
-                    }
-
-
-                    chunks.add(new ChunkPosition(currentChunkPosition));
-
-                }
-            }
-        }
-
-        return chunks;
-    }
-
     private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}
 
     public float getGravity() {
@@ -673,5 +608,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     public Random getRandom() {
         return RANDOM;
+    }
+
+    public int getSeaLevel() {
+        return seaLevel;
     }
 }

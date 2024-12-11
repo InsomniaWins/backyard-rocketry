@@ -152,6 +152,15 @@ public class Block {
             120
     );
 
+    public static final byte WATER = registerBlock(
+            "Water",
+            true,
+            true,
+            null,
+            "water",
+            0
+    );
+
 
 
     static {

@@ -82,9 +82,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
-        glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * Float.BYTES, 5 * Float.BYTES);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 9 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 9 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, 9 * Float.BYTES, 5 * Float.BYTES);
+        glVertexAttribPointer(3, 1, GL_FLOAT, false, 9 * Float.BYTES, 8 * Float.BYTES);
 
 
         readyToCreateOpenGLMeshData.set(false);
@@ -102,14 +103,16 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         return chunk;
     }
 
-    public void addFace(ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ) {
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
 
         try {
-            int indexOffset = vertices.size() / 8;
+            int indexOffset = vertices.size() / 9;
 
             for (int faceIndex : faceIndexArray) {
                 indices.add(faceIndex + indexOffset);
             }
+
+            float[] vertexPosition = new float[3];
 
             for (int i = 0; i < faceVertexArray.size(); i++) {
 
@@ -117,10 +120,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 float vertexData = faceVertexArray.get(i).floatValue();
 
                 if (vertexDataIndex == 0) {
+                    vertexPosition[0] = vertexData;
                     vertexData += offX;
                 } else if (vertexDataIndex == 1) {
+                    vertexPosition[1] = vertexData;
                     vertexData += offY;
                 } else if (vertexDataIndex == 2) {
+                    vertexPosition[2] = vertexData;
                     vertexData += offZ;
                 }
 
@@ -138,9 +144,22 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         vertices.add(1f);
                         vertices.add(0f);
                     } else {
+                        // normals
                         vertices.add(faceNormalsArray.get(0).floatValue());
                         vertices.add(faceNormalsArray.get(1).floatValue());
                         vertices.add(faceNormalsArray.get(2).floatValue());
+                    }
+
+                    // ambient occlusion value
+                    if (ambientOcclusion) {
+
+                        if (vertexPosition[0] == 0.0f) {
+                            vertices.add(0f);
+                        }else {
+                            vertices.add(1f);
+                        }
+                    } else {
+                        vertices.add(1f);
                     }
 
                 }
@@ -208,11 +227,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
 
         glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(3);
     }
 
     public void generateMesh(byte[][][] blocks) {
@@ -224,23 +245,50 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
 
+        byte[][][] blockNeighbors = new byte[9][9][9];
+
         for (int y = 0; y < Chunk.SIZE_Y; y++) {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
+
+
 
                     byte block = blocks[x][y][z];
                     if (block == Block.AIR) continue;
 
                     if (isTransparent != Block.isBlockTransparent(block)) continue;
 
-                    // use Chunk.getBlock because blocks could be in neighboring chunk(s)
-                    byte posYNeighbor = chunk.getBlock(x, y+1, z);
-                    byte negYNeighbor = chunk.getBlock(x, y-1, z);
-                    byte negXNeighbor = chunk.getBlock(x-1, y, z);
-                    byte posXNeighbor = chunk.getBlock(x+1, y, z);
-                    byte negZNeighbor = chunk.getBlock(x, y, z-1);
-                    byte posZNeighbor = chunk.getBlock(x, y, z+1);
 
+
+                    blockNeighbors[0][0][0] = chunk.getBlock(x-1, y-1, z-1);
+                    blockNeighbors[1][0][0] = chunk.getBlock(x, y-1, z-1);
+                    blockNeighbors[2][0][0] = chunk.getBlock(x+1, y-1, z-1);
+                    blockNeighbors[0][1][0] = chunk.getBlock(x-1, y, z-1);
+                    blockNeighbors[1][1][0] = chunk.getBlock(x, y, z-1);
+                    blockNeighbors[2][1][0] = chunk.getBlock(x+1, y, z-1);
+                    blockNeighbors[0][2][0] = chunk.getBlock(x-1, y+1, z-1);
+                    blockNeighbors[1][2][0] = chunk.getBlock(x, y+1, z-1);
+                    blockNeighbors[2][2][0] = chunk.getBlock(x+1, y+1, z-1);
+
+                    blockNeighbors[0][0][1] = chunk.getBlock(x-1, y-1, z);
+                    blockNeighbors[1][0][1] = chunk.getBlock(x, y-1, z);
+                    blockNeighbors[2][0][1] = chunk.getBlock(x+1, y-1, z);
+                    blockNeighbors[0][1][1] = chunk.getBlock(x-1, y, z);
+                    blockNeighbors[1][1][1] = block;
+                    blockNeighbors[2][1][1] = chunk.getBlock(x+1, y, z);
+                    blockNeighbors[0][2][1] = chunk.getBlock(x-1, y+1, z);
+                    blockNeighbors[1][2][1] = chunk.getBlock(x, y+1, z);
+                    blockNeighbors[2][2][1] = chunk.getBlock(x+1, y+1, z);
+
+                    blockNeighbors[0][0][2] = chunk.getBlock(x-1, y-1, z+1);
+                    blockNeighbors[1][0][2] = chunk.getBlock(x, y-1, z+1);
+                    blockNeighbors[2][0][2] = chunk.getBlock(x+1, y-1, z+1);
+                    blockNeighbors[0][1][2] = chunk.getBlock(x-1, y, z+1);
+                    blockNeighbors[1][1][2] = chunk.getBlock(x, y, z+1);
+                    blockNeighbors[2][1][2] = chunk.getBlock(x+1, y, z+1);
+                    blockNeighbors[0][2][2] = chunk.getBlock(x-1, y+1, z+1);
+                    blockNeighbors[1][2][2] = chunk.getBlock(x, y+1, z+1);
+                    blockNeighbors[2][2][2] = chunk.getBlock(x+1, y+1, z+1);
 
 
                     BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
@@ -253,9 +301,16 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
                         ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
 
-                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, posYNeighbor, negYNeighbor, negXNeighbor, posXNeighbor, negZNeighbor, posZNeighbor)) {
+                        if (shouldAddFaceToMesh((String) faceData.get("cullface"), block, blockNeighbors)) {
 
-                            addFace(vertices, indices, faceVertexArray, faceIndexArray, faceNormalArray, x, y, z);
+                            addFace(
+                                    true,
+                                    vertices, indices,
+                                    faceVertexArray, faceIndexArray,
+                                    faceNormalArray,
+                                    x, y, z,
+                                    blockNeighbors
+                            );
 
                         }
 
@@ -302,7 +357,16 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     }
 
-    private boolean shouldAddFaceToMesh(String cullface, byte block, byte posYNeighbor, byte negYNeighbor, byte negXNeighbor, byte posXNeighbor, byte negZNeighbor, byte posZNeighbor) {
+    private boolean shouldAddFaceToMesh(String cullface, byte block, byte[][][] blockNeighbors) {
+
+        byte posYNeighbor = blockNeighbors[1][2][1];
+        byte negYNeighbor = blockNeighbors[1][0][1];
+        byte negXNeighbor = blockNeighbors[0][1][1];
+        byte posXNeighbor = blockNeighbors[2][1][1];
+        byte negZNeighbor = blockNeighbors[1][1][0];
+        byte posZNeighbor = blockNeighbors[1][1][2];
+
+
 
         if (cullface == null) return true;
 
