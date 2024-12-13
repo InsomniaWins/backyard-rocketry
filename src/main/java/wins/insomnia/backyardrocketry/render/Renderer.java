@@ -13,7 +13,6 @@ import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.util.*;
 

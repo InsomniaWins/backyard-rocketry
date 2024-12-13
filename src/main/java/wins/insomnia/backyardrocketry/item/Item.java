@@ -40,6 +40,54 @@ public class Item {
 			99000
 	);
 
+	public static final Item LEAVES = registerBlockItem(
+			Block.LEAVES,
+			"Leaves",
+			"leaves",
+			1000,
+			99000
+	);
+
+	public static final Item STONE = registerBlockItem(
+			Block.STONE,
+			"Stone",
+			"stone",
+			1000,
+			99000
+	);
+
+	public static final Item WOODEN_PLANKS = registerBlockItem(
+			Block.WOODEN_PLANKS,
+			"Wooden Planks",
+			"wooden_planks",
+			1000,
+			99000
+	);
+
+	public static final Item WOOD = registerBlockItem(
+			Block.WOOD,
+			"Wood",
+			"wood",
+			1000,
+			99000
+	);
+
+	public static final Item LOG = registerBlockItem(
+			Block.LOG,
+			"Log",
+			"log",
+			1000,
+			99000
+	);
+
+	public static final Item GLASS = registerBlockItem(
+			Block.GLASS,
+			"Glass",
+			"glass",
+			1000,
+			99000
+	);
+
 
 
 

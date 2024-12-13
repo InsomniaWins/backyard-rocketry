@@ -392,103 +392,228 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         return false;
     }
 
-    private float getVertexAo(float[] vertexPosition, byte[][][] blockNeighbors) {
+    private boolean vectorArrayEqualTo(float[] normalArray, float x, float y, float z) {
+        return normalArray[0] == x && normalArray[1] == y && normalArray[2] == z;
+    }
 
-        boolean side1 = false;
-        boolean side2 = false;
-        boolean corner = false;
-
-        // negative x
-        if (vertexPosition[0] == 0f) {
-
-            // negative z
-            if (vertexPosition[2] == 0f) {
-
-                // negative y
-                if (vertexPosition[1] == 0f) {
-                    //side1 = blockNeighbors[0][0][1] != Block.AIR;
-                    //side2 = blockNeighbors[1][0][0] != Block.AIR;
-                    //corner = blockNeighbors[0][0][0] != Block.AIR;
-                }
-                // positive y
-                else if (vertexPosition[1] == 1f) {
-                    // correct
-                    side1 = blockNeighbors[0][2][1] != Block.AIR;
-                    side2 = blockNeighbors[1][2][0] != Block.AIR;
-                    corner = blockNeighbors[0][2][0] != Block.AIR;
-                }
-
-            }
-            // positive z
-            else if (vertexPosition[2] == 1f) {
-
-                // negative y
-                if (vertexPosition[1] == 0f) {
-                    //side1 = blockNeighbors[1][0][2] != Block.AIR;
-                    //side2 = blockNeighbors[0][0][1] != Block.AIR;
-                    //corner = blockNeighbors[0][0][2] != Block.AIR;
-                }
-                // positive y
-                else if (vertexPosition[1] == 1f) {
-                    // correct
-                    side1 = blockNeighbors[1][2][2] != Block.AIR;
-                    side2 = blockNeighbors[0][2][1] != Block.AIR;
-                    corner = blockNeighbors[0][2][2] != Block.AIR;
-                }
-
-            }
-
-        }
-        // positive x
-        else if (vertexPosition[0] == 1f) {
-
-            // negative z
-            if (vertexPosition[2] == 0f) {
-
-                // negative y
-                if (vertexPosition[1] == 0f) {
-                    //side1 = blockNeighbors[2][0][1] != Block.AIR;
-                    //side2 = blockNeighbors[1][0][0] != Block.AIR;
-                    //corner = blockNeighbors[2][0][0] != Block.AIR;
-                }
-                // positive y
-                else if (vertexPosition[1] == 1f) {
-                    // correct
-                    side1 = blockNeighbors[2][2][1] != Block.AIR;
-                    side2 = blockNeighbors[1][2][0] != Block.AIR;
-                    corner = blockNeighbors[2][2][0] != Block.AIR;
-                }
-
-            }
-            // positive z
-            else if (vertexPosition[2] == 1f) {
-
-                // negative y
-                if (vertexPosition[1] == 0f) {
-                    //side1 = blockNeighbors[1][0][2] != Block.AIR;
-                    //side2 = blockNeighbors[2][0][1] != Block.AIR;
-                    //corner = blockNeighbors[2][0][2] != Block.AIR;
-                }
-                // positive y
-                else if (vertexPosition[1] == 1f) {
-                    // correct
-                    side1 = blockNeighbors[1][2][2] != Block.AIR;
-                    side2 = blockNeighbors[2][2][1] != Block.AIR;
-                    corner = blockNeighbors[2][2][2] != Block.AIR;
-                }
-
-            }
-
-        }
-
-
-
-
-        if (side1 && side2) return 0.1f;
-        if ((side1 && corner && !side2) || (side2 && corner && !side1)) return 0.25f;
+    private float calculateVertexAoValue(boolean side1, boolean corner, boolean side2) {
+        if (side1 && side2) return 0.2f;
+        if ((side1 && corner && !side2) || (!side1 && corner && side2)) return 0.375f;
         if (!side1 && !side2 && !corner) return 1f;
 
-        return 0.5f;
+        return 0.75f;
+    }
+
+    private float getVertexAo(float[] vertexPosition, byte[][][] blockNeighbors, float[] normal) {
+
+        float returnValue = 1f;
+
+        // negative x face
+        if (vectorArrayEqualTo(normal, -1f, 0f, 0f)) {
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[0][1][2], blockNeighbors[0][0][2], blockNeighbors[0][0][1],
+                    blockNeighbors[0][0][0], blockNeighbors[0][1][0],
+                    blockNeighbors[0][2][0], blockNeighbors[0][2][1], blockNeighbors[0][2][2],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+            if (vertexPosition[1] == 0f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[1] == 0f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[1] == 1f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[1] == 1f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+        }
+
+        // positive x face
+        else if (vectorArrayEqualTo(normal, 1f, 0f, 0f)) {
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[2][1][0], blockNeighbors[2][0][0], blockNeighbors[2][0][1],
+                    blockNeighbors[2][0][2], blockNeighbors[2][1][2],
+                    blockNeighbors[2][2][2], blockNeighbors[2][2][1], blockNeighbors[2][2][0],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+            if (vertexPosition[1] == 0f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[1] == 0f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[1] == 1f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[1] == 1f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+
+        }
+
+        // negative y face
+        else if (vectorArrayEqualTo(normal, 0f, -1f, 0f)) {
+
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[1][0][0], blockNeighbors[0][0][0], blockNeighbors[0][0][1],
+                    blockNeighbors[0][0][2], blockNeighbors[1][0][2],
+                    blockNeighbors[2][0][2], blockNeighbors[2][0][1], blockNeighbors[2][0][0],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+            if (vertexPosition[0] == 0f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[0] == 0f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+        }
+
+        // positive y face
+        else if (vectorArrayEqualTo(normal, 0f, 1f, 0f)) {
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[1][2][2], blockNeighbors[0][2][2], blockNeighbors[0][2][1],
+                    blockNeighbors[0][2][0], blockNeighbors[1][2][0],
+                    blockNeighbors[2][2][0], blockNeighbors[2][2][1], blockNeighbors[2][2][2],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+            if (vertexPosition[0] == 0f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[0] == 0f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[2] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[2] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+        }
+
+        // negative z face
+        else if (vectorArrayEqualTo(normal, 0f, 0f, -1f)) {
+
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[0][1][0], blockNeighbors[0][0][0], blockNeighbors[1][0][0],
+                    blockNeighbors[2][0][0], blockNeighbors[2][1][0],
+                    blockNeighbors[2][2][0], blockNeighbors[1][2][0], blockNeighbors[0][2][0],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+
+            if (vertexPosition[0] == 0f && vertexPosition[1] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[1] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[0] == 0f && vertexPosition[1] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[1] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+
+        }
+
+        // positive z face
+        else if (vectorArrayEqualTo(normal, 0f, 0f, 1f)) {
+            byte[] neighbors = new byte[] {
+                    blockNeighbors[2][1][2], blockNeighbors[2][0][2], blockNeighbors[1][0][2],
+                    blockNeighbors[0][0][2], blockNeighbors[0][1][2],
+                    blockNeighbors[0][2][2], blockNeighbors[1][2][2], blockNeighbors[2][2][2],
+            };
+
+            boolean[] neighborResults = new boolean[] {
+                    !Block.isBlockTransparent(neighbors[0]),
+                    !Block.isBlockTransparent(neighbors[1]),
+                    !Block.isBlockTransparent(neighbors[2]),
+                    !Block.isBlockTransparent(neighbors[3]),
+                    !Block.isBlockTransparent(neighbors[4]),
+                    !Block.isBlockTransparent(neighbors[5]),
+                    !Block.isBlockTransparent(neighbors[6]),
+                    !Block.isBlockTransparent(neighbors[7])
+            };
+
+
+            if (vertexPosition[0] == 1f && vertexPosition[1] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[0], neighborResults[1], neighborResults[2]);
+            }
+            else if (vertexPosition[0] == 0f && vertexPosition[1] == 0f) {
+                returnValue = calculateVertexAoValue(neighborResults[2], neighborResults[3], neighborResults[4]);
+            }
+            else if (vertexPosition[0] == 1f && vertexPosition[1] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[6], neighborResults[7], neighborResults[0]);
+            }
+            else if (vertexPosition[0] == 0f && vertexPosition[1] == 1f) {
+                returnValue = calculateVertexAoValue(neighborResults[4], neighborResults[5], neighborResults[6]);
+            }
+        }
+
+        return returnValue;
+
     }
 
     public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
@@ -525,23 +650,33 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 // if vertexDataIndex is last bit of vertex data
                 if (vertexDataIndex == 4) {
 
+                    float[] normal = new float[3];
+
                     // if face does not have normals
                     if (faceNormalsArray == null) {
                         // make "up" normal
                         vertices.add(0f);
                         vertices.add(1f);
                         vertices.add(0f);
+                        normal[0] = 0f;
+                        normal[1] = 1f;
+                        normal[2] = 0f;
                     } else {
                         // normals
-                        vertices.add(faceNormalsArray.get(0).floatValue());
-                        vertices.add(faceNormalsArray.get(1).floatValue());
-                        vertices.add(faceNormalsArray.get(2).floatValue());
+
+                        normal[0] = faceNormalsArray.get(0).floatValue();
+                        normal[1] = faceNormalsArray.get(1).floatValue();
+                        normal[2] = faceNormalsArray.get(2).floatValue();
+
+                        vertices.add(normal[0]);
+                        vertices.add(normal[1]);
+                        vertices.add(normal[2]);
                     }
 
                     // ambient occlusion value
-                    if (ambientOcclusion) {
+                    if (ambientOcclusion && faceNormalsArray != null) {
 
-                        float aoValue = getVertexAo(vertexPosition, blockNeighbors);
+                        float aoValue = getVertexAo(vertexPosition, blockNeighbors, normal);
                         vertices.add(aoValue);
 
                     } else {
