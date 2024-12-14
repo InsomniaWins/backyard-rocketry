@@ -1,9 +1,9 @@
 # Backyard Rocketry
-
 Open source voxel-based Minecraft-inspired sandbox game built with LWJGL in Java.
 
 The goal of this project is to make a game with most of the features from Minecraft with faster speeds. This will likely not include features such as smooth lighting, mod support, detailed lighting shaders, etc. It will focus on core mechanics and features rather than quality-of-life bloaty mechanics.
 
+[Click Here for Development Logs/Progress](https://insomniawins.github.io/voxel_game/)
 
 ![Screenshot of first implementation of fog](/screenshot4.png)
 ![Screenshot of yet another early build](/screenshot3.png)
