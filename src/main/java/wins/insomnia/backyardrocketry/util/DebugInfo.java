@@ -27,6 +27,10 @@ public class DebugInfo {
 		return "FPS: \n  " + Renderer.get().getFramesPerSecond();
 	}
 
+	public static String getDrawCallsPerSecond() {
+		return "DCPS: \n  " + Renderer.get().getDrawCallsPerSecond();
+	}
+
 	public static String getFixedUpdatesPerSecond() {
 		return "Fixed Updates: \n  " + Updater.get().getUpdatesPerSecond();
 	}

@@ -22,7 +22,7 @@ public class Camera {
 
     public Camera() {
 
-        fov = (float) Math.toRadians(70f);
+        fov = (float) Math.toRadians(90f);
 
         TRANSFORM = new Transform();
         PREVIOUS_TRANSFORM = new Transform();

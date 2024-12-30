@@ -16,8 +16,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 
 import java.util.*;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -34,10 +33,18 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final LinkedList<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
+
+    private int drawCallsPerSecond = 0;
+    private int drawCallsSoFar = 0; // draw calls before fps-polling occurs
+
     private double fpsTimer = 0.0;
+    private int fpsLimit = -1; // limits the fps, -1 for unlimited
+    // the time each frame should render based on fpsLimit
+    private double fixedFrameRenderTime = 0.0; // DO NOT SET MANUALLY
     private Matrix4f modelMatrix;
     private int renderMode = 0;
     private int guiScale = 1;
+    private double timeOfPreviousFrame = glfwGetTime(); // game time of previous frame's rendering/drawing (not total time it took to render)
     private boolean renderDebugInformation = false;
     private ShaderProgram defaultShaderProgram = null, guiShaderProgram = null, chunkMeshShaderProgram = null;
 
@@ -81,7 +88,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         );
 
         setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
-
+        setFpsLimit(120);
     }
 
     public void setClearColor(float r, float g, float b) {
@@ -113,15 +120,20 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public void update(double deltaTime) {
+
         draw(BackyardRocketry.getInstance().getWindow());
-        framesRenderedSoFar++;
+        drawCallsSoFar++;
 
         fpsTimer += deltaTime;
         while (fpsTimer > 1.0) {
 
             fpsTimer -= 1.0;
+
             framesPerSecond = framesRenderedSoFar;
+            drawCallsPerSecond = drawCallsSoFar;
+
             framesRenderedSoFar = 0;
+            drawCallsSoFar = 0;
 
         }
 
@@ -138,10 +150,17 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     // master draw method used in game loop
+    // returns true if successfully drew to screen
     private void draw(Window window) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render();
-        glfwSwapBuffers(window.getWindowHandle());
+
+        if (getFpsLimit() == -1 || glfwGetTime() - timeOfPreviousFrame > getFixedFrameRenderTime()) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            timeOfPreviousFrame = glfwGetTime();
+            render();
+            framesRenderedSoFar++;
+            glfwSwapBuffers(window.getWindowHandle());
+        }
+
     }
 
     // is thread-safe
@@ -159,7 +178,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         RENDER_LIST.sort((renderable1, renderable2) -> {
 
-
+            // check render priority
             if (renderable1.getRenderPriority() > renderable2.getRenderPriority()) {
                 return 1;
             } else if (renderable1.getRenderPriority() < renderable2.getRenderPriority()) {
@@ -167,6 +186,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             }
 
 
+            // get distance from camera for the two renderables
 			float distance1 = 0.0f;
 			float distance2 = 0.0f;
 
@@ -178,6 +198,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 				distance2 = (float) positionOwner2.getPosition().distance(getCamera().getTransform().getPosition());
 			}
 
+            // check which of the renderables are opaque or not
             boolean hasTransparency1 = false;
             boolean hasTransparency2 = false;
 
@@ -190,7 +211,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             }
 
 
-
+            // sort
+            // could be faster, but I'm too tired to deal with "Comparison method violates its general contract!"
             if (hasTransparency1 == hasTransparency2) {
                 return Float.compare(distance1, distance2);
             } else if (hasTransparency1) {
@@ -319,6 +341,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString.append("Render Time: ").append(renderTime).append("ms");
             debugString.append("\n\n").append(DebugInfo.getMemoryUsage());
             debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
+            debugString.append("\n\n").append(DebugInfo.getDrawCallsPerSecond());
 
 
             if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
@@ -603,6 +626,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         return framesPerSecond;
     }
 
+    public int getDrawCallsPerSecond() {
+        return drawCallsPerSecond;
+    }
+
     public Camera getCamera() {
         return camera;
     }
@@ -633,6 +660,26 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         SHADER_PROGRAM_MAP.put(programName, program);
         return program;
 
+    }
+
+    public double getFixedFrameRenderTime() {
+        return fixedFrameRenderTime;
+    }
+
+    public void setFpsLimit(int limit) {
+
+        if (limit < 0) {
+            limit = -1;
+        } else {
+            limit = Math.max(1, limit);
+        }
+
+        fpsLimit = limit;
+        fixedFrameRenderTime = 1.0 / fpsLimit;
+    }
+
+    public int getFpsLimit() {
+        return fpsLimit;
     }
 
 }
