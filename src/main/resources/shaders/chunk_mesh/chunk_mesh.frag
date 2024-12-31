@@ -11,8 +11,6 @@ uniform sampler2D fs_texture;
 uniform vec3 fs_fogColor;
 uniform bool fs_fogEnabled = true;
 
-// transparency
-float alphaThreshold = 0.25;
 
 // lighting
 vec3 lightDirection = normalize(-vec3(0.7, -0.9, 0.45));
@@ -24,7 +22,7 @@ void main() {
     vec4 fragmentColor = texture(fs_texture, vec2(fs_textureCoordinates.x, fs_textureCoordinates.y));
 
     // transparency
-    if (fragmentColor.a < alphaThreshold) {
+    if (fragmentColor.a == 0.0) {
         discard;
     }
 

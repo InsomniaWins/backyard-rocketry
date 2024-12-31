@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
@@ -13,6 +14,7 @@ import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.util.*;
 
@@ -176,6 +178,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     private void sortRenderList() {
 
+        Vector3d cameraPosition = getCamera().getTransform().getPosition();
+
         RENDER_LIST.sort((renderable1, renderable2) -> {
 
             // check render priority
@@ -190,12 +194,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 			float distance1 = 0.0f;
 			float distance2 = 0.0f;
 
+
 			if (renderable1 instanceof IPositionOwner positionOwner1) {
-				distance1 = (float) positionOwner1.getPosition().distance(getCamera().getTransform().getPosition());
+				distance1 = (float) positionOwner1.getPosition().distance(cameraPosition);
 			}
 
 			if (renderable2 instanceof IPositionOwner positionOwner2) {
-				distance2 = (float) positionOwner2.getPosition().distance(getCamera().getTransform().getPosition());
+				distance2 = (float) positionOwner2.getPosition().distance(cameraPosition);
 			}
 
             // check which of the renderables are opaque or not
@@ -214,7 +219,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             // sort
             // could be faster, but I'm too tired to deal with "Comparison method violates its general contract!"
             if (hasTransparency1 == hasTransparency2) {
-                return Float.compare(distance1, distance2);
+                return -Float.compare(distance1, distance2);
             } else if (hasTransparency1) {
                 return 1;
             } else {

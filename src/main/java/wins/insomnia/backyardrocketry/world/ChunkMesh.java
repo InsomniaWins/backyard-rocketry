@@ -698,7 +698,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     @Override
     public Vector3d getPosition() {
-        return new Vector3d(chunk.getPosition());
+        return new Vector3d(chunk.getPosition()).add(Chunk.SIZE_X / 2d, Chunk.SIZE_Y / 2d, Chunk.SIZE_Z / 2d);
     }
 
     @Override
