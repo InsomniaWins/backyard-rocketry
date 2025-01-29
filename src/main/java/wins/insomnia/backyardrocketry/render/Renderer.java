@@ -14,7 +14,6 @@ import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.ChunkMesh;
 
 import java.util.*;
 
@@ -29,6 +28,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
     private final Vector3f CLEAR_COLOR = new Vector3f();
     private final TextureManager TEXTURE_MANAGER;
+    private ResolutionFrameBuffer resolutionFrameBuffer;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
     private final LinkedList<IRenderable> RENDER_LIST;
@@ -49,10 +49,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private double timeOfPreviousFrame = glfwGetTime(); // game time of previous frame's rendering/drawing (not total time it took to render)
     private boolean renderDebugInformation = false;
     private ShaderProgram defaultShaderProgram = null, guiShaderProgram = null, chunkMeshShaderProgram = null;
-
+    private boolean pixelPerfectViewport = false;
     private final HashMap<String, ShaderProgram> SHADER_PROGRAM_MAP = new HashMap<>();
 
     public Renderer() {
+
+        setResolution(320, 240, true);
+
         RENDER_LIST = new LinkedList<>();
         GUI_RENDER_LIST = new LinkedList<>();
         TEXTURE_MANAGER = new TextureManager();
@@ -68,7 +71,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
         chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
 
-        setGuiScale(3);
+        setGuiScale(1);
 
         modelMatrix = new Matrix4f().identity();
 
@@ -91,6 +94,23 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
         setFpsLimit(120);
+    }
+
+    public void setResolution(int width, int height, boolean pixelPerfect) {
+
+        if (resolutionFrameBuffer != null) {
+            resolutionFrameBuffer.clean();
+        }
+
+        resolutionFrameBuffer = new ResolutionFrameBuffer(width, height);
+        setPixelPerfectViewport(pixelPerfect);
+
+    }
+
+    public void setResolution(int width, int height) {
+
+        setResolution(width, height, isPixelPerfectViewport());
+
     }
 
     public void setClearColor(float r, float g, float b) {
@@ -151,18 +171,67 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     }
 
+    public boolean isPixelPerfectViewport() {
+        return pixelPerfectViewport;
+    }
+
+    public void setPixelPerfectViewport(boolean isPixelPerfect) {
+        pixelPerfectViewport = isPixelPerfect;
+    }
+
     // master draw method used in game loop
     // returns true if successfully drew to screen
     private void draw(Window window) {
 
         if (getFpsLimit() == -1 || glfwGetTime() - timeOfPreviousFrame > getFixedFrameRenderTime()) {
+            setClearColor(0f, 0f, 0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glViewport(0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight());
+            glBindFramebuffer(GL_FRAMEBUFFER, resolutionFrameBuffer.getHandle());
+            setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             timeOfPreviousFrame = glfwGetTime();
             render();
             framesRenderedSoFar++;
+
+
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+            if (isPixelPerfectViewport()) {
+                int pixelPerfectScaleX = window.getWidth() / resolutionFrameBuffer.getWidth();
+                int pixelPerfectScaleY = window.getHeight() / resolutionFrameBuffer.getHeight();
+
+                int pixelPerfectScale = Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
+                int pixelPerfectSizeX = pixelPerfectScale * resolutionFrameBuffer.getWidth();
+                int pixelPerfectSizeY = pixelPerfectScale * resolutionFrameBuffer.getHeight();
+                int pixelPerfectPosX = window.getWidth() / 2 - pixelPerfectSizeX / 2;
+                int pixelPerfectPosY = window.getHeight() / 2 - pixelPerfectSizeY / 2;
+
+
+                glBlitFramebuffer(
+                        0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight(),
+                        pixelPerfectPosX, pixelPerfectPosY, pixelPerfectSizeX + pixelPerfectPosX, pixelPerfectSizeY + pixelPerfectPosY,
+                        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
+                );
+
+            } else {
+
+                glBlitFramebuffer(
+                        0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight(),
+                        0, 0, window.getWidth(), window.getHeight(),
+                        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
+                );
+
+            }
             glfwSwapBuffers(window.getWindowHandle());
         }
 
+    }
+
+    public ResolutionFrameBuffer getResolutionFrameBuffer() {
+        return resolutionFrameBuffer;
     }
 
     // is thread-safe
@@ -204,17 +273,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 			}
 
             // check which of the renderables are opaque or not
-            boolean hasTransparency1 = false;
-            boolean hasTransparency2 = false;
-
-            if (renderable1 instanceof Mesh mesh) {
-                hasTransparency1 = mesh.hasTransparency();
-            }
-
-            if (renderable2 instanceof Mesh mesh) {
-                hasTransparency2 = mesh.hasTransparency();
-            }
-
+            boolean hasTransparency1 = renderable1.hasTransparency();
+            boolean hasTransparency2 = renderable2.hasTransparency();
 
             // sort
             // could be faster, but I'm too tired to deal with "Comparison method violates its general contract!"
@@ -283,10 +343,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // render renderables
         sortRenderList();
+
         //glDisable(GL_BLEND);
 
         long renderTime = System.currentTimeMillis();
         for (IRenderable renderable : RENDER_LIST) {
+
+            //if (renderable.hasTransparency()) continue;
 
             if (!renderable.shouldRender()) continue;
 
@@ -298,6 +361,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             renderable.render();
         }
+
         renderTime = DebugTime.getElapsedTime(renderTime);
 
 
@@ -355,10 +419,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
             }
 
-            TextRenderer.drawText(debugString.toString(), 0, 0, 2, TextureManager.getTexture("debug_font"));
+            TextRenderer.drawText(debugString.toString(), 0, 0, getGuiScale(), TextureManager.getTexture("debug_font"));
         }
 
 
+        /*
         StringBuilder controlsStringBuilder = new StringBuilder();
         controlsStringBuilder.append("W,A,S,D : move\n");
         controlsStringBuilder.append("Spacebar : jump\n");
@@ -372,8 +437,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         TextRenderer.drawText(
                 controlsString,
-                0, getBottomAnchor(2) - TextRenderer.getTextPixelHeight(controlsString.length() - controlsString.replace("\n", "").length()), 2, TextureManager.getTexture("debug_font"));
-
+                0, getBottomAnchor() - TextRenderer.getTextPixelHeight(controlsString.length() - controlsString.replace("\n", "").length()), getGuiScale(), TextureManager.getTexture("debug_font"));
+        */
     }
 
     public void setGuiScale(int guiScale) {
@@ -402,19 +467,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public int getBottomAnchor() {
-        return Window.get().getHeight() / guiScale;
+        return resolutionFrameBuffer.getHeight() / guiScale; // Window.get().getHeight() / guiScale;
     }
 
     public int getBottomAnchor(int customGuiScale) {
-        return Window.get().getHeight() / customGuiScale;
+        return resolutionFrameBuffer.getHeight() / customGuiScale; // Window.get().getHeight() / customGuiScale;
     }
 
     public int getRightAnchor() {
-        return Window.get().getWidth() / guiScale;
+        return resolutionFrameBuffer.getWidth() / guiScale;   // Window.get().getWidth() / guiScale;
     }
 
     public int getRightAnchor(int customGuiScale) {
-        return Window.get().getWidth() / customGuiScale;
+        return resolutionFrameBuffer.getWidth() / customGuiScale; // Window.get().getWidth() / customGuiScale;
     }
 
     public int getRenderMode() {
@@ -464,9 +529,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
                 0f, // left
-                BackyardRocketry.getInstance().getWindow().getWidth(), // right
+                resolutionFrameBuffer.getWidth(), // right
                 0f, // bottom
-                BackyardRocketry.getInstance().getWindow().getHeight(), // top
+                resolutionFrameBuffer.getHeight(), // top
                 0.01f, // z-near
                 1f // z-far
         ));
@@ -530,9 +595,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
                 0f, // left
-                BackyardRocketry.getInstance().getWindow().getWidth(), // right
+                resolutionFrameBuffer.getWidth(), // right
                 0f, // bottom
-                BackyardRocketry.getInstance().getWindow().getHeight(), // top
+                resolutionFrameBuffer.getHeight(), // top
                 0.01f, // z-near
                 1f // z-far
         ));
@@ -624,7 +689,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             }
         }
 
-
+        resolutionFrameBuffer.clean();
     }
 
     public int getFramesPerSecond() {

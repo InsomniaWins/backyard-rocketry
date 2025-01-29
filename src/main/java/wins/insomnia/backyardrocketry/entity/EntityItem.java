@@ -189,4 +189,8 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 	public BoundingBox getBoundingBox() {
 		return BOUNDING_BOX;
 	}
+
+	public boolean hasTransparency() {
+		return true;
+	}
 }

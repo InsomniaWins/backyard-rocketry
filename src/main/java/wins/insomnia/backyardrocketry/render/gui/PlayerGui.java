@@ -63,9 +63,12 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 
 		// render hotbar items
-		int[] gameWindowSize = Window.get().getSize();
-		float gameWindowAspect = gameWindowSize[0] / (float) gameWindowSize[1];
-		float modelAspectScale = (750f / gameWindowSize[1]);
+
+		int resolutionWidth = renderer.getResolutionFrameBuffer().getWidth();
+		int resolutionHeight = renderer.getResolutionFrameBuffer().getHeight();
+
+		float gameWindowAspect = resolutionWidth / (float) resolutionHeight;
+		float modelAspectScale = (750f / resolutionHeight);
 		glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas").getTextureHandle());
 
 		for (int i = 0; i < 10; i++) {
@@ -76,9 +79,9 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			byte currentBlock = player.getHotbarSlotContents(i);
 
 
-			Mesh handMesh = BlockModelData.getMeshFromBlock(currentBlock);
+			Mesh hotbarSlotHandMesh = BlockModelData.getMeshFromBlock(currentBlock);
 
-			if (handMesh == null || handMesh.isClean()) {
+			if (hotbarSlotHandMesh == null || hotbarSlotHandMesh.isClean()) {
 				continue;
 			}
 
@@ -100,8 +103,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			int guiX = hotbarX + 13 + 28 * i;
 			int guiY = hotbarY + 28;
 			Vector2f viewportOffset = new Vector2f(
-					2f * (((renderer.getGuiScale() * guiX) / (float) gameWindowSize[0]) - 0.5f),
-					2f * (((renderer.getGuiScale() * guiY) / (float) gameWindowSize[1]) - 0.5f)
+					2f * (((renderer.getGuiScale() * guiX) / (float) resolutionWidth) - 0.5f),
+					2f * (((renderer.getGuiScale() * guiY) / (float) resolutionHeight) - 0.5f)
 			);
 
 			Matrix4f projectionMatrix = new Matrix4f().setPerspective(70f, gameWindowAspect, 0.01f, 1f);
@@ -113,7 +116,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
 
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
-			handMesh.render();
+			hotbarSlotHandMesh.render();
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
 
 			Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
@@ -259,6 +262,11 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	@Override
 	public int getRenderPriority() {
 		return 0;
+	}
+
+	@Override
+	public boolean hasTransparency() {
+		return true;
 	}
 
 	@Override

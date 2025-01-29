@@ -78,9 +78,9 @@ public class TextRenderer {
 		Renderer.get().getGuiShaderProgram().setUniform("fs_colorModulation", fontColor.getRGB());
 		Renderer.get().getGuiShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getModelMatrix().ortho(
 				0f, // left
-				BackyardRocketry.getInstance().getWindow().getWidth(), // right
+				Renderer.get().getResolutionFrameBuffer().getWidth(), // right
 				0f, // bottom
-				BackyardRocketry.getInstance().getWindow().getHeight(), // top
+				Renderer.get().getResolutionFrameBuffer().getHeight(), // top
 				0.01f, // z-near
 				1f // z-far
 		));

@@ -46,8 +46,9 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 				.rotateX((float) Math.sin(Updater.getCurrentTime() * 0.75) * 0.02f)
 				.rotateX(-swingAnimationSineValue * 1.2f);
 
-		int[] gameWindowSize = Window.get().getSize();
-		Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", new Matrix4f().setPerspective(70f, gameWindowSize[0] / (float) gameWindowSize[1], 0.01f, 16f));
+		int resolutionWidth = Renderer.get().getResolutionFrameBuffer().getWidth();
+		int resolutionHeight = Renderer.get().getResolutionFrameBuffer().getHeight();
+		Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", new Matrix4f().setPerspective(70f, resolutionWidth / (float) resolutionHeight, 0.01f, 16f));
 		Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", new Matrix4f().identity());
 		Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
 
@@ -93,5 +94,10 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 	@Override
 	public int getRenderPriority() {
 		return 100;
+	}
+
+	@Override
+	public boolean hasTransparency() {
+		return true;
 	}
 }
