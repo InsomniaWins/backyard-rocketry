@@ -154,7 +154,7 @@ public class Block {
 
     public static final byte WATER = registerBlock(
             "Water",
-            true,
+            false,
             true,
             null,
             "water",

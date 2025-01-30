@@ -109,6 +109,8 @@ public class BlockModelData {
 
     private static BlockModelData fixModelUvs(BlockModelData blockModelData) {
 
+        double pixelUnit = TextureManager.BLOCK_SCALE_ON_ATLAS * (1.0 / 16.0);
+
         int[] atlasCoordinates;
 
         for (Map.Entry<String, Object> faceEntry : blockModelData.getFaces().entrySet()) {
@@ -131,8 +133,16 @@ public class BlockModelData {
                         double blockU = faceVertexArray.get(addIndex - 2);
                         double blockV = faceVertexArray.get(addIndex - 1);
 
-                        double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
-                        double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
+                        double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS
+                                + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
+                        double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS
+                                + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
+
+                        u += pixelUnit;
+                        v += pixelUnit;
+
+                        u += pixelUnit * 2 * atlasCoordinates[0];
+                        v += pixelUnit * 2 * atlasCoordinates[1];
 
                         faceVertexArray.set(addIndex - 2, u);
                         faceVertexArray.set(addIndex - 1, v);

@@ -21,7 +21,7 @@ vec4 snap(vec4 vertex, vec2 resolution) {
 void main() {
     gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);
 
-    gl_Position = snap(gl_Position, vec2(320, 240));
+    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
 
     fs_textureCoordinates = vs_textureCoordinates;
 }

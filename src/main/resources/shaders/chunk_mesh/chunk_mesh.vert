@@ -32,7 +32,7 @@ void main() {
 
     gl_Position = modelViewProjectionMatrix * vertexVector;
 
-    gl_Position = snap(gl_Position, vec2(320, 240));
+    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
 
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = vs_normal;
