@@ -12,6 +12,9 @@ public class Window {
     private final long WINDOW_HANDLE;
     private int width;
     private int height;
+    private boolean pixelPerfectViewport = false;
+
+    private ResolutionFrameBuffer resolutionFrameBuffer;
 
     public Window(int width, int height, String title) {
 
@@ -30,8 +33,45 @@ public class Window {
 
         // setup callback for window
         glfwSetWindowSizeCallback(WINDOW_HANDLE, this::windowResizeCallback);
+
     }
 
+    public void postInitialize() {
+        setResolution(320, 240, true);
+    }
+
+    public void clean() {
+        getResolutionFrameBuffer().clean();
+    }
+
+    public void setResolution(int width, int height, boolean pixelPerfect) {
+
+        if (resolutionFrameBuffer != null) {
+            resolutionFrameBuffer.clean();
+        }
+
+        resolutionFrameBuffer = new ResolutionFrameBuffer(width, height);
+        setPixelPerfectViewport(pixelPerfect);
+
+    }
+
+    public void setResolution(int width, int height) {
+
+        setResolution(width, height, isPixelPerfectViewport());
+
+    }
+
+    public ResolutionFrameBuffer getResolutionFrameBuffer() {
+        return resolutionFrameBuffer;
+    }
+
+    public boolean isPixelPerfectViewport() {
+        return pixelPerfectViewport;
+    }
+
+    public void setPixelPerfectViewport(boolean isPixelPerfect) {
+        pixelPerfectViewport = isPixelPerfect;
+    }
 
     private void windowResizeCallback(long windowHandle, int width, int height) {
 

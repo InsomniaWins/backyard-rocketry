@@ -28,7 +28,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private Camera camera;
     private final Vector3f CLEAR_COLOR = new Vector3f();
     private final TextureManager TEXTURE_MANAGER;
-    private ResolutionFrameBuffer resolutionFrameBuffer;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
     private final LinkedList<IRenderable> RENDER_LIST;
@@ -49,12 +48,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private double timeOfPreviousFrame = glfwGetTime(); // game time of previous frame's rendering/drawing (not total time it took to render)
     private boolean renderDebugInformation = false;
     private ShaderProgram defaultShaderProgram = null, guiShaderProgram = null, chunkMeshShaderProgram = null;
-    private boolean pixelPerfectViewport = false;
+
     private final HashMap<String, ShaderProgram> SHADER_PROGRAM_MAP = new HashMap<>();
 
     public Renderer() {
-
-        setResolution(320, 240, true);
 
         RENDER_LIST = new LinkedList<>();
         GUI_RENDER_LIST = new LinkedList<>();
@@ -96,22 +93,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         setFpsLimit(120);
     }
 
-    public void setResolution(int width, int height, boolean pixelPerfect) {
 
-        if (resolutionFrameBuffer != null) {
-            resolutionFrameBuffer.clean();
-        }
-
-        resolutionFrameBuffer = new ResolutionFrameBuffer(width, height);
-        setPixelPerfectViewport(pixelPerfect);
-
-    }
-
-    public void setResolution(int width, int height) {
-
-        setResolution(width, height, isPixelPerfectViewport());
-
-    }
 
     public void setClearColor(float r, float g, float b) {
         CLEAR_COLOR.x = r;
@@ -171,13 +153,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     }
 
-    public boolean isPixelPerfectViewport() {
-        return pixelPerfectViewport;
-    }
 
-    public void setPixelPerfectViewport(boolean isPixelPerfect) {
-        pixelPerfectViewport = isPixelPerfect;
-    }
 
     // master draw method used in game loop
     // returns true if successfully drew to screen
@@ -187,8 +163,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             setClearColor(0f, 0f, 0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glViewport(0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight());
-            glBindFramebuffer(GL_FRAMEBUFFER, resolutionFrameBuffer.getHandle());
+            glViewport(0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight());
+            glBindFramebuffer(GL_FRAMEBUFFER, window.getResolutionFrameBuffer().getHandle());
             setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -199,19 +175,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-            if (isPixelPerfectViewport()) {
-                int pixelPerfectScaleX = window.getWidth() / resolutionFrameBuffer.getWidth();
-                int pixelPerfectScaleY = window.getHeight() / resolutionFrameBuffer.getHeight();
+            if (window.isPixelPerfectViewport()) {
+                int pixelPerfectScaleX = window.getWidth() / window.getResolutionFrameBuffer().getWidth();
+                int pixelPerfectScaleY = window.getHeight() / window.getResolutionFrameBuffer().getHeight();
 
                 int pixelPerfectScale = Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
-                int pixelPerfectSizeX = pixelPerfectScale * resolutionFrameBuffer.getWidth();
-                int pixelPerfectSizeY = pixelPerfectScale * resolutionFrameBuffer.getHeight();
+                int pixelPerfectSizeX = pixelPerfectScale * window.getResolutionFrameBuffer().getWidth();
+                int pixelPerfectSizeY = pixelPerfectScale * window.getResolutionFrameBuffer().getHeight();
                 int pixelPerfectPosX = window.getWidth() / 2 - pixelPerfectSizeX / 2;
                 int pixelPerfectPosY = window.getHeight() / 2 - pixelPerfectSizeY / 2;
 
 
                 glBlitFramebuffer(
-                        0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight(),
+                        0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
                         pixelPerfectPosX, pixelPerfectPosY, pixelPerfectSizeX + pixelPerfectPosX, pixelPerfectSizeY + pixelPerfectPosY,
                         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
                 );
@@ -219,7 +195,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             } else {
 
                 glBlitFramebuffer(
-                        0, 0, resolutionFrameBuffer.getWidth(), resolutionFrameBuffer.getHeight(),
+                        0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
                         0, 0, window.getWidth(), window.getHeight(),
                         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
                 );
@@ -230,9 +206,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     }
 
-    public ResolutionFrameBuffer getResolutionFrameBuffer() {
-        return resolutionFrameBuffer;
-    }
 
     // is thread-safe
     public void addRenderable(IRenderable renderable) {
@@ -467,19 +440,19 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
     public int getBottomAnchor() {
-        return resolutionFrameBuffer.getHeight() / guiScale; // Window.get().getHeight() / guiScale;
+        return Window.get().getResolutionFrameBuffer().getHeight() / guiScale; // Window.get().getHeight() / guiScale;
     }
 
     public int getBottomAnchor(int customGuiScale) {
-        return resolutionFrameBuffer.getHeight() / customGuiScale; // Window.get().getHeight() / customGuiScale;
+        return Window.get().getResolutionFrameBuffer().getHeight() / customGuiScale; // Window.get().getHeight() / customGuiScale;
     }
 
     public int getRightAnchor() {
-        return resolutionFrameBuffer.getWidth() / guiScale;   // Window.get().getWidth() / guiScale;
+        return Window.get().getResolutionFrameBuffer().getWidth() / guiScale;   // Window.get().getWidth() / guiScale;
     }
 
     public int getRightAnchor(int customGuiScale) {
-        return resolutionFrameBuffer.getWidth() / customGuiScale; // Window.get().getWidth() / customGuiScale;
+        return Window.get().getResolutionFrameBuffer().getWidth() / customGuiScale; // Window.get().getWidth() / customGuiScale;
     }
 
     public int getRenderMode() {
@@ -529,9 +502,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
                 0f, // left
-                resolutionFrameBuffer.getWidth(), // right
+                Window.get().getResolutionFrameBuffer().getWidth(), // right
                 0f, // bottom
-                resolutionFrameBuffer.getHeight(), // top
+                Window.get().getResolutionFrameBuffer().getHeight(), // top
                 0.01f, // z-near
                 1f // z-far
         ));
@@ -595,9 +568,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
         guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
                 0f, // left
-                resolutionFrameBuffer.getWidth(), // right
+                Window.get().getResolutionFrameBuffer().getWidth(), // right
                 0f, // bottom
-                resolutionFrameBuffer.getHeight(), // top
+                Window.get().getResolutionFrameBuffer().getHeight(), // top
                 0.01f, // z-near
                 1f // z-far
         ));
@@ -689,7 +662,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             }
         }
 
-        resolutionFrameBuffer.clean();
+        Window.get().getResolutionFrameBuffer().clean();
     }
 
     public int getFramesPerSecond() {

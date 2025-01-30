@@ -64,8 +64,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 		// render hotbar items
 
-		int resolutionWidth = renderer.getResolutionFrameBuffer().getWidth();
-		int resolutionHeight = renderer.getResolutionFrameBuffer().getHeight();
+		int resolutionWidth = Window.get().getResolutionFrameBuffer().getWidth();
+		int resolutionHeight = Window.get().getResolutionFrameBuffer().getHeight();
 
 		float gameWindowAspect = resolutionWidth / (float) resolutionHeight;
 		float modelAspectScale = (750f / resolutionHeight);

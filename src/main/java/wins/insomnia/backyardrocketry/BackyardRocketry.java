@@ -60,6 +60,8 @@ public class BackyardRocketry {
 
         world.shutdown();
 
+        window.clean();
+
         glfwFreeCallbacks(window.getWindowHandle());
         glfwDestroyWindow(window.getWindowHandle());
 
@@ -116,6 +118,9 @@ public class BackyardRocketry {
         // Make the window visible
         glfwShowWindow(window.getWindowHandle());
         GL.createCapabilities();
+
+        // window post init
+        window.postInitialize();
 
         // create keyboard and mouse input
         keyboardInput = new KeyboardInput(window.getWindowHandle());
