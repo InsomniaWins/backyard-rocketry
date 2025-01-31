@@ -175,32 +175,40 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
+            int viewportWidth;
+            int viewportHeight;
+            int viewportX;
+            int viewportY;
+
             if (window.isPixelPerfectViewport()) {
                 int pixelPerfectScaleX = window.getWidth() / window.getResolutionFrameBuffer().getWidth();
                 int pixelPerfectScaleY = window.getHeight() / window.getResolutionFrameBuffer().getHeight();
 
                 int pixelPerfectScale = Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
-                int pixelPerfectSizeX = pixelPerfectScale * window.getResolutionFrameBuffer().getWidth();
-                int pixelPerfectSizeY = pixelPerfectScale * window.getResolutionFrameBuffer().getHeight();
-                int pixelPerfectPosX = window.getWidth() / 2 - pixelPerfectSizeX / 2;
-                int pixelPerfectPosY = window.getHeight() / 2 - pixelPerfectSizeY / 2;
 
-
-                glBlitFramebuffer(
-                        0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
-                        pixelPerfectPosX, pixelPerfectPosY, pixelPerfectSizeX + pixelPerfectPosX, pixelPerfectSizeY + pixelPerfectPosY,
-                        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
-                );
+                viewportWidth = pixelPerfectScale * window.getResolutionFrameBuffer().getWidth();
+                viewportHeight = pixelPerfectScale * window.getResolutionFrameBuffer().getHeight();
 
             } else {
+                double viewportScaleX = window.getWidth() / (double) window.getResolutionFrameBuffer().getWidth();
+                double viewportScaleY = window.getHeight() / (double) window.getResolutionFrameBuffer().getHeight();
 
-                glBlitFramebuffer(
-                        0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
-                        0, 0, window.getWidth(), window.getHeight(),
-                        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
-                );
+                double minViewportScale = Math.min(viewportScaleX, viewportScaleY);
+
+                viewportWidth = (int) (window.getResolutionFrameBuffer().getWidth() * minViewportScale);
+                viewportHeight = (int) (window.getResolutionFrameBuffer().getHeight() * minViewportScale);
 
             }
+
+            viewportX = window.getWidth() / 2 - viewportWidth / 2;
+            viewportY = window.getHeight() / 2 - viewportHeight / 2;
+
+            glBlitFramebuffer(
+                    0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
+                    viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight,
+                    GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
+            );
+
             glfwSwapBuffers(window.getWindowHandle());
         }
 
@@ -339,6 +347,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
         // render target block
+
         if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
 
             BlockRaycastResult raycastResult = player.getTargetBlock();

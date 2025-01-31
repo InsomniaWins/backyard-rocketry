@@ -40,7 +40,7 @@ public class FirstPersonHandItemRenderable implements IRenderable {
 
 		Renderer.get().getModelMatrix().identity()
 				.translate(-0.5f, -0.5f, -0.5f)
-				.translate(1.75f, -1.4f + Math.sin((float) Updater.getCurrentTime() * 0.75f) * 0.05f, -3f)
+				.translate(1.70f, -1.4f + Math.sin((float) Updater.getCurrentTime() * 0.75f) * 0.05f, -3f)
 				.translate(0f, swingAnimationSineValue * 0.5f, -swingAnimationSineValue * 0.5f)
 				.rotateY(0.45f)
 				.rotateX((float) Math.sin(Updater.getCurrentTime() * 0.75) * 0.02f)

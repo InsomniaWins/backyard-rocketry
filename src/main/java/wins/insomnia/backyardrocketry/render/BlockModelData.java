@@ -27,11 +27,6 @@ public class BlockModelData {
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
     private static final HashMap<Byte, Mesh> BLOCK_MESH_MAP = new HashMap<>();
 
-    public static void init() {
-        loadBlockModels();
-        loadBlockStates();
-        registerBlockMeshes();
-    }
 
     public static void registerBlockMeshes() {
 

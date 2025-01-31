@@ -3,12 +3,14 @@ package wins.insomnia.backyardrocketry.world.block.loot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
+import wins.insomnia.backyardrocketry.util.loading.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BlockLoot {
@@ -23,14 +25,22 @@ public class BlockLoot {
 		lootTable = new HashMap<>();
 	}
 
-	public static void init() {
+	public static List<LoadTask> makeLoadingTaskList() {
+
+		List<LoadTask> taskList = new ArrayList<>();
 
 		for (byte block : Block.getBlocks()) {
+
 			String blockStateName = Block.getBlockStateName(block);
-			BlockLoot blockLoot = loadBlockLoot(blockStateName);
-			BLOCK_LOOT_HASH_MAP.put(block, blockLoot);
+
+			taskList.add(new LoadTask("Loading block loot: " + blockStateName, () -> {
+				BlockLoot blockLoot = loadBlockLoot(blockStateName);
+				BLOCK_LOOT_HASH_MAP.put(block, blockLoot);
+			}));
+
 		}
 
+		return taskList;
 	}
 
 	public static BlockLoot getBlockLoot(byte block) {

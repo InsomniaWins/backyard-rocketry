@@ -5,15 +5,19 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.scenes.SceneManager;
+import wins.insomnia.backyardrocketry.scenes.loading.LoadingScene;
+import wins.insomnia.backyardrocketry.util.loading.AssetLoader;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.loading.LoadTask;
+import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.nio.IntBuffer;
+import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -28,20 +32,11 @@ public class BackyardRocketry {
     private MouseInput mouseInput;
     private boolean running = false;
     private final Updater UPDATER;
-
-
-
-    // TODO: REMOVE PLACEHOLDER CODE!
-
-    private IPlayer player;
-    private World world;
-
-
-
-
+    private final SceneManager SCENE_MANAGER;
 
     public BackyardRocketry() {
         UPDATER = new Updater();
+        SCENE_MANAGER = new SceneManager();
     }
 
     public void run() {
@@ -57,8 +52,6 @@ public class BackyardRocketry {
         UPDATER.loop();
         renderer.clean();
         BlockModelData.clean();
-
-        world.shutdown();
 
         window.clean();
 
@@ -129,22 +122,14 @@ public class BackyardRocketry {
         // create renderer
         renderer = new Renderer();
 
-        // load block models
-        BlockModelData.init();
-        BlockLoot.init();
-
-
-        // TODO: REPLACE PLACEHOLDER CODE!
-
-        world = new World();
-        player = new TestPlayer(world);
-        double[] worldCenter = world.getCenterXZ();
-        player.getTransform().getPosition().set(worldCenter[0], 200, worldCenter[1]);
+        // load assets
+        SCENE_MANAGER.changeScene(new LoadingScene());
 
     }
 
+    // TODO: IMPLEMENT THIS METHOD PLS!
     public IPlayer getPlayer() {
-        return player;
+        return null;
     }
 
     public Window getWindow() {
@@ -167,5 +152,9 @@ public class BackyardRocketry {
 
     public Updater getUpdater() {
         return UPDATER;
+    }
+
+    public SceneManager getSceneManager() {
+        return SCENE_MANAGER;
     }
 }
