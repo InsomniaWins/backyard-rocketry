@@ -58,7 +58,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             Block.STONE,
             Block.LOG,
             Block.LEAVES,
-            Block.WATER,
+            Block.WOODEN_PLANKS,
             Block.GLASS,
             Block.BRICKS,
             Block.WOOD

@@ -13,7 +13,7 @@ public class KeyboardInput {
     private final Queue<KeyboardInputEvent> INPUT_EVENT_QUEUE; // input events for the current update() call
     private final Queue<KeyboardInputEvent> QUEUED_INPUTS; // input events to be processed in the next update() call
     private final HashMap<Integer, KeyboardInputEvent.KeyState> KEY_STATES;
-    private final List<WeakReference<IInputCallback>> INPUT_CALLBACK_LIST;
+    private final List<IInputCallback> INPUT_CALLBACK_LIST;
 
     public KeyboardInput(long windowHandle) {
 
@@ -28,13 +28,22 @@ public class KeyboardInput {
 
     }
 
+    public void registerInputCallback(IInputCallback callback) {
+
+        INPUT_CALLBACK_LIST.add(callback);
+
+    }
+
+    public void unregisterInputCallback(IInputCallback callback) {
+
+        INPUT_CALLBACK_LIST.remove(callback);
+
+    }
+
     public void clearConsumedInputs() {
         INPUT_EVENT_QUEUE.removeIf(KeyboardInputEvent::isConsumed);
     }
 
-    public void addInputCallback(IInputCallback callbackObject) {
-        INPUT_CALLBACK_LIST.add(new WeakReference<>(callbackObject));
-    }
 
     public boolean isKeyPressed(int key) {
         return KEY_STATES.get(key) == KeyboardInputEvent.KeyState.pressed || KEY_STATES.get(key) == KeyboardInputEvent.KeyState.justPressed;
@@ -90,17 +99,15 @@ public class KeyboardInput {
 
             KeyboardInputEvent inputEvent = INPUT_EVENT_QUEUE.remove();
 
-            for (WeakReference<IInputCallback> weakReference: INPUT_CALLBACK_LIST) {
-                IInputCallback inputCallback = weakReference.get();
+			for (IInputCallback inputCallback : INPUT_CALLBACK_LIST) {
 
-                if (inputEvent.isConsumed()) {
-                    break;
-                }
+				if (inputEvent.isConsumed()) {
+					break;
+				}
 
-                if (inputCallback == null) throw new RuntimeException("inputCallback is null!");
+				inputCallback.inputEvent(inputEvent);
+			}
 
-                inputCallback.inputEvent(inputEvent);
-            }
         }
     }
 

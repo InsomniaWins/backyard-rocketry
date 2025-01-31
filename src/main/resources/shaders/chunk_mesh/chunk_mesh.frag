@@ -19,6 +19,7 @@ float ambientLightStrength = 0.7;
 
 void main() {
 
+
     vec4 fragmentColor = texture(fs_texture, vec2(fs_textureCoordinates.x, fs_textureCoordinates.y));
 
     // transparency

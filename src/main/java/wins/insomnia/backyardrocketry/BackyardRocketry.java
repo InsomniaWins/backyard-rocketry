@@ -119,12 +119,12 @@ public class BackyardRocketry {
         glfwShowWindow(window.getWindowHandle());
         GL.createCapabilities();
 
-        // window post init
-        window.postInitialize();
-
         // create keyboard and mouse input
         keyboardInput = new KeyboardInput(window.getWindowHandle());
         mouseInput = new MouseInput(window.getWindowHandle());
+
+        // window post init
+        window.postInitialize();
 
         // create renderer
         renderer = new Renderer();

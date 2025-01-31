@@ -9,6 +9,7 @@ out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
 out vec4 fs_eyeSpacePosition;
 out float fs_ambientOcclusionValue;
+out float fs_affine;
 
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
@@ -17,12 +18,15 @@ uniform vec2 vs_uvOffset;
 
 // taken from u/PixelbearGames on reddit
 vec4 snap(vec4 vertex, vec2 resolution) {
+
     vec4 snappedPos = vertex;
     snappedPos.xyz = vertex.xyz / vertex.w; // convert to normalised device coordinates (NDC)
     snappedPos.xy = floor(resolution * snappedPos.xy) / resolution; // snap the vertex to the lower-resolution grid
     snappedPos.xyz *= vertex.w; // convert back to projection-space
     return snappedPos;
 }
+
+
 
 void main() {
     vec4 vertexVector = vec4(vs_vertexPosition, 1.0);
@@ -38,4 +42,6 @@ void main() {
     fs_normal = vs_normal;
     fs_eyeSpacePosition = modelViewMatrix * vertexVector;
     fs_ambientOcclusionValue = vs_ambientOcclusionValue;
+
+
 }
