@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.render;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.primitives.Rectanglei;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
@@ -175,37 +176,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-            int viewportWidth;
-            int viewportHeight;
-            int viewportX;
-            int viewportY;
-
-            if (window.isPixelPerfectViewport()) {
-                int pixelPerfectScaleX = window.getWidth() / window.getResolutionFrameBuffer().getWidth();
-                int pixelPerfectScaleY = window.getHeight() / window.getResolutionFrameBuffer().getHeight();
-
-                int pixelPerfectScale = Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
-
-                viewportWidth = pixelPerfectScale * window.getResolutionFrameBuffer().getWidth();
-                viewportHeight = pixelPerfectScale * window.getResolutionFrameBuffer().getHeight();
-
-            } else {
-                double viewportScaleX = window.getWidth() / (double) window.getResolutionFrameBuffer().getWidth();
-                double viewportScaleY = window.getHeight() / (double) window.getResolutionFrameBuffer().getHeight();
-
-                double minViewportScale = Math.min(viewportScaleX, viewportScaleY);
-
-                viewportWidth = (int) (window.getResolutionFrameBuffer().getWidth() * minViewportScale);
-                viewportHeight = (int) (window.getResolutionFrameBuffer().getHeight() * minViewportScale);
-
-            }
-
-            viewportX = window.getWidth() / 2 - viewportWidth / 2;
-            viewportY = window.getHeight() / 2 - viewportHeight / 2;
+            Rectanglei viewportDimensions = window.getViewportDimensions();
 
             glBlitFramebuffer(
                     0, 0, window.getResolutionFrameBuffer().getWidth(), window.getResolutionFrameBuffer().getHeight(),
-                    viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight,
+                    viewportDimensions.minX, viewportDimensions.minY, viewportDimensions.maxX, viewportDimensions.maxY,
                     GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST
             );
 
@@ -466,6 +441,111 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public int getRenderMode() {
         return renderMode;
+    }
+
+
+    public void drawGuiTextureNineSlice(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight, int sliceSize) {
+        drawGuiTextureNineSlice(texture, guiX, guiY, guiWidth, guiHeight, sliceSize, false);
+    }
+
+    public void drawGuiTextureNineSlice(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight, int sliceSize, boolean drawCenter) {
+
+        // center
+        if (drawCenter) {
+
+            int tileX = guiWidth / sliceSize - 2;
+            int tileY = guiHeight / sliceSize - 2;
+
+            int pixelsRemainingX = guiWidth % sliceSize;
+            int pixelsRemainingY = guiHeight % sliceSize;
+
+            for (int i = 0; i < tileX; i++) {
+                for (int j = 0; j < tileY; j++) {
+
+                    int x = i * sliceSize + sliceSize;
+                    int y = j * sliceSize + sliceSize;
+
+                    drawGuiTextureClipped(texture, guiX + x, guiY + y, sliceSize, sliceSize, sliceSize, sliceSize, sliceSize, sliceSize);
+
+                    boolean hasHorizontalGap = i == tileX - 1 && pixelsRemainingX > 0;
+                    boolean hasVerticalGap = j == tileY - 1 && pixelsRemainingY > 0;
+
+                    if (hasHorizontalGap) {
+                        drawGuiTextureClipped(texture, guiX + x + sliceSize, guiY + y, pixelsRemainingX, sliceSize, sliceSize, sliceSize, pixelsRemainingX, sliceSize);
+                    }
+
+                    if (hasVerticalGap) {
+                        drawGuiTextureClipped(texture, guiX + x, guiY + y + sliceSize, sliceSize, pixelsRemainingY, sliceSize, sliceSize, sliceSize, pixelsRemainingY);
+                    }
+
+                    if (hasVerticalGap && hasHorizontalGap) {
+                        drawGuiTextureClipped(texture, guiX + x + sliceSize, guiY + y + sliceSize, pixelsRemainingX, pixelsRemainingY, sliceSize, sliceSize, pixelsRemainingX, pixelsRemainingY);
+                    }
+
+                }
+            }
+
+        }
+
+        // vertical sides
+        int verticalTileAmount = guiHeight / sliceSize - 2;
+        int verticalTileRemainder = guiHeight % sliceSize;
+        for (int i = 0; i < verticalTileAmount; i++) {
+
+            // left
+            drawGuiTextureClipped(texture, guiX, guiY + i * sliceSize + sliceSize, sliceSize, sliceSize, 0, sliceSize, sliceSize, sliceSize);
+
+            // right
+            drawGuiTextureClipped(texture, guiX + guiWidth - sliceSize, guiY + i * sliceSize + sliceSize, sliceSize, sliceSize, sliceSize * 2, sliceSize, sliceSize, sliceSize);
+
+
+            if (verticalTileRemainder > 0 && i == guiHeight / sliceSize - 3) {
+
+                // left
+                drawGuiTextureClipped(texture, guiX, guiY + i * sliceSize + sliceSize + sliceSize, sliceSize, verticalTileRemainder, 0, sliceSize, sliceSize, verticalTileRemainder);
+
+                // right
+                drawGuiTextureClipped(texture, guiX + guiWidth - sliceSize, guiY + i * sliceSize + sliceSize + sliceSize, sliceSize, verticalTileRemainder, sliceSize * 2, sliceSize, sliceSize, verticalTileRemainder);
+
+            }
+
+        }
+
+
+        // horizontal sides
+        int horizontalTileAmount = guiWidth / sliceSize - 2;
+        int horizontalTileRemainder = guiWidth % sliceSize;
+        for (int i = 0; i < horizontalTileAmount; i++) {
+            // top
+            drawGuiTextureClipped(texture, guiX + i * sliceSize + sliceSize, guiY, sliceSize, sliceSize, sliceSize, 0, sliceSize, sliceSize);
+
+            // bottom
+            drawGuiTextureClipped(texture, guiX + i * sliceSize + sliceSize, guiY + guiHeight - sliceSize, sliceSize, sliceSize, sliceSize, sliceSize * 2, sliceSize, sliceSize);
+
+            if (horizontalTileRemainder > 0 && i == guiWidth / sliceSize - 3) {
+
+                // top
+                drawGuiTextureClipped(texture, guiX + i * sliceSize + sliceSize + sliceSize, guiY, horizontalTileRemainder, sliceSize, sliceSize, 0, horizontalTileRemainder, sliceSize);
+
+                // bottom
+                drawGuiTextureClipped(texture, guiX + i * sliceSize + sliceSize + sliceSize, guiY + guiHeight - sliceSize, horizontalTileRemainder, sliceSize, sliceSize, sliceSize * 2, horizontalTileRemainder, sliceSize);
+
+            }
+
+        }
+
+
+        // top left
+        drawGuiTextureClipped(texture, guiX, guiY, sliceSize, sliceSize, 0, 0, sliceSize, sliceSize);
+
+        // top right
+        drawGuiTextureClipped(texture, guiX + guiWidth - sliceSize, guiY, sliceSize, sliceSize, sliceSize * 2, 0, sliceSize, sliceSize);
+
+        // bottom left
+        drawGuiTextureClipped(texture, guiX, guiY + guiHeight - sliceSize, sliceSize, sliceSize, 0, sliceSize * 2, sliceSize, sliceSize);
+
+        // bottom right
+        drawGuiTextureClipped(texture, guiX + guiWidth - sliceSize, guiY + guiHeight - sliceSize, sliceSize, sliceSize, sliceSize * 2, sliceSize * 2, sliceSize, sliceSize);
     }
 
 

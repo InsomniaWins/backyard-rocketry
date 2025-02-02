@@ -17,7 +17,7 @@ import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
-import wins.insomnia.backyardrocketry.render.gui.PlayerGui;
+import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;

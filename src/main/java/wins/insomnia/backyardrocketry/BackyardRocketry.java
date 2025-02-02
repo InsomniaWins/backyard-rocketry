@@ -7,17 +7,12 @@ import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
-import wins.insomnia.backyardrocketry.scenes.loading.LoadingScene;
-import wins.insomnia.backyardrocketry.util.loading.AssetLoader;
+import wins.insomnia.backyardrocketry.scenes.screens.LoadingScene;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
-import wins.insomnia.backyardrocketry.util.loading.LoadTask;
-import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.nio.IntBuffer;
-import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -33,6 +28,21 @@ public class BackyardRocketry {
     private boolean running = false;
     private final Updater UPDATER;
     private final SceneManager SCENE_MANAGER;
+
+
+
+    public enum VersionPhase {
+        ALPHA,
+        BETA,
+        RELEASE
+    }
+
+
+    private static final VersionPhase VERSION_PHASE = VersionPhase.ALPHA;
+    private static final int VERSION_MAJOR = 1;
+    private static final int VERSION_MINOR = 0;
+
+
 
     public BackyardRocketry() {
         UPDATER = new Updater();
@@ -156,5 +166,32 @@ public class BackyardRocketry {
 
     public SceneManager getSceneManager() {
         return SCENE_MANAGER;
+    }
+
+    public static VersionPhase getVersionPhase() {
+        return VERSION_PHASE;
+    }
+
+    public static int getVersionMajor() {
+        return VERSION_MAJOR;
+    }
+
+    public static int getVersionMinor() {
+        return VERSION_MINOR;
+    }
+
+    public static String getVersionString() {
+
+        StringBuilder outString = new StringBuilder();
+        switch (VERSION_PHASE) {
+            case ALPHA -> outString.append("Alpha 0");
+            case BETA -> outString.append("Beta 0");
+            case RELEASE -> outString.append("1");
+        }
+
+        outString.append(".").append(VERSION_MAJOR);
+        outString.append(".").append(VERSION_MINOR);
+
+        return outString.toString();
     }
 }

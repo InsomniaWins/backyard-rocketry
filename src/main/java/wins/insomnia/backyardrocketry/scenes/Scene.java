@@ -1,8 +1,10 @@
 package wins.insomnia.backyardrocketry.scenes;
 
 import wins.insomnia.backyardrocketry.render.IRenderable;
+import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 
 public class Scene implements IRenderable, IUpdateListener, IFixedUpdateListener {
 	@Override
@@ -72,4 +74,37 @@ public class Scene implements IRenderable, IUpdateListener, IFixedUpdateListener
 	public void sceneUnregistered() {
 
 	}
+
+	public void registerGameObject(Object object) {
+
+		if (object instanceof IUpdateListener iUpdateListener) {
+			Updater.get().registerUpdateListener(iUpdateListener);
+		}
+
+		if (object instanceof IFixedUpdateListener iFixedUpdateListener) {
+			Updater.get().registerFixedUpdateListener(iFixedUpdateListener);
+		}
+
+		if (object instanceof IRenderable iRenderable) {
+			Renderer.get().addRenderable(iRenderable);
+		}
+
+	}
+
+	public void unregisterGameObject(Object object) {
+
+		if (object instanceof IUpdateListener iUpdateListener) {
+			Updater.get().unregisterUpdateListener(iUpdateListener);
+		}
+
+		if (object instanceof IFixedUpdateListener iFixedUpdateListener) {
+			Updater.get().unregisterFixedUpdateListener(iFixedUpdateListener);
+		}
+
+		if (object instanceof IRenderable iRenderable) {
+			Renderer.get().removeRenderable(iRenderable);
+		}
+
+	}
+
 }

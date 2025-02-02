@@ -2,6 +2,8 @@ package wins.insomnia.backyardrocketry.util.input;
 
 import org.joml.Vector2i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.render.ResolutionFrameBuffer;
+import wins.insomnia.backyardrocketry.render.Window;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -53,6 +55,14 @@ public class MouseInput {
         glfwSetScrollCallback(WINDOW_HANDLE, this::mouseWheelCallback);
         glfwSetCursorPosCallback(WINDOW_HANDLE, this::mousePositionCallback);
 
+    }
+
+    public int getMouseX() {
+        return currentMouseX;
+    }
+
+    public int getMouseY() {
+        return currentMouseY;
     }
 
     public void clearConsumedInputs() {

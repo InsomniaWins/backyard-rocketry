@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
+import wins.insomnia.backyardrocketry.util.loading.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.io.IOException;
@@ -28,13 +29,19 @@ public class BlockModelData {
     private static final HashMap<Byte, Mesh> BLOCK_MESH_MAP = new HashMap<>();
 
 
-    public static void registerBlockMeshes() {
+    public static List<LoadTask> makeBlockMeshLoadingTaskList() {
+
+        List<LoadTask> list = new ArrayList<>();
 
         for (Byte block : Block.getBlocks()) {
-            registerBlockMesh(block);
+            list.add(new LoadTask(
+                    "Registering block mesh: " + Block.getBlockName(block),
+                    () -> registerBlockMesh(block)
+            ));
+
         }
 
-
+        return list;
 
     }
 
@@ -252,7 +259,9 @@ public class BlockModelData {
 
     }
 
-    public static void loadBlockModels() {
+    public static List<LoadTask> makeBlockModelLoadingTaskList() {
+
+        List<LoadTask> tasks = new ArrayList<>();
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -279,7 +288,19 @@ public class BlockModelData {
                 if (!fileName.endsWith(".json")) continue;
 
                 fileName = fileName.replace(".json", "");
-                loadBlockModel(mapper, fileName);
+
+                final String constantFileName = fileName;
+
+                tasks.add(new LoadTask(
+                        "Loading block model: " + constantFileName,
+                        () -> {
+							try {
+								loadBlockModel(mapper, constantFileName);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+                ));
 
             }
         } catch (IOException e) {
@@ -288,28 +309,35 @@ public class BlockModelData {
 			throw new RuntimeException(e);
 		}
 
-
+        return tasks;
 	}
 
-    public static void loadBlockStates() {
+    public static List<LoadTask> makeBlockStateLoadingTaskList() {
+
+        List<LoadTask> list = new ArrayList<>();
 
         ObjectMapper mapper = new ObjectMapper();
 
-        try {
+		for (byte block : Block.getBlocks()) {
 
-            for (byte block : Block.getBlocks()) {
+			String blockStateFileName = Block.getBlockStateName(block);
 
-                String blockStateFileName = Block.getBlockStateName(block);
+			if (blockStateFileName == null || blockStateFileName.isEmpty()) continue;
 
-                if (blockStateFileName == null || blockStateFileName.isEmpty()) continue;
+			list.add(new LoadTask(
+					"Loading block state: " + blockStateFileName,
+					() -> {
+						try {
+							loadBlockState(mapper, block, blockStateFileName);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+			));
 
-                loadBlockState(mapper, block, blockStateFileName);
-            }
+		}
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+		return list;
     }
 
 

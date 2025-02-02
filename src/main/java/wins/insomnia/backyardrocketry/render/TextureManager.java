@@ -32,7 +32,9 @@ public class TextureManager {
         registerTexture("break_progress_bar_under", "gui/break_progress_bar_under.png");
         registerTexture("break_progress_bar_progress", "gui/break_progress_bar_progress.png");
         registerTexture("waila", "gui/waila.png");
-
+        registerTexture("text_button", "gui/buttons/text_button.png");
+        registerTexture("text_button_hovered", "gui/buttons/text_button_hovered.png");
+        registerTexture("text_button_pressed", "gui/buttons/text_button_pressed.png");
     }
 
     public static Texture getTexture(String textureId) {

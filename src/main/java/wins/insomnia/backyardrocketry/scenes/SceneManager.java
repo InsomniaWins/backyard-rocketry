@@ -7,7 +7,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 public class SceneManager {
 
 	private Scene currentScene;
-
+	private boolean sceneChanging;
 
 
 	public Scene getCurrentScene() {
@@ -16,11 +16,12 @@ public class SceneManager {
 
 
 	public void changeScene(Scene nextScene) {
+		sceneChanging = true;
 
 		unloadCurrentScene();
 		setCurrentScene(nextScene);
 
-
+		sceneChanging = false;
 	}
 
 	private void setCurrentScene(Scene scene) {
@@ -49,5 +50,9 @@ public class SceneManager {
 
 	public static SceneManager get() {
 		return BackyardRocketry.getInstance().getSceneManager();
+	}
+
+	public boolean isSceneChanging() {
+		return sceneChanging;
 	}
 }

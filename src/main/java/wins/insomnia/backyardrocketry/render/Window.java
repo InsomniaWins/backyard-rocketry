@@ -1,12 +1,11 @@
 package wins.insomnia.backyardrocketry.render;
 
+import org.joml.Vector2i;
+import org.joml.primitives.Rectanglei;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.util.input.IInputCallback;
-import wins.insomnia.backyardrocketry.util.input.InputEvent;
-import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.input.KeyboardInputEvent;
+import wins.insomnia.backyardrocketry.util.input.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.glViewport;
@@ -153,7 +152,76 @@ public class Window {
         window.height = height;
 
         glViewport(0, 0, window.width, window.height);
+
     }
+
+    public int getViewportMouseX() {
+
+        int mouseX = MouseInput.get().getMouseX();
+
+        Rectanglei viewportDimensions = getViewportDimensions();
+        mouseX -= viewportDimensions.minX;
+
+        mouseX = (int) (((double) mouseX) / getViewportScale());
+
+        return mouseX;
+    }
+
+    public int getViewportMouseY() {
+
+        int mouseY = MouseInput.get().getMouseY();
+
+        Rectanglei viewportDimensions = getViewportDimensions();
+        mouseY -= viewportDimensions.minY;
+
+        mouseY = (int) (((double) mouseY) / getViewportScale());
+
+        return mouseY;
+    }
+
+    public Vector2i getViewportMouse() {
+        return new Vector2i(
+                getViewportMouseX(),
+                getViewportMouseY()
+        );
+    }
+
+    public double getViewportScale() {
+        if (isPixelPerfectViewport()) {
+            int pixelPerfectScaleX = getWidth() / getResolutionFrameBuffer().getWidth();
+            int pixelPerfectScaleY = getHeight() / getResolutionFrameBuffer().getHeight();
+
+            return Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
+        } else {
+            double viewportScaleX = getWidth() / (double) getResolutionFrameBuffer().getWidth();
+            double viewportScaleY = getHeight() / (double) getResolutionFrameBuffer().getHeight();
+
+            return Math.min(viewportScaleX, viewportScaleY);
+        }
+    }
+
+    public Rectanglei getViewportDimensions() {
+
+        int viewportX;
+        int viewportY;
+        int viewportWidth;
+        int viewportHeight;
+
+        double viewportScale = getViewportScale();
+
+        if (isPixelPerfectViewport()) {
+            viewportScale = (int) viewportScale;
+        }
+
+        viewportWidth = (int) (getResolutionFrameBuffer().getWidth() * viewportScale);
+        viewportHeight = (int) (getResolutionFrameBuffer().getHeight() * viewportScale);
+
+        viewportX = getWidth() / 2 - viewportWidth / 2;
+        viewportY = getHeight() / 2 - viewportHeight / 2;
+
+        return new Rectanglei(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
+    }
+
 
     public long getWindowHandle() {
         return WINDOW_HANDLE;
