@@ -1,11 +1,12 @@
 package wins.insomnia.backyardrocketry.scenes.screens;
 
-import org.w3c.dom.Text;
+import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.gui.elements.Button;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
@@ -14,8 +15,13 @@ public class TitleScene extends Scene {
 
 	private final Button OFFLINE_BUTTON;
 	private final Button QUIT_BUTTON;
-
-
+	private final IRenderable POST_RENDER_OBJECT;
+	private final String TITLE_STRING = "Backyard Rocketry";
+	private final int TITLE_X = Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(TITLE_STRING) / 2;
+	private final int TITLE_Y = 10;
+	private final int CHANGE_BLOCK_TIMER_WAIT_TIME = Updater.FIXED_UPDATES_PER_SECOND;
+	private int changeBlockTimer = CHANGE_BLOCK_TIMER_WAIT_TIME;
+	private byte block = Block.COBBLESTONE;
 
 	public TitleScene() {
 
@@ -33,12 +39,59 @@ public class TitleScene extends Scene {
 				Renderer.get().getCenterAnchorY() - QUIT_BUTTON.getHeight() / 2 + QUIT_BUTTON.getHeight() + 4
 		);
 
+		POST_RENDER_OBJECT = new IRenderable() {
+			@Override
+			public void render() {
+				Renderer renderer = Renderer.get();
 
+				renderer.drawGuiMesh(
+						BlockModelData.getMeshFromBlock(block),
+						TextureManager.getTexture("block_atlas"),
+						TITLE_X - 20,
+						TITLE_Y + 5,
+						(float) Math.sin(Updater.getCurrentTime()), (float) Math.cos(Updater.getCurrentTime()), 0f,
+						1f / 48f,
+						-0.5f, -0.5f, -0.5f
+				);
+
+				renderer.drawGuiMesh(
+						BlockModelData.getMeshFromBlock(block),
+						TextureManager.getTexture("block_atlas"),
+						TITLE_X + 20 + TextRenderer.getTextPixelWidth(TITLE_STRING),
+						TITLE_Y + 5,
+						(float) Math.sin(Updater.getCurrentTime()), (float) Math.cos(Updater.getCurrentTime()), 0f,
+						1f / 48f,
+						-0.5f, -0.5f, -0.5f
+				);
+			}
+
+			@Override
+			public boolean shouldRender() {
+				return true;
+			}
+
+			@Override
+			public boolean isClean() {
+				return false;
+			}
+
+			@Override
+			public void clean() {
+
+			}
+
+			@Override
+			public int getRenderPriority() {
+				return 1;
+			}
+
+			@Override
+			public boolean hasTransparency() {
+				return false;
+			}
+		};
 
 	}
-
-
-
 
 	@Override
 	public void update(double deltaTime) {
@@ -47,10 +100,27 @@ public class TitleScene extends Scene {
 
 	}
 
+	private void changeBlock() {
+
+		byte previousBlock = block;
+		block = Block.getRandomBlock();
+
+		while (block == previousBlock || BlockModelData.getMeshFromBlock(block) == null) {
+			block = Block.getRandomBlock();
+		}
+
+	}
+
 	@Override
 	public void fixedUpdate() {
 
+		changeBlockTimer -= 1;
+		if (changeBlockTimer <= 0) {
+			changeBlockTimer = CHANGE_BLOCK_TIMER_WAIT_TIME;
 
+			changeBlock();
+
+		}
 
 	}
 
@@ -65,10 +135,7 @@ public class TitleScene extends Scene {
 				renderer.getRightAnchor(), renderer.getBottomAnchor()
 		);
 
-		String titleString = "Backyard Rocketry";
-		int textX = Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(titleString) / 2;
-
-		TextRenderer.drawTextOutline(titleString, textX, 10, 1, TextureManager.getTexture("font"));
+		TextRenderer.drawTextOutline(TITLE_STRING, TITLE_X, TITLE_Y, 1, TextureManager.getTexture("font"));
 
 		String versionString = BackyardRocketry.getVersionString();
 		TextRenderer.drawTextOutline(
@@ -80,14 +147,8 @@ public class TitleScene extends Scene {
 		);
 
 
-
-		Mesh blockMesh = BlockModelData.getMeshFromBlock(Block.GRASS);
-		blockMesh.render();
-
-
-
-
 	}
+
 
 	@Override
 	public boolean shouldRender() {
@@ -98,10 +159,9 @@ public class TitleScene extends Scene {
 	@Override
 	public void sceneRegistered() {
 
-		Window.get().setFullscreen(true);
-
 		registerGameObject(OFFLINE_BUTTON);
 		registerGameObject(QUIT_BUTTON);
+		registerGameObject(POST_RENDER_OBJECT);
 
 	}
 
@@ -110,6 +170,7 @@ public class TitleScene extends Scene {
 
 		unregisterGameObject(OFFLINE_BUTTON);
 		unregisterGameObject(QUIT_BUTTON);
+		unregisterGameObject(POST_RENDER_OBJECT);
 
 	}
 

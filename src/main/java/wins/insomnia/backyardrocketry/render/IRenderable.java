@@ -6,6 +6,5 @@ public interface IRenderable {
     boolean isClean();
     void clean();
     int getRenderPriority();
-
     boolean hasTransparency();
 }

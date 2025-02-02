@@ -1,9 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
-import org.joml.Matrix4f;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.*;
+import org.joml.Math;
 import org.joml.primitives.Rectanglei;
+import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
@@ -441,6 +441,69 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public int getRenderMode() {
         return renderMode;
+    }
+
+
+    public void drawGuiMesh(Mesh mesh, Texture texture, int guiX, int guiY) {
+        drawGuiMesh(mesh, texture, guiX, guiY, 0f, 0f, 0f, 1f, 0f, 0f, 0f);
+    }
+
+    public void drawGuiMesh(Mesh mesh, Texture texture, int guiX, int guiY, float rotationX, float rotationY, float rotationZ, float scale, float originX, float originY, float originZ) {
+
+        int resolutionWidth = Window.get().getResolutionFrameBuffer().getWidth();
+        int resolutionHeight = Window.get().getResolutionFrameBuffer().getHeight();
+
+        float gameWindowAspect = resolutionWidth / (float) resolutionHeight;
+        float modelAspectScale = (750f / resolutionHeight);
+
+        scale = scale * modelAspectScale * getGuiScale();
+
+        glBindTexture(GL_TEXTURE_2D, texture.getTextureHandle());
+
+        for (int i = 0; i < 10; i++) {
+
+
+            if (mesh == null || mesh.isClean()) {
+                continue;
+            }
+
+            Renderer.get().getModelMatrix().identity()
+                    .translate(0, 0, -1f)
+                    .scale(1f, 1f, 0f)
+                    .rotateX(rotationX)
+                    .rotateY(rotationY)
+                    .rotateY(rotationZ)
+                    .scale(
+                            scale,
+                            scale,
+                            scale
+                    )
+                    .translate(originX, originY, originZ);
+
+            Vector2f viewportOffset = new Vector2f(
+                    2f * (((getGuiScale() * guiX) / (float) resolutionWidth) - 0.5f),
+                    2f * (((getGuiScale() * guiY) / (float) resolutionHeight) - 0.5f)
+            );
+
+            Matrix4f projectionMatrix = new Matrix4f().setPerspective(70f, gameWindowAspect, 0.01f, 1f);
+            projectionMatrix.m20(-viewportOffset.x);
+            projectionMatrix.m21(viewportOffset.y);
+
+            Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", projectionMatrix);
+            Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", new Matrix4f().identity());
+            Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
+
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            glDisable(GL_DEPTH);
+            mesh.render();
+            glEnable(GL_DEPTH);
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+            Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
+            Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
+
+        }
+
     }
 
 

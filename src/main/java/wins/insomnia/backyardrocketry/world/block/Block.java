@@ -1,9 +1,11 @@
 package wins.insomnia.backyardrocketry.world.block;
 
+import org.joml.Math;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesDirt;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesGrass;
@@ -308,5 +310,22 @@ public class Block {
         }
 
         return result;
+    }
+
+    public static byte getRandomBlock() {
+
+        Object[] blocks = BLOCK_DETAILS_MAP.keySet().toArray();
+        int index = World.RANDOM.nextInt(blocks.length);
+
+        Byte block;
+
+        try {
+            block = (Byte) blocks[index];
+        } catch (Exception e) {
+            block = GRASS;
+		}
+
+		return block;
+
     }
 }

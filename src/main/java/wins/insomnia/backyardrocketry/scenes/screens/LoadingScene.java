@@ -5,6 +5,7 @@ import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
 import wins.insomnia.backyardrocketry.util.loading.AssetLoader;
 import wins.insomnia.backyardrocketry.util.loading.LoadTask;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.util.List;
@@ -27,8 +28,6 @@ public class LoadingScene extends Scene {
 		if (ASSET_LOADER.areAssetsCurrentlyLoading()) {
 			return;
 		}
-
-
 
 
 		List<LoadTask> blockModelTaskList = BlockModelData.makeBlockModelLoadingTaskList();
