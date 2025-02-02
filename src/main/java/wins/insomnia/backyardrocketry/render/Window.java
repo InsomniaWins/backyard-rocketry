@@ -45,6 +45,7 @@ public class Window {
         // setup callback for window
         glfwSetWindowSizeCallback(WINDOW_HANDLE, this::windowResizeCallback);
 
+
     }
 
     public void postInitialize() {
@@ -67,38 +68,47 @@ public class Window {
 
     }
 
+    public Vector2i getMonitorResolution() {
+
+        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+        int displayWidth = 1920;
+        int displayHeight = 1080;
+
+        if (videoMode != null) {
+
+            displayWidth = videoMode.width();
+            displayHeight = videoMode.height();
+
+        }
+
+
+        return new Vector2i(displayWidth, displayHeight);
+
+    }
+
+
 
     public void setFullscreen(boolean value) {
         fullscreen = value;
 
-        long monitorHandle = glfwGetPrimaryMonitor();
-
         if (fullscreen) {
 
             glfwSetWindowAttrib(getWindowHandle(), GLFW_DECORATED, GLFW_FALSE);
-            glfwSetWindowSize(getWindowHandle(), 1920, 1080);
+
+            Vector2i monitorResolution = getMonitorResolution();
+
+            glfwSetWindowSize(getWindowHandle(), monitorResolution.x, monitorResolution.y);
             glfwSetWindowPos(getWindowHandle(), 0, 0);
-
-
 
         } else {
 
             glfwSetWindowSize(getWindowHandle(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
-            GLFWVidMode videoMode = glfwGetVideoMode(monitorHandle);
+            Vector2i monitorResolution = getMonitorResolution();
 
-            int displayWidth = 32;
-            int displayHeight = 32;
-
-            if (videoMode != null) {
-
-                displayWidth = videoMode.width();
-                displayHeight = videoMode.height();
-
-            }
-
-            int centerX = (int) (displayWidth * 0.5 - DEFAULT_WIDTH * 0.5);
-            int centerY = (int) (displayHeight * 0.5 - DEFAULT_HEIGHT * 0.5);
+            int centerX = (int) (monitorResolution.x * 0.5 - DEFAULT_WIDTH * 0.5);
+            int centerY = (int) (monitorResolution.y * 0.5 - DEFAULT_HEIGHT * 0.5);
 
             glfwSetWindowPos(getWindowHandle(), centerX, centerY);
             glfwSetWindowAttrib(getWindowHandle(), GLFW_DECORATED, GLFW_TRUE);

@@ -36,7 +36,9 @@ public class BlockModelData {
         for (Byte block : Block.getBlocks()) {
             list.add(new LoadTask(
                     "Registering block mesh: " + Block.getBlockName(block),
-                    () -> registerBlockMesh(block)
+                    () -> {
+                        registerBlockMesh(block);
+                    }
             ));
 
         }

@@ -1,19 +1,20 @@
 package wins.insomnia.backyardrocketry.util.loading;
 
 import java.util.LinkedList;
+import java.util.Queue;
 
 public class AssetLoader {
 	private boolean processingTask = false;
 	private int progress = 0;
 	private int totalProgress = 0;
-	private final LinkedList<LoadTask> LOAD_TASKS;
+	private final Queue<LoadTask> LOAD_TASKS;
 
 	public AssetLoader() {
 		LOAD_TASKS = new LinkedList<>();
 	}
 
 	public void addLoadTask(LoadTask task) {
-		LOAD_TASKS.push(task);
+		LOAD_TASKS.add(task);
 		totalProgress++;
 	}
 
@@ -34,7 +35,7 @@ public class AssetLoader {
 
 		processingTask = true;
 
-		LoadTask task = LOAD_TASKS.pop();
+		LoadTask task = LOAD_TASKS.poll();
 		task.task().run();
 
 		progress += 1;

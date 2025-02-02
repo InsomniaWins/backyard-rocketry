@@ -448,44 +448,105 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         drawGuiTextureNineSlice(texture, guiX, guiY, guiWidth, guiHeight, sliceSize, false);
     }
 
+    public void drawGuiTextureTiled(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight, int textureX, int textureY, int textureWidth, int textureHeight) {
+
+        int tileAmountX = (int) (guiWidth / (float) textureWidth);
+        int tileAmountY = (int) (guiHeight / (float) textureHeight);
+
+        int tileRemainderX = guiWidth % textureWidth;
+        int tileRemainderY = guiHeight % textureHeight;
+
+        for (int x = 0; x < tileAmountX; x++) {
+            for (int y = 0; y < tileAmountY; y++) {
+
+                drawGuiTextureClipped(
+                        texture,
+                        guiX + x * textureWidth,
+                        guiY + y * textureHeight,
+                        textureWidth,
+                        textureHeight,
+                        textureX,
+                        textureY,
+                        textureWidth,
+                        textureHeight
+                );
+
+                if (x == tileAmountX - 1 && tileRemainderX > 0) {
+
+                    drawGuiTextureClipped(
+                            texture,
+                            guiX + x * textureWidth + textureWidth,
+                            guiY + y * textureHeight,
+                            tileRemainderX,
+                            textureHeight,
+                            textureX,
+                            textureY,
+                            tileRemainderX,
+                            textureHeight
+                    );
+
+                }
+
+                if (y == tileAmountY - 1 && tileRemainderY > 0) {
+
+                    drawGuiTextureClipped(
+                            texture,
+                            guiX + x * textureWidth,
+                            guiY + y * textureHeight + textureHeight,
+                            textureWidth,
+                            tileRemainderY,
+                            textureX,
+                            textureY,
+                            textureWidth,
+                            tileRemainderY
+                    );
+
+                }
+
+                if (y == tileAmountY - 1 && x == tileAmountX - 1 && tileRemainderX > 0 && tileRemainderY > 0) {
+
+                    drawGuiTextureClipped(
+                            texture,
+                            guiX + x * textureWidth + textureWidth,
+                            guiY + y * textureHeight + textureHeight,
+                            tileRemainderX,
+                            tileRemainderY,
+                            textureX,
+                            textureY,
+                            tileRemainderX,
+                            tileRemainderY
+                    );
+
+                }
+
+            }
+        }
+
+    }
+
+    public void drawGuiTextureTiled(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight) {
+        drawGuiTextureTiled(texture, guiX, guiY, guiWidth, guiHeight, 0, 0, texture.getWidth(), texture.getHeight());
+    }
+
     public void drawGuiTextureNineSlice(Texture texture, int guiX, int guiY, int guiWidth, int guiHeight, int sliceSize, boolean drawCenter) {
 
         // center
         if (drawCenter) {
 
-            int tileX = guiWidth / sliceSize - 2;
-            int tileY = guiHeight / sliceSize - 2;
-
-            int pixelsRemainingX = guiWidth % sliceSize;
-            int pixelsRemainingY = guiHeight % sliceSize;
-
-            for (int i = 0; i < tileX; i++) {
-                for (int j = 0; j < tileY; j++) {
-
-                    int x = i * sliceSize + sliceSize;
-                    int y = j * sliceSize + sliceSize;
-
-                    drawGuiTextureClipped(texture, guiX + x, guiY + y, sliceSize, sliceSize, sliceSize, sliceSize, sliceSize, sliceSize);
-
-                    boolean hasHorizontalGap = i == tileX - 1 && pixelsRemainingX > 0;
-                    boolean hasVerticalGap = j == tileY - 1 && pixelsRemainingY > 0;
-
-                    if (hasHorizontalGap) {
-                        drawGuiTextureClipped(texture, guiX + x + sliceSize, guiY + y, pixelsRemainingX, sliceSize, sliceSize, sliceSize, pixelsRemainingX, sliceSize);
-                    }
-
-                    if (hasVerticalGap) {
-                        drawGuiTextureClipped(texture, guiX + x, guiY + y + sliceSize, sliceSize, pixelsRemainingY, sliceSize, sliceSize, sliceSize, pixelsRemainingY);
-                    }
-
-                    if (hasVerticalGap && hasHorizontalGap) {
-                        drawGuiTextureClipped(texture, guiX + x + sliceSize, guiY + y + sliceSize, pixelsRemainingX, pixelsRemainingY, sliceSize, sliceSize, pixelsRemainingX, pixelsRemainingY);
-                    }
-
-                }
-            }
+            drawGuiTextureTiled(
+                    texture,
+                    guiX + sliceSize,
+                    guiY + sliceSize,
+                    guiWidth - 2 * sliceSize,
+                    guiHeight - 2 * sliceSize,
+                    sliceSize,
+                    sliceSize,
+                    sliceSize,
+                    sliceSize
+            );
 
         }
+
 
         // vertical sides
         int verticalTileAmount = guiHeight / sliceSize - 2;

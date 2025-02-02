@@ -1,43 +1,41 @@
 package wins.insomnia.backyardrocketry.scenes.screens;
 
-import org.w3c.dom.Text;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.gui.elements.Button;
-import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.render.TextRenderer;
+import wins.insomnia.backyardrocketry.render.TextureManager;
 import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
-import wins.insomnia.backyardrocketry.world.block.Block;
 
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
-
-public class TitleScene extends Scene {
-
-	private final Button OFFLINE_BUTTON;
-	private final Button QUIT_BUTTON;
+public class SaveSelectionScene extends Scene {
 
 
+	private final Button BACK_BUTTON;
+	private final Button CREATE_BUTTON;
+	private final Button LOAD_BUTTON;
 
-	public TitleScene() {
+	public SaveSelectionScene() {
 
-		OFFLINE_BUTTON = new Button("Play Offline", () -> SceneManager.get().changeScene(new SaveSelectionScene()));
-		OFFLINE_BUTTON.setSize(120, 20);
-		OFFLINE_BUTTON.setPosition(
-				Renderer.get().getCenterAnchorX() - OFFLINE_BUTTON.getWidth() / 2,
-				Renderer.get().getCenterAnchorY() - OFFLINE_BUTTON.getHeight() / 2
-		);
+		BACK_BUTTON = new Button("Back To Title", () -> SceneManager.get().changeScene(new TitleScene()));
+		BACK_BUTTON.setSize(100, 20);
+		BACK_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - BACK_BUTTON.getWidth() / 2, Renderer.get().getBottomAnchor() - 25);
 
-		QUIT_BUTTON = new Button("Quit Game", () -> glfwSetWindowShouldClose(Window.get().getWindowHandle(), true));
-		QUIT_BUTTON.setSize(120, 22);
-		QUIT_BUTTON.setPosition(
-				Renderer.get().getCenterAnchorX() - QUIT_BUTTON.getWidth() / 2,
-				Renderer.get().getCenterAnchorY() - QUIT_BUTTON.getHeight() / 2 + QUIT_BUTTON.getHeight() + 4
-		);
+		CREATE_BUTTON = new Button("New Save", this::startNewSave);
+		CREATE_BUTTON.setSize(100, 20);
+		CREATE_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 30);
+
+		LOAD_BUTTON = new Button("Load Save", this::startNewSave);
+		LOAD_BUTTON.setSize(100, 20);
+		LOAD_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 55);
+	}
+
+
+	private void startNewSave() {
 
 
 
 	}
-
-
 
 
 	@Override
@@ -57,6 +55,7 @@ public class TitleScene extends Scene {
 	@Override
 	public void render() {
 
+
 		Renderer renderer = Renderer.get();
 
 		renderer.drawGuiTextureTiled(
@@ -65,7 +64,7 @@ public class TitleScene extends Scene {
 				renderer.getRightAnchor(), renderer.getBottomAnchor()
 		);
 
-		String titleString = "Backyard Rocketry";
+		String titleString = "Saves";
 		int textX = Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(titleString) / 2;
 
 		TextRenderer.drawTextOutline(titleString, textX, 10, 1, TextureManager.getTexture("font"));
@@ -79,14 +78,6 @@ public class TitleScene extends Scene {
 				TextureManager.getTexture("font")
 		);
 
-
-
-		Mesh blockMesh = BlockModelData.getMeshFromBlock(Block.GRASS);
-		blockMesh.render();
-
-
-
-
 	}
 
 	@Override
@@ -98,18 +89,18 @@ public class TitleScene extends Scene {
 	@Override
 	public void sceneRegistered() {
 
-		Window.get().setFullscreen(true);
-
-		registerGameObject(OFFLINE_BUTTON);
-		registerGameObject(QUIT_BUTTON);
+		registerGameObject(BACK_BUTTON);
+		registerGameObject(CREATE_BUTTON);
+		registerGameObject(LOAD_BUTTON);
 
 	}
 
 	@Override
 	public void sceneUnregistered() {
 
-		unregisterGameObject(OFFLINE_BUTTON);
-		unregisterGameObject(QUIT_BUTTON);
+		unregisterGameObject(BACK_BUTTON);
+		unregisterGameObject(CREATE_BUTTON);
+		unregisterGameObject(LOAD_BUTTON);
 
 	}
 

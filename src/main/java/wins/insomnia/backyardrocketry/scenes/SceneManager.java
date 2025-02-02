@@ -45,6 +45,11 @@ public class SceneManager {
 		Renderer.get().removeRenderable(currentScene);
 
 		currentScene.sceneUnregistered();
+
+		if (!currentScene.isClean()) {
+			currentScene.clean();
+		}
+
 	}
 
 

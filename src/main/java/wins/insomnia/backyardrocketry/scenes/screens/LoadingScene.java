@@ -101,10 +101,19 @@ public class LoadingScene extends Scene {
 
 	@Override
 	public void render() {
-		int progress = ASSET_LOADER.getProgress();
-		int totalProgress = ASSET_LOADER.getTotalProgress();
 
 		Renderer renderer = Renderer.get();
+
+
+		renderer.drawGuiTextureTiled(
+				TextureManager.getTexture("menu_background"),
+				0, 0,
+				renderer.getRightAnchor(), renderer.getBottomAnchor()
+		);
+
+
+		int progress = ASSET_LOADER.getProgress();
+		int totalProgress = ASSET_LOADER.getTotalProgress();
 
 		int centerX = renderer.getCenterAnchorX();
 		int centerY = renderer.getCenterAnchorY();
