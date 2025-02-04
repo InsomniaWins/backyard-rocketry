@@ -34,7 +34,7 @@ public class ComponentGenericVelocityMovement extends Component {
 
 		BoundingBox broadPhaseBoundingBox = new BoundingBox(boundingBoxEntity.getBoundingBox()).grow(ENTITY.getVelocity().length() * 2);
 
-		List<Chunk> broadPhaseChunks = Collision. getChunksTouchingBoundingBox(World.getServerWorld(), broadPhaseBoundingBox);
+		List<Chunk> broadPhaseChunks = Collision. getChunksTouchingBoundingBox(ENTITY.getWorld(), broadPhaseBoundingBox);
 		List<BoundingBox> blockBoundingBoxesNearPlayer = new ArrayList<>();
 
 		if (!broadPhaseChunks.isEmpty()) {

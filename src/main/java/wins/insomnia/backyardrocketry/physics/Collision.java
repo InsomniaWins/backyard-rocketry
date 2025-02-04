@@ -23,9 +23,9 @@ public class Collision {
 
     }
 
-    public static boolean isBlockInWorldBorder(int x, int y, int z) {
+    public static boolean isBlockInWorldBorder(World world, int x, int y, int z) {
 
-        return World.getServerWorld().isBlockInWorldBorder(x, y, z);
+        return world.isBlockInWorldBorder(x, y, z);
     }
 
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
@@ -82,7 +82,7 @@ public class Collision {
                         // if we are including null chunks,
                         // check to see if chunk is in world border
                         // if it's not, then it will never exist, so continue and dont add null to list
-                        if (!World.getServerWorld().isChunkPositionInWorldBorder(currentChunkPosition)) {
+                        if (!world.isChunkPositionInWorldBorder(currentChunkPosition)) {
 
                             continue;
                         }
@@ -106,9 +106,8 @@ public class Collision {
     }
 
 
-    private static BlockRaycastResult blockCollisionCheck(int blockX, int blockY, int blockZ, Block.Face face) {
+    private static BlockRaycastResult blockCollisionCheck(World world, int blockX, int blockY, int blockZ, Block.Face face) {
 
-        World world = World.getServerWorld();
         Chunk chunk = world.getChunkContainingBlock(blockX, blockY, blockZ);
 
         if (chunk == null) return null;
@@ -128,7 +127,7 @@ public class Collision {
     //  ->   https://gamedev.stackexchange.com/users/9825/kevin-reid
     //  ->   https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
 
-    public static BlockRaycastResult blockRaycast(Vector3d origin, Vector3d direction, double length) {
+    public static BlockRaycastResult blockRaycast(World world, Vector3d origin, Vector3d direction, double length) {
 
         // Cube containing origin point.
         int x = (int) Math.floor(origin.x);
@@ -166,8 +165,6 @@ public class Collision {
         // compare with 't'.
         length /= Math.sqrt(dx*dx+dy*dy+dz*dz);
 
-        World world = World.getServerWorld();
-
         while (/* ray has not gone past bounds of world */
                 (stepX > 0 ? x < world.getSizeX() : x >= 0) &&
                         (stepY > 0 ? y < world.getSizeY() : y >= 0) &&
@@ -177,7 +174,7 @@ public class Collision {
             // world.
             if (!(x < 0 || y < 0 || z < 0 || x >= world.getSizeX() || y >= world.getSizeY() || z >= world.getSizeZ())) {
 
-                BlockRaycastResult result = blockCollisionCheck(x, y, z, face);
+                BlockRaycastResult result = blockCollisionCheck(world, x, y, z, face);
 
                 if (result != null) {
                     return result;

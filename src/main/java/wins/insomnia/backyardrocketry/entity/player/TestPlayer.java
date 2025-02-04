@@ -387,7 +387,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         int rayLength = 7;
 
         BlockRaycastResult previousTargetBlock = targetBlock;
-        targetBlock = Collision.blockRaycast(rayFrom, rayDirection, rayLength);
+        targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, rayLength);
 
         if (previousTargetBlock != null && targetBlock != null && !previousTargetBlock.equals(targetBlock, false)) {
             breakProgress = 0;
