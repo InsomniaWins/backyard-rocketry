@@ -1,14 +1,9 @@
-package wins.insomnia.backyardrocketry.gameframework;
+package wins.insomnia.backyardrocketry.controller;
 
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.world.World;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public abstract class GameController implements IUpdateListener, IFixedUpdateListener {

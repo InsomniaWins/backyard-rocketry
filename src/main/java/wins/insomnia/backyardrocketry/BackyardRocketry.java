@@ -4,6 +4,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scenes.GameplayScene;
@@ -28,7 +29,7 @@ public class BackyardRocketry {
     private boolean running = false;
     private final Updater UPDATER;
     private final SceneManager SCENE_MANAGER;
-
+    private final AudioManager AUDIO_MANAGER;
 
 
     public enum VersionPhase {
@@ -47,6 +48,7 @@ public class BackyardRocketry {
     public BackyardRocketry() {
         UPDATER = new Updater();
         SCENE_MANAGER = new SceneManager();
+        AUDIO_MANAGER = new AudioManager();
     }
 
     public void run() {
@@ -60,9 +62,10 @@ public class BackyardRocketry {
 
         init();
         UPDATER.loop();
+
         renderer.clean();
         BlockModelData.clean();
-
+        getAudioManager().clean();
         window.clean();
 
         glfwFreeCallbacks(window.getWindowHandle());
@@ -193,5 +196,9 @@ public class BackyardRocketry {
         outString.append(".").append(VERSION_MINOR);
 
         return outString.toString();
+    }
+
+    public AudioManager getAudioManager() {
+        return AUDIO_MANAGER;
     }
 }

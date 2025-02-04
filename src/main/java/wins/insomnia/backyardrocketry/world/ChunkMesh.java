@@ -236,7 +236,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         if (shouldAddFaceToMesh(cullface, block, blockNeighbors)) {
 
                             addFace(
-                                    true,
+                                    false,
                                     vertices, indices,
                                     faceVertexArray, faceIndexArray,
                                     faceNormalArray,

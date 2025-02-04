@@ -223,7 +223,7 @@ public class BlockModelData {
         MODEL_MAP.put(modelName, blockModelData);
 
         // debug info
-        System.out.println("Loaded block model: " + blockModelData);
+        System.out.println("Loaded block model: " + modelName);
     }
 
     private static void loadBlockState(ObjectMapper mapper, byte block, String blockStatePath) throws IOException {
@@ -272,10 +272,10 @@ public class BlockModelData {
             URI uri = BlockModelData.class.getResource("/models/blocks/").toURI();
 
             Path myPath;
+            FileSystem fileSystem = null;
             if (uri.getScheme().equals("jar")) {
-                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
                 myPath = fileSystem.getPath("/models/blocks/");
-                fileSystem.close();
             } else {
                 myPath = Paths.get(uri);
             }
@@ -305,6 +305,9 @@ public class BlockModelData {
                 ));
 
             }
+
+            if (fileSystem != null) fileSystem.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {

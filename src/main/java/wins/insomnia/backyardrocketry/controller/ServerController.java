@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.gameframework;
+package wins.insomnia.backyardrocketry.controller;
 
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 

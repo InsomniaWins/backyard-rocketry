@@ -364,16 +364,16 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         if (renderDebugInformation) {
             StringBuilder debugString = new StringBuilder();
-            debugString.append("Render Time: ").append(renderTime).append("ms");
-            debugString.append("\n\n").append(DebugInfo.getMemoryUsage());
-            debugString.append("\n\n").append(DebugInfo.getFramesPerSecond());
-            debugString.append("\n\n").append(DebugInfo.getDrawCallsPerSecond());
+            debugString.append("Render: ").append(renderTime).append("ms");
+            debugString.append("\n").append(DebugInfo.getMemoryUsage());
+            debugString.append("\n").append(DebugInfo.getFramesPerSecond());
+            debugString.append("\n").append(DebugInfo.getDrawCallsPerSecond());
 
 
             if (BackyardRocketry.getInstance().getClientPlayer() instanceof TestPlayer player) {
-                debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
-                debugString.append("\n\n").append(DebugInfo.getPlayerBlockPosition(player));
-                debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
+                debugString.append("\n").append(DebugInfo.getPlayerChunkPosition(player));
+                debugString.append("\n").append(DebugInfo.getPlayerBlockPosition(player));
+                debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
             }
 
             TextRenderer.drawText(debugString.toString(), 0, 0, getGuiScale(), TextureManager.getTexture("debug_font"));

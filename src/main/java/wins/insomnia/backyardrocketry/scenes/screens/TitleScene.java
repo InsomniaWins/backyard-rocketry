@@ -2,6 +2,9 @@ package wins.insomnia.backyardrocketry.scenes.screens;
 
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.audio.AudioBuffer;
+import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.gui.elements.Button;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scenes.Scene;
@@ -162,6 +165,11 @@ public class TitleScene extends Scene {
 		registerGameObject(OFFLINE_BUTTON);
 		registerGameObject(QUIT_BUTTON);
 		registerGameObject(POST_RENDER_OBJECT);
+
+
+		AudioManager audioManager = AudioManager.get();
+		AudioBuffer testSound = audioManager.getAudioBuffer("test_sound");
+		AudioPlayer audioPlayer = audioManager.playAudio(testSound, false, false);
 
 	}
 

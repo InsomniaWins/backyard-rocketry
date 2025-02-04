@@ -15,6 +15,10 @@ public class Window {
 
     public final int DEFAULT_WIDTH;
     public final int DEFAULT_HEIGHT;
+
+    public final int DEFAULT_RESOLUTION_WIDTH = 320;
+    public final int DEFAULT_RESOLUTION_HEIGHT = 240;
+
     private final long WINDOW_HANDLE;
     private int width;
     private int height;
@@ -49,7 +53,7 @@ public class Window {
     }
 
     public void postInitialize() {
-        setResolution(320, 240, true);
+        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true);
 
         keyboardInputCallback = inputEvent -> {
 
@@ -162,6 +166,24 @@ public class Window {
         window.height = height;
 
         glViewport(0, 0, window.width, window.height);
+
+
+        /*
+
+
+        //
+        //the following code expands the viewport to the window borders
+        //
+
+
+        int pixelsNeededX = (int) ((window.width / getViewportScale()) - DEFAULT_RESOLUTION_WIDTH);
+        int pixelsNeededY = (int) ((window.height / getViewportScale()) - DEFAULT_RESOLUTION_HEIGHT);
+
+        setResolution(
+                DEFAULT_RESOLUTION_WIDTH + pixelsNeededX,
+                DEFAULT_RESOLUTION_HEIGHT + pixelsNeededY
+        );*/
+
 
     }
 

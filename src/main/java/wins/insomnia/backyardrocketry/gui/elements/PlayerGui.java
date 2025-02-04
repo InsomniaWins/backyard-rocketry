@@ -101,8 +101,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					.translate(-0.5f, -0.5f, -0.5f);
 
 
-			int guiX = hotbarX + 13 + 28 * i;
-			int guiY = hotbarY + 28;
+			int guiX = hotbarX + 14 + 28 * i;
+			int guiY = hotbarY + 27;
 			Vector2f viewportOffset = new Vector2f(
 					2f * (((renderer.getGuiScale() * guiX) / (float) resolutionWidth) - 0.5f),
 					2f * (((renderer.getGuiScale() * guiY) / (float) resolutionHeight) - 0.5f)

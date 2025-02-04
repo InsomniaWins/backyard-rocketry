@@ -61,7 +61,7 @@ public class BlockLoot {
 
 		// if could not find file
 		if (src == null) {
-			System.out.println("Failed to load block loot: " + lootFileName);
+			System.err.println("Failed to load block loot: " + lootFileName);
 			return null;
 		}
 

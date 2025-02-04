@@ -1,13 +1,9 @@
 package wins.insomnia.backyardrocketry.scenes;
 
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
-import wins.insomnia.backyardrocketry.gameframework.ClientController;
-import wins.insomnia.backyardrocketry.gameframework.GameController;
-import wins.insomnia.backyardrocketry.gameframework.ServerController;
+import wins.insomnia.backyardrocketry.controller.ClientController;
+import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.world.World;
-
-import java.util.Objects;
 
 public class GameplayScene extends Scene {
 

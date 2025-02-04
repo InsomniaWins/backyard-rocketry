@@ -1,19 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
-import org.lwjgl.stb.STBImage;
-
-import javax.imageio.ImageIO;
-import java.awt.image.*;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class Texture {
 

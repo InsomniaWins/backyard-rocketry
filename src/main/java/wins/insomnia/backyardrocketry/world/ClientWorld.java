@@ -1,8 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
-import wins.insomnia.backyardrocketry.gameframework.ClientController;
+import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.scenes.GameplayScene;
 
 public class ClientWorld extends World {

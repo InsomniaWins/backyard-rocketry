@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.scenes.screens;
 
+import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
@@ -27,6 +28,21 @@ public class LoadingScene extends Scene {
 
 		if (ASSET_LOADER.areAssetsCurrentlyLoading()) {
 			return;
+		}
+
+		ASSET_LOADER.addLoadTask(new LoadTask("Initializing Audio Manager . . .", () -> {
+
+			try {
+				AudioManager.get().init();
+			} catch (Exception e) {
+				System.err.println("Failed to initialize audio manager!");
+			}
+
+		}));
+
+		List<LoadTask> audioBufferTaskList = AudioManager.makeAudioBufferLoadingTaskList();
+		for (LoadTask task : audioBufferTaskList) {
+			ASSET_LOADER.addLoadTask(task);
 		}
 
 

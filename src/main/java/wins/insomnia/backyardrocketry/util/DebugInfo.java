@@ -18,31 +18,29 @@ public class DebugInfo {
 
 		long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
-		return "Memory Usage: \n  " +
-				usedMemory / 1_048_576 + "MiB / " +
-				Runtime.getRuntime().totalMemory() / 1_048_576 + "MiB";
+		return "Cur Mem: " + usedMemory / 1_048_576 + "MiB\nMax Mem: " + Runtime.getRuntime().totalMemory() / 1_048_576 + "MiB";
 	}
 
 	public static String getFramesPerSecond() {
-		return "FPS: \n  " + Renderer.get().getFramesPerSecond();
+		return "FPS: " + Renderer.get().getFramesPerSecond();
 	}
 
 	public static String getDrawCallsPerSecond() {
-		return "DCPS: \n  " + Renderer.get().getDrawCallsPerSecond();
+		return "DCPS: " + Renderer.get().getDrawCallsPerSecond();
 	}
 
 	public static String getFixedUpdatesPerSecond() {
-		return "Fixed Updates: \n  " + Updater.get().getUpdatesPerSecond();
+		return "Fixed Updates: " + Updater.get().getUpdatesPerSecond();
 	}
 
 	public static String getPlayerChunkPosition(IPlayer player) {
 		Vector3i playerBlockPosition = player.getBlockPosition();
 		ChunkPosition chunkPosition = player.getWorld().getChunkPositionFromBlockPosition(playerBlockPosition.x, playerBlockPosition.y, playerBlockPosition.z);
-		return "Chunk Position: \n  " + (chunkPosition != null ? FancyToString.toString(chunkPosition) : "NULL");
+		return "Ch Pos: " + (chunkPosition != null ? FancyToString.toString(chunkPosition) : "NULL");
 	}
 	public static String getPlayerBlockPosition(IPlayer player) {
 		Vector3i playerBlockPosition = player.getBlockPosition();
-		return "Block Position: \n  " + FancyToString.toString(playerBlockPosition);
+		return "Bl Pos: " + FancyToString.toString(playerBlockPosition);
 	}
 
 	public static String getPlayerPosition(IPlayer player) {
@@ -83,8 +81,15 @@ public class DebugInfo {
 		}
 
 		if (player.getTargetBlock() == null) {
-			return "Targeted Block: \n  NULL";
+			return "T Bl: NULL";
 		} else {
+			return "T Bl: " + Block.getBlockName(targetBlock) +
+					"\nT Bl Pos: <" +
+					player.getTargetBlock().getBlockX() + ", " +
+					player.getTargetBlock().getBlockY() + ", " +
+					player.getTargetBlock().getBlockZ() + ">";
+
+			/*
 			return "Targeted Block: \n  " + targetBlock + " : <" +
 					player.getTargetBlock().getBlockX() + ", " +
 					player.getTargetBlock().getBlockY() + ", " +
@@ -92,6 +97,7 @@ public class DebugInfo {
 					"\n  " + Integer.toBinaryString(targetBlock & 0xFF) +
 					"\n  " + Block.getBlockName(targetBlock) +
 					"\n  Block Health: " + targetBlockHealth;
+			*/
 		}
 
 	}
