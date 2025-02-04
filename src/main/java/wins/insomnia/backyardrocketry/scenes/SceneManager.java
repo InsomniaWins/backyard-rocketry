@@ -52,6 +52,18 @@ public class SceneManager {
 
 	}
 
+	public void mainLoopFinished() {
+
+		Class<?> caller = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass();
+
+		if (!(caller.equals(Updater.get().getClass()))) {
+			System.out.println("mainLoopFinished called from unauthorized class: " + caller);
+			return;
+		}
+
+		unloadCurrentScene();
+
+	}
 
 	public static SceneManager get() {
 		return BackyardRocketry.getInstance().getSceneManager();

@@ -323,7 +323,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // render target block
 
-        if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
+        if (BackyardRocketry.getInstance().getClientPlayer() instanceof TestPlayer player) {
 
             BlockRaycastResult raycastResult = player.getTargetBlock();
 
@@ -370,7 +370,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString.append("\n\n").append(DebugInfo.getDrawCallsPerSecond());
 
 
-            if (BackyardRocketry.getInstance().getPlayer() instanceof TestPlayer player) {
+            if (BackyardRocketry.getInstance().getClientPlayer() instanceof TestPlayer player) {
                 debugString.append("\n\n").append(DebugInfo.getPlayerChunkPosition(player));
                 debugString.append("\n\n").append(DebugInfo.getPlayerBlockPosition(player));
                 debugString.append("\n\n").append(DebugInfo.getPlayerTargetBlockInfo(player));

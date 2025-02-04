@@ -7,9 +7,13 @@ import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.gameframework.ClientController;
+import wins.insomnia.backyardrocketry.gameframework.ServerController;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.IRenderable;
+import wins.insomnia.backyardrocketry.scenes.GameplayScene;
+import wins.insomnia.backyardrocketry.scenes.SceneManager;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
@@ -30,15 +34,12 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_X = 45;
     public static final int CHUNK_AMOUNT_Y = 45;
     public static final int CHUNK_AMOUNT_Z = 45;
-    private static World instance;
     public static int chunkLoadDistance = 8; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
-
     private final HashMap<ChunkPosition, Chunk> CHUNKS;
     private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
     private final ArrayList<Entity> ENTITY_LIST;
-
     public static final Random RANDOM = new Random();
     private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
     public final ArrayList<ChunkPosition> CHUNKS_CURRENTLY_LOADING;
@@ -55,10 +56,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         CHUNKS = new HashMap<>();
         ENTITIES = new HashMap<>();
         ENTITY_LIST = new ArrayList<>();
-        CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+        CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10, r -> new Thread(r, "chunk-management-thread"));
         CHUNK_MANAGEMENT_QUEUE = new LinkedList<>();
         CHUNKS_CURRENTLY_LOADING = new ArrayList<>();
-        instance = this;
 
         Updater.get().registerFixedUpdateListener(this);
         Updater.get().registerUpdateListener(this);
@@ -76,20 +76,20 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public boolean isBlockInWorldBorder(int x, int y, int z) {
 
         if (x < 0) return false;
-        if (x > World.get().getSizeX()-1) return false;
+        if (x > World.getServerWorld().getSizeX()-1) return false;
 
         if (y < 0) return false;
-        if (y > World.get().getSizeY()-1) return false;
+        if (y > World.getServerWorld().getSizeY()-1) return false;
 
         if (z < 0) return false;
-        if (z > World.get().getSizeZ()-1) return false;
+        if (z > World.getServerWorld().getSizeZ()-1) return false;
 
         return true;
     }
 
     public boolean isPlayerInUnloadedChunk(TestPlayer player) {
 
-        List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(player.getBoundingBox(), true);
+        List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(this, player.getBoundingBox(), true);
 
 		return chunksTouchingPlayer.contains(null);
 	}
@@ -196,8 +196,34 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return chunk.getBlockState(x, y, z);
     }
 
-    public static World get() {
-        return instance;
+
+
+    public static ServerWorld getServerWorld() {
+
+        GameplayScene gameplayScene = GameplayScene.get();
+
+        if (gameplayScene == null) return null;
+
+        ServerController serverController = gameplayScene.getServer();
+
+        if (serverController == null) return null;
+
+        return serverController.getWorld();
+
+    }
+
+    public static ClientWorld getClientWorld() {
+
+        GameplayScene gameplayScene = GameplayScene.get();
+
+        if (gameplayScene == null) return null;
+
+        ClientController clientController = gameplayScene.getClient();
+
+        if (clientController == null) return null;
+
+        return clientController.getWorld();
+
     }
 
     /**
@@ -545,11 +571,19 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    public void logInfo(String info) {
+
+    }
 
     // called at unload of world
     public void shutdown() {
+
+        logInfo("Shutting down world . . .");
+
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE.shutdown();
         Chunk.chunkMeshGenerationExecutorService.shutdown();
+
+        logInfo("World shut down successfully!");
     }
 
     private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}

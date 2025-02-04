@@ -137,7 +137,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         BoundingBox broadPhaseBoundingBox = new BoundingBox(getBoundingBox()).grow(getVelocity().length() * 2);
 
-        List<Chunk> broadPhaseChunks = Collision.getChunksTouchingBoundingBox(broadPhaseBoundingBox);
+        List<Chunk> broadPhaseChunks = Collision.getChunksTouchingBoundingBox(getWorld(), broadPhaseBoundingBox);
         List<BoundingBox> blockBoundingBoxesNearPlayer = new ArrayList<>();
 
         if (!broadPhaseChunks.isEmpty()) {

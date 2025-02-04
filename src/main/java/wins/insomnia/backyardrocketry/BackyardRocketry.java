@@ -6,11 +6,15 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.scenes.GameplayScene;
+import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
 import wins.insomnia.backyardrocketry.scenes.screens.LoadingScene;
 import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ClientWorld;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.nio.IntBuffer;
 
@@ -40,7 +44,7 @@ public class BackyardRocketry {
 
     private static final VersionPhase VERSION_PHASE = VersionPhase.ALPHA;
     private static final int VERSION_MAJOR = 1;
-    private static final int VERSION_MINOR = 0;
+    private static final int VERSION_MINOR = 1;
 
 
 
@@ -87,7 +91,7 @@ public class BackyardRocketry {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
-        window = new Window(900, 600, "Backyard Rocketry");
+        window = new Window(320 * 3, 240 * 3, "Backyard Rocketry");
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
@@ -137,9 +141,9 @@ public class BackyardRocketry {
 
     }
 
-    // TODO: IMPLEMENT THIS METHOD PLS!
-    public IPlayer getPlayer() {
-        return null;
+
+    public IPlayer getClientPlayer() {
+        return GameplayScene.getClientPlayer();
     }
 
     public Window getWindow() {

@@ -39,7 +39,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public static final int SIZE_X = 20;
     public static final int SIZE_Y = 20;
     public static  final int SIZE_Z = 20;
-    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(4);
+    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(4, r -> new Thread(r, "chunk-mesh-generation-thread"));
     private final int X;
     private final int Y;
     private final int Z;
@@ -425,7 +425,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
 
     public ChunkPosition getChunkPosition() {
-        return World.get().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
+        return World.getServerWorld().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
     }
 
     public Chunk[] getNeighborChunks() {

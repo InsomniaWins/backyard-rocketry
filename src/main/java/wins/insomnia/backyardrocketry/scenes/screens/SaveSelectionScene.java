@@ -5,6 +5,7 @@ import wins.insomnia.backyardrocketry.gui.elements.Button;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.TextRenderer;
 import wins.insomnia.backyardrocketry.render.TextureManager;
+import wins.insomnia.backyardrocketry.scenes.GameplayScene;
 import wins.insomnia.backyardrocketry.scenes.Scene;
 import wins.insomnia.backyardrocketry.scenes.SceneManager;
 
@@ -25,7 +26,7 @@ public class SaveSelectionScene extends Scene {
 		CREATE_BUTTON.setSize(100, 20);
 		CREATE_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 30);
 
-		LOAD_BUTTON = new Button("Load Save", this::startNewSave);
+		LOAD_BUTTON = new Button("Load Save", () -> {});
 		LOAD_BUTTON.setSize(100, 20);
 		LOAD_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 55);
 	}
@@ -33,7 +34,8 @@ public class SaveSelectionScene extends Scene {
 
 	private void startNewSave() {
 
-
+		GameplayScene gameplayScene = new GameplayScene(GameplayScene.GameType.CLIENT_SERVER);
+		SceneManager.get().changeScene(gameplayScene);
 
 	}
 

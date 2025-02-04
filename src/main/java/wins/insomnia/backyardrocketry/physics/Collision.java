@@ -25,13 +25,12 @@ public class Collision {
 
     public static boolean isBlockInWorldBorder(int x, int y, int z) {
 
-        return World.get().isBlockInWorldBorder(x, y, z);
+        return World.getServerWorld().isBlockInWorldBorder(x, y, z);
     }
 
     public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
 
-    public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox, boolean includeUnloadedChunks) {
-        World world = World.get();
+    public static List<Chunk> getChunksTouchingBoundingBox(World world, BoundingBox boundingBox, boolean includeUnloadedChunks) {
 
         List<Chunk> chunks = new ArrayList<>();
 
@@ -83,7 +82,8 @@ public class Collision {
                         // if we are including null chunks,
                         // check to see if chunk is in world border
                         // if it's not, then it will never exist, so continue and dont add null to list
-                        if (!World.get().isChunkPositionInWorldBorder(currentChunkPosition)) {
+                        if (!World.getServerWorld().isChunkPositionInWorldBorder(currentChunkPosition)) {
+
                             continue;
                         }
 
@@ -97,17 +97,18 @@ public class Collision {
             }
         }
 
+
         return chunks;
     }
 
-    public static List<Chunk> getChunksTouchingBoundingBox(BoundingBox boundingBox) {
-        return getChunksTouchingBoundingBox(boundingBox, false);
+    public static List<Chunk> getChunksTouchingBoundingBox(World world, BoundingBox boundingBox) {
+        return getChunksTouchingBoundingBox(world, boundingBox, false);
     }
 
 
     private static BlockRaycastResult blockCollisionCheck(int blockX, int blockY, int blockZ, Block.Face face) {
 
-        World world = World.get();
+        World world = World.getServerWorld();
         Chunk chunk = world.getChunkContainingBlock(blockX, blockY, blockZ);
 
         if (chunk == null) return null;
@@ -165,7 +166,7 @@ public class Collision {
         // compare with 't'.
         length /= Math.sqrt(dx*dx+dy*dy+dz*dz);
 
-        World world = World.get();
+        World world = World.getServerWorld();
 
         while (/* ray has not gone past bounds of world */
                 (stepX > 0 ? x < world.getSizeX() : x >= 0) &&

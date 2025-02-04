@@ -7,11 +7,11 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 public class BlockPropertiesDirt extends BlockProperties {
 
 	private static boolean blockIsGrass(int x, int y, int z) {
-		return Block.GRASS == BitHelper.getBlockIdFromBlockState(World.get().getBlockState(x, y, z));
+		return Block.GRASS == BitHelper.getBlockIdFromBlockState(World.getServerWorld().getBlockState(x, y, z));
 	}
 
 	private static boolean blockIsTransparent(int x, int y, int z) {
-		return Block.isBlockTransparent(World.get().getBlock(x, y, z));
+		return Block.isBlockTransparent(World.getServerWorld().getBlock(x, y, z));
 	}
 
 	/*

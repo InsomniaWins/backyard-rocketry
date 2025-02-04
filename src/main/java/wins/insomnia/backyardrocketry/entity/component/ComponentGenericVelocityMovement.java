@@ -6,6 +6,7 @@ import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ComponentGenericVelocityMovement extends Component {
 
 		BoundingBox broadPhaseBoundingBox = new BoundingBox(boundingBoxEntity.getBoundingBox()).grow(ENTITY.getVelocity().length() * 2);
 
-		List<Chunk> broadPhaseChunks = Collision.getChunksTouchingBoundingBox(broadPhaseBoundingBox);
+		List<Chunk> broadPhaseChunks = Collision. getChunksTouchingBoundingBox(World.getServerWorld(), broadPhaseBoundingBox);
 		List<BoundingBox> blockBoundingBoxesNearPlayer = new ArrayList<>();
 
 		if (!broadPhaseChunks.isEmpty()) {

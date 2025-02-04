@@ -9,7 +9,7 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 public class BlockPropertiesGrass extends BlockProperties {
 
 	private static boolean blockIsTransparent(int x, int y, int z) {
-		return Block.isBlockTransparent(World.get().getBlock(x, y, z));
+		return Block.isBlockTransparent(World.getServerWorld().getBlock(x, y, z));
 	}
 
 	@Override

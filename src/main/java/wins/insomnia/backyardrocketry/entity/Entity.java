@@ -105,4 +105,5 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 		getRotation().set(rotX, rotY, rotZ);
 
 	}
+
 }

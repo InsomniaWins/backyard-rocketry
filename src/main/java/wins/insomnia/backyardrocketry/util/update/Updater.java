@@ -1,6 +1,9 @@
 package wins.insomnia.backyardrocketry.util.update;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.scenes.Scene;
+import wins.insomnia.backyardrocketry.scenes.SceneManager;
 import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.world.World;
 
@@ -216,7 +219,7 @@ public class Updater {
         double accumulator = 0.0;
 
 
-        while (!glfwWindowShouldClose(BackyardRocketry.getInstance().getWindow().getWindowHandle())) {
+        while (!glfwWindowShouldClose(Window.get().getWindowHandle())) {
 
             glfwPollEvents();
 
@@ -236,7 +239,10 @@ public class Updater {
             update(timeSincePreviousLoopIteration);
 
         }
+        
+        SceneManager.get().mainLoopFinished();
     }
+
 
     public static double getCurrentTime() {
         return glfwGetTime();
