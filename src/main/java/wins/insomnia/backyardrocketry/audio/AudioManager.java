@@ -30,7 +30,7 @@ public class AudioManager {
 	private final Matrix4f cameraMatrix;
 	private ALCCapabilities deviceCapabilities;
 	private static final HashMap<String, String> DEFAULT_AUDIO_REGISTRATION_MAP = new HashMap<>() {{
-		put("test_sound", "test_sound.ogg");
+		put("button_hover", "button_hover.ogg");
 	}};
 
 	private final HashMap<String, AudioBuffer> AUDIO_BUFFER_MAP;
@@ -115,12 +115,12 @@ public class AudioManager {
 
 	// the param 'shouldFree' determines whether the AudioPlayer should free itself from memory when the audio is finished playing
 	public AudioPlayer playAudio(AudioBuffer audioBuffer, boolean looping, boolean relative, boolean shouldFree) {
+
 		AudioPlayer player = new AudioPlayer(looping, relative);
 		player.setBuffer(audioBuffer);
 		AUDIO_PLAYER_LIST.add(player);
 
 		player.setCleanWhenFinished(shouldFree);
-
 		player.play();
 
 		return player;

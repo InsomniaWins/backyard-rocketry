@@ -1,6 +1,9 @@
 package wins.insomnia.backyardrocketry.gui.elements;
 
 import org.w3c.dom.Text;
+import wins.insomnia.backyardrocketry.audio.AudioBuffer;
+import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 
@@ -124,6 +127,17 @@ public class Button extends GuiElement {
 	}
 
 
+	private void playPressSound() {
+
+		AudioManager audioManager = AudioManager.get();
+		AudioBuffer hoverSound = audioManager.getAudioBuffer("button_hover");
+
+		AudioPlayer audioPlayer = audioManager.playAudio(hoverSound, false, false, true);
+		audioPlayer.setPitch(2f);
+
+	}
+
+
 	private void checkForPress() {
 
 		MouseInput mouseInput = MouseInput.get();
@@ -132,19 +146,29 @@ public class Button extends GuiElement {
 		int mouseX = Window.get().getViewportMouseX();
 		int mouseY = Window.get().getViewportMouseY();
 
-		hovered = containsPoint(mouseX, mouseY);
-
+		if (containsPoint(mouseX, mouseY)) {
+			if (!hovered) {
+				hovered = true;
+				AudioManager audioManager = AudioManager.get();
+				AudioBuffer hoverSound = audioManager.getAudioBuffer("button_hover");
+				audioManager.playAudio(hoverSound, false, false, true);
+			}
+		} else {
+			hovered = false;
+		}
 
 
 		if (hovered) {
 			if (mouseInput.isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 				pressed = true;
 				if (onJustPressed) {
+					playPressSound();
 					pressedCallback.run();
 				}
 			} else if (mouseInput.isButtonJustReleased(GLFW_MOUSE_BUTTON_LEFT)) {
 				pressed = false;
 				if (!onJustPressed) {
+					playPressSound();
 					pressedCallback.run();
 				}
 			}

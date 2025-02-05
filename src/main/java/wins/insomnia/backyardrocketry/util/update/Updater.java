@@ -33,6 +33,7 @@ public class Updater {
         MAIN_THREAD_INSTRUCTION_QUEUE = new ConcurrentLinkedQueue<>();
 
         tickDeltaStart = getCurrentTime();
+
     }
 
     // is thread-safe

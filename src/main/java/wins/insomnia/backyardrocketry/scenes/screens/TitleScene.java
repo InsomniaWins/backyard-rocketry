@@ -167,9 +167,7 @@ public class TitleScene extends Scene {
 		registerGameObject(POST_RENDER_OBJECT);
 
 
-		AudioManager audioManager = AudioManager.get();
-		AudioBuffer testSound = audioManager.getAudioBuffer("test_sound");
-		AudioPlayer audioPlayer = audioManager.playAudio(testSound, false, false);
+
 
 	}
 
