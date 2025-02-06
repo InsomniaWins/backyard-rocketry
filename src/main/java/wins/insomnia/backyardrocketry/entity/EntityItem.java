@@ -24,7 +24,7 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 	private ItemStack itemStack;
 	private final BoundingBox BOUNDING_BOX = new BoundingBox();
 	private float modelYRotation = 0f;
-	private float modelYPosition = 0f;
+	private float modelXRotation = 0f;
 	private final double CREATION_TIME;
 	private final ComponentGenericVelocityMovement VELOCITY_MOVEMENT_COMPONENT;
 	private float visualInterpolationFactor = 0f;
@@ -79,14 +79,14 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 		Transform transform = getInterpolatedTransform();
 
 		Renderer.get().getModelMatrix().identity()
-				.translate((float) transform.getPosition().x, (float) transform.getPosition().y + modelYPosition, (float) transform.getPosition().z)
+				.translate((float) transform.getPosition().x, (float) transform.getPosition().y, (float) transform.getPosition().z)
 				.rotateZ(getRotation().z)
 				.rotateY(getRotation().y + modelYRotation)
-				.rotateX(getRotation().x)
-				.scale(0.25f)
+				.rotateX(getRotation().x + modelXRotation)
+				.scale(0.5f)
 				.translate(-0.5f, -0.5f, -0.5f);
-		Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
 
+		Renderer.get().getShaderProgram().setUniform("vs_modelMatrix", Renderer.get().getModelMatrix());
 		mesh.render();
 	}
 
@@ -138,8 +138,8 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 	}
 
 	private void updateBoundingBox() {
-		BOUNDING_BOX.getMin().set(getPosition()).add(-0.25, -0.25, -0.25);
-		BOUNDING_BOX.getMax().set(getPosition()).add(0.25, 0.25, 0.25);
+		BOUNDING_BOX.getMin().set(getPosition()).add(-0.4, -0.4, -0.4);
+		BOUNDING_BOX.getMax().set(getPosition()).add(0.4, 0.4, 0.4);
 	}
 
 	@Override
@@ -181,7 +181,12 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 		super.update(deltaTime);
 
 		modelYRotation = (float) (modelYRotation + deltaTime);
-		modelYPosition = (float) Math.sin(Updater.getCurrentTime() - CREATION_TIME) * 0.1f;
+		modelXRotation = (float) (modelXRotation + deltaTime);
+
+		while (modelXRotation >= 360f) modelXRotation -= 360f;
+		while (modelYRotation >= 360f) modelYRotation -= 360f;
+
+		//modelYPosition = (float) Math.sin(Updater.getCurrentTime() - CREATION_TIME) * 0.1f;
 
 		visualInterpolationFactor += (float) deltaTime / (1.0f / Updater.getFixedUpdatesPerSecond());
 		visualInterpolationFactor = Math.min(visualInterpolationFactor, 1f);

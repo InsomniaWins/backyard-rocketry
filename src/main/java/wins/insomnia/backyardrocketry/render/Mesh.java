@@ -59,6 +59,10 @@ public class Mesh implements IRenderable, IMesh {
     }
 
     public Mesh(float[] vertexArray, int[] indexArray) {
+        this(vertexArray, indexArray, false);
+    }
+
+    public Mesh(float[] vertexArray, int[] indexArray, boolean hasNormals) {
 
         this.indexArray = indexArray;
         this.vertexArray = vertexArray;
@@ -78,8 +82,14 @@ public class Mesh implements IRenderable, IMesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        if (hasNormals) {
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * Float.BYTES, 0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
+            glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * Float.BYTES, 5 * Float.BYTES);
+        } else {
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        }
 
         isClean = new AtomicBoolean(false);
     }
@@ -144,6 +154,7 @@ public class Mesh implements IRenderable, IMesh {
         glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
 
         glDrawElements(primitveRenderType, getIndexCount(), GL_UNSIGNED_INT, 0);
 

@@ -42,6 +42,4 @@ void main() {
     fs_normal = vs_normal;
     fs_eyeSpacePosition = modelViewMatrix * vertexVector;
     fs_ambientOcclusionValue = vs_ambientOcclusionValue;
-
-
 }

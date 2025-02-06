@@ -92,6 +92,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
         setFpsLimit(120);
+
+        TargetBlockOutlineMesh.init();
     }
 
 
@@ -421,7 +423,14 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
                 glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_outline").getTextureHandle());
 
+                getShaderProgram().setUniform("fs_lightingEnabled", false);
+                getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, TargetBlockOutlineMesh.getOutlineAlpha()));
+
                 TargetBlockOutlineMesh.get(raycastResult.getFace()).render(GL_LINES);
+
+                getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, 1f));
+
+                getShaderProgram().setUniform("fs_lightingEnabled", true);
 
                 glEnable(GL_DEPTH_TEST);
 
@@ -939,6 +948,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         FONT_MESH.clean();
         TextureManager.clean();
         GUI_MESH.clean();
+        TargetBlockOutlineMesh.clean();
 
         Iterator<Map.Entry<String, ShaderProgram>> shaderIterator = SHADER_PROGRAM_MAP.entrySet().iterator();
         while (shaderIterator.hasNext()) {

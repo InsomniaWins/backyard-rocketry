@@ -8,14 +8,16 @@ in vec4 fs_eyeSpacePosition;
 in float fs_ambientOcclusionValue;
 
 uniform sampler2D fs_texture;
+
+// fog
 uniform vec3 fs_fogColor;
 uniform bool fs_fogEnabled = true;
 
-
 // lighting
-vec3 lightDirection = normalize(-vec3(0.7, -0.9, 0.45));
+vec3 lightDirection = -normalize(vec3(-0.7, -0.9, -0.45));
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
 float ambientLightStrength = 0.7;
+
 
 void main() {
 

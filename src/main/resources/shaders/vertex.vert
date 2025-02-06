@@ -1,8 +1,11 @@
 #version 330 core
+
 layout (location = 0) in vec3 vs_vertexPosition;
 layout (location = 1) in vec2 vs_textureCoordinates;
+layout (location = 2) in vec3 vs_normal;
 
 out vec2 fs_textureCoordinates;
+out vec3 fs_normal;
 
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
@@ -19,9 +22,16 @@ vec4 snap(vec4 vertex, vec2 resolution) {
 }
 
 void main() {
-    gl_Position = vs_projectionMatrix * vs_viewMatrix * vs_modelMatrix * vec4(vs_vertexPosition, 1.0);
+    mat4 mvMatrix = vs_viewMatrix * vs_modelMatrix;
+    mat4 mvpMatrix = vs_projectionMatrix * mvMatrix;
+    gl_Position = mvpMatrix * vec4(vs_vertexPosition, 1.0);
+
+    mat3 normalMatrix = mat3(vs_projectionMatrix * vs_modelMatrix);
+    fs_normal = normalMatrix * vs_normal;
+    fs_normal.z *= -1;
 
     gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
 
     fs_textureCoordinates = vs_textureCoordinates;
+
 }

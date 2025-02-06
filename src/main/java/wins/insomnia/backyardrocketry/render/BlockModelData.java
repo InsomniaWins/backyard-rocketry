@@ -109,8 +109,6 @@ public class BlockModelData {
         return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
-
-
     private static BlockModelData fixModelUvs(BlockModelData blockModelData) {
 
         double pixelUnit = TextureManager.BLOCK_SCALE_ON_ATLAS * (1.0 / 16.0);
@@ -125,37 +123,27 @@ public class BlockModelData {
             atlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(faceTextureName);
 
 
-            // modify uv coordinates to fit texture atlas and move block uvs over by 2
-            for (int dataIndex = faceVertexArray.size() - 1; dataIndex > -1; dataIndex -= 5) {
+            for (int vertexIndex = 0; vertexIndex < faceVertexArray.size() / 8; vertexIndex++) {
 
-                // 0 = x, 1 = y, 2 = z, 3 = u, 4 = v,
-                // then append: 5 = blockU, 6 = blockV
-                for (int vertexDataIndex = 0; vertexDataIndex < 5; vertexDataIndex++) {
-                    if (vertexDataIndex == 4) {
-                        int addIndex = dataIndex - vertexDataIndex + 5;
+                int uIndex = vertexIndex * 8 + 3;
+                int vIndex = vertexIndex * 8 + 4;
 
-                        double blockU = faceVertexArray.get(addIndex - 2);
-                        double blockV = faceVertexArray.get(addIndex - 1);
+                double blockU = faceVertexArray.get(uIndex);
+                double blockV = faceVertexArray.get(vIndex);
 
-                        double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS
-                                + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
-                        double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS
-                                + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
+                double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS
+                        + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
+                double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS
+                        + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
 
-                        u += pixelUnit;
-                        v += pixelUnit;
+                u += pixelUnit;
+                v += pixelUnit;
 
-                        u += pixelUnit * 2 * atlasCoordinates[0];
-                        v += pixelUnit * 2 * atlasCoordinates[1];
+                u += pixelUnit * 2 * atlasCoordinates[0];
+                v += pixelUnit * 2 * atlasCoordinates[1];
 
-                        faceVertexArray.set(addIndex - 2, u);
-                        faceVertexArray.set(addIndex - 1, v);
-
-                        //faceVertexArray.add(addIndex, blockV);
-                        //faceVertexArray.add(addIndex, blockU);
-
-                    }
-                }
+                faceVertexArray.set(uIndex, u);
+                faceVertexArray.set(vIndex, v);
             }
 
             faceData.put("vertices", faceVertexArray);
@@ -216,7 +204,8 @@ public class BlockModelData {
 
         // load block model
         BlockModelData blockModelData = loadBlockModelData(mapper, modelName);
-        // fix Uvs
+
+        // fix Uvs and normals
         blockModelData = fixModelUvs(blockModelData);
 
         // put in model map
@@ -407,7 +396,6 @@ public class BlockModelData {
 
         ArrayList<Float> vertexArray = new ArrayList<>();
         ArrayList<Integer> indexArray = new ArrayList<>();
-        ArrayList<Float> normalArray = new ArrayList<>();
 
         int indexOffset = 0;
 
@@ -418,11 +406,9 @@ public class BlockModelData {
             ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
             ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
-            ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
-
-            for (Double vertexValue : faceVertexArray) {
-                vertexArray.add(vertexValue.floatValue());
-            }
+			for (Double aDouble : faceVertexArray) {
+				vertexArray.add(aDouble.floatValue());
+			}
 
             int greatestIndexValue = 0;
             for (Integer indexValue : faceIndexArray) {
@@ -432,19 +418,6 @@ public class BlockModelData {
                 }
             }
             indexOffset += greatestIndexValue + 1;
-
-            if (faceNormalArray == null) {
-                // this face has no normal
-                // this is NOT supposed to happen, so tell the user (probably me) that I fucked up
-                throw new RuntimeException("Face \"" + faceEntry.getKey() + "\" in model for \"" + Block.getBlockName(block) + "\" is missing normals");
-            } else {
-                // for the next [x] amount of vertices of this face, use faceNormalArray normal
-                for (int i = 0; i < faceVertexArray.size(); i++) {
-                    normalArray.add(faceNormalArray.get(0).floatValue());
-                    normalArray.add(faceNormalArray.get(1).floatValue());
-                    normalArray.add(faceNormalArray.get(2).floatValue());
-                }
-            }
         }
 
         float[] primitiveVertexArray = new float[vertexArray.size()];
@@ -457,7 +430,7 @@ public class BlockModelData {
             primitiveIndexArray[i] = indexArray.get(i);
         }
 
-        BLOCK_MESH_MAP.put(block, new Mesh(primitiveVertexArray, primitiveIndexArray));
+        BLOCK_MESH_MAP.put(block, new Mesh(primitiveVertexArray, primitiveIndexArray, true));
     }
 
     @Override

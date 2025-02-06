@@ -25,7 +25,6 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	private float[] hotbarItemScales = new float[10];
 	private float breakProgressRatio = 0.0f;
 	private TestPlayer player;
-	private double previousDeltaTime = 0.0;
 	private float desiredBreakProgress = 0f;
 
 	public PlayerGui(TestPlayer player) {
@@ -97,7 +96,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
 			Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
 
-			return;
+
 		}
 
 
@@ -286,7 +285,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	public void update(double deltaTime) {
 
 		BLOCK_ITEM_ICON_ROTATION.y += (float) (deltaTime * 1.5);
-		BLOCK_ITEM_ICON_ROTATION.x = Math.sin(BLOCK_ITEM_ICON_ROTATION.y);
+		BLOCK_ITEM_ICON_ROTATION.x = (float) Math.sin(Updater.getCurrentTime());
 
 		while (BLOCK_ITEM_ICON_ROTATION.x >= 360) {
 			BLOCK_ITEM_ICON_ROTATION.x -= 360;

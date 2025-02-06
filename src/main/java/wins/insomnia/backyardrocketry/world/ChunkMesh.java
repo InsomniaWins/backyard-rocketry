@@ -229,7 +229,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         HashMap<String, ?> faceData = (HashMap<String, ?>) faceEntry.getValue();
                         ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
-                        ArrayList<Double> faceNormalArray = (ArrayList<Double>) faceData.get("normal");
 
                         String cullface = (String) faceData.get("cullface");
 
@@ -239,7 +238,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                                     false,
                                     vertices, indices,
                                     faceVertexArray, faceIndexArray,
-                                    faceNormalArray,
                                     x, y, z,
                                     blockNeighbors
                             );
@@ -616,67 +614,52 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     }
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, ArrayList<Double> faceNormalsArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
+
+
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
 
         try {
-            int indexOffset = vertices.size() / 9;
+            int vertexAmount = vertices.size() / 9;
 
             for (int faceIndex : faceIndexArray) {
-                indices.add(faceIndex + indexOffset);
+                indices.add(faceIndex + vertexAmount);
             }
 
             float[] vertexPosition = new float[3];
+            float[] vertexNormal = new float[3];
 
             for (int i = 0; i < faceVertexArray.size(); i++) {
 
-                int vertexDataIndex = i % 5;
+                int vertexDataIndex = i % 8;
                 float vertexData = faceVertexArray.get(i).floatValue();
 
                 if (vertexDataIndex == 0) {
                     vertexPosition[0] = vertexData;
+                    // offset x position of vertex
                     vertexData += offX;
                 } else if (vertexDataIndex == 1) {
                     vertexPosition[1] = vertexData;
+                    // offset y position of vertex
                     vertexData += offY;
                 } else if (vertexDataIndex == 2) {
                     vertexPosition[2] = vertexData;
+                    // offset z position of vertex
                     vertexData += offZ;
+                } else if (vertexData == 5 || vertexData == 6 || vertexData == 7) {
+                    // set normal of vertex
+                    vertexNormal[vertexDataIndex - 5] = vertexData;
                 }
 
+                // add bit of data
                 vertices.add(vertexData);
 
-
-
                 // if vertexDataIndex is last bit of vertex data
-                if (vertexDataIndex == 4) {
+                if (vertexDataIndex == 7) {
 
-                    float[] normal = new float[3];
+                    // add ambient occlusion value
+                    if (ambientOcclusion) {
 
-                    // if face does not have normals
-                    if (faceNormalsArray == null) {
-                        // make "up" normal
-                        vertices.add(0f);
-                        vertices.add(1f);
-                        vertices.add(0f);
-                        normal[0] = 0f;
-                        normal[1] = 1f;
-                        normal[2] = 0f;
-                    } else {
-                        // normals
-
-                        normal[0] = faceNormalsArray.get(0).floatValue();
-                        normal[1] = faceNormalsArray.get(1).floatValue();
-                        normal[2] = faceNormalsArray.get(2).floatValue();
-
-                        vertices.add(normal[0]);
-                        vertices.add(normal[1]);
-                        vertices.add(normal[2]);
-                    }
-
-                    // ambient occlusion value
-                    if (ambientOcclusion && faceNormalsArray != null) {
-
-                        float aoValue = getVertexAo(vertexPosition, blockNeighbors, normal);
+                        float aoValue = getVertexAo(vertexPosition, blockNeighbors, vertexNormal);
                         vertices.add(aoValue);
 
                     } else {

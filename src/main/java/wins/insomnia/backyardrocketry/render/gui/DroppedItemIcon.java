@@ -6,16 +6,14 @@ import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.entity.EntityItem;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.Item;
-import wins.insomnia.backyardrocketry.render.Camera;
-import wins.insomnia.backyardrocketry.render.IPositionOwner;
-import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.render.TextureManager;
+import wins.insomnia.backyardrocketry.render.*;
 
 public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 
 	private final Vector3d POSITION = new Vector3d();
 	private final EntityItem POSITION_OWNER;
 	private Item item;
+	private boolean shouldShowDistance = true;
 
 	public DroppedItemIcon(Item item, EntityItem positionOwner) {
 		POSITION_OWNER = positionOwner;
@@ -26,6 +24,18 @@ public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 		POSITION.set(x, y, z);
 		POSITION_OWNER = null;
 		this.item = item;
+	}
+
+	public void showDistance() {
+		shouldShowDistance = true;
+	}
+
+	public void hideDistance() {
+		shouldShowDistance = false;
+	}
+
+	public boolean isShowingDistance() {
+		return shouldShowDistance;
 	}
 
 	public Item getItem() {
@@ -79,13 +89,21 @@ public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 			);
 
 			PlayerGui.renderItemIcon(item, guiPosition.x + 1, guiPosition.y - 1);
+
+			String distanceText = String.valueOf((int) camera.getTransform().getPosition().distance(position.x, position.y, position.z));
+			TextRenderer.drawTextOutline(
+					distanceText,
+					guiPosition.x - (TextRenderer.getTextPixelWidth(distanceText) / 2),
+					guiPosition.y - 24
+			);
+
 		}
 
 	}
 
 	@Override
 	public boolean shouldRender() {
-		return getPosition().distance(Renderer.get().getCamera().getTransform().getPosition()) > 4f;
+		return getPosition().distance(Renderer.get().getCamera().getTransform().getPosition()) > 10f;
 	}
 
 	@Override

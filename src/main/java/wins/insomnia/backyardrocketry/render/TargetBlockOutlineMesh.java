@@ -1,9 +1,14 @@
 package wins.insomnia.backyardrocketry.render;
 
+import org.joml.Math;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 public class TargetBlockOutlineMesh {
 
+	public static float getOutlineAlpha() {
+		return ((float) (Math.sin(Updater.getCurrentTime() * 5f) + 1) / 2f);
+	}
 
 	private static final int[] INDICES = new int[] {
 			0, 1,
@@ -102,4 +107,19 @@ public class TargetBlockOutlineMesh {
 
 	}
 
+
+	public static void init() {
+
+	}
+
+	public static void clean() {
+
+		POS_X_MESH.clean();
+		POS_Y_MESH.clean();
+		POS_Z_MESH.clean();
+		NEG_X_MESH.clean();
+		NEG_Y_MESH.clean();
+		NEG_Z_MESH.clean();
+
+	}
 }

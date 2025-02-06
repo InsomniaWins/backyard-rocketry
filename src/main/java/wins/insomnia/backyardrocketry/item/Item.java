@@ -89,6 +89,14 @@ public class Item {
 			99000
 	);
 
+	public static final Item BRICKS = registerBlockItem(
+			Block.BRICKS,
+			"Bricks",
+			"bricks",
+			1000,
+			99000
+	);
+
 
 
 

@@ -36,6 +36,9 @@ public class TextRenderer {
 		drawText(text, guiX, guiY, scale, fontTexture);
 	}
 
+	public static void drawTextOutline(String text, int guiX, int guiY) {
+		drawTextOutline(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));
+	}
 	public static void drawTextOutline(String text, int guiX, int guiY, int scale, Texture fontTexture) {
 		Color previousColor = fontColor;
 		fontColor = new Color(Color.BLACK);
