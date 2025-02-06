@@ -95,6 +95,44 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     }
 
 
+    public Vector3i worldPositionToGuiPosition(Camera camera, float x, float y, float z) {
+
+        Matrix4f modelMatrix = new Matrix4f().identity();
+        modelMatrix.translate(x, y, z);
+
+        Matrix4f viewMatrix = new Matrix4f(camera.getViewMatrix());
+
+        Matrix4f projectionMatrix = new Matrix4f(camera.getProjectionMatrix());
+
+        Matrix4f screenMatrix = new Matrix4f(projectionMatrix).mul(viewMatrix);
+        screenMatrix.mul(modelMatrix);
+
+
+        float cubeW = screenMatrix.m33();
+        float cubeX = screenMatrix.m30() / cubeW;
+        float cubeY = screenMatrix.m31() / cubeW;
+        float cubeZ = screenMatrix.m32() / cubeW;
+
+        int viewportWidth = Window.get().getResolutionFrameBuffer().getWidth();
+        int viewportHeight = Window.get().getResolutionFrameBuffer().getHeight();
+
+        float outX = viewportWidth * (cubeX + 1) / 2;
+        float outY = viewportHeight - viewportHeight * (cubeY + 1) / 2;
+
+        Vector3i returnVector = new Vector3i((int) outX, (int) outY, 0);
+
+        if (cubeZ < -1f || cubeZ > 1f) {
+
+            returnVector.x = -1000000;
+            returnVector.y = -1000000;
+            returnVector.z = 1;
+
+        }
+
+        return returnVector;
+
+    }
+
 
     public void setClearColor(float r, float g, float b) {
         CLEAR_COLOR.x = r;
@@ -216,17 +254,17 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
             // get distance from camera for the two renderables
-			float distance1 = 0.0f;
-			float distance2 = 0.0f;
+            float distance1 = 0.0f;
+            float distance2 = 0.0f;
 
 
-			if (renderable1 instanceof IPositionOwner positionOwner1) {
-				distance1 = (float) positionOwner1.getPosition().distance(cameraPosition);
-			}
+            if (renderable1 instanceof IPositionOwner positionOwner1) {
+                distance1 = (float) positionOwner1.getPosition().distance(cameraPosition);
+            }
 
-			if (renderable2 instanceof IPositionOwner positionOwner2) {
-				distance2 = (float) positionOwner2.getPosition().distance(cameraPosition);
-			}
+            if (renderable2 instanceof IPositionOwner positionOwner2) {
+                distance2 = (float) positionOwner2.getPosition().distance(cameraPosition);
+            }
 
             // check which of the renderables are opaque or not
             boolean hasTransparency1 = renderable1.hasTransparency();
@@ -243,7 +281,48 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             }
 
 
-		});
+        });
+
+
+        GUI_RENDER_LIST.sort((renderable1, renderable2) -> {
+
+            // check render priority
+            if (renderable1.getRenderPriority() > renderable2.getRenderPriority()) {
+                return 1;
+            } else if (renderable1.getRenderPriority() < renderable2.getRenderPriority()) {
+                return -1;
+            }
+
+
+            // get distance from camera for the two renderables
+            float distance1 = 0.0f;
+            float distance2 = 0.0f;
+
+
+            if (renderable1 instanceof IPositionOwner positionOwner1) {
+                distance1 = (float) positionOwner1.getPosition().distance(cameraPosition);
+            }
+
+            if (renderable2 instanceof IPositionOwner positionOwner2) {
+                distance2 = (float) positionOwner2.getPosition().distance(cameraPosition);
+            }
+
+            // check which of the renderables are opaque or not
+            boolean hasTransparency1 = renderable1.hasTransparency();
+            boolean hasTransparency2 = renderable2.hasTransparency();
+
+            // sort
+            // could be faster, but I'm too tired to deal with "Comparison method violates its general contract!"
+            if (hasTransparency1 == hasTransparency2) {
+                return -Float.compare(distance1, distance2);
+            } else if (hasTransparency1) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+
+        });
 
     }
 

@@ -1,15 +1,17 @@
 package wins.insomnia.backyardrocketry.entity;
 
+import org.joml.*;
 import org.joml.Math;
-import org.joml.Random;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGenericVelocityMovement;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
+import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.BlockItem;
+import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.gui.DroppedItemIcon;
+import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
@@ -28,6 +30,7 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 	private float visualInterpolationFactor = 0f;
 	private final Transform PREVIOUS_TRANSFORM = new Transform();
 	private final Transform INTERPOLATED_TRANSFORM = new Transform();
+	private DroppedItemIcon droppedItemIcon;
 
 	public EntityItem(ItemStack itemStack, World world) {
 		super(world);
@@ -45,7 +48,6 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 		VELOCITY_MOVEMENT_COMPONENT = new ComponentGenericVelocityMovement(this);
 		addEntityComponent(VELOCITY_MOVEMENT_COMPONENT);
 		CREATION_TIME = Updater.getCurrentTime();
-
 
 		getVelocity().add(world.getRandom().nextFloat() - 0.5f, world.getRandom().nextFloat() * 0.1f + 0.05, world.getRandom().nextFloat() - 0.25f);
 	}
@@ -193,4 +195,17 @@ public class EntityItem extends Entity implements IRenderable, IBoundingBoxEntit
 	public boolean hasTransparency() {
 		return true;
 	}
+
+	@Override
+	public void registeredFixedUpdateListener() {
+		droppedItemIcon = new DroppedItemIcon(itemStack.getItem(), this);
+		droppedItemIcon.register();
+	}
+
+	@Override
+	public void unregisteredFixedUpdateListener() {
+		droppedItemIcon.unregister();
+		droppedItemIcon = null;
+	}
+
 }

@@ -3,6 +3,8 @@ package wins.insomnia.backyardrocketry.gui.elements;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL11;
+import wins.insomnia.backyardrocketry.item.BlockItem;
+import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
@@ -17,92 +19,64 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 
-	private final float NORMAL_HOTBAR_ITEM_SCALE = 0.015f;
-	private final float SELECTED_HOTBAR_ITEM_SCALE = 0.02f;
+	public static final float NORMAL_HOTBAR_ITEM_SCALE = 0.013f;
+	public static final float SELECTED_HOTBAR_ITEM_SCALE = 0.015f;
+	public static final Vector3f BLOCK_ITEM_ICON_ROTATION = new Vector3f();
 	private float[] hotbarItemScales = new float[10];
-
 	private float breakProgressRatio = 0.0f;
 	private TestPlayer player;
 	private double previousDeltaTime = 0.0;
-	private Vector3d blockMeshRotationValue = new Vector3d();
 	private float desiredBreakProgress = 0f;
 
 	public PlayerGui(TestPlayer player) {
 		this.player = player;
 	}
 
+	public static void renderItemIcon(Item item, int guiX, int guiY) {
+		renderItemIcon(
+				item,
+				guiX,
+				guiY,
+				item instanceof BlockItem ? PlayerGui.NORMAL_HOTBAR_ITEM_SCALE : 1f
+		);
+	}
 
-
-	@Override
-	public void render() {
-
-
-		double deltaTime = Updater.getCurrentTime() - previousDeltaTime;
-		previousDeltaTime = Updater.getCurrentTime();
-
-
-		blockMeshRotationValue.x += deltaTime * 1.5;
-		blockMeshRotationValue.y += deltaTime * 15.0;
-
-
-		while (blockMeshRotationValue.x >= 360) {
-			blockMeshRotationValue.x -= 360;
-		}
-		while (blockMeshRotationValue.y >= 360) {
-			blockMeshRotationValue.y -= 360;
-		}
-
+	public static void renderItemIcon(Item item, int guiX, int guiY, float scale) {
 
 		Renderer renderer = Renderer.get();
 
-		int hotbarX = renderer.getCenterAnchorX() - 139;
-		int hotbarY = renderer.getBottomAnchor() - 41;
-		int selectedHotbarSlotX = hotbarX + player.getCurrentHotbarSlot() * 28;
-		renderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
-		renderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
+		if (item instanceof BlockItem blockItem) {
 
+			glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas").getTextureHandle());
 
-
-		// render hotbar items
-
-		int resolutionWidth = Window.get().getResolutionFrameBuffer().getWidth();
-		int resolutionHeight = Window.get().getResolutionFrameBuffer().getHeight();
-
-		float gameWindowAspect = resolutionWidth / (float) resolutionHeight;
-		float modelAspectScale = (750f / resolutionHeight);
-		glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas").getTextureHandle());
-
-		for (int i = 0; i < 10; i++) {
-
-			int hotbarIndex = i == 9 ? 0 : i + 1;
-			TextRenderer.drawText(Integer.toString(hotbarIndex), hotbarX + 11 + i * 28, hotbarY + 5);
-
-			byte currentBlock = player.getHotbarSlotContents(i);
-
-
-			Mesh hotbarSlotHandMesh = BlockModelData.getMeshFromBlock(currentBlock);
+			Mesh hotbarSlotHandMesh = BlockModelData.getMeshFromBlock(blockItem.getBlock());
 
 			if (hotbarSlotHandMesh == null || hotbarSlotHandMesh.isClean()) {
-				continue;
+				return;
 			}
 
-			float blockMeshScale = hotbarItemScales[i] * modelAspectScale * renderer.getGuiScale();
+			int resolutionWidth = Window.get().getResolutionFrameBuffer().getWidth();
+			int resolutionHeight = Window.get().getResolutionFrameBuffer().getHeight();
+
+			float modelAspectScale = (750f / resolutionHeight);
 
 			Renderer.get().getModelMatrix().identity()
 					.translate(0f, 0f, -1f)
 					.scale(1f, 1f, 0f)
-					.rotateX((float) Math.sin(blockMeshRotationValue.x) * 0.3f)
-					.rotateY((float) Math.toRadians(blockMeshRotationValue.y))
+					.rotateX(BLOCK_ITEM_ICON_ROTATION.x)
+					.rotateY(BLOCK_ITEM_ICON_ROTATION.y)
+					.rotateZ(BLOCK_ITEM_ICON_ROTATION.z)
 					.scale(
-							blockMeshScale,
-							blockMeshScale,
-							blockMeshScale
+							scale * modelAspectScale * renderer.getGuiScale(),
+							scale * modelAspectScale * renderer.getGuiScale(),
+							scale * modelAspectScale * renderer.getGuiScale()
 					)
 					.translate(-0.5f, -0.5f, -0.5f);
 
 
-			int guiX = hotbarX + 14 + 28 * i;
-			int guiY = hotbarY + 27;
+
+			float gameWindowAspect = resolutionWidth / (float) resolutionHeight;
+
 			Vector2f viewportOffset = new Vector2f(
 					2f * (((renderer.getGuiScale() * guiX) / (float) resolutionWidth) - 0.5f),
 					2f * (((renderer.getGuiScale() * guiY) / (float) resolutionHeight) - 0.5f)
@@ -122,6 +96,44 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 			Renderer.get().getShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getCamera().getProjectionMatrix());
 			Renderer.get().getShaderProgram().setUniform("vs_viewMatrix", Renderer.get().getCamera().getViewMatrix());
+
+			return;
+		}
+
+
+	}
+
+	@Override
+	public void render() {
+
+
+		Renderer renderer = Renderer.get();
+
+		int hotbarX = renderer.getCenterAnchorX() - 139;
+		int hotbarY = renderer.getBottomAnchor() - 41;
+		int selectedHotbarSlotX = hotbarX + player.getCurrentHotbarSlot() * 28;
+		renderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
+		renderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
+
+
+
+		// render hotbar items
+		glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas").getTextureHandle());
+
+		for (int i = 0; i < 10; i++) {
+
+			int hotbarIndex = i == 9 ? 0 : i + 1;
+			TextRenderer.drawText(Integer.toString(hotbarIndex), hotbarX + 11 + i * 28, hotbarY + 5);
+
+			int guiX = hotbarX + 14 + 28 * i;
+			int guiY = hotbarY + 27;
+			float blockMeshScale = hotbarItemScales[i];
+
+			renderItemIcon(
+					Item.getBlockItem(player.getHotbarSlotContents(i)),
+					guiX, guiY,
+					blockMeshScale
+			);
 
 
 
@@ -272,6 +284,18 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 	@Override
 	public void update(double deltaTime) {
+
+		BLOCK_ITEM_ICON_ROTATION.y += (float) (deltaTime * 1.5);
+		BLOCK_ITEM_ICON_ROTATION.x = Math.sin(BLOCK_ITEM_ICON_ROTATION.y);
+
+		while (BLOCK_ITEM_ICON_ROTATION.x >= 360) {
+			BLOCK_ITEM_ICON_ROTATION.x -= 360;
+		}
+
+		while (BLOCK_ITEM_ICON_ROTATION.y >= 360) {
+			BLOCK_ITEM_ICON_ROTATION.y -= 360;
+		}
+
 
 		float tickUpdateFactor = (float) (Updater.get().getTickDelta() / (1f / Updater.FIXED_UPDATES_PER_SECOND));
 

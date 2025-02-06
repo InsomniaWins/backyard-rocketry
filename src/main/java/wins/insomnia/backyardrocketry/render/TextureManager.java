@@ -36,6 +36,7 @@ public class TextureManager {
         registerTexture("text_button_hovered", "gui/buttons/text_button_hovered.png");
         registerTexture("text_button_pressed", "gui/buttons/text_button_pressed.png");
         registerTexture("menu_background", "gui/background.png");
+        registerTexture("dropped_item", "gui/notification_icons/dropped_item.png");
     }
 
     public static Texture getTexture(String textureId) {

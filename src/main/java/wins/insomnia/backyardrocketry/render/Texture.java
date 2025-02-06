@@ -1,6 +1,9 @@
 package wins.insomnia.backyardrocketry.render;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -43,14 +46,27 @@ public class Texture {
         ByteBuffer buffer = null;
 
         try {
-            decoder = new PNGDecoder(Texture.class.getResourceAsStream("/textures/" + textureName));
+            InputStream inputStream = Texture.class.getResourceAsStream("/textures/" + textureName);
+
+            if (inputStream == null) {
+                System.err.println("Could not open texture: " + textureName);
+                return;
+            }
+
+            decoder = new PNGDecoder(inputStream);
 
             buffer = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
             decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
             buffer.flip();
 
+        } catch (IOException ioException) {
+
+            System.err.println("Could not open texture: " + textureName);
+            return;
+
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
 
         textureIndex = glGenTextures();

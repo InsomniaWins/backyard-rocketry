@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.item;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Item {
 
@@ -14,7 +15,7 @@ public class Item {
 	private static int nextAvailableItemIdForRegistration = Integer.MIN_VALUE;
 	private static final HashMap<Integer, Item> ITEM_HASHMAP = new HashMap<>();
 	private static final HashMap<String, Integer> ITEM_SYNONYM_MAP = new HashMap<>();
-
+	public static final HashMap<Byte, BlockItem> BLOCK_ITEM_MAP = new HashMap<>();
 
 	public static final BlockItem COBBLESTONE = registerBlockItem(
 			Block.COBBLESTONE,
@@ -161,9 +162,15 @@ public class Item {
 				maxVolume
 		);
 
+		BLOCK_ITEM_MAP.put(blockId, item);
+
 		ITEM_HASHMAP.put(itemId, item);
 		ITEM_SYNONYM_MAP.put(itemSynonym, itemId);
 
 		return item;
+	}
+
+	public static BlockItem getBlockItem(byte blockId) {
+		return BLOCK_ITEM_MAP.get(blockId);
 	}
 }
