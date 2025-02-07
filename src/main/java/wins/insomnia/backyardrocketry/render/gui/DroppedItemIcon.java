@@ -7,6 +7,8 @@ import wins.insomnia.backyardrocketry.entity.EntityItem;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.text.TextRenderer;
+import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 
 public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 

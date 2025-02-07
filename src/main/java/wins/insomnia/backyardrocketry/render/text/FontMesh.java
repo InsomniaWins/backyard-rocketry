@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.text;
 
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 

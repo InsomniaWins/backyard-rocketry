@@ -5,6 +5,8 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
@@ -25,6 +27,8 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.BlockAudio;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +54,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private final Vector3f INTERPOLATED_CAMERA_ROTATION;
     private final Vector3d INTERPOLATED_CAMERA_POSITION;
     private final FirstPersonHandItemRenderable FIRST_PERSON_HAND_ITEM;
-
+    private int breakAudioDelay = 0;
     private byte[] hotbarItems = {
             Block.GRASS,
             Block.COBBLESTONE,
@@ -408,6 +412,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
                 breakBlock();
 
+            } else {
+
+                breakAudioDelay = 0;
+
             }
 
             if (mouseInput.isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -463,6 +471,13 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                     targetBlockChunk.toLocalZ(targetBlock.getBlockZ()),
                     true
             );
+
+            BlockAudio blockAudio = Block.getBlockAudio(block);
+            AudioPlayer digAudioPlayer = AudioManager.get().playAudio(blockAudio.getBreakAudio(), false, true, true);
+            digAudioPlayer.setPitch(0.7f + (float) Math.random() * 0.6f);
+
+            breakAudioDelay = 5;
+
             breakProgress = 0;
 
             if (shouldInstantlyBreakBlocks()) {
@@ -470,6 +485,23 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             } else if (Block.getBlockHealth(block) > 1) {
                 blockInteractionTimer = 2;
             }
+        } else {
+
+            if (breakAudioDelay <= 0) {
+
+                BlockAudio blockAudio = Block.getBlockAudio(block);
+                AudioManager.get().playAudio(blockAudio.getBreakAudio(), false, true, true)
+                        .setPitch(0.7f + (float) Math.random() * 0.6f)
+                        .setGain(0.25f);
+                breakAudioDelay = 5;
+
+            } else {
+
+                breakAudioDelay -= 1;
+
+            }
+
+
         }
 
 
@@ -531,6 +563,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
                 return;
             }
         }
+
+        BlockAudio blockAudio = Block.getBlockAudio(blockToPlace);
+        AudioManager.get().playAudio(blockAudio.getPlaceAudio(), false, true, true)
+                .setPitch(0.8f + (float) Math.random() * 0.4f);
 
         chunk.setBlock(
                 chunk.toLocalX(placePosX),

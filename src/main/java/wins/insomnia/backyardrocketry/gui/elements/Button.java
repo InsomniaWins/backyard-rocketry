@@ -1,10 +1,12 @@
 package wins.insomnia.backyardrocketry.gui.elements;
 
-import org.w3c.dom.Text;
 import wins.insomnia.backyardrocketry.audio.AudioBuffer;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.text.TextRenderer;
+import wins.insomnia.backyardrocketry.render.texture.Texture;
+import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;

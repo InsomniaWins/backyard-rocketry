@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.texture;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 

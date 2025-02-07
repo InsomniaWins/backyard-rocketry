@@ -58,8 +58,9 @@ public class AudioPlayer implements IUpdateListener  {
 		alSourcef(SOURCE_ID, AL_GAIN, gain);
 	}
 
-	public void setPitch(float pitch) {
+	public AudioPlayer setPitch(float pitch) {
 		alSourcef(SOURCE_ID, AL_PITCH, pitch);
+		return this;
 	}
 
 	public void setProperty(int param, float value) {

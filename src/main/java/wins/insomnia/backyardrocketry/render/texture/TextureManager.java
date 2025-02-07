@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.texture;
 
 import org.lwjgl.stb.STBImage;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
@@ -12,7 +12,7 @@ public class TextureManager {
 
     private static final HashMap<String, Texture> TEXTURE_HASH_MAP = new HashMap<>();
 
-    public static final float BLOCK_SCALE_ON_ATLAS = 16f / 256f;
+    public static final float BLOCK_SCALE_ON_ATLAS = 16f / 512f;
 
 
     public TextureManager() {

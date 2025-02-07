@@ -1,6 +1,10 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.text;
 
-import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.render.Color;
+import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.render.texture.Texture;
+import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;

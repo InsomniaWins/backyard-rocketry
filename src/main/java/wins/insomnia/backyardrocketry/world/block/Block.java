@@ -1,15 +1,11 @@
 package wins.insomnia.backyardrocketry.world.block;
 
-import org.joml.Math;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesDirt;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockPropertiesGrass;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +34,8 @@ public class Block {
         PROPERTIES,
         STATE,
         HEALTH,
-        HIDE_NEIGHBORING_FACES
+        HIDE_NEIGHBORING_FACES,
+        AUDIO
     }
 
 
@@ -75,7 +72,8 @@ public class Block {
             true,
             null,
             "grass",
-            40
+            40,
+            BlockAudio.GENERIC_DIRT
     );
     public static final byte COBBLESTONE = registerBlock(
             "Cobblestone",
@@ -83,7 +81,8 @@ public class Block {
             true,
             null,
             "cobblestone",
-            120
+            120,
+            BlockAudio.GENERIC_STONE
     );
     public static final byte DIRT = registerBlock(
             "Dirt",
@@ -91,7 +90,8 @@ public class Block {
             true,
             null,
             "dirt",
-            30
+            30,
+            BlockAudio.GENERIC_DIRT
     );
     public static final byte STONE = registerBlock(
             "Stone",
@@ -99,7 +99,8 @@ public class Block {
             true,
             null,
             "stone",
-            120
+            120,
+            BlockAudio.GENERIC_STONE
     );
     public static final byte LOG = registerBlock(
             "Log",
@@ -107,7 +108,8 @@ public class Block {
             true,
             null,
             "log",
-            90
+            90,
+            BlockAudio.GENERIC_WOOD
     );
 
     public static final byte WOOD = registerBlock(
@@ -116,7 +118,8 @@ public class Block {
             true,
             null,
             "wood",
-            90
+            90,
+            BlockAudio.GENERIC_WOOD
     );
 
     public static final byte LEAVES = registerBlock(
@@ -125,7 +128,8 @@ public class Block {
             true,
             null,
             "leaves",
-            20
+            20,
+            BlockAudio.GENERIC_LEAVES
     );
     public static final byte WOODEN_PLANKS = registerBlock(
             "Wooden Planks",
@@ -133,7 +137,8 @@ public class Block {
             true,
             null,
             "wooden_planks",
-            90
+            90,
+            BlockAudio.GENERIC_WOOD
     );
 
     public static final byte GLASS = registerBlock(
@@ -142,7 +147,8 @@ public class Block {
             true,
             null,
             "glass",
-            20
+            20,
+            BlockAudio.GENERIC_GLASS
     );
 
     public static final byte BRICKS = registerBlock(
@@ -151,7 +157,8 @@ public class Block {
             true,
             null,
             "bricks",
-            120
+            120,
+            BlockAudio.GENERIC_STONE
     );
 
     public static final byte WATER = registerBlock(
@@ -176,7 +183,26 @@ public class Block {
         return BLOCK_SYNONYM_MAP.get(blockSynonym);
     }
 
-    public static byte registerBlock(String blockName, boolean isTransparent, boolean hideNeighboringFaces, BlockProperties blockProperties, String blockStateFileName, int blockHealth) {
+    public static byte registerBlock(
+            String blockName,
+            boolean isTransparent,
+            boolean hideNeighboringFaces,
+            BlockProperties blockProperties,
+            String blockStateFileName,
+            int blockHealth
+    ) {
+        return registerBlock(blockName, isTransparent, hideNeighboringFaces, blockProperties, blockStateFileName, blockHealth, new BlockAudio());
+    }
+
+    public static byte registerBlock(
+            String blockName,
+            boolean isTransparent,
+            boolean hideNeighboringFaces,
+            BlockProperties blockProperties,
+            String blockStateFileName,
+            int blockHealth,
+            BlockAudio blockAudio
+        ) {
 
         byte blockId = nextAvailableBlockIdForRegistration++;
 
@@ -200,12 +226,18 @@ public class Block {
         }
 
         detailsMap.put(BlockDetail.HEALTH, blockHealth);
-
+        detailsMap.put(BlockDetail.AUDIO, blockAudio);
 
 
         BLOCK_DETAILS_MAP.put(blockId, detailsMap);
 
         return blockId;
+    }
+
+    public static BlockAudio getBlockAudio(byte block) {
+
+        return (BlockAudio) BLOCK_DETAILS_MAP.get(block).get(BlockDetail.AUDIO);
+
     }
 
     public static BlockProperties getBlockProperties(byte block) {

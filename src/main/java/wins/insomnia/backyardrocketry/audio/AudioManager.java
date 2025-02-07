@@ -31,6 +31,26 @@ public class AudioManager {
 	private ALCCapabilities deviceCapabilities;
 	private static final HashMap<String, String> DEFAULT_AUDIO_REGISTRATION_MAP = new HashMap<>() {{
 		put("button_hover", "button_hover.ogg");
+
+		put("stone_step", "blocks/step/stone_step.ogg");
+		put("stone_place", "blocks/place/stone_place.ogg");
+		put("stone_break", "blocks/break/stone_break.ogg");
+
+		put("dirt_step", "blocks/step/dirt_step.ogg");
+		put("dirt_place", "blocks/place/dirt_place.ogg");
+		put("dirt_break", "blocks/break/dirt_break.ogg");
+
+		put("wood_step", "blocks/step/wood_step.ogg");
+		put("wood_place", "blocks/place/wood_place.ogg");
+		put("wood_break", "blocks/break/wood_break.ogg");
+
+		put("glass_step", "blocks/step/glass_step.ogg");
+		put("glass_place", "blocks/place/glass_place.ogg");
+		put("glass_break", "blocks/break/glass_break.ogg");
+
+		put("leaves_step", "blocks/step/leaves_step.ogg");
+		put("leaves_place", "blocks/place/leaves_place.ogg");
+		put("leaves_break", "blocks/break/leaves_break.ogg");
 	}};
 
 	private final HashMap<String, AudioBuffer> AUDIO_BUFFER_MAP;
