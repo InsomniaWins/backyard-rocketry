@@ -25,10 +25,6 @@ public class BlockAudio {
 
 	private final HashMap<BlockActionType, String> AUDIO_NAMES_MAP;
 
-	public BlockAudio() {
-		this("button_hover", "button_hover", "button_hover");
-	}
-
 	public BlockAudio(String stepAudioName, String placeAudioName, String breakAudioName) {
 		AUDIO_NAMES_MAP = new HashMap<>();
 		setActionAudio(BlockActionType.STEP, stepAudioName);

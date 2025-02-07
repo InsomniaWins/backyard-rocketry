@@ -99,7 +99,7 @@ public class ShaderProgram {
         glGetShaderiv(shader, GL_COMPILE_STATUS, compilationSuccess);
         if (compilationSuccess[0] == 0) {
             String error = glGetShaderInfoLog(shader);
-            System.out.println(shaderTypeString + " shader compilation error: " + error);
+            System.err.println(shaderTypeString + " shader compilation error: " + error);
         } else {
             System.out.println(shaderTypeString + " shader compiled!");
         }
@@ -121,7 +121,7 @@ public class ShaderProgram {
         glGetProgramiv(shaderProgramHandle, GL_LINK_STATUS, linkingSuccess);
         if (linkingSuccess[0] == 0) {
             String error = glGetProgramInfoLog(shaderProgramHandle);
-            System.out.println("Error linking shader: " + error);
+            System.err.println("Error linking shader: " + error);
         } else {
             System.out.println("Shader program linked!");
         }

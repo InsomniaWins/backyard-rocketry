@@ -643,4 +643,12 @@ public class World implements IFixedUpdateListener, IUpdateListener {
     public int getSeaLevel() {
         return seaLevel;
     }
+
+    public Vector3i getBlockPosition(Vector3f position) {
+        return new Vector3i((int) position.x, (int) position.y, (int) position.z);
+    }
+
+    public Vector3i getBlockPosition(Vector3d position) {
+        return new Vector3i((int) position.x, (int) position.y, (int) position.z);
+    }
 }

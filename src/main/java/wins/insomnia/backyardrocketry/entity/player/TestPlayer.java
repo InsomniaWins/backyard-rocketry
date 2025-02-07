@@ -5,11 +5,13 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.audio.AudioListener;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
+import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentStandardPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
@@ -76,7 +78,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private int breakProgress = 0;
     private boolean hasCollision = true;
     private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
-
+    private final ComponentFootstepAudio FOOTSTEP_AUDIO;
 
     public TestPlayer(World world) {
         super(world);
@@ -103,6 +105,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         addEntityComponent(new ComponentStandardPlayer(this));
         addEntityComponent(new ComponentGravity(this, 1f));
+        FOOTSTEP_AUDIO = new ComponentFootstepAudio(this);
+        addEntityComponent(FOOTSTEP_AUDIO);
     }
 
     public Vector3d getPosition() {
@@ -200,6 +204,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     public void fixedUpdate() {
         super.fixedUpdate();
 
+        FOOTSTEP_AUDIO.fixedUpdate();
+
         // make sure interpolation of camera transformation is complete
         Renderer.get().getCamera().getTransform().getRotation().set(getRotation());
         Renderer.get().getCamera().getTransform().getPosition().set(getCameraPosition());
@@ -255,6 +261,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         PREVIOUS_TRANSFORM.set(getTransform());
         move();
         updateBoundingBox();
+
+        double moveDistance = PREVIOUS_TRANSFORM.getPosition().distance(getTransform().getPosition());
+        FOOTSTEP_AUDIO.setMoveDistance((float) moveDistance);
+        FOOTSTEP_AUDIO.setOnGround(isOnGround());
 
         if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
             lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
@@ -473,8 +483,11 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             );
 
             BlockAudio blockAudio = Block.getBlockAudio(block);
-            AudioPlayer digAudioPlayer = AudioManager.get().playAudio(blockAudio.getBreakAudio(), false, true, true);
-            digAudioPlayer.setPitch(0.7f + (float) Math.random() * 0.6f);
+            if (blockAudio != null) {
+                AudioPlayer digAudioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getBreakAudio(), false, false, true)
+                        .setPitch(0.7f + (float) Math.random() * 0.6f)
+                        .setPosition(targetBlock.getBlockX() + 0.5f, targetBlock.getBlockY() + 0.5f, targetBlock.getBlockZ() + 0.5f);
+            }
 
             breakAudioDelay = 5;
 
@@ -490,9 +503,10 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
             if (breakAudioDelay <= 0) {
 
                 BlockAudio blockAudio = Block.getBlockAudio(block);
-                AudioManager.get().playAudio(blockAudio.getBreakAudio(), false, true, true)
+                AudioPlayer audioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getBreakAudio(), false, false, true)
                         .setPitch(0.7f + (float) Math.random() * 0.6f)
-                        .setGain(0.25f);
+                        .setGain(0.25f)
+                        .setPosition(targetBlock.getBlockX() + 0.5f, targetBlock.getBlockY() + 0.5f, targetBlock.getBlockZ() + 0.5f);
                 breakAudioDelay = 5;
 
             } else {
@@ -565,8 +579,9 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         }
 
         BlockAudio blockAudio = Block.getBlockAudio(blockToPlace);
-        AudioManager.get().playAudio(blockAudio.getPlaceAudio(), false, true, true)
-                .setPitch(0.8f + (float) Math.random() * 0.4f);
+        AudioManager.get().playAudioSpatial(blockAudio.getPlaceAudio(), false, false, true)
+                .setPitch(0.8f + (float) Math.random() * 0.4f)
+                .setPosition(placePosX + 0.5f, placePosY + 0.5f, placePosZ + 0.5f);
 
         chunk.setBlock(
                 chunk.toLocalX(placePosX),
@@ -595,6 +610,9 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     public void update(double deltaTime) {
         super.update(deltaTime);
         interpolateCameraTransform(deltaTime);
+
+        Camera camera = Renderer.get().getCamera();
+        AudioManager.updateListenerPosition(new Vector3f(camera.getTransform().getPosition()), camera);
 
     }
 

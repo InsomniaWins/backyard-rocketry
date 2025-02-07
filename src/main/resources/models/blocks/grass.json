@@ -7,7 +7,7 @@
 		"neg_x": "grass_top",
 		"pos_z": "grass_top",
 		"neg_z": "grass_top",
-		"neg_y": "dirt",
+		"neg_y": "grass_bottom",
 		"icon": "grass_top"
 	}
 }

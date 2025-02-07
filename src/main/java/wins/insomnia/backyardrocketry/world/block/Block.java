@@ -191,7 +191,7 @@ public class Block {
             String blockStateFileName,
             int blockHealth
     ) {
-        return registerBlock(blockName, isTransparent, hideNeighboringFaces, blockProperties, blockStateFileName, blockHealth, new BlockAudio());
+        return registerBlock(blockName, isTransparent, hideNeighboringFaces, blockProperties, blockStateFileName, blockHealth, null);
     }
 
     public static byte registerBlock(

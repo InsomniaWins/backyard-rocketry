@@ -35,7 +35,7 @@ public class AudioBuffer {
 		try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
 			ShortBuffer pcm = readVorbis(audioFileName, info);
 			alBufferData(BUFFER_ID, info.channels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, info.sample_rate());
-			System.out.println("Loaded audio file: " + audioFileName);
+			System.out.println("Loaded audio: " + audioFileName);
 		}
 
 		clean = false;

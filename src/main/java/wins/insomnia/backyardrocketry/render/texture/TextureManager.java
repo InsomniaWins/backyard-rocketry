@@ -12,8 +12,6 @@ public class TextureManager {
 
     private static final HashMap<String, Texture> TEXTURE_HASH_MAP = new HashMap<>();
 
-    public static final float BLOCK_SCALE_ON_ATLAS = 16f / 512f;
-
 
     public TextureManager() {
         registerTextures();
@@ -21,10 +19,11 @@ public class TextureManager {
 
     private static void registerTextures() {
 
+        registerTexture("block_atlas", new BlockAtlasTexture());
+
         registerTexture("placeholder_inventory", "gui/inventory/placeholder_inventory.png");
         registerTexture("font", "font.png");
         registerTexture("debug_font", "debug_font.png");
-        registerTexture("block_atlas", "block_atlas.png");
         registerTexture("block_outline", "block_outline.png");
         registerTexture("crosshair", "gui/crosshair.png");
         registerTexture("hotbar", "gui/hotbar.png");
@@ -43,7 +42,6 @@ public class TextureManager {
         return TEXTURE_HASH_MAP.get(textureId);
     }
 
-
     public static Texture registerTexture(String textureFilePath) {
         return registerTexture(textureFilePath, textureFilePath);
     }
@@ -58,8 +56,14 @@ public class TextureManager {
         TEXTURE_HASH_MAP.remove(textureId);
     }
 
+
     public static Texture registerTexture(String textureId, String textureFilePath) {
         Texture texture = new Texture(textureFilePath);
+        TEXTURE_HASH_MAP.put(textureId, texture);
+        return texture;
+    }
+
+    public static Texture registerTexture(String textureId, Texture texture) {
         TEXTURE_HASH_MAP.put(textureId, texture);
         return texture;
     }
@@ -68,56 +72,7 @@ public class TextureManager {
         for (Map.Entry<String, Texture> textureEntry : TEXTURE_HASH_MAP.entrySet()) {
             textureEntry.getValue().clean();
         }
-    }
-
-    public static int[] getBlockAtlasCoordinates(String blockTextureName) {
-        switch (blockTextureName) {
-            case "cobblestone" -> {
-                return new int[] {0, 0};
-            }
-            case "stone" -> {
-                return new int[] {1, 0};
-            }
-            case "dirt" -> {
-                return new int[] {2, 0};
-            }
-            case "grass_side" -> {
-                return new int[] {3, 0};
-            }
-            case "grass_top" -> {
-                return new int[] {4, 0};
-            }
-            case "grass_deep_side" -> {
-                return new int[] {5, 0};
-            }
-            case "log_top" -> {
-                return new int[] {0, 1};
-            }
-            case "log_side" -> {
-                return new int[] {1, 1};
-            }
-            case "leaves" -> {
-                return new int[] {2, 1};
-            }
-            case "wooden_planks" -> {
-                return new int[] {3, 1};
-            }
-            case "glass" -> {
-                return new int[] {4, 1};
-            }
-            case "bricks" -> {
-                return new int[] {5, 1};
-            }
-
-            case "wood" -> {
-                return new int[] {0, 2};
-            }
-
-            case "water" -> {
-                return new int[] {6, 0};
-            }
-        }
-        return new int[] {0, 0};
+        TEXTURE_HASH_MAP.clear();
     }
 
     private static byte[] loadTextureData(String textureName) {
@@ -148,10 +103,6 @@ public class TextureManager {
         STBImage.stbi_image_free(buffer);
 
         return textureData;
-    }
-
-    public static Texture getBlockAtlasTexture() {
-        return getTexture("block_atlas");
     }
 
     public static TextureManager get() {

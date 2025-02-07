@@ -2,7 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import wins.insomnia.backyardrocketry.render.texture.TextureManager;
+import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.loading.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.Block;
@@ -110,7 +110,7 @@ public class BlockModelData {
 
     private static BlockModelData fixModelUvs(BlockModelData blockModelData) {
 
-        double pixelUnit = TextureManager.BLOCK_SCALE_ON_ATLAS * (1.0 / 16.0);
+        double pixelUnit = BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * (1.0 / 16.0);
 
         int[] atlasCoordinates;
 
@@ -119,7 +119,7 @@ public class BlockModelData {
             ArrayList<Double> faceVertexArray = (ArrayList<Double>) faceData.get("vertices");
 
             String faceTextureName = blockModelData.textures.get((String) faceData.get("texture"));
-            atlasCoordinates = TextureManager.get().getBlockAtlasCoordinates(faceTextureName);
+            atlasCoordinates = BlockAtlasTexture.getBlockAtlasCoordinates(faceTextureName);
 
 
             for (int vertexIndex = 0; vertexIndex < faceVertexArray.size() / 8; vertexIndex++) {
@@ -130,10 +130,10 @@ public class BlockModelData {
                 double blockU = faceVertexArray.get(uIndex);
                 double blockV = faceVertexArray.get(vIndex);
 
-                double u = blockU * TextureManager.BLOCK_SCALE_ON_ATLAS
-                        + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
-                double v = blockV * TextureManager.BLOCK_SCALE_ON_ATLAS
-                        + TextureManager.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
+                double u = blockU * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS
+                        + BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
+                double v = blockV * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS
+                        + BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
 
                 u += pixelUnit;
                 v += pixelUnit;

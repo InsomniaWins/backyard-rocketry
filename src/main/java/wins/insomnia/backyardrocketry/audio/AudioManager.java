@@ -25,7 +25,6 @@ public class AudioManager {
 
 	private long device;
 	private long context;
-	private AudioListener listener;
 	private final List<AudioPlayer> AUDIO_PLAYER_LIST;
 	private final Matrix4f cameraMatrix;
 	private ALCCapabilities deviceCapabilities;
@@ -147,9 +146,19 @@ public class AudioManager {
 	}
 
 
-	public AudioListener getListener() {
-		return listener;
+	public AudioPlayer playAudioSpatial(AudioBuffer audioBuffer, boolean looping, boolean relative, boolean shouldFree) {
+
+		AudioPlayer player = new AudioPlayer(looping, relative, true);
+		player.setBuffer(audioBuffer);
+		AUDIO_PLAYER_LIST.add(player);
+
+		player.setCleanWhenFinished(shouldFree);
+		player.play();
+
+		return player;
 	}
+
+
 
 	public void clean() {
 
@@ -183,13 +192,16 @@ public class AudioManager {
 		return BackyardRocketry.getInstance().getAudioManager();
 	}
 
-	public void updateListenerPosition(Vector3f position, Camera camera) {
+	public static void updateListenerPosition(Vector3f position, Camera camera) {
 		Matrix4f viewMatrix = camera.getViewMatrix();
-		listener.setPosition(position.x, position.y, position.z);
+		AudioListener.setPosition(position.x, position.y, position.z);
+
 		Vector3f at = new Vector3f();
 		viewMatrix.positiveZ(at).negate();
+
 		Vector3f up = new Vector3f();
 		viewMatrix.positiveY(up);
-		listener.setOrientation(at, up);
+
+		AudioListener.setOrientation(at, up);
 	}
 }

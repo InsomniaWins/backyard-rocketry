@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.FontMesh;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
+import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.util.*;
@@ -376,7 +377,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         defaultShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, TextureManager.getBlockAtlasTexture().getTextureHandle());
+        glBindTexture(GL_TEXTURE_2D, BlockAtlasTexture.get().getTextureHandle());
 
         activateRenderMode();
 
