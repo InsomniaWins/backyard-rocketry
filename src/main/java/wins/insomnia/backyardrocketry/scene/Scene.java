@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.scenes;
+package wins.insomnia.backyardrocketry.scene;
 
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.render.Renderer;
@@ -14,7 +14,7 @@ public class Scene implements IRenderable, IUpdateListener, IFixedUpdateListener
 
 	@Override
 	public boolean shouldRender() {
-		return false;
+		return true;
 	}
 
 	@Override

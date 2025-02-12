@@ -9,7 +9,7 @@ import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.physics.Collision;
-import wins.insomnia.backyardrocketry.scenes.GameplayScene;
+import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
@@ -27,9 +27,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         UNLOAD
     }
 
-    public static final int CHUNK_AMOUNT_X = 45;
-    public static final int CHUNK_AMOUNT_Y = 45;
-    public static final int CHUNK_AMOUNT_Z = 45;
+    public static final int CHUNK_AMOUNT_X = 200;
+    public static final int CHUNK_AMOUNT_Y = 100;
+    public static final int CHUNK_AMOUNT_Z = 200;
     public static int chunkLoadDistance = 8; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;

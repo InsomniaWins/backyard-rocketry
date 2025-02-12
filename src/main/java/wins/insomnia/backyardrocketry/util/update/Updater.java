@@ -2,10 +2,7 @@ package wins.insomnia.backyardrocketry.util.update;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.render.Window;
-import wins.insomnia.backyardrocketry.scenes.Scene;
-import wins.insomnia.backyardrocketry.scenes.SceneManager;
-import wins.insomnia.backyardrocketry.util.debug.DebugTime;
-import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.scene.SceneManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;

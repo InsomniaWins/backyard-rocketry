@@ -10,7 +10,6 @@ public class Color {
 	private float b;
 	private float a;
 
-
 	public static Color WHITE = new Color(1f, 1f, 1f).setConstant();
 	public static Color TRANSPARENT = new Color(1f, 1f, 1f, 0f).setConstant();
 	public static Color RED = new Color(1f, 0f, 0f).setConstant();
@@ -23,18 +22,23 @@ public class Color {
 		setRGBA(fromColor.getRGBA());
 	}
 
-	public Color(float r, float g, float b) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
-		this.a = 1.0f;
-	}
-
 	public Color(float r, float g, float b, float a) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
 		this.a = a;
+	}
+
+	public Color(float r, float g, float b) {
+		this(r,g,b,1f);
+	}
+
+	public Color(int r, int g, int b, int a) {
+		this(r/255f, g/255f, b/255f, a/255f);
+	}
+
+	public Color(int r, int g, int b) {
+		this(r, g, b, 255);
 	}
 
 	public Vector3f getRGB() {
@@ -101,5 +105,17 @@ public class Color {
 	private Color setConstant() {
 		constant = true;
 		return this;
+	}
+
+	public byte getRByte() {
+		return (byte) ((int) (r * 255f));
+	}
+
+	public byte getGByte() {
+		return (byte) ((int) (g * 255f));
+	}
+
+	public byte getBByte() {
+		return (byte) ((int) (b * 255f));
 	}
 }

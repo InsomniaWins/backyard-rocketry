@@ -59,6 +59,10 @@ public class ComponentFootstepAudio extends Component {
 		this.onGround = onGround;
 	}
 
+	public int getAudioTickInterval() {
+		return audioTickInterval;
+	}
+
 	@Override
 	public void fixedUpdate() {
 
@@ -93,7 +97,7 @@ public class ComponentFootstepAudio extends Component {
 		this.moveDistance = moveDistance;
 	}
 
-	private void playAudio() {
+	public void playAudio() {
 
 		audioTickTimer = audioTickInterval;
 
@@ -115,9 +119,10 @@ public class ComponentFootstepAudio extends Component {
 		AudioBuffer stepAudio = blockAudio.getStepAudio();
 		if (stepAudio == null) return;
 
-		AudioPlayer stepAudioPlayer = AudioManager.get().playAudioSpatial(stepAudio, false, false, true);
-		stepAudioPlayer.setPosition(position);
-		stepAudioPlayer.setPitch(0.8f + (float) (Math.random() * 0.6));
+		AudioManager.get().playAudioSpatial(stepAudio, false, false, true)
+				.setPosition(position)
+				.setPitch(0.8f + (float) (Math.random() * 0.6))
+				.setGain(moveDistance * 2f);
 
 		footIndex = (footIndex + 1) % 2;
 

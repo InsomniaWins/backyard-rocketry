@@ -15,10 +15,10 @@ public class Camera {
     private final Transform PREVIOUS_TRANSFORM;
     private final Transform INTERPOLATED_TRANSFORM;
     private final FrustumIntersection FRUSTUM;
-
     private float interpolationFactor = 0.0f;
     private float fov;
     private float renderDistance = 364f;
+    private float viewBobValue = 0f;
 
     public Camera() {
 
@@ -35,6 +35,14 @@ public class Camera {
         updateViewMatrix();
 
         FRUSTUM = new FrustumIntersection();
+    }
+
+    public float getViewBobValue() {
+        return viewBobValue;
+    }
+
+    public void setViewBobValue(float value) {
+        viewBobValue = value;
     }
 
     public float getRenderDistance() {
@@ -57,6 +65,7 @@ public class Camera {
         VIEW_MATRIX.identity();
         VIEW_MATRIX.rotateXYZ(TRANSFORM.getRotation().x, TRANSFORM.getRotation().y, TRANSFORM.getRotation().z);
         VIEW_MATRIX.translate(new Vector3f((float) -TRANSFORM.getPosX(), (float) -TRANSFORM.getPosY(), (float) -TRANSFORM.getPosZ()));
+        VIEW_MATRIX.translate(0f, viewBobValue, 0f);
     }
 
     public void interpolate(double deltaTime) {

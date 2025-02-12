@@ -19,22 +19,7 @@ public class Texture {
 
     public Texture(ByteBuffer textureData, int width, int height) {
 
-        textureIndex = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, textureIndex);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-
-        // if mipmaps should be loaded
-        //glGenerateMipmap(GL_TEXTURE_2D)
-
-        isClean = false;
+        init(textureData, width, height);
 
     }
 
@@ -69,6 +54,12 @@ public class Texture {
             return;
         }
 
+        init(buffer, decoder.getWidth(), decoder.getHeight());
+
+    }
+
+    private void init(ByteBuffer textureData, int textureWidth, int textureHeight) {
+
         textureIndex = glGenTextures();
 
         glBindTexture(GL_TEXTURE_2D, textureIndex);
@@ -76,21 +67,15 @@ public class Texture {
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(), decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-        // if mipmaps should be loaded
-        //glGenerateMipmap(GL_TEXTURE_2D);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
 
         isClean = false;
 
-        this.width = decoder.getWidth();
-        this.height = decoder.getHeight();
+        this.width = textureWidth;
+        this.height = textureHeight;
 
     }
 

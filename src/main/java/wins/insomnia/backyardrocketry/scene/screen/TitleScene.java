@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.scenes.screens;
+package wins.insomnia.backyardrocketry.scene.screen;
 
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
@@ -6,8 +6,9 @@ import wins.insomnia.backyardrocketry.gui.elements.Button;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
-import wins.insomnia.backyardrocketry.scenes.Scene;
-import wins.insomnia.backyardrocketry.scenes.SceneManager;
+import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
+import wins.insomnia.backyardrocketry.scene.Scene;
+import wins.insomnia.backyardrocketry.scene.SceneManager;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
@@ -131,7 +132,7 @@ public class TitleScene extends Scene {
 
 		Renderer renderer = Renderer.get();
 
-		renderer.drawGuiTextureTiled(
+		TextureRenderer.drawGuiTextureTiled(
 				TextureManager.getTexture("menu_background"),
 				0, 0,
 				renderer.getRightAnchor(), renderer.getBottomAnchor()

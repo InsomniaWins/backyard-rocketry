@@ -7,6 +7,7 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
+import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.util.input.MouseInput;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
@@ -98,7 +99,7 @@ public class Button extends GuiElement {
 		}
 
 
-		Renderer.get().drawGuiTextureNineSlice(
+		TextureRenderer.drawGuiTextureNineSlice(
 				buttonTexture,
 				(int) getXPosition(),
 				(int) getYPosition(),

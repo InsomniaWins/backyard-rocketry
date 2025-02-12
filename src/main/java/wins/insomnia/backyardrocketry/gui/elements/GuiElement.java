@@ -1,13 +1,13 @@
 package wins.insomnia.backyardrocketry.gui.elements;
 
 import org.joml.Vector2f;
-import org.joml.primitives.Rectangled;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 
 public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRenderable {
 
+	private static GuiElement selectedElement = null;
 	private final Vector2f POSITION = new Vector2f();
 	private Vector2f SIZE = new Vector2f();
 
@@ -128,6 +128,33 @@ public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRende
 
 	@Override
 	public void unregisteredUpdateListener() {
+
+	}
+
+	public void grabFocus() {
+
+		setFocusedElement(this);
+
+	}
+
+	public void loseFocus() {
+
+		if (!hasFocus()) return;
+
+		setFocusedElement(null);
+	}
+
+	public boolean hasFocus() {
+		return selectedElement == this;
+	}
+
+	public static GuiElement getFocusedElement() {
+		return selectedElement;
+	}
+
+	public static void setFocusedElement(GuiElement element) {
+
+		selectedElement = element;
 
 	}
 }

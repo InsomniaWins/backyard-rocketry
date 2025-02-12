@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util.input;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.render.Window;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -10,8 +11,8 @@ import static org.lwjgl.glfw.GLFW.*;
 public class KeyboardInput {
 
     private final long WINDOW_HANDLE;
-    private final Queue<KeyboardInputEvent> INPUT_EVENT_QUEUE; // input events for the current update() call
-    private final Queue<KeyboardInputEvent> QUEUED_INPUTS; // input events to be processed in the next update() call
+    private final Queue<InputEvent> INPUT_EVENT_QUEUE; // input events for the current update() call
+    private final Queue<InputEvent> QUEUED_INPUTS; // input events to be processed in the next update() call
     private final HashMap<Integer, KeyboardInputEvent.KeyState> KEY_STATES;
     private final List<IInputCallback> INPUT_CALLBACK_LIST;
 
@@ -25,8 +26,9 @@ public class KeyboardInput {
         INPUT_CALLBACK_LIST = new ArrayList<>();
 
         glfwSetKeyCallback(WINDOW_HANDLE, this::keyboardInputCallback);
-
+        glfwSetCharCallback(WINDOW_HANDLE, this::characterInputCallback);
     }
+
 
     public void registerInputCallback(IInputCallback callback) {
 
@@ -41,7 +43,7 @@ public class KeyboardInput {
     }
 
     public void clearConsumedInputs() {
-        INPUT_EVENT_QUEUE.removeIf(KeyboardInputEvent::isConsumed);
+        INPUT_EVENT_QUEUE.removeIf(InputEvent::isConsumed);
     }
 
 
@@ -77,13 +79,21 @@ public class KeyboardInput {
 
 
         while (!QUEUED_INPUTS.isEmpty()) {
-            KeyboardInputEvent inputEvent = QUEUED_INPUTS.remove();
+            InputEvent inputEvent = QUEUED_INPUTS.remove();
 
-            if (inputEvent.isJustPressed()) {
-                KEY_STATES.put(inputEvent.getKey(), KeyboardInputEvent.KeyState.justPressed);
-            }
-            else if (inputEvent.isJustReleased()) {
-                KEY_STATES.put(inputEvent.getKey(), KeyboardInputEvent.KeyState.justReleased);
+            if (inputEvent instanceof KeyboardInputEvent keyboardInputEvent) {
+
+                if (keyboardInputEvent.isJustPressed()) {
+                    KEY_STATES.put(keyboardInputEvent.getKey(), KeyboardInputEvent.KeyState.justPressed);
+                }
+                else if (keyboardInputEvent.isJustReleased()) {
+                    KEY_STATES.put(keyboardInputEvent.getKey(), KeyboardInputEvent.KeyState.justReleased);
+                }
+
+            } else if (inputEvent instanceof TypeInputEvent typeInputEvent) {
+
+
+
             }
 
             INPUT_EVENT_QUEUE.add(inputEvent);
@@ -97,7 +107,7 @@ public class KeyboardInput {
     private void sendInputsToCallbacks() {
         while (!INPUT_EVENT_QUEUE.isEmpty()) {
 
-            KeyboardInputEvent inputEvent = INPUT_EVENT_QUEUE.remove();
+            InputEvent inputEvent = INPUT_EVENT_QUEUE.remove();
 
 			for (IInputCallback inputCallback : INPUT_CALLBACK_LIST) {
 
@@ -128,6 +138,12 @@ public class KeyboardInput {
 
         QUEUED_INPUTS.add(inputEvent);
 
+    }
+
+    public void characterInputCallback(long windowHandle, int character) {
+
+        TypeInputEvent inputEvent = new TypeInputEvent((char) character);
+        QUEUED_INPUTS.add(inputEvent);
     }
 
     public static KeyboardInput get() {

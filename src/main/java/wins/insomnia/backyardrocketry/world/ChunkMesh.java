@@ -4,6 +4,7 @@ import org.joml.*;
 import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.BitHelper;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
@@ -82,11 +83,12 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 9 * Float.BYTES, 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 9 * Float.BYTES, 3 * Float.BYTES);
-        glVertexAttribPointer(2, 3, GL_FLOAT, false, 9 * Float.BYTES, 5 * Float.BYTES);
-        glVertexAttribPointer(3, 1, GL_FLOAT, false, 9 * Float.BYTES, 8 * Float.BYTES);
-
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 11 * Float.BYTES, 0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 11 * Float.BYTES, 3 * Float.BYTES);
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, 11 * Float.BYTES, 5 * Float.BYTES);
+        glVertexAttribPointer(3, 1, GL_FLOAT, false, 11 * Float.BYTES, 8 * Float.BYTES);
+        glVertexAttribPointer(4, 1, GL_FLOAT, false, 11 * Float.BYTES, 9 * Float.BYTES);
+        glVertexAttribPointer(5, 1, GL_FLOAT, false, 11 * Float.BYTES, 10 * Float.BYTES);
 
         readyToCreateOpenGLMeshData.set(false);
         isClean.set(false);
@@ -158,12 +160,15 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
         glEnableVertexAttribArray(3);
+        glEnableVertexAttribArray(4);
+        glEnableVertexAttribArray(5);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
-
         glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(3);
+        glDisableVertexAttribArray(4);
+        glDisableVertexAttribArray(5);
     }
 
     public void generateMesh(byte[][][] blocks) {
@@ -222,7 +227,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
                     BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
-
+                    HashMap<String, String> textures = blockModelData.getTextures();
 
                     for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 
@@ -239,7 +244,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                                     vertices, indices,
                                     faceVertexArray, faceIndexArray,
                                     x, y, z,
-                                    blockNeighbors
+                                    blockNeighbors,
+                                    BlockAtlasTexture.get().getBlockTexture(textures.get(faceData.get("texture")))
                             );
 
                         }
@@ -616,10 +622,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors) {
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture) {
 
         try {
-            int vertexAmount = vertices.size() / 9;
+            int vertexAmount = vertices.size() / 11;
 
             for (int faceIndex : faceIndexArray) {
                 indices.add(faceIndex + vertexAmount);
@@ -665,6 +671,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     } else {
                         vertices.add(1f);
                     }
+
+                    vertices.add((float) blockTexture.getFrames().getFramesPerSecond());
+                    vertices.add((float) blockTexture.getFrames().getFrameAmount());
 
                 }
 

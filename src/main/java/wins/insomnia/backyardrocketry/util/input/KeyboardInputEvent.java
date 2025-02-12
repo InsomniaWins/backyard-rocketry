@@ -1,6 +1,10 @@
 package wins.insomnia.backyardrocketry.util.input;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public class KeyboardInputEvent extends InputEvent {
+
+
 
     public enum KeyState {
         justPressed,

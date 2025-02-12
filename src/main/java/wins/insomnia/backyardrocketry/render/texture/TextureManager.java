@@ -36,6 +36,11 @@ public class TextureManager {
         registerTexture("text_button_pressed", "gui/buttons/text_button_pressed.png");
         registerTexture("menu_background", "gui/background.png");
         registerTexture("dropped_item", "gui/notification_icons/dropped_item.png");
+        registerTexture("line_edit", "gui/line_edits/line_edit.png");
+        registerTexture("line_edit_hovered", "gui/line_edits/line_edit_hovered.png");
+        registerTexture("line_edit_pressed", "gui/line_edits/line_edit_pressed.png");
+        registerTexture("world_preview_crosshair", "world_preview_crosshair.png");
+        registerTexture("buffering", "gui/buffering.png");
     }
 
     public static Texture getTexture(String textureId) {

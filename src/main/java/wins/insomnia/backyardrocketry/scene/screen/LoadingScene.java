@@ -1,12 +1,13 @@
-package wins.insomnia.backyardrocketry.scenes.screens;
+package wins.insomnia.backyardrocketry.scene.screen;
 
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
-import wins.insomnia.backyardrocketry.scenes.Scene;
-import wins.insomnia.backyardrocketry.scenes.SceneManager;
+import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
+import wins.insomnia.backyardrocketry.scene.Scene;
+import wins.insomnia.backyardrocketry.scene.SceneManager;
 import wins.insomnia.backyardrocketry.util.loading.AssetLoader;
 import wins.insomnia.backyardrocketry.util.loading.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
@@ -122,7 +123,7 @@ public class LoadingScene extends Scene {
 		Renderer renderer = Renderer.get();
 
 
-		renderer.drawGuiTextureTiled(
+		TextureRenderer.drawGuiTextureTiled(
 				TextureManager.getTexture("menu_background"),
 				0, 0,
 				renderer.getRightAnchor(), renderer.getBottomAnchor()
@@ -158,10 +159,10 @@ public class LoadingScene extends Scene {
 
 
 		Texture underTexture = TextureManager.getTexture("break_progress_bar_under");
-		renderer.drawGuiTexture(underTexture, centerX - underTexture.getWidth() / 2, centerY - underTexture.getHeight() / 2 + 16);
+		TextureRenderer.drawGuiTexture(underTexture, centerX - underTexture.getWidth() / 2, centerY - underTexture.getHeight() / 2 + 16);
 
 		Texture progressTexture = TextureManager.getTexture("break_progress_bar_progress");
-		renderer.drawGuiTextureClipped(
+		TextureRenderer.drawGuiTextureClipped(
 				progressTexture,
 				centerX - progressTexture.getWidth() / 2, centerY - progressTexture.getHeight() / 2 + 16,
 				(int) (progressTexture.getWidth() * (progress / (double) totalProgress)), progressTexture.getHeight(),

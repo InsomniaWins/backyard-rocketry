@@ -5,7 +5,6 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.audio.AudioListener;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.entity.Entity;
@@ -41,11 +40,12 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
     private final float CAMERA_INTERPOLATION_DURATION = 1.0f / Updater.getFixedUpdatesPerSecond();
 
+    private final float REACH_DISTANCE = 4f;
     // movement speeds (meters per tick)
     private final float CROUCH_SPEED = 1f / Updater.getFixedUpdatesPerSecond();
     private final float WALK_SPEED = 3f / Updater.getFixedUpdatesPerSecond();
     private final float SPRINT_SPEED = 6f / Updater.getFixedUpdatesPerSecond();
-
+    private float moveSpeed;
     private final float JUMP_SPEED = 0.5f;
     private final float HEIGHT = 1.73f;
     private final float EYE_HEIGHT = HEIGHT - 0.1778f;
@@ -77,6 +77,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
     private BlockRaycastResult targetBlock;
     private int breakProgress = 0;
     private boolean hasCollision = true;
+    private boolean moving = false;
+    private boolean crouching = false;
     private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
     private final ComponentFootstepAudio FOOTSTEP_AUDIO;
 
@@ -107,6 +109,14 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         addEntityComponent(new ComponentGravity(this, 1f));
         FOOTSTEP_AUDIO = new ComponentFootstepAudio(this);
         addEntityComponent(FOOTSTEP_AUDIO);
+    }
+
+    public float getMoveSpeed() {
+        return moveSpeed;
+    }
+
+    public boolean isMoving() {
+        return moving;
     }
 
     public Vector3d getPosition() {
@@ -200,27 +210,43 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         return onGround;
     }
 
+
+    private void handleCrouchingAndSprinting() {
+
+        KeyboardInput keyboardInput = KeyboardInput.get();
+
+        moveSpeed = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_CONTROL) ? SPRINT_SPEED : WALK_SPEED;
+
+        if (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+            moveSpeed = CROUCH_SPEED;
+            crouching = true;
+        } else {
+            crouching = false;
+        }
+
+    }
+
+
     @Override
     public void fixedUpdate() {
         super.fixedUpdate();
 
-        FOOTSTEP_AUDIO.fixedUpdate();
+        KeyboardInput keyboardInput = KeyboardInput.get();
+        MouseInput mouseInput = MouseInput.get();
 
         // make sure interpolation of camera transformation is complete
         Renderer.get().getCamera().getTransform().getRotation().set(getRotation());
         Renderer.get().getCamera().getTransform().getPosition().set(getCameraPosition());
 
-        KeyboardInput keyboardInput = KeyboardInput.get();
-        float moveSpeed = KeyboardInput.get().isKeyPressed(GLFW_KEY_LEFT_CONTROL) ? SPRINT_SPEED : WALK_SPEED;
-        if (keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-            moveSpeed = CROUCH_SPEED;
-        }
+        FOOTSTEP_AUDIO.fixedUpdate();
+
+
+        handleCrouchingAndSprinting();
 
         float rotateSpeed = 0.0025f;
 
 
         // get input
-        MouseInput mouseInput = BackyardRocketry.getInstance().getMouseInput();
 
         float forwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_W) ? 1 : 0;
         float backwardDirection = keyboardInput.isKeyPressed(GLFW_KEY_S) ? 1 : 0;
@@ -255,6 +281,7 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
 
         if (isOnGround() && keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
             getVelocity().y = JUMP_SPEED;
+            FOOTSTEP_AUDIO.playAudio();
         }
 
         // apply translation and rotation
@@ -265,6 +292,8 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         double moveDistance = PREVIOUS_TRANSFORM.getPosition().distance(getTransform().getPosition());
         FOOTSTEP_AUDIO.setMoveDistance((float) moveDistance);
         FOOTSTEP_AUDIO.setOnGround(isOnGround());
+
+        moving = moveDistance > 0.01f;
 
         if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
             lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
@@ -398,10 +427,9 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         Vector3d rayDirection = new Vector3d(0, 0, -1)
                 .rotateX(-getTransform().getRotation().x)
                 .rotateY(-getTransform().getRotation().y);
-        int rayLength = 7;
 
         BlockRaycastResult previousTargetBlock = targetBlock;
-        targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, rayLength);
+        targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, REACH_DISTANCE);
 
         if (previousTargetBlock != null && targetBlock != null && !previousTargetBlock.equals(targetBlock, false)) {
             breakProgress = 0;
@@ -660,6 +688,13 @@ public class TestPlayer extends LivingEntity implements IPlayer, ICollisionBody 
         // set camera rotation and position to interpolated values
         camera.getTransform().getRotation().set(INTERPOLATED_CAMERA_ROTATION);
         camera.getTransform().getPosition().set(INTERPOLATED_CAMERA_POSITION);
+
+        float desiredBobValue = (isOnGround() && isMoving())
+                ? (float) Math.sin(Updater.getCurrentTime() * 70f * moveSpeed) * 0.1f
+                : 0f;
+        float viewBobValue = (float) Math.lerp(camera.getViewBobValue(), desiredBobValue, deltaTime * 40f * moveSpeed);
+
+        camera.setViewBobValue(viewBobValue);
 
     }
 

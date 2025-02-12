@@ -178,10 +178,6 @@ public class AudioManager {
 
 		AUDIO_BUFFER_MAP.clear();
 
-
-
-		alcMakeContextCurrent(NULL);
-		AL.setCurrentProcess(null);
 		memFree(deviceCapabilities.getAddressBuffer());
 		alcDestroyContext(context);
 		alcCloseDevice(device);

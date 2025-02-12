@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.scenes;
+package wins.insomnia.backyardrocketry.scene;
 
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.controller.ClientController;

@@ -12,6 +12,7 @@ import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
+import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
@@ -114,8 +115,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		int hotbarX = renderer.getCenterAnchorX() - 139;
 		int hotbarY = renderer.getBottomAnchor() - 41;
 		int selectedHotbarSlotX = hotbarX + player.getCurrentHotbarSlot() * 28;
-		renderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
-		renderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
+		TextureRenderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
+		TextureRenderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
 
 
 
@@ -191,7 +192,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 
 		// draw crosshair
-		renderer.drawGuiTexture(TextureManager.getTexture("crosshair"), renderer.getCenterAnchorX() - 8, renderer.getCenterAnchorY() - 8);
+		TextureRenderer.drawGuiTexture(TextureManager.getTexture("crosshair"), renderer.getCenterAnchorX() - 8, renderer.getCenterAnchorY() - 8);
 
 
 		// render inventory
@@ -199,7 +200,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			Texture inventoryTexture = TextureManager.getTexture("placeholder_inventory");
 			int textureX = renderer.getCenterAnchorX() - inventoryTexture.getWidth() / 2;
 			int textureY = renderer.getCenterAnchorY() - inventoryTexture.getHeight() / 2;
-			renderer.drawGuiTexture(inventoryTexture, textureX, textureY);
+			TextureRenderer.drawGuiTexture(inventoryTexture, textureX, textureY);
 		}
 
 
@@ -215,7 +216,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		if (player.getBreakProgress() > 0) {
 			int progressBarScreenPositionY = renderer.getCenterAnchorY() + 16;
 
-			renderer.drawGuiTextureClipped(
+			TextureRenderer.drawGuiTextureClipped(
 					TextureManager.getTexture("break_progress_bar_under"),
 					renderer.getCenterAnchorX() - 34,
 					progressBarScreenPositionY,
@@ -230,7 +231,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 			int breakProgressPixels = Math.round(62f * breakProgressRatio);
 
-			renderer.drawGuiTextureClipped(
+			TextureRenderer.drawGuiTextureClipped(
 					TextureManager.getTexture("break_progress_bar_progress"),
 					renderer.getCenterAnchorX() - 31,
 					progressBarScreenPositionY + 3,
@@ -246,7 +247,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		// render w.a.i.l.a gui
 		Texture wailaTexture = TextureManager.getTexture("waila");
 		int wailaPosY = 0;
-		renderer.drawGuiTexture(
+		TextureRenderer.drawGuiTexture(
 				wailaTexture,
 				renderer.getCenterAnchorX() - wailaTexture.getWidth() / 2,
 				wailaPosY

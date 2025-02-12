@@ -163,11 +163,11 @@ public class Block {
 
     public static final byte WATER = registerBlock(
             "Water",
-            false,
+            true,
             true,
             null,
             "water",
-            0
+            -1
     );
 
 
@@ -308,7 +308,7 @@ public class Block {
     }
 
     public static BoundingBox getBlockCollision(byte block) {
-        if (block == AIR) {
+        if (block == AIR || block == WATER) {
             return null;
         } else {
             return new BoundingBox(DEFAULT_BLOCK_BOUNDING_BOX);

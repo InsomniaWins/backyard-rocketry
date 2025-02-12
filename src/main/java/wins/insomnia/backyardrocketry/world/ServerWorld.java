@@ -1,7 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 import wins.insomnia.backyardrocketry.controller.ServerController;
-import wins.insomnia.backyardrocketry.scenes.GameplayScene;
+import wins.insomnia.backyardrocketry.scene.GameplayScene;
 
 import java.util.logging.Level;
 

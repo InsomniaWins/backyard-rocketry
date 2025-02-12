@@ -9,6 +9,7 @@ import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
+import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 
 public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 
@@ -82,7 +83,7 @@ public class DroppedItemIcon implements IGuiRenderable, IPositionOwner {
 		Vector3i guiPosition = Renderer.get().worldPositionToGuiPosition(camera, position.x, position.y, position.z);
 
 		if (guiPosition.z == 0) {
-			Renderer.get().drawGuiTextureNineSlice(
+			TextureRenderer.drawGuiTextureNineSlice(
 					TextureManager.getTexture("dropped_item"),
 					guiPosition.x - 12,
 					guiPosition.y - 12,

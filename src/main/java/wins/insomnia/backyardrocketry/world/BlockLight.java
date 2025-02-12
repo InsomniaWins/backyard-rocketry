@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.util.world;
+package wins.insomnia.backyardrocketry.world;
 
 public class BlockLight {
 
