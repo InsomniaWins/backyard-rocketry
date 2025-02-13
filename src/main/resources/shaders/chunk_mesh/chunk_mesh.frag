@@ -81,7 +81,7 @@ void main() {
 
             fragmentColor.rgb = fragmentColor.rgb * ambientLighting;
 
-            vec3 diffuseLighting = lightColor * (max(dot(normalize(fs_normal), lightDirection), 0.0));
+            vec3 diffuseLighting = lightColor * (max(dot(fs_normal, lightDirection), 0.0));
 
             fragmentColor.rgb = (ambientLighting + diffuseLighting) * fragmentColor.rgb;
 

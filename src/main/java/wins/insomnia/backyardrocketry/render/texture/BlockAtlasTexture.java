@@ -12,7 +12,7 @@ public class BlockAtlasTexture extends Texture {
 	private final HashMap<String, BlockTexture> BLOCK_TEXTURE_MAP;
 
 	public BlockAtlasTexture() {
-		super("block_atlas.png");
+		super("block_atlas.png", false);
 
 		BLOCK_TEXTURE_MAP = new HashMap<>();
 		registerBlockTexture("cobblestone", new BlockTextureFrames(new Vector2i(0, 0)));

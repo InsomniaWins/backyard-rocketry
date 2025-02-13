@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_TEXTURE_MAX_LEVEL;
+import static org.lwjgl.opengl.GL12.GL_TEXTURE_MAX_LOD;
 
 public class Texture {
 
@@ -23,8 +25,7 @@ public class Texture {
 
     }
 
-
-    public Texture(String textureName) {
+    public Texture(String textureName, boolean repeat) {
         this.textureName = textureName;
 
         PNGDecoder decoder = null;
@@ -54,21 +55,34 @@ public class Texture {
             return;
         }
 
-        init(buffer, decoder.getWidth(), decoder.getHeight());
-
+        init(buffer, decoder.getWidth(), decoder.getHeight(), repeat);
     }
 
-    private void init(ByteBuffer textureData, int textureWidth, int textureHeight) {
+    public Texture(String textureName) {
+        this(textureName, true);
+    }
+
+    private void init(ByteBuffer textureData, int textureWidth, int textureHeight, boolean repeat) {
 
         textureIndex = glGenTextures();
 
         glBindTexture(GL_TEXTURE_2D, textureIndex);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        if (repeat) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
 
@@ -76,6 +90,12 @@ public class Texture {
 
         this.width = textureWidth;
         this.height = textureHeight;
+
+    }
+
+    private void init(ByteBuffer textureData, int textureWidth, int textureHeight) {
+
+        init(textureData, textureWidth, textureHeight, true);
 
     }
 

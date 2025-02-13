@@ -123,7 +123,7 @@ public class NewSaveScene extends Scene {
 
 		verticalObjectIndex += 3;
 
-		CREATE_SAVE_BUTTON = new Button("Create Save", () -> SceneManager.get().changeScene(new TitleScene()));
+		CREATE_SAVE_BUTTON = new Button("Create Save", this::temp);
 		CREATE_SAVE_BUTTON.setSize(100, 20);
 		CREATE_SAVE_BUTTON.setPosition(
 				Renderer.get().getCenterAnchorX() - CREATE_SAVE_BUTTON.getWidth() / 2,

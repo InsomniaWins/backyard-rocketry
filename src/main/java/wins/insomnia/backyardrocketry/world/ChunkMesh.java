@@ -1,14 +1,10 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.*;
-import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
-import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
-import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
@@ -624,6 +620,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture) {
 
+        ChunkPosition chunkPosition = chunk.getChunkPosition();
+
         try {
             int vertexAmount = vertices.size() / 11;
 
@@ -669,7 +667,15 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         vertices.add(aoValue);
 
                     } else {
-                        vertices.add(1f);
+                        //vertices.add(1f);
+                        vertices.add(
+                                WorldGeneration.getBlockTint(
+                                        World.getServerWorld().getSeed(),
+                                        chunkPosition.getBlockX() + offX,
+                                        chunkPosition.getBlockY() + offY,
+                                        chunkPosition.getBlockZ() + offZ
+                                )
+                        );
                     }
 
                     vertices.add((float) blockTexture.getFrames().getFramesPerSecond());

@@ -9,6 +9,11 @@ import java.nio.ByteBuffer;
 
 public class WorldGeneration {
 
+    public static float getBlockTint(long seed, int blockX, int blockY, int blockZ) {
+        float noiseScale = 0.25f;
+        float tint = 0.5f * (OpenSimplex2.noise3_ImproveXZ(seed, blockX * noiseScale, blockY * noiseScale, blockZ * noiseScale) + 1f);
+        return 0.9f + tint * 0.2f;
+    }
 
     public static void getWorldPreview(long seed, ByteBuffer textureData) {
 

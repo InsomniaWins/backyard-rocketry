@@ -89,7 +89,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
                     int groundHeight = WorldGeneration.getGroundHeight(globalBlockX, globalBlockZ);
 
-                    byte block = Block.AIR;
+                    byte block;
 
                     if (globalBlockY > groundHeight) {
 

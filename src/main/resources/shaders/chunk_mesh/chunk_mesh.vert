@@ -45,7 +45,7 @@ void main() {
     gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
 
     fs_textureCoordinates = vs_textureCoordinates;
-    fs_normal = vs_normal;
+    fs_normal = normalize(vs_normal);
     fs_eyeSpacePosition = modelViewMatrix * vertexVector;
     fs_ambientOcclusionValue = vs_ambientOcclusionValue;
     fs_framesPerSecond = vs_framesPerSecond;

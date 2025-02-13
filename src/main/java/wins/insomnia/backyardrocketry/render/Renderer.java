@@ -66,6 +66,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         camera = new Camera();
         camera.getTransform().getPosition().set(0f, 0f, -3f);
 
+        glDisable(GL_MULTISAMPLE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
