@@ -4,10 +4,90 @@ import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
+import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.nio.ByteBuffer;
 
 public class WorldGeneration {
+
+    public static int SEA_LEVEL = 80;
+
+    public static ChunkData generateChunkData(ChunkData chunkData) {
+
+        generateLand(chunkData);
+
+        return chunkData;
+    }
+
+
+    public static boolean isBlockWorldBorder(int blockX, int blockY, int blockZ) {
+
+        if (blockX == 0 || blockX == World.CHUNK_AMOUNT_X * Chunk.SIZE_X - 1) {
+            return true;
+        }
+
+        if (blockY == 0 || blockY == World.CHUNK_AMOUNT_Y * Chunk.SIZE_Y - 1) {
+            return true;
+        }
+
+		return blockZ == 0 || blockZ == World.CHUNK_AMOUNT_Z * Chunk.SIZE_Z - 1;
+	}
+
+    private static void generateLand(ChunkData chunkData) {
+
+        for (int y = 0; y < Chunk.SIZE_Y; y++) {
+            for (int x = 0; x < Chunk.SIZE_X; x++) {
+                for (int z = 0; z < Chunk.SIZE_Z; z++) {
+
+                    int globalBlockX = x + chunkData.getWorldX();
+                    int globalBlockY = y + chunkData.getWorldY();
+                    int globalBlockZ = z + chunkData.getWorldZ();
+
+                    int groundHeight = WorldGeneration.getGroundHeight(chunkData.getSeed(), globalBlockX, globalBlockZ);
+
+                    byte block;
+
+
+                    if (isBlockWorldBorder(globalBlockX, globalBlockY, globalBlockZ)) {
+
+                        block = Block.WORLD_BORDER;
+
+                    } else if (globalBlockY > groundHeight) {
+
+                        if (globalBlockY <= WorldGeneration.SEA_LEVEL) {
+                            block = Block.WATER;
+                        } else {
+                            block = Block.AIR;
+                        }
+
+                    } else {
+
+                        if (globalBlockY == groundHeight) {
+                            block = Block.GRASS;
+                        } else if (globalBlockY > groundHeight - 4) {
+                            block = Block.DIRT;
+                        } else {
+                            if (World.RANDOM.nextInt(2) == 0) {
+                                block = Block.COBBLESTONE;
+                            } else {
+                                block = Block.STONE;
+                            }
+                        }
+                    }
+
+
+                    chunkData.setBlock(x, y, z, block);
+
+                }
+            }
+        }
+
+    }
+
+
+
+
+
 
     public static float getBlockTint(long seed, int blockX, int blockY, int blockZ) {
         float noiseScale = 0.25f;
@@ -33,7 +113,7 @@ public class WorldGeneration {
                 int groundHeight = WorldGeneration.getGroundHeight(seed, blockX, blockZ);
 
                 Color color = LAND_COLOR;
-                if (groundHeight <= 80) {
+                if (groundHeight <= SEA_LEVEL) {
                     color = WATER_COLOR;
                 }
 
@@ -62,8 +142,7 @@ public class WorldGeneration {
 
     public static int getGroundHeight(long seed, int globalBlockX, int globalBlockZ) {
         int noiseAmplitude = 6;
-        float noiseScale = 0.0125f;
-
+        float noiseScale = 0.0025f;
         return (int) (60 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
     }
 

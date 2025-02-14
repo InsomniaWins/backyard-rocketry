@@ -1,14 +1,12 @@
 package wins.insomnia.backyardrocketry.scene.screen;
 
 import org.joml.Math;
-import org.joml.Vector3f;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.glfw.GLFW;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.gui.elements.Button;
 import wins.insomnia.backyardrocketry.gui.elements.GuiElement;
 import wins.insomnia.backyardrocketry.gui.elements.LineEdit;
-import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
@@ -18,13 +16,23 @@ import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.scene.Scene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
-import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.io.ChunkIO;
+import wins.insomnia.backyardrocketry.util.io.FileIO;
+import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkData;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
+
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NewSaveScene extends Scene {
@@ -53,9 +61,7 @@ public class NewSaveScene extends Scene {
 	private final Runnable GENERATE_SEED_PREVIEW_RUNNABLE = new Runnable() {
 		@Override
 		public void run() {
-			long seed = (SAVE_SEED_LINE_EDIT.getText().isEmpty())
-					? 0
-					: Long.parseLong(SAVE_SEED_LINE_EDIT.getText());
+			long seed = getSeed();
 
 			WorldGeneration.getWorldPreview(seed, SEED_TEXTURE_DATA);
 			SEED_PREVIEW_STATUS.set(SEED_PREVIEW_GENERATED);
@@ -74,6 +80,14 @@ public class NewSaveScene extends Scene {
 		}
 	};
 
+	private final int SAVE_CREATION_GENERATING_CHUNKS = 0;
+	private Thread saveCreationThread;
+	private boolean creatingSave = false;
+	private final AtomicInteger CURRENT_CREATION_STEP = new AtomicInteger(SAVE_CREATION_GENERATING_CHUNKS);
+	private final AtomicInteger CREATION_PROGRESS = new AtomicInteger(0);
+	private int creationTotalProgress = 1;
+
+
 	public NewSaveScene() {
 
 		BACK_BUTTON = new Button("Back", () -> SceneManager.get().changeScene(new SaveSelectionScene()));
@@ -91,6 +105,7 @@ public class NewSaveScene extends Scene {
 				Renderer.get().getCenterAnchorX() - SAVE_NAME_LINE_EDIT.getWidth() / 2,
 				verticalObjectPosition + verticalObjectIndex * verticalObjectHeight
 		);
+		SAVE_NAME_LINE_EDIT.registerTextListener((text) -> makeValidSaveName());
 		SAVE_NAME_LINE_EDIT.setMaximumCharacters(15);
 		SAVE_NAME_LINE_EDIT.setHorizontalTextAlignment(LineEdit.HorizontalTextAlignment.CENTER);
 		SAVE_NAME_LINE_EDIT.setText("New Save");
@@ -123,7 +138,7 @@ public class NewSaveScene extends Scene {
 
 		verticalObjectIndex += 3;
 
-		CREATE_SAVE_BUTTON = new Button("Create Save", this::temp);
+		CREATE_SAVE_BUTTON = new Button("Create Save", this::createSave);
 		CREATE_SAVE_BUTTON.setSize(100, 20);
 		CREATE_SAVE_BUTTON.setPosition(
 				Renderer.get().getCenterAnchorX() - CREATE_SAVE_BUTTON.getWidth() / 2,
@@ -148,17 +163,18 @@ public class NewSaveScene extends Scene {
 		shouldUpdateSeedPreview = true;
 	}
 
-	@Override
-	public void render() {
-
-
-		Renderer renderer = Renderer.get();
-
+	private void drawBackground() {
 		TextureRenderer.drawGuiTextureTiled(
 				TextureManager.getTexture("menu_background"),
 				0, 0,
-				renderer.getRightAnchor(), renderer.getBottomAnchor()
+				Renderer.get().getRightAnchor(), Renderer.get().getBottomAnchor()
 		);
+	}
+
+	@Override
+	public void render() {
+
+		drawBackground();
 		
 		String versionString = BackyardRocketry.getVersionString();
 		TextRenderer.drawTextOutline(
@@ -170,6 +186,88 @@ public class NewSaveScene extends Scene {
 		);
 
 		drawSeedPreview();
+
+		if (creatingSave) {
+
+			drawSaveCreationProgress();
+
+		}
+	}
+
+	private void drawSaveCreationProgress() {
+
+		drawBackground();
+
+		int frame = (int) ((Updater.getCurrentTime() * 25f) % 12f);
+		TextureRenderer.drawGuiTextureClipped(
+				TextureManager.getTexture("buffering"),
+				Renderer.get().getCenterAnchorX() - 8,
+				Renderer.get().getCenterAnchorY() - 8,
+				16,
+				16,
+				frame * 16,
+				0,
+				16,
+				16
+		);
+
+		String loadingText = "Creating Save . . .";
+		TextRenderer.drawText(
+				loadingText,
+				Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(loadingText) / 2,
+				Renderer.get().getCenterAnchorY() - 32
+		);
+
+
+		Renderer renderer = Renderer.get();
+
+
+		String stepText = "";
+		switch (CURRENT_CREATION_STEP.get()) {
+			case SAVE_CREATION_GENERATING_CHUNKS -> {
+
+				stepText = "Generating Chunks . . .";
+
+			}
+		}
+		TextRenderer.drawText(
+				stepText,
+				Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(stepText) / 2,
+				Renderer.get().getCenterAnchorY() + 16
+		);
+
+
+
+
+		int progressBarScreenPositionY = renderer.getCenterAnchorY() + 32;
+
+		TextureRenderer.drawGuiTextureClipped(
+				TextureManager.getTexture("break_progress_bar_under"),
+				renderer.getCenterAnchorX() - 34,
+				progressBarScreenPositionY,
+				68,
+				8,
+				0,
+				0,
+				68,
+				8
+		);
+
+
+		int breakProgressPixels = Math.round(62f * (CREATION_PROGRESS.get() / (float) creationTotalProgress));
+
+		TextureRenderer.drawGuiTextureClipped(
+				TextureManager.getTexture("break_progress_bar_progress"),
+				renderer.getCenterAnchorX() - 31,
+				progressBarScreenPositionY + 3,
+				breakProgressPixels,
+				2,
+				0,
+				0,
+				breakProgressPixels,
+				2
+		);
+
 	}
 
 
@@ -362,11 +460,137 @@ public class NewSaveScene extends Scene {
 
 
 
+	private void makeValidSaveName() {
+
+		SAVE_NAME_LINE_EDIT.setText(SAVE_NAME_LINE_EDIT.getText().replaceAll("[^a-zA-Z0-9-_\\.]", "_"), false);
+
+	}
+
+	private long getSeed() {
+
+		if (SAVE_SEED_LINE_EDIT.getText().isEmpty()) {
+			return 0L;
+		} else {
+			return Long.parseLong(SAVE_SEED_LINE_EDIT.getText());
+		}
+
+	}
+
+	private void createSave() {
+
+		makeValidSaveName();
+
+		String saveName = SAVE_NAME_LINE_EDIT.getText();
+
+		Path savePath = FileIO.getPathForSave(saveName, false);
+		if (Files.exists(savePath)) {
+
+			//TODO: tell user save name already exists
+			return;
+
+		}
+
+		try {
+			Files.createDirectory(savePath);
+		} catch (IOException e) {
+
+			//TODO: tell user we failed to make a save directory
+
+			return;
+		}
 
 
-	private void temp( ) {
-		GameplayScene gameplayScene = new GameplayScene(GameplayScene.GameType.CLIENT_SERVER);
-		SceneManager.get().changeScene(gameplayScene);
+		unregisterGameObject(SAVE_NAME_LINE_EDIT);
+		unregisterGameObject(SAVE_SEED_LINE_EDIT);
+		unregisterGameObject(BACK_BUTTON);
+		unregisterGameObject(CREATE_SAVE_BUTTON);
+		unregisterGameObject(REFRESH_SEED_BUTTON);
+
+		creatingSave = true;
+
+		CREATION_PROGRESS.set(0);
+		creationTotalProgress = World.CHUNK_AMOUNT_X * World.CHUNK_AMOUNT_Y * World.CHUNK_AMOUNT_Z;
+
+		long seed = getSeed();
+
+		Path chunksPath = FileIO.getChunksPath(savePath);
+		ChunkIO.setChunksPath(chunksPath);
+		saveCreationThread = new Thread(
+				() -> {
+
+					FileOutputStream fos = null;
+
+					try {
+						int regionAmountX = World.CHUNK_AMOUNT_X / ChunkIO.REGION_SIZE;
+						int regionAmountY = World.CHUNK_AMOUNT_Y / ChunkIO.REGION_SIZE;
+						int regionAmountZ = World.CHUNK_AMOUNT_Z / ChunkIO.REGION_SIZE;
+
+						for (int regionX = 0; regionX < regionAmountX; regionX++) {
+							for (int regionY = 0; regionY < regionAmountY; regionY++) {
+								for (int regionZ = 0; regionZ < regionAmountZ; regionZ++) {
+
+									String regionName = ChunkIO.getRegionNameFromRegion(regionX, regionY, regionZ);
+									Path regionFilePath = ChunkIO.getRegionPathFromRegionName(regionName);
+
+									Files.createFile(regionFilePath);
+									fos = new FileOutputStream(regionFilePath.toString());
+									BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+
+									for (int i = 0; i < ChunkIO.REGION_SIZE; i++) {
+										for (int j = 0; j < ChunkIO.REGION_SIZE; j++) {
+											for (int k = 0; k < ChunkIO.REGION_SIZE; k++) {
+
+												int chunkX = regionX * ChunkIO.REGION_SIZE + i;
+												int chunkY = regionY * ChunkIO.REGION_SIZE + j;
+												int chunkZ = regionZ * ChunkIO.REGION_SIZE + k;
+
+												ChunkData chunkData = new ChunkData(seed, chunkX, chunkY, chunkZ);
+
+												bos.write(ChunkData.serialize(chunkData));
+
+												CREATION_PROGRESS.incrementAndGet();
+
+											}
+										}
+									}
+
+									bos.close();
+									fos.close();
+
+								}
+							}
+						}
+					} catch (IOException e) {
+
+
+
+						if (fos != null) {
+							try {
+								fos.close();
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							}
+						}
+
+						e.printStackTrace();
+
+					}
+
+					Updater.get().queueMainThreadInstruction(() -> {
+
+						GameplayScene gameplayScene = new GameplayScene(GameplayScene.GameType.CLIENT_SERVER);
+						SceneManager.get().changeScene(gameplayScene);
+
+					});
+
+					},
+				"Save-Creation-Thread"
+		);
+
+		saveCreationThread.start();
+
+
 	}
 
 }

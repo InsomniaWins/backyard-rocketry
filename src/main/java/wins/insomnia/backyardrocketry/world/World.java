@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -27,9 +28,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         UNLOAD
     }
 
-    public static final int CHUNK_AMOUNT_X = 200;
-    public static final int CHUNK_AMOUNT_Y = 100;
-    public static final int CHUNK_AMOUNT_Z = 200;
+    public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(100);
+    public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(1);
+    public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(100);
     public static int chunkLoadDistance = 8; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
@@ -434,20 +435,22 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         if (CHUNKS.get(chunkPosition) != null) return;
 
+        Chunk chunk = new Chunk(this, chunkPosition);
+
         if (Thread.currentThread() != Main.MAIN_THREAD) {
             Updater.get().queueMainThreadInstruction(() -> {
-                Chunk chunk = new Chunk(this, chunkPosition);
-                chunk.generateLand();
                 CHUNKS.put(chunkPosition, chunk);
                 CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
                 ENTITIES.put(chunkPosition, new ArrayList<>());
+
+                chunk.updateNeighborChunkMeshes();
             });
         } else {
-            Chunk chunk = new Chunk(this, chunkPosition);
-            chunk.generateLand();
             CHUNKS.put(chunkPosition, chunk);
             CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
             ENTITIES.put(chunkPosition, new ArrayList<>());
+
+            chunk.updateNeighborChunkMeshes();
         }
     }
 

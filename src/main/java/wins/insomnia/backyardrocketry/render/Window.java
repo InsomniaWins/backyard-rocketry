@@ -2,10 +2,12 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.Vector2i;
 import org.joml.primitives.Rectanglei;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.util.input.*;
+import wins.insomnia.backyardrocketry.util.io.device.IInputCallback;
+import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.io.device.KeyboardInputEvent;
+import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.glViewport;

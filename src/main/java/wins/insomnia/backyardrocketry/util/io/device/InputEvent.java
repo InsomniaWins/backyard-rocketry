@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.util.input;
+package wins.insomnia.backyardrocketry.util.io.device;
 
 public class InputEvent {
 

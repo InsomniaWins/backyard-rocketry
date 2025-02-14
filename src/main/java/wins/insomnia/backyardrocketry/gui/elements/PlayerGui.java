@@ -245,16 +245,27 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		}
 
 		// render w.a.i.l.a gui
-		Texture wailaTexture = TextureManager.getTexture("waila");
-		int wailaPosY = 0;
-		TextureRenderer.drawGuiTexture(
-				wailaTexture,
-				renderer.getCenterAnchorX() - wailaTexture.getWidth() / 2,
-				wailaPosY
-		);
-
 		String blockName = Block.getBlockName(targetBlockId);
 		int textWidth = TextRenderer.getTextPixelWidth(blockName);
+
+		Texture wailaTexture = TextureManager.getTexture("waila");
+
+		int wailaWidth = textWidth + 16;
+		int wailaHeight = TextRenderer.getTextPixelHeight(1) + 6;
+		int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
+		int wailaPosY = 0;
+
+		TextureRenderer.drawGuiTextureNineSlice(
+				wailaTexture,
+				wailaPosX,
+				wailaPosY,
+				wailaWidth,
+				wailaHeight,
+				5,
+				true
+		);
+
+
 		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
 		TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
 	}

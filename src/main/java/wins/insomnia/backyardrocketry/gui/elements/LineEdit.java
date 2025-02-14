@@ -1,17 +1,14 @@
 package wins.insomnia.backyardrocketry.gui.elements;
 
-import org.joml.Vector2f;
 import wins.insomnia.backyardrocketry.audio.AudioBuffer;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.render.Color;
-import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
-import wins.insomnia.backyardrocketry.util.input.*;
-import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.util.io.device.*;
 
 
 import java.util.ArrayList;

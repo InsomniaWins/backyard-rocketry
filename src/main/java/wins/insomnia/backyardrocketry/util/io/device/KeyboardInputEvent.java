@@ -1,6 +1,4 @@
-package wins.insomnia.backyardrocketry.util.input;
-
-import static org.lwjgl.glfw.GLFW.*;
+package wins.insomnia.backyardrocketry.util.io.device;
 
 public class KeyboardInputEvent extends InputEvent {
 

@@ -1,9 +1,7 @@
-package wins.insomnia.backyardrocketry.util.input;
+package wins.insomnia.backyardrocketry.util.io.device;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.render.Window;
 
-import java.lang.ref.WeakReference;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.*;

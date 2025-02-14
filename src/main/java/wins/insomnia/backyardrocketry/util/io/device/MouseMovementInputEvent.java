@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.util.input;
+package wins.insomnia.backyardrocketry.util.io.device;
 
 import org.joml.Vector2i;
 

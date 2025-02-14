@@ -8,8 +8,8 @@ import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.scene.Scene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
-import wins.insomnia.backyardrocketry.util.loading.AssetLoader;
-import wins.insomnia.backyardrocketry.util.loading.LoadTask;
+import wins.insomnia.backyardrocketry.util.io.AssetLoader;
+import wins.insomnia.backyardrocketry.util.io.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.util.List;

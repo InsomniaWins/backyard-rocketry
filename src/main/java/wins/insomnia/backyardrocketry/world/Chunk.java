@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.checkerframework.checker.units.qual.A;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.Main;
@@ -8,6 +9,7 @@ import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -23,13 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
-    public enum GenerationPhase {
-        UNLOADED,
-        GENERATING_LAND,
-        READY_FOR_DECORATION,
-        PLACING_DECORATIONS,
-        GENERATED
-    }
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
     public static final int SIZE_X = 20;
@@ -43,15 +38,17 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     private final ChunkMesh CHUNK_MESH;
     private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
-    private AtomicInteger generationPhase = new AtomicInteger(GenerationPhase.UNLOADED.ordinal());
+    private final AtomicBoolean LOADED = new AtomicBoolean(false);
     private boolean shouldProcess = false;
-    private byte[][][] blocks;
     protected AtomicBoolean shouldRegenerateMesh = new AtomicBoolean(false);
     protected AtomicBoolean shouldInstantlyGenerateMesh = new AtomicBoolean(false);
     protected int ticksToLive = 240;
+    private ChunkData chunkData;
 
     public Chunk(World world, ChunkPosition chunkPosition) {
 
+        chunkData = ChunkIO.loadChunk(chunkPosition);
+        shouldRegenerateMesh.set(true);
 
         X = chunkPosition.getBlockX();
         Y = chunkPosition.getBlockY();
@@ -66,69 +63,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         CHUNK_MESH = new ChunkMesh(this, false);
         TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
 
-        initializeBlocks();
-
         Updater.get().registerFixedUpdateListener(this);
         Updater.get().registerUpdateListener(this);
 
-        //System.out.println("Loaded chunk: " + chunkPosition);
     }
 
-
-    protected void generateLand() {
-
-        generationPhase.set(GenerationPhase.GENERATING_LAND.ordinal());
-
-        for (int y = 0; y < SIZE_Y; y++) {
-            for (int x = 0; x < SIZE_X; x++) {
-                for (int z = 0; z < SIZE_Z; z++) {
-
-                    int globalBlockX = x + X;
-                    int globalBlockY = y + Y;
-                    int globalBlockZ = z + Z;
-
-                    int groundHeight = WorldGeneration.getGroundHeight(globalBlockX, globalBlockZ);
-
-                    byte block;
-
-                    if (globalBlockY > groundHeight) {
-
-                        if (globalBlockY <= WORLD.getSeaLevel()) {
-                            block = Block.WATER;
-                        } else {
-                            continue;
-                        }
-
-                    } else {
-
-                        if (globalBlockY == groundHeight) {
-                            block = Block.GRASS;
-                        } else if (globalBlockY > groundHeight - 4) {
-                            block = Block.DIRT;
-                        } else {
-                            if (World.RANDOM.nextInt(2) == 0) {
-                                block = Block.COBBLESTONE;
-                            } else {
-                                block = Block.STONE;
-                            }
-                        }
-                    }
-
-
-                    blocks[x][y][z] = block;
-
-                }
-            }
-        }
-
-        setShouldRegenerateMesh(true);
-        Updater.get().queueMainThreadInstruction(this::updateNeighborChunkMeshes);
-
-    }
-
-
-    public GenerationPhase getGenerationPhase() {
-        return GenerationPhase.values()[generationPhase.get()];
+    public boolean isLoaded() {
+        return LOADED.get();
     }
 
 
@@ -171,7 +112,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         }
 
-        blocks[x][y][z] = block;
+        chunkData.setBlock(x,y,z, block);
 
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
@@ -196,7 +137,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         }
     }
 
-    private void updateNeighborChunkMeshes() {
+    public void updateNeighborChunkMeshes() {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
             throw new ConcurrentModificationException("Tried updating neighboring chunk meshes from thread other than the main thread!");
@@ -305,7 +246,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             return Block.NULL;
         }
 
-        return blocks[x][y][z];
+        return chunkData.getBlock(x, y, z);
     }
 
     public byte getBlock(int x, int y, int z) {
@@ -337,7 +278,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             return chunk.getBlock(chunk.toLocalX(globalX), chunk.toLocalY(globalY), chunk.toLocalZ(globalZ));
         }
 
-        return blocks[x][y][z];
+        return chunkData.getBlock(x,y,z);
     }
 
 
@@ -346,8 +287,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         if (!isBlockInBounds(x, y, z)) {
             return WORLD.getBlockState(x, y, z);
         }
-
-        return blocks[toLocalX(x)][toLocalY(y)][toLocalZ(z)];
+        return chunkData.getBlock(toLocalX(x), toLocalY(y), toLocalZ(z));
     }
 
     public int getBlockStateLocal(int x, int y, int z) {
@@ -356,7 +296,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             return WORLD.getBlockState(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
         }
 
-        return blocks[x][y][z];
+        return chunkData.getBlock(x, y, z);
     }
 
     // IN GLOBAL SPACE
@@ -392,8 +332,8 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         shouldRegenerateMesh.set(false);
 
 
-        CHUNK_MESH.generateMesh(blocks, isDelayed);
-        TRANSPARENT_CHUNK_MESH.generateMesh(blocks, isDelayed);
+        CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
+        TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
 
     }
 
@@ -434,22 +374,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                 WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, 0, -1)),
                 WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, 0, 1))
         };
-    }
-
-    private void initializeBlocks() {
-
-        blocks = new byte[SIZE_X][SIZE_Y][SIZE_Z];
-
-        for (int x = 0; x < SIZE_X; x++) {
-            for (int z = 0; z < SIZE_Z; z++) {
-                for (int y = 0; y < SIZE_Y; y++) {
-
-                    blocks[x][y][z] = Block.AIR;
-
-                }
-            }
-        }
-
     }
 
     public ChunkMesh getChunkMesh() {
@@ -515,10 +439,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     public void setShouldProcess(boolean value) {
         shouldProcess = value;
-    }
-
-    public boolean isFinishedGenerating() {
-        return getGenerationPhase() == GenerationPhase.GENERATED;
     }
 
     @Override

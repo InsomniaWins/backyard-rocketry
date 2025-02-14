@@ -113,6 +113,18 @@ public class ChunkPosition {
         return z * Chunk.SIZE_Z;
     }
 
+    public static int getBlockX(int chunkX) {
+        return chunkX * Chunk.SIZE_X;
+    }
+
+    public static int getBlockY(int chunkY) {
+        return chunkY * Chunk.SIZE_Y;
+    }
+
+    public static int getBlockZ(int chunkZ) {
+        return chunkZ * Chunk.SIZE_Z;
+    }
+
     public Vector3i getVector() {
         return new Vector3i(x, y, z);
     }

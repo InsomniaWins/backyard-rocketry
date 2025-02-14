@@ -10,8 +10,8 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
 import wins.insomnia.backyardrocketry.scene.screen.LoadingScene;
-import wins.insomnia.backyardrocketry.util.input.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.input.MouseInput;
+import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
+import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import java.nio.IntBuffer;
 
