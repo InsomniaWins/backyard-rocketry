@@ -13,7 +13,6 @@ public class WorldGeneration {
     public static int SEA_LEVEL = 80;
 
     public static ChunkData generateChunkData(ChunkData chunkData) {
-
         generateLand(chunkData);
 
         return chunkData;
@@ -32,6 +31,18 @@ public class WorldGeneration {
 
 		return blockZ == 0 || blockZ == World.CHUNK_AMOUNT_Z * Chunk.SIZE_Z - 1;
 	}
+
+
+
+
+    public static void plantTree(int blockX, int blockY, int blockZ) {
+
+
+
+
+    }
+
+
 
     private static void generateLand(ChunkData chunkData) {
 
@@ -64,6 +75,9 @@ public class WorldGeneration {
 
                         if (globalBlockY == groundHeight) {
                             block = Block.GRASS;
+
+
+
                         } else if (globalBlockY > groundHeight - 4) {
                             block = Block.DIRT;
                         } else {

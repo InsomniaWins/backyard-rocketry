@@ -456,8 +456,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     @Override
     public void unregisteredFixedUpdateListener() {
-
         clean();
+
+        chunkMeshGenerationExecutorService.submit(() -> {
+            ChunkIO.saveChunk(this, chunkData);
+        });
+
     }
 
     public BoundingBox getBoundingBox() {

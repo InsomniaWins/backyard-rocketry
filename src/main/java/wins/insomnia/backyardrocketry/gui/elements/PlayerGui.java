@@ -3,11 +3,12 @@ package wins.insomnia.backyardrocketry.gui.elements;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL11;
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
@@ -28,10 +29,10 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	public static final Vector3f BLOCK_ITEM_ICON_ROTATION = new Vector3f();
 	private float[] hotbarItemScales = new float[10];
 	private float breakProgressRatio = 0.0f;
-	private TestPlayer player;
+	private EntityClientPlayer player;
 	private float desiredBreakProgress = 0f;
 
-	public PlayerGui(TestPlayer player) {
+	public PlayerGui(EntityClientPlayer player) {
 		this.player = player;
 	}
 

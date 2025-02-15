@@ -5,7 +5,7 @@ import org.joml.Math;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
@@ -412,7 +412,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // render target block
 
-        if (BackyardRocketry.getInstance().getClientPlayer() instanceof TestPlayer player) {
+        if (BackyardRocketry.getInstance().getClientPlayer() instanceof EntityServerPlayer player) {
 
             BlockRaycastResult raycastResult = player.getTargetBlock();
 
@@ -466,7 +466,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString.append("\n").append(DebugInfo.getDrawCallsPerSecond());
 
 
-            if (BackyardRocketry.getInstance().getClientPlayer() instanceof TestPlayer player) {
+            if (BackyardRocketry.getInstance().getClientPlayer() instanceof EntityServerPlayer player) {
                 debugString.append("\n").append(DebugInfo.getPlayerChunkPosition(player));
                 debugString.append("\n").append(DebugInfo.getPlayerBlockPosition(player));
                 debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(player));

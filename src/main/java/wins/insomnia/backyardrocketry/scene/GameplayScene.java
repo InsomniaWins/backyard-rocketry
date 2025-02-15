@@ -27,7 +27,11 @@ public class GameplayScene extends Scene {
 		switch (gameType) {
 			case CLIENT -> {
 
-				CLIENT_CONTROLLER = new ClientController();
+				String ip = "";
+				int tcpPort = 0;
+				int udpPort = 0;
+
+				CLIENT_CONTROLLER = new ClientController(ip, tcpPort, udpPort);
 				SERVER_CONTROLLER = null;
 
 			}
@@ -35,14 +39,14 @@ public class GameplayScene extends Scene {
 			case SERVER -> {
 
 				CLIENT_CONTROLLER = null;
-				SERVER_CONTROLLER = new ServerController();
+				SERVER_CONTROLLER = new ServerController(false);
 
 			}
 
 			case CLIENT_SERVER -> {
 
 				CLIENT_CONTROLLER = new ClientController();
-				SERVER_CONTROLLER = new ServerController();
+				SERVER_CONTROLLER = new ServerController(true);
 
 			}
 
@@ -51,7 +55,11 @@ public class GameplayScene extends Scene {
 
 		GAME_TYPE = gameType;
 
+
 	}
+
+
+
 
 	public ServerController getServer() {
 		return SERVER_CONTROLLER;
@@ -65,6 +73,17 @@ public class GameplayScene extends Scene {
 		return GAME_TYPE;
 	}
 
+	public boolean isServer() {
+		return getGameType() == GameType.SERVER;
+	}
+
+	public boolean isClient() {
+		return getGameType() == GameType.CLIENT;
+	}
+
+	public boolean isClientServer() {
+		return getGameType() == GameType.CLIENT_SERVER;
+	}
 
 	@Override
 	public void update(double delta) {
@@ -82,12 +101,22 @@ public class GameplayScene extends Scene {
 		if (SERVER_CONTROLLER != null) {
 			registerGameObject(SERVER_CONTROLLER);
 			SERVER_CONTROLLER.start();
+
+			if (CLIENT_CONTROLLER != null) {
+
+				registerGameObject(CLIENT_CONTROLLER);
+				CLIENT_CONTROLLER.start();
+
+			}
+
+			return;
 		}
 
-		if (CLIENT_CONTROLLER != null) {
-			registerGameObject(CLIENT_CONTROLLER);
-			CLIENT_CONTROLLER.start();
-		}
+
+
+		registerGameObject(CLIENT_CONTROLLER);
+		CLIENT_CONTROLLER.start();
+
 
 	}
 

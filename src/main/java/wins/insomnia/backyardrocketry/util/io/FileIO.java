@@ -1,11 +1,12 @@
 package wins.insomnia.backyardrocketry.util.io;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FileIO {
 
@@ -13,6 +14,40 @@ public class FileIO {
 	public static final String SAVES_DIRECTORY_NAME = "saves";
 	public static final String CHUNKS_DIRECTORY_NAME = "chunks";
 	public static final String FILE_SEPARATOR = FileSystems.getDefault().getSeparator();
+
+	private static final HashMap<Path, Thread> BUSY_FILES = new HashMap<>();
+
+
+
+	// returns true if file is busy
+	// returns false if file was NOT busy, and is now marked as busy
+	public static synchronized boolean checkAndMarkFileAsBusy(Path path) {
+
+		Thread owner = BUSY_FILES.get(path);
+
+		if (owner != null) return true;
+
+		BUSY_FILES.put(path, Thread.currentThread());
+
+		return false;
+
+	}
+
+
+	// MAKE SURE YOU ARE THE OWNER OF THIS BUSY FILE BEFORE CALLING
+	// OTHERWISE IT IS      >>> NOT <<<     THREAD SAFE
+	public static void markFileAsUnbusy(Path path) {
+
+		if (BUSY_FILES.get(path) == Thread.currentThread()) {
+			BUSY_FILES.remove(path);
+		}
+
+	}
+
+
+
+
+
 
 	private static boolean checkDirectory(Path path, boolean createIfNotExist) {
 

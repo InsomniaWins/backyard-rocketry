@@ -9,6 +9,8 @@ import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.scene.Scene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
+import wins.insomnia.backyardrocketry.util.io.ChunkIO;
+import wins.insomnia.backyardrocketry.util.io.FileIO;
 
 public class SaveSelectionScene extends Scene {
 
@@ -27,7 +29,14 @@ public class SaveSelectionScene extends Scene {
 		CREATE_BUTTON.setSize(100, 20);
 		CREATE_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 30);
 
-		LOAD_BUTTON = new Button("Load Save", () -> {});
+		LOAD_BUTTON = new Button("Load Save", () -> {
+
+			ChunkIO.setChunksPath(FileIO.getChunksPath(FileIO.getPathForSave("New_Save", false)));
+
+			GameplayScene gameplayScene = new GameplayScene(GameplayScene.GameType.CLIENT_SERVER);
+			SceneManager.get().changeScene(gameplayScene);
+
+		});
 		LOAD_BUTTON.setSize(100, 20);
 		LOAD_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 55);
 	}

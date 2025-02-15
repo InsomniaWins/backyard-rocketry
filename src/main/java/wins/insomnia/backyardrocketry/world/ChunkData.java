@@ -10,9 +10,7 @@ public class ChunkData {
 	private final int X;
 	private final int Y;
 	private final int Z;
-
 	private byte[][][] blocks;
-
 
 	private ChunkData(long seed, int chunkX, int chunkY, int chunkZ, boolean shouldGenerate) {
 

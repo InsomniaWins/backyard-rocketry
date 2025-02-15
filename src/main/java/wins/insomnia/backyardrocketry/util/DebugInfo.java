@@ -1,8 +1,9 @@
 package wins.insomnia.backyardrocketry.util;
 
 import org.joml.Vector3i;
+import wins.insomnia.backyardrocketry.entity.player.EntityPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
@@ -64,7 +65,7 @@ public class DebugInfo {
 		};
 	}
 
-	public static String getPlayerTargetBlockInfo(TestPlayer player) {
+	public static String getPlayerTargetBlockInfo(EntityPlayer player) {
 
 		int targetBlockHealth = 0;
 		byte targetBlock = Block.NULL;

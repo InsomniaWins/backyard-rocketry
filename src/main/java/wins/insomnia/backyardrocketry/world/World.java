@@ -5,7 +5,7 @@ import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.entity.player.TestPlayer;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.physics.Collision;
@@ -23,24 +23,24 @@ import java.util.concurrent.*;
 
 public class World implements IFixedUpdateListener, IUpdateListener {
 
-    private enum ChunkManagementType {
+    protected enum ChunkManagementType {
         LOAD,
         UNLOAD
     }
 
-    public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(100);
+    public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(1);
     public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(1);
-    public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(100);
+    public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(1);
     public static int chunkLoadDistance = 8; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
-    private final HashMap<ChunkPosition, Chunk> CHUNKS;
-    private final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
-    private final ArrayList<Entity> ENTITY_LIST;
+    protected final HashMap<ChunkPosition, Chunk> CHUNKS;
+    protected final HashMap<ChunkPosition, ArrayList<Entity>> ENTITIES;
+    protected final ArrayList<Entity> ENTITY_LIST;
     public static final Random RANDOM = new Random();
-    private final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
+    protected final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
     public final ArrayList<ChunkPosition> CHUNKS_CURRENTLY_LOADING;
-    private final Queue<ChunkManagementData> CHUNK_MANAGEMENT_QUEUE;
+    protected final Queue<ChunkManagementData> CHUNK_MANAGEMENT_QUEUE;
 
     private final float GRAVITY = -0.1f;
     private int seaLevel = 80;
@@ -84,7 +84,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return true;
     }
 
-    public boolean isPlayerInUnloadedChunk(TestPlayer player) {
+    public boolean isPlayerInUnloadedChunk(EntityServerPlayer player) {
 
         List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(this, player.getBoundingBox(), true);
 
@@ -431,27 +431,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
      *
      * @param chunkPosition
      */
-    private void loadChunk(ChunkPosition chunkPosition) {
-
-        if (CHUNKS.get(chunkPosition) != null) return;
-
-        Chunk chunk = new Chunk(this, chunkPosition);
-
-        if (Thread.currentThread() != Main.MAIN_THREAD) {
-            Updater.get().queueMainThreadInstruction(() -> {
-                CHUNKS.put(chunkPosition, chunk);
-                CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-                ENTITIES.put(chunkPosition, new ArrayList<>());
-
-                chunk.updateNeighborChunkMeshes();
-            });
-        } else {
-            CHUNKS.put(chunkPosition, chunk);
-            CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-            ENTITIES.put(chunkPosition, new ArrayList<>());
-
-            chunk.updateNeighborChunkMeshes();
-        }
+    protected void loadChunk(ChunkPosition chunkPosition) {
     }
 
 	public boolean isChunkLoaded(ChunkPosition chunkPosition) {
@@ -470,29 +450,9 @@ public class World implements IFixedUpdateListener, IUpdateListener {
      *
      * @param chunkPosition
      */
-    private void unloadChunk(ChunkPosition chunkPosition) {
-
-        if (CHUNKS.get(chunkPosition) != null) {
-            ArrayList<Entity> entitiesInChunk = ENTITIES.get(chunkPosition);
-            ENTITIES.remove(chunkPosition);
-
-            Chunk chunk = CHUNKS.get(chunkPosition);
-            CHUNKS.remove(chunkPosition);
-
-            Iterator<Entity> entityIterator = entitiesInChunk.iterator();
-            while (entityIterator.hasNext()) {
-                Entity entity = entityIterator.next();
-                entity.removedFromWorld();
-
-                ENTITY_LIST.remove(entity);
-                entityIterator.remove();
-            }
-
-            Updater.get().unregisterUpdateListener(chunk);
-            Updater.get().unregisterFixedUpdateListener(chunk);
+    protected void unloadChunk(ChunkPosition chunkPosition) {
 
 
-        }
 
     }
 
@@ -527,19 +487,19 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
             if (chunkManagementData == null) continue;
 
-            switch (chunkManagementData.managementType) {
+            switch (chunkManagementData.managementType()) {
                 case LOAD -> {
 
-                    if (!CHUNKS_CURRENTLY_LOADING.contains(chunkManagementData.chunkPosition)) {
-                        if (CHUNKS.get(chunkManagementData.chunkPosition) == null) {
-                            CHUNKS_CURRENTLY_LOADING.add(chunkManagementData.chunkPosition);
-                            CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(() -> loadChunk(chunkManagementData.chunkPosition));
+                    if (!CHUNKS_CURRENTLY_LOADING.contains(chunkManagementData.chunkPosition())) {
+                        if (CHUNKS.get(chunkManagementData.chunkPosition()) == null) {
+                            CHUNKS_CURRENTLY_LOADING.add(chunkManagementData.chunkPosition());
+                            CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(() -> loadChunk(chunkManagementData.chunkPosition()));
                         }
                     }
 
                 }
                 case UNLOAD -> {
-                    ChunkPosition chunkPosition = chunkManagementData.chunkPosition;
+                    ChunkPosition chunkPosition = chunkManagementData.chunkPosition();
 
                     // if chunk is still loading, wait for it to finish loading before unloading it
                     if (CHUNKS_CURRENTLY_LOADING.contains(chunkPosition)) {
@@ -579,13 +539,30 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         logInfo("Shutting down world . . .");
 
+
+
+
+        if (this instanceof ServerWorld serverWorld) {
+
+            Iterator<ChunkPosition> chunkPositionIterator = CHUNKS.keySet().iterator();
+
+            while (chunkPositionIterator.hasNext()) {
+                ChunkPosition chunkPosition = chunkPositionIterator.next();
+                unloadChunk(chunkPosition);
+            }
+
+        }
+
+
+
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE.shutdown();
         Chunk.chunkMeshGenerationExecutorService.shutdown();
 
         logInfo("World shut down successfully!");
     }
 
-    private record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}
+
+    record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}
 
     public float getGravity() {
         return GRAVITY;
