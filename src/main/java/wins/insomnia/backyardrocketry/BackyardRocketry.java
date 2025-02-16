@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
@@ -141,7 +142,7 @@ public class BackyardRocketry {
     }
 
 
-    public IPlayer getClientPlayer() {
+    public EntityClientPlayer getClientPlayer() {
         return GameplayScene.getClientPlayer();
     }
 

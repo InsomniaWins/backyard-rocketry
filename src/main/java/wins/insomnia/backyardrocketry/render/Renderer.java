@@ -5,6 +5,7 @@ import org.joml.Math;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
@@ -14,7 +15,7 @@ import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
-import wins.insomnia.backyardrocketry.util.*;
+import wins.insomnia.backyardrocketry.util.debug.DebugInfo;
 import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
@@ -412,9 +413,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
         // render target block
 
-        if (BackyardRocketry.getInstance().getClientPlayer() instanceof EntityServerPlayer player) {
+        EntityClientPlayer clientPlayer = BackyardRocketry.getInstance().getClientPlayer();
+        if (clientPlayer != null) {
 
-            BlockRaycastResult raycastResult = player.getTargetBlock();
+            BlockRaycastResult raycastResult = clientPlayer.getTargetBlock();
 
             if (raycastResult != null) {
 
@@ -466,10 +468,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             debugString.append("\n").append(DebugInfo.getDrawCallsPerSecond());
 
 
-            if (BackyardRocketry.getInstance().getClientPlayer() instanceof EntityServerPlayer player) {
-                debugString.append("\n").append(DebugInfo.getPlayerChunkPosition(player));
-                debugString.append("\n").append(DebugInfo.getPlayerBlockPosition(player));
-                debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(player));
+            if (clientPlayer != null) {
+                debugString.append("\n").append(DebugInfo.getPlayerChunkPosition(clientPlayer));
+                debugString.append("\n").append(DebugInfo.getPlayerBlockPosition(clientPlayer));
+                debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(clientPlayer));
             }
 
             TextRenderer.drawText(debugString.toString(), 0, 0, getGuiScale(), TextureManager.getTexture("debug_font"));

@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.controller;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.network.TestPacket;
@@ -99,13 +98,13 @@ public class ClientController extends GameController {
 	private void connectToServer(String ip, int tcpPort, int udpPort) throws IOException {
 
 
-		client = new Client();
+		client = new Client(CLIENT_WRITE_BUFFER_SIZE, OBJECT_BUFFER_SIZE);
 		client.start();
 		client.connect(5000, ip, tcpPort, udpPort);
 
 		client.addListener(CLIENT_LISTENER);
 
-		Packet.registerPackets(client.getKryo());
+		Packet.registerClasses(client.getKryo());
 
 		TestPacket packet = new TestPacket();
 		packet.string = "Hello, Server!";

@@ -16,12 +16,14 @@ import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
 import java.util.*;
 import java.util.Random;
 import java.util.concurrent.*;
 
-public class World implements IFixedUpdateListener, IUpdateListener {
+public abstract class World implements IFixedUpdateListener, IUpdateListener {
 
     protected enum ChunkManagementType {
         LOAD,
@@ -83,13 +85,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
         return true;
     }
-
-    public boolean isPlayerInUnloadedChunk(EntityServerPlayer player) {
-
-        List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(this, player.getBoundingBox(), true);
-
-		return chunksTouchingPlayer.contains(null);
-	}
 
     public List<ChunkPosition> getChunkPositionsAroundBlockPosition(int x, int y, int z, int chunkRadius) {
 
@@ -382,46 +377,7 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         return new Vector3d(chunkPosition.getVector()).distance(new Vector3d(getPlayersChunkPosition(player).getVector()));
     }
 
-    public void updateChunksAroundPlayer(IPlayer player) {
-
-        List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player, chunkLoadDistance);
-        for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-
-            Chunk chunk = CHUNKS.get(chunkPosition);
-            double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
-
-            if (chunk == null) {
-
-                if (chunkDistance <= chunkLoadDistance) {
-                    queueChunkForLoading(chunkPosition);
-                }
-            }
-        }
-
-        for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
-
-            ChunkPosition chunkPosition = chunkEntry.getKey();
-            Chunk chunk = chunkEntry.getValue();
-            double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
-
-            chunk.setShouldProcess(chunkDistance <= chunkProcessDistance);
-
-            if (chunkDistance >= chunkUnloadDistance) {
-                chunk.ticksToLive -= 1;
-            }
-
-            if (chunk.isProcessing()) {
-                // if chunk is processing, make it stay alive
-                chunk.ticksToLive = Math.max(1, chunk.ticksToLive);
-            } else {
-                // check for chunk unloading
-                if (chunk.ticksToLive <= 0) {
-                    queueChunkForUnloading(chunkPosition);
-                }
-            }
-
-        }
-    }
+    public abstract void updateChunksAroundPlayer(IPlayer player);
 
 
     /**
@@ -540,14 +496,14 @@ public class World implements IFixedUpdateListener, IUpdateListener {
         logInfo("Shutting down world . . .");
 
 
-
-
         if (this instanceof ServerWorld serverWorld) {
 
-            Iterator<ChunkPosition> chunkPositionIterator = CHUNKS.keySet().iterator();
 
-            while (chunkPositionIterator.hasNext()) {
-                ChunkPosition chunkPosition = chunkPositionIterator.next();
+            ChunkPosition[] chunkPositions = new ChunkPosition[CHUNKS.size()];
+            CHUNKS.keySet().toArray(chunkPositions);
+
+            for (int i = 0; i < chunkPositions.length; i++) {
+                ChunkPosition chunkPosition = chunkPositions[i];
                 unloadChunk(chunkPosition);
             }
 
@@ -556,7 +512,6 @@ public class World implements IFixedUpdateListener, IUpdateListener {
 
 
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE.shutdown();
-        Chunk.chunkMeshGenerationExecutorService.shutdown();
 
         logInfo("World shut down successfully!");
     }

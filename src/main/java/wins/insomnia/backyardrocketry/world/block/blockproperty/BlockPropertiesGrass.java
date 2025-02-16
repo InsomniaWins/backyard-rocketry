@@ -2,7 +2,7 @@ package wins.insomnia.backyardrocketry.world.block.blockproperty;
 
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.util.BitHelper;
-import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 

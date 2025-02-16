@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.render;
 
 import org.joml.*;
 import wins.insomnia.backyardrocketry.Main;
@@ -7,7 +7,11 @@ import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,7 +48,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         super.clean();
     }
 
-    protected void destroy() {
+    public void destroy() {
         unloaded = true;
         if (!isClean()) clean();
         chunk = null;

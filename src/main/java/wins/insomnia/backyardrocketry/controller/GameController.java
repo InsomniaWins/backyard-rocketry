@@ -8,7 +8,9 @@ import java.util.logging.Logger;
 
 public abstract class GameController implements IUpdateListener, IFixedUpdateListener {
 
-
+	public static final int CLIENT_WRITE_BUFFER_SIZE = 8_192;
+	public static final int SERVER_WRITE_BUFFER_SIZE = CLIENT_WRITE_BUFFER_SIZE * 2;
+	public static final int OBJECT_BUFFER_SIZE = 10_000; // read buffer size
 	private boolean started = false;
 	private World world;
 	private final Logger LOGGER = Logger.getLogger(getClass().getName());

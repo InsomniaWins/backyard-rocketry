@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.scene;
 
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
@@ -149,7 +150,7 @@ public class GameplayScene extends Scene {
 		return getWorld(false);
 	}
 
-	public static IPlayer getClientPlayer() {
+	public static EntityClientPlayer getClientPlayer() {
 
 		GameplayScene scene = get();
 

@@ -1,8 +1,11 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.chunk;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.WorldGeneration;
 
 public class ChunkData {
 
@@ -12,13 +15,20 @@ public class ChunkData {
 	private final int Z;
 	private byte[][][] blocks;
 
-	private ChunkData(long seed, int chunkX, int chunkY, int chunkZ, boolean shouldGenerate) {
+
+	private ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {
 
 		SEED = seed;
 
-		X = ChunkPosition.getBlockX(chunkX);
-		Y = ChunkPosition.getBlockY(chunkY);
-		Z = ChunkPosition.getBlockZ(chunkZ);
+		if (!areWorldCoordinates) {
+			x = ChunkPosition.getBlockX(x);
+			y = ChunkPosition.getBlockY(y);
+			z = ChunkPosition.getBlockZ(z);
+		}
+
+		X = x;
+		Y = y;
+		Z = z;
 
 		initializeBlocks();
 
@@ -28,8 +38,20 @@ public class ChunkData {
 
 	}
 
+	private ChunkData(long seed, int chunkX, int chunkY, int chunkZ, boolean shouldGenerate) {
+
+		this(seed, chunkX, chunkY, chunkZ, shouldGenerate, false);
+
+	}
+
 	public ChunkData(long seed, int chunkX, int chunkY, int chunkZ) {
 		this(seed, chunkX, chunkY, chunkZ, true);
+	}
+
+	public ChunkPosition getChunkPosition(World world) {
+
+		return world.getChunkPositionFromBlockPosition(X, Y, Z);
+
 	}
 
 	public int getWorldX() {
@@ -82,28 +104,35 @@ public class ChunkData {
 		}
 		long seed = Longs.fromByteArray(buffer);
 
-		// read x y and z
 
-		int chunkX, chunkY, chunkZ;
-		buffer = new byte[Ints.BYTES];
 
-		for (int i = 0; i < Integer.BYTES; i++) {
+		// read x
+
+		buffer = new byte[Integer.BYTES];
+		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = data[dataIndex++];
 		}
-		chunkX = Ints.fromByteArray(buffer);
+		int worldX = Ints.fromByteArray(buffer);
 
-		for (int i = 0; i < Integer.BYTES; i++) {
+
+		// read y
+
+		buffer = new byte[Integer.BYTES];
+		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = data[dataIndex++];
 		}
-		chunkY = Ints.fromByteArray(buffer);
+		int worldY = Ints.fromByteArray(buffer);
 
-		for (int i = 0; i < Integer.BYTES; i++) {
+
+		// read z
+
+		buffer = new byte[Integer.BYTES];
+		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = data[dataIndex++];
 		}
-		chunkZ = Ints.fromByteArray(buffer);
+		int worldZ = Ints.fromByteArray(buffer);
 
-
-		ChunkData chunkData = new ChunkData(seed, chunkX, chunkY, chunkZ, false);
+		ChunkData chunkData = new ChunkData(seed, worldX, worldY, worldZ, false, true);
 
 
 		// read blocks

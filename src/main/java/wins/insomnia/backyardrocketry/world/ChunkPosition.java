@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 import org.joml.Vector3i;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 import java.util.Objects;
 

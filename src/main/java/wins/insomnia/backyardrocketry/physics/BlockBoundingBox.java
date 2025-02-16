@@ -1,7 +1,7 @@
 package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Vector3i;
-import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 public class BlockBoundingBox extends BoundingBox {
 

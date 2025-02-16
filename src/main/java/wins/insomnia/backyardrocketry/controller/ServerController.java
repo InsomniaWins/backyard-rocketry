@@ -1,12 +1,12 @@
 package wins.insomnia.backyardrocketry.controller;
 
-import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
-import wins.insomnia.backyardrocketry.network.TestPacket;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 import java.io.IOException;
@@ -15,7 +15,10 @@ public class ServerController extends GameController {
 
 	public static final int TCP_PORT = 54555;
 	public static final int UDP_PORT = 54777;
+
+
 	private static final Listener SERVER_LISTENER = new Listener() {
+		@Override
 		public void received(Connection connection, Object object) {
 
 			if (!(object instanceof Packet packet)) return;
@@ -25,6 +28,29 @@ public class ServerController extends GameController {
 
 		}
 
+		@Override
+		public void connected(Connection connection) {
+
+			Updater.get().queueMainThreadInstruction(() -> {
+
+				ServerController serverController = ServerController.get();
+				ServerWorld serverWorld = serverController.world;
+
+				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld);
+				serverWorld.addEntity(serverPlayer, 100, 100, 100);
+
+			});
+
+
+
+		}
+
+		@Override
+		public void disconnected(Connection connection) {
+
+
+
+		}
 
 	};
 
@@ -58,23 +84,15 @@ public class ServerController extends GameController {
 	@Override
 	protected void onStart() {
 
-
+		world = new ServerWorld();
 		startServer();
 
-
-		if (isInternalServer()) {
-
-		} else {
-
-		}
-
-		world = new ServerWorld();
 	}
 
 
 	private void startServer() {
 
-		server = new Server();
+		server = new Server(SERVER_WRITE_BUFFER_SIZE, OBJECT_BUFFER_SIZE);
 		server.start();
 
 		try {
@@ -93,7 +111,7 @@ public class ServerController extends GameController {
 
 		server.addListener(SERVER_LISTENER);
 
-		Packet.registerPackets(server.getKryo());
+		Packet.registerClasses(server.getKryo());
 
 	}
 
@@ -154,5 +172,37 @@ public class ServerController extends GameController {
 	}
 
 
+	// sends to every client
+	public static void sendUnreliable(Packet packet) {
+
+		send(packet, false);
+
+	}
+
+	// sends to every client
+	public static void sendReliable(Packet packet) {
+
+		send(packet, true);
+
+	}
+
+	// sends to every client
+	public static void send(Packet packet, boolean reliable) {
+
+		ServerController serverController = get();
+		Server server = serverController.server;
+
+		if (reliable) {
+
+			server.sendToAllTCP(packet);
+
+
+		} else {
+
+			server.sendToAllUDP(packet);
+
+		}
+
+	}
 
 }

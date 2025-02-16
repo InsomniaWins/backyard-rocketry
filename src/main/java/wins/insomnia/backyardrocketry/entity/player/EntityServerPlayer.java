@@ -8,12 +8,16 @@ import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 public class EntityServerPlayer extends EntityPlayer {
     private boolean[] movementInputs = new boolean[6];
+    private final int CONNECTION_ID;
 
-    public EntityServerPlayer(ServerWorld world) {
+    public EntityServerPlayer(int connectionId, ServerWorld world) {
         super(world);
+        CONNECTION_ID = connectionId;
     }
 
-
+    public int getConnectionId() {
+        return CONNECTION_ID;
+    }
 
     public void setMovementInputs(boolean[] movementInputs) {
 

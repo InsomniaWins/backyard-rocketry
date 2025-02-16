@@ -1,15 +1,23 @@
 package wins.insomnia.backyardrocketry.world;
 
+import com.esotericsoftware.kryonet.Server;
+import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
+import wins.insomnia.backyardrocketry.entity.player.IPlayer;
+import wins.insomnia.backyardrocketry.network.world.LoadChunkPacket;
+import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class ServerWorld extends World {
@@ -26,36 +34,76 @@ public class ServerWorld extends World {
 
 	// DO NOT CALL DIRECTLY
 	// only called on main-thread
-	private void _loadChunk(Chunk chunk) {
+	private void _loadChunk(ChunkPosition chunkPosition) {
 
-		ChunkPosition chunkPosition = chunk.getChunkPosition();
+		if (CHUNKS.get(chunkPosition) != null) return;
+		ServerChunk chunk = new ServerChunk(this, chunkPosition);
 
 		CHUNKS.put(chunkPosition, chunk);
 		CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
 		ENTITIES.put(chunkPosition, new ArrayList<>());
 
-		for (EntityServerPlayer player : getPlayersNearChunk(chunk)) {
-
-
-
-		}
-
-		//chunk.updateNeighborChunkMeshes();
+		// todo: send only to those who need it
+		ServerController.sendReliable(chunk.createLoadPacket());
 
 	}
 
 
 	@Override
+	public void updateChunksAroundPlayer(IPlayer player) {
+
+		List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player, chunkLoadDistance);
+		for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+
+			Chunk chunk = CHUNKS.get(chunkPosition);
+			double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
+
+			if (chunk == null) {
+
+				if (chunkDistance <= chunkLoadDistance) {
+					queueChunkForLoading(chunkPosition);
+				}
+			}
+		}
+
+		/*
+
+		TODO: implement chunk unloading
+
+		for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
+
+			ChunkPosition chunkPosition = chunkEntry.getKey();
+			Chunk chunk = chunkEntry.getValue();
+			double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
+
+			chunk.setShouldProcess(chunkDistance <= chunkProcessDistance);
+
+			if (chunkDistance >= chunkUnloadDistance) {
+				chunk.ticksToLive -= 1;
+			}
+
+			if (chunk.isProcessing()) {
+				// if chunk is processing, make it stay alive
+				chunk.ticksToLive = Math.max(1, chunk.ticksToLive);
+			} else {
+				// check for chunk unloading
+				if (chunk.ticksToLive <= 0) {
+					queueChunkForUnloading(chunkPosition);
+				}
+			}
+
+		}*/
+
+
+	}
+
+	@Override
 	protected void loadChunk(ChunkPosition chunkPosition) {
 
-		if (CHUNKS.get(chunkPosition) != null) return;
-
-		Chunk chunk = new Chunk(this, chunkPosition);
-
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
-			Updater.get().queueMainThreadInstruction(() -> _loadChunk(chunk));
+			Updater.get().queueMainThreadInstruction(() -> _loadChunk(chunkPosition));
 		} else {
-			_loadChunk(chunk);
+			_loadChunk(chunkPosition);
 		}
 
 	}
@@ -104,7 +152,12 @@ public class ServerWorld extends World {
 	}
 
 
+	public boolean isPlayerInUnloadedChunk(EntityServerPlayer player) {
 
+		List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(this, player.getBoundingBox(), true);
+
+		return chunksTouchingPlayer.contains(null);
+	}
 
 
 }

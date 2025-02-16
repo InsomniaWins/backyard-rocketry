@@ -1,6 +1,6 @@
 package wins.insomnia.backyardrocketry.physics;
 
-import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 public class BlockRaycastResult {

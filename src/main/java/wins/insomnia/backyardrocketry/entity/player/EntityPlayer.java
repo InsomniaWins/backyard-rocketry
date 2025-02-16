@@ -2,39 +2,26 @@ package wins.insomnia.backyardrocketry.entity.player;
 
 import org.joml.Math;
 import org.joml.Vector3d;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.audio.AudioManager;
-import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentStandardPlayer;
-import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
-import wins.insomnia.backyardrocketry.render.Camera;
-import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.util.Transform;
-import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
-import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 

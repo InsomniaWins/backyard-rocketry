@@ -1,6 +1,5 @@
-package wins.insomnia.backyardrocketry.world;
+package wins.insomnia.backyardrocketry.world.chunk;
 
-import org.checkerframework.checker.units.qual.A;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.Main;
@@ -8,20 +7,18 @@ import wins.insomnia.backyardrocketry.entity.EntityItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
-
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
@@ -30,25 +27,16 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public static final int SIZE_X = 20;
     public static final int SIZE_Y = 20;
     public static  final int SIZE_Z = 20;
-    public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(4, r -> new Thread(r, "chunk-mesh-generation-thread"));
     private final int X;
     private final int Y;
     private final int Z;
-    private final int RANDOM_TICK_AMOUNT = 18;
-    private final ChunkMesh CHUNK_MESH;
-    private final ChunkMesh TRANSPARENT_CHUNK_MESH;
     private final World WORLD;
     private final AtomicBoolean LOADED = new AtomicBoolean(false);
     private boolean shouldProcess = false;
-    protected AtomicBoolean shouldRegenerateMesh = new AtomicBoolean(false);
-    protected AtomicBoolean shouldInstantlyGenerateMesh = new AtomicBoolean(false);
     protected int ticksToLive = 240;
-    private ChunkData chunkData;
+    protected ChunkData chunkData;
 
     public Chunk(World world, ChunkPosition chunkPosition) {
-
-        chunkData = ChunkIO.loadChunk(chunkPosition);
-        shouldRegenerateMesh.set(true);
 
         X = chunkPosition.getBlockX();
         Y = chunkPosition.getBlockY();
@@ -60,19 +48,19 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         );
 
         WORLD = world;
-        CHUNK_MESH = new ChunkMesh(this, false);
-        TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
 
         Updater.get().registerFixedUpdateListener(this);
         Updater.get().registerUpdateListener(this);
 
     }
 
+    public int getTicksToLive() {
+        return ticksToLive;
+    }
+
     public boolean isLoaded() {
         return LOADED.get();
     }
-
-
 
     public void setBlock(int x, int y, int z, byte block) {
         setBlock(x, y, z, block, true);
@@ -114,12 +102,16 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         chunkData.setBlock(x,y,z, block);
 
+        /*
+
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
         if (shouldRegenerateMesh.get()) {
             updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
         }
 
+
+         */
     }
 
     public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
@@ -128,31 +120,8 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z) {
-
-        if (isBlockOnChunkBorder(x, y, z)) {
-
-            updateNeighborChunkMeshes();
-
-        }
-    }
-
-    public void updateNeighborChunkMeshes() {
-
-        if (Thread.currentThread() != Main.MAIN_THREAD) {
-            throw new ConcurrentModificationException("Tried updating neighboring chunk meshes from thread other than the main thread!");
-        }
 
 
-        for (Chunk chunk : getNeighborChunks()) {
-            if (chunk == null) {
-                continue;
-            }
-
-            chunk.shouldRegenerateMesh.set(true);
-            chunk.shouldInstantlyGenerateMesh.set(false);
-        }
-    }
 
     public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
 
@@ -323,42 +292,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    private void generateMesh() {
-        generateMesh(true);
-    }
-
-    private void generateMesh(boolean isDelayed) {
-
-        shouldRegenerateMesh.set(false);
-
-
-        CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
-        TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
-
-    }
-
-    public void clean() {
-        shouldRegenerateMesh.set(false);
-
-        Renderer.get().removeRenderable(CHUNK_MESH);
-        Renderer.get().removeRenderable(TRANSPARENT_CHUNK_MESH);
-
-        CHUNK_MESH.destroy();
-        TRANSPARENT_CHUNK_MESH.destroy();
-
-    }
-
-    public void setShouldRegenerateMesh(boolean value, boolean instantly) {
-        shouldInstantlyGenerateMesh.set(instantly);
-        shouldRegenerateMesh.set(value);
-    }
-
-    public void setShouldRegenerateMesh(boolean value) {
-        shouldInstantlyGenerateMesh.set(false);
-        shouldRegenerateMesh.set(value);
-    }
-
-
 
     public ChunkPosition getChunkPosition() {
         return World.getServerWorld().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
@@ -376,51 +309,10 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         };
     }
 
-    public ChunkMesh getChunkMesh() {
-        return CHUNK_MESH;
-    }
-
-    public ChunkMesh getTransparentChunkMesh() {
-        return TRANSPARENT_CHUNK_MESH;
-    }
-
 
 
     @Override
     public void update(double deltaTime) {
-
-        if (shouldRegenerateMesh.get()) {
-
-            if (!CHUNK_MESH.isGenerating() && !TRANSPARENT_CHUNK_MESH.isGenerating()) {
-
-                shouldRegenerateMesh.set(false);
-
-                CHUNK_MESH.setGenerating(true);
-                TRANSPARENT_CHUNK_MESH.setGenerating(true);
-
-                boolean instantly = shouldInstantlyGenerateMesh.get();
-                shouldInstantlyGenerateMesh.set(false);
-
-                chunkMeshGenerationExecutorService.submit(() -> {
-
-                    generateMesh(instantly);
-
-                });
-            }
-        }
-
-
-        //<editor-fold desc="create chunk meshes">
-        // Moving this block to fixedUpdate would stop the block outline from looking delayed when placing/breaking
-        // a block; however, it also destabilizes FPS
-        if (CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
-            CHUNK_MESH.createOpenGLMeshData();
-        }
-
-        if (TRANSPARENT_CHUNK_MESH.isReadyToCreateOpenGLMeshData()) {
-            TRANSPARENT_CHUNK_MESH.createOpenGLMeshData();
-        }
-        //</editor-fold>
     }
 
     @Override
@@ -449,20 +341,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     @Override
     public void registeredFixedUpdateListener() {
 
-        Renderer.get().addRenderable(CHUNK_MESH);
-        Renderer.get().addRenderable(TRANSPARENT_CHUNK_MESH);
-
     }
 
     @Override
     public void unregisteredFixedUpdateListener() {
-        clean();
-
-        chunkMeshGenerationExecutorService.submit(() -> {
-            ChunkIO.saveChunk(this, chunkData);
-        });
 
     }
+
 
     public BoundingBox getBoundingBox() {
         return BOUNDING_BOX;

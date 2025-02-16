@@ -1,12 +1,10 @@
 package wins.insomnia.backyardrocketry.entity.component;
 
-import org.joml.Math;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
-import wins.insomnia.backyardrocketry.world.Chunk;
-import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 import java.util.ArrayList;
 import java.util.List;

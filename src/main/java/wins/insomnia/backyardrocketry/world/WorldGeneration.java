@@ -5,6 +5,8 @@ import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 
 import java.nio.ByteBuffer;
 

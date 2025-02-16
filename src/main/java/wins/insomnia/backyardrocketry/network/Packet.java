@@ -2,10 +2,10 @@ package wins.insomnia.backyardrocketry.network;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.EndPoint;
-import com.esotericsoftware.kryonet.Server;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
+import wins.insomnia.backyardrocketry.network.world.LoadChunkPacket;
+import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,15 +17,18 @@ public abstract class Packet {
 		CLIENT
 	}
 
-	public static final List<Class<? extends Packet>> PACKET_LIST = Arrays.asList(
-			TestPacket.class
+	public static final List<Class<?>> CLASS_REGISTRATION_LIST = Arrays.asList(
+			TestPacket.class,
+			LoadChunkPacket.class,
+			byte[].class,
+			byte[][].class
 	);
 
 
 
-	public static void registerPackets(Kryo kryo) {
+	public static void registerClasses(Kryo kryo) {
 
-		for (Class<? extends Packet> packetClass : PACKET_LIST) {
+		for (Class<?> packetClass : CLASS_REGISTRATION_LIST) {
 
 			kryo.register(packetClass);
 

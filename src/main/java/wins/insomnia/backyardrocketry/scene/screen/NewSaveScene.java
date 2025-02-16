@@ -21,9 +21,9 @@ import wins.insomnia.backyardrocketry.util.io.FileIO;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.ChunkData;
+import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
-import wins.insomnia.backyardrocketry.world.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 
 import java.io.BufferedOutputStream;
@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NewSaveScene extends Scene {

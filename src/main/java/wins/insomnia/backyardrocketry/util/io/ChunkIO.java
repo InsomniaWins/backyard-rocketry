@@ -1,17 +1,14 @@
 package wins.insomnia.backyardrocketry.util.io;
 
-import wins.insomnia.backyardrocketry.world.Chunk;
-import wins.insomnia.backyardrocketry.world.ChunkData;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class ChunkIO {
 
