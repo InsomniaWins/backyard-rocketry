@@ -6,6 +6,7 @@ import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.network.player.PacketPlayerTransform;
 import wins.insomnia.backyardrocketry.util.FancyToString;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 import java.util.Arrays;
@@ -55,12 +56,7 @@ public class EntityServerPlayer extends EntityPlayer {
     public void fixedUpdate() {
         super.fixedUpdate();
 
-        FOOTSTEP_AUDIO.fixedUpdate();
-
-
         handleCrouchingAndSprinting();
-
-        float rotateSpeed = 0.0025f;
 
 
         // get input
@@ -123,8 +119,6 @@ public class EntityServerPlayer extends EntityPlayer {
         updateBoundingBox();
 
         double moveDistance = getPreviousTransform().getPosition().distance(getTransform().getPosition());
-        FOOTSTEP_AUDIO.setMoveDistance((float) moveDistance);
-        FOOTSTEP_AUDIO.setOnGround(isOnGround());
 
         moving = moveDistance > 0.01f;
 

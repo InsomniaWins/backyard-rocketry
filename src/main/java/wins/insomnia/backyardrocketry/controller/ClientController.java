@@ -64,6 +64,7 @@ public class ClientController extends GameController {
 	@Override
 	protected void onStop() {
 
+		disconnectFromServer();
 		world.shutdown();
 
 	}
@@ -119,7 +120,8 @@ public class ClientController extends GameController {
 	private void disconnectFromServer() {
 
 		if (client != null) {
-			client.close();
+			client.stop();
+			client = null;
 		}
 
 	}

@@ -4,10 +4,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.audio.AudioBuffer;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
-import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.entity.Entity;
-import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
-import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 
@@ -67,7 +65,7 @@ public class ComponentFootstepAudio extends Component {
 	public void fixedUpdate() {
 
 		if (moveDistance > 0.1f) {
-			audioTickInterval = Math.max(1, (int) (2 / moveDistance));
+			audioTickInterval = Math.max(1, (int) (1.5f / moveDistance));
 
 			if (audioTickInterval > 100) {
 				audioTickInterval = 10000000;
@@ -119,10 +117,14 @@ public class ComponentFootstepAudio extends Component {
 		AudioBuffer stepAudio = blockAudio.getStepAudio();
 		if (stepAudio == null) return;
 
-		AudioManager.get().playAudioSpatial(stepAudio, false, false, true)
-				.setPosition(position)
-				.setPitch(0.8f + (float) (Math.random() * 0.6))
-				.setGain(moveDistance * 2f);
+		if (GameplayScene.get() == null || GameplayScene.hasClient()) {
+
+			AudioManager.get().playAudioSpatial(stepAudio, false, false, true)
+					.setPosition(position)
+					.setPitch(0.8f + (float) (Math.random() * 0.6))
+					.setGain(moveDistance * 2f);
+
+		}
 
 		footIndex = (footIndex + 1) % 2;
 

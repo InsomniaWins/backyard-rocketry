@@ -12,6 +12,7 @@ import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
 import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
+import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
@@ -74,7 +75,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 
 	// unreliably send movement keyboard inputs to server
-	private void sendMovementInputsToServer(KeyboardInput keyboardInput, MouseInput mouseInput) {
+	private boolean[] sendMovementInputsToServer(KeyboardInput keyboardInput, MouseInput mouseInput) {
 
 		boolean[] inputs = new boolean[MOVEMENT_INPUT_SIZE];
 		inputs[MOVEMENT_INPUT_FORWARD] = keyboardInput.isKeyPressed(GLFW_KEY_W);
@@ -85,12 +86,14 @@ public class EntityClientPlayer extends EntityPlayer {
 		inputs[MOVEMENT_INPUT_JUMP] = keyboardInput.isKeyPressed(GLFW_KEY_SPACE);
 		inputs[MOVEMENT_INPUT_SPRINT] = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_CONTROL);
 
+
 		ClientController.sendUnreliable(
 				new PacketPlayerMovementInputs()
 						.setMovementInputs(inputs)
 						.setRotation(getRotation())
 		);
 
+		return inputs;
 	}
 
 
@@ -137,14 +140,88 @@ public class EntityClientPlayer extends EntityPlayer {
 
 	}
 
+
+	// moves player along predicted path before receiving correct position from server
+	private void predictMovement(boolean[] movementInputs) {
+
+		// get input
+		float forwardDirection = movementInputs[MOVEMENT_INPUT_FORWARD] ? 1 : 0;
+		float backwardDirection = movementInputs[MOVEMENT_INPUT_BACKWARD] ? 1 : 0;
+
+		float leftDirection = movementInputs[MOVEMENT_INPUT_LEFT] ? 1 : 0;
+		float rightDirection = movementInputs[MOVEMENT_INPUT_RIGHT] ? 1 : 0;
+
+		float upDirection = movementInputs[MOVEMENT_INPUT_JUMP] ? 1 : 0;
+		float downDirection = movementInputs[MOVEMENT_INPUT_CROUCH] ? 1 : 0;
+
+		Vector3f moveAmount = new Vector3f(
+				(rightDirection - leftDirection),
+				0f,
+				(backwardDirection - forwardDirection)
+		).rotateY(-getRotation().y);
+
+		if (moveAmount.length() > 0f) {
+			moveAmount.normalize();
+		}
+
+		moveAmount.y = (upDirection - downDirection);
+
+		if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
+			moveSpeed = CROUCH_SPEED;
+		} else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
+			moveSpeed = SPRINT_SPEED;
+		} else {
+			moveSpeed = WALK_SPEED;
+		}
+
+		moveAmount.mul(moveSpeed);
+
+
+		getVelocity().x = Math.lerp(getVelocity().x, moveAmount.x, 0.5f);
+		getVelocity().z = Math.lerp(getVelocity().z, moveAmount.z, 0.5f);
+
+
+		if (!hasEntityComponent(ComponentGravity.class)) {
+			float verticalMoveAmount = upDirection - downDirection;
+			getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+		} else {
+			GRAVITY_COMPONENT.fixedUpdate();
+		}
+
+		if (KeyboardInput.get().isKeyPressed(GLFW_KEY_SPACE)) {
+			if (isOnGround()) {
+				getVelocity().y = JUMP_SPEED;
+				FOOTSTEP_AUDIO.playAudio();
+			}
+		}
+
+
+		// apply translation and rotation
+		getPreviousTransform().set(getTransform());
+		move();
+		updateBoundingBox();
+
+		double moveDistance = getPreviousTransform().getPosition().distance(getTransform().getPosition());
+		FOOTSTEP_AUDIO.setMoveDistance((float) moveDistance);
+		FOOTSTEP_AUDIO.setOnGround(isOnGround());
+
+		moving = moveDistance > 0.01f;
+
+	}
+
+
 	@Override
 	public void fixedUpdate() {
 		super.fixedUpdate();
 
+		FOOTSTEP_AUDIO.fixedUpdate();
+
+
+
 		KeyboardInput keyboardInput = KeyboardInput.get();
 		MouseInput mouseInput = MouseInput.get();
 
-		sendMovementInputsToServer(keyboardInput, mouseInput);
+		boolean[] movementInputs = sendMovementInputsToServer(keyboardInput, mouseInput);
 
 		Renderer.get().getCamera().getTransform().getRotation().set(getRotation());
 		Renderer.get().getCamera().getTransform().getPosition().set(getCameraPosition());
@@ -157,6 +234,12 @@ public class EntityClientPlayer extends EntityPlayer {
 			lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
 			updateCursorVisibility();
 		}
+
+
+
+		predictMovement(movementInputs);
+
+
 
 		if (keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
 			jump(false);
@@ -178,9 +261,23 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		cameraInterpolationFactor = 0f;
 
-
+		updateTargetBlock();
 
 	}
+
+
+	private void updateTargetBlock() {
+
+		Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
+		Vector3d rayDirection = new Vector3d(0, 0, -1)
+				.rotateX(-getTransform().getRotation().x)
+				.rotateY(-getTransform().getRotation().y);
+
+		BlockRaycastResult previousTargetBlock = targetBlock;
+		targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, getReachDistance());
+
+	}
+
 
 
 	private void interpolateCameraTransform(double deltaTime) {

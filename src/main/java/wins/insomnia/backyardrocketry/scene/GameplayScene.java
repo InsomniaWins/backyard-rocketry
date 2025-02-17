@@ -136,6 +136,16 @@ public class GameplayScene extends Scene {
 
 	}
 
+	public static boolean hasClient() {
+
+		GameplayScene gameplayScene = get();
+
+		if (gameplayScene == null) return false;
+
+		return gameplayScene.getClient() != null;
+
+	}
+
 	public static GameplayScene get() {
 		if (!(SceneManager.get().getCurrentScene() instanceof GameplayScene gameplayScene)) {
 			return null;

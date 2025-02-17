@@ -50,9 +50,9 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	protected final ComponentGravity GRAVITY_COMPONENT;
 	protected BlockRaycastResult targetBlock;
 
-	private final float HEIGHT = 1.73f;
-	private final float EYE_HEIGHT = HEIGHT - 0.1778f;
-	private final float HALF_WIDTH = 0.4f;
+	public final float HEIGHT = 1.73f;
+	public final float EYE_HEIGHT = HEIGHT - 0.1778f;
+	public final float HALF_WIDTH = 0.4f;
 	private final BoundingBox BOUNDING_BOX;
 	private final Transform PREVIOUS_TRANSFORM;
 	private int breakAudioDelay = 0;
@@ -93,6 +93,10 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 		addEntityComponent(GRAVITY_COMPONENT);
 		FOOTSTEP_AUDIO = new ComponentFootstepAudio(this);
 		addEntityComponent(FOOTSTEP_AUDIO);
+	}
+
+	public float getReachDistance() {
+		return REACH_DISTANCE;
 	}
 
 	public Transform getPreviousTransform() {

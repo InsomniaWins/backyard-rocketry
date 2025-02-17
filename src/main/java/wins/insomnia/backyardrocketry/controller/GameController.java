@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.controller;
 
+import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.world.World;
@@ -16,9 +17,7 @@ public abstract class GameController implements IUpdateListener, IFixedUpdateLis
 	private final Logger LOGGER = Logger.getLogger(getClass().getName());
 
 	public Logger getLogger() {
-
 		return LOGGER;
-
 	}
 
 	public boolean isServer() {

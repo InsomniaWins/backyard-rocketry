@@ -127,6 +127,7 @@ public class ServerController extends GameController {
 
 		if (server != null) {
 			server.stop();
+			server = null;
 		}
 	}
 
