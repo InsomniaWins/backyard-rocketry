@@ -67,7 +67,7 @@ public class ComponentFootstepAudio extends Component {
 	public void fixedUpdate() {
 
 		if (moveDistance > 0.1f) {
-			audioTickInterval = Math.max(1, (int) (3 / moveDistance));
+			audioTickInterval = Math.max(1, (int) (2 / moveDistance));
 
 			if (audioTickInterval > 100) {
 				audioTickInterval = 10000000;

@@ -2,7 +2,9 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.*;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.util.debug.DebugInfo;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 
 import java.lang.Math;
@@ -67,30 +69,6 @@ public class Camera {
         VIEW_MATRIX.translate(new Vector3f((float) -TRANSFORM.getPosX(), (float) -TRANSFORM.getPosY(), (float) -TRANSFORM.getPosZ()));
         VIEW_MATRIX.translate(0f, viewBobValue, 0f);
     }
-
-    public void interpolate(double deltaTime) {
-        interpolationFactor += (float) deltaTime / (1.0f / Updater.getFixedUpdatesPerSecond());
-        interpolationFactor = org.joml.Math.min(interpolationFactor, 1f);
-
-        Camera camera = Renderer.get().getCamera();
-
-        // reset interpolation to t = 0 to begin interpolation=
-        INTERPOLATED_TRANSFORM.getRotation().set(PREVIOUS_TRANSFORM.getRotation());
-        INTERPOLATED_TRANSFORM.getPosition().set(PREVIOUS_TRANSFORM.getPosition());
-
-        // interpolate camera rotation and position
-        INTERPOLATED_TRANSFORM.getRotation().set(
-                Transform.lerpAngle(INTERPOLATED_TRANSFORM.getRotation().x, TRANSFORM.getRotation().x, interpolationFactor),
-                Transform.lerpAngle(INTERPOLATED_TRANSFORM.getRotation().y, TRANSFORM.getRotation().y, interpolationFactor),
-                Transform.lerpAngle(INTERPOLATED_TRANSFORM.getRotation().z, TRANSFORM.getRotation().z, interpolationFactor)
-        );
-        INTERPOLATED_TRANSFORM.getPosition().lerp(TRANSFORM.getPosition(), interpolationFactor);
-
-        // set camera rotation and position to interpolated values
-        camera.getTransform().getRotation().set(INTERPOLATED_TRANSFORM.getRotation());
-        camera.getTransform().getPosition().set(INTERPOLATED_TRANSFORM.getPosition());
-    }
-
 
     public void updateFrustum() {
         FRUSTUM.set(

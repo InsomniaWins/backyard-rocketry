@@ -5,13 +5,17 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
@@ -48,6 +52,11 @@ public class EntityClientPlayer extends EntityPlayer {
 
 	}
 
+	public void gotTransformFromServer(Transform transform) {
+		getTransform().getPosition().set(transform.getPosition());
+	}
+
+
 	@Override
 	public Vector3d getInterpolatedPosition() {
 		return INTERPOLATED_CAMERA_POSITION;
@@ -65,17 +74,22 @@ public class EntityClientPlayer extends EntityPlayer {
 
 
 	// unreliably send movement keyboard inputs to server
-	private void sendInputsToServer(KeyboardInput keyboardInput, MouseInput mouseInput) {
+	private void sendMovementInputsToServer(KeyboardInput keyboardInput, MouseInput mouseInput) {
 
 		boolean[] inputs = new boolean[MOVEMENT_INPUT_SIZE];
+		inputs[MOVEMENT_INPUT_FORWARD] = keyboardInput.isKeyPressed(GLFW_KEY_W);
+		inputs[MOVEMENT_INPUT_LEFT] = keyboardInput.isKeyPressed(GLFW_KEY_A);
+		inputs[MOVEMENT_INPUT_BACKWARD] = keyboardInput.isKeyPressed(GLFW_KEY_S);
+		inputs[MOVEMENT_INPUT_RIGHT] = keyboardInput.isKeyPressed(GLFW_KEY_D);
+		inputs[MOVEMENT_INPUT_CROUCH] = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_SHIFT);
+		inputs[MOVEMENT_INPUT_JUMP] = keyboardInput.isKeyPressed(GLFW_KEY_SPACE);
+		inputs[MOVEMENT_INPUT_SPRINT] = keyboardInput.isKeyPressed(GLFW_KEY_LEFT_CONTROL);
 
-
-	}
-
-	// unreliably send rotation to server
-	private void sendRotationToServer(Vector3f rotation) {
-
-
+		ClientController.sendUnreliable(
+				new PacketPlayerMovementInputs()
+						.setMovementInputs(inputs)
+						.setRotation(getRotation())
+		);
 
 	}
 
@@ -103,6 +117,26 @@ public class EntityClientPlayer extends EntityPlayer {
 	}
 
 
+	private void jump(boolean reliable) {
+
+		/* TODO: implement later
+		if (!isOnGround()) {
+
+			System.out.println("cannot jump: not on ground");
+
+			return;
+		}*/
+
+
+		if (reliable) {
+			ClientController.sendReliable(new PacketPlayerJump());
+		} else {
+			ClientController.sendUnreliable(new PacketPlayerJump());
+		}
+
+
+	}
+
 	@Override
 	public void fixedUpdate() {
 		super.fixedUpdate();
@@ -110,16 +144,22 @@ public class EntityClientPlayer extends EntityPlayer {
 		KeyboardInput keyboardInput = KeyboardInput.get();
 		MouseInput mouseInput = MouseInput.get();
 
-		sendInputsToServer(keyboardInput, mouseInput);
+		sendMovementInputsToServer(keyboardInput, mouseInput);
 
 		Renderer.get().getCamera().getTransform().getRotation().set(getRotation());
 		Renderer.get().getCamera().getTransform().getPosition().set(getCameraPosition());
+
+		getPreviousTransform().set(getTransform());
 
 		float rotateSpeed = 0.0025f;
 
 		if (keyboardInput.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
 			lockMouseToCenterForCameraRotation = !lockMouseToCenterForCameraRotation;
 			updateCursorVisibility();
+		}
+
+		if (keyboardInput.isKeyPressed(GLFW_KEY_SPACE)) {
+			jump(false);
 		}
 
 		if (lockMouseToCenterForCameraRotation) {
@@ -134,8 +174,6 @@ public class EntityClientPlayer extends EntityPlayer {
 			// clamp vertical rotation
 			getTransform().getRotation().x = Math.max(getTransform().getRotation().x, (float) -Math.PI * 0.5f);
 			getTransform().getRotation().x = Math.min(getTransform().getRotation().x, (float) Math.PI * 0.5f);
-
-			sendRotationToServer(getTransform().getRotation());
 		}
 
 		cameraInterpolationFactor = 0f;

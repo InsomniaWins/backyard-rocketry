@@ -14,6 +14,7 @@ import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 
-	protected final int MOVEMENT_INPUT_SIZE = 7; // amount of inputs to send
+	public static final int MOVEMENT_INPUT_SIZE = 7; // amount of inputs to send
 	protected final int MOVEMENT_INPUT_FORWARD = 0;
 	protected final int MOVEMENT_INPUT_BACKWARD = 1;
 	protected final int MOVEMENT_INPUT_RIGHT = 2;
@@ -46,6 +47,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	protected boolean crouching = false;
 	protected boolean moving = false;
 	protected final ComponentFootstepAudio FOOTSTEP_AUDIO;
+	protected final ComponentGravity GRAVITY_COMPONENT;
 	protected BlockRaycastResult targetBlock;
 
 	private final float HEIGHT = 1.73f;
@@ -87,7 +89,8 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 		getRotation().x = Math.toRadians(90);
 
 		addEntityComponent(new ComponentStandardPlayer(this));
-		addEntityComponent(new ComponentGravity(this, 1f));
+		GRAVITY_COMPONENT = new ComponentGravity(this, 1f);
+		addEntityComponent(GRAVITY_COMPONENT);
 		FOOTSTEP_AUDIO = new ComponentFootstepAudio(this);
 		addEntityComponent(FOOTSTEP_AUDIO);
 	}

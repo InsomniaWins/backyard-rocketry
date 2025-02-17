@@ -1,8 +1,5 @@
 package wins.insomnia.backyardrocketry;
 
-import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
-import wins.insomnia.backyardrocketry.util.io.FileIO;
-
 public class Main {
 
     private static BackyardRocketry game;
@@ -10,7 +7,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //OpenGLWrapper.trackVaos();
 
         game = new BackyardRocketry();
         game.run();

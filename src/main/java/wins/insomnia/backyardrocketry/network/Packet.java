@@ -2,10 +2,15 @@ package wins.insomnia.backyardrocketry.network;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
-import wins.insomnia.backyardrocketry.network.world.LoadChunkPacket;
-import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerTransform;
+import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
+import wins.insomnia.backyardrocketry.util.Transform;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +24,14 @@ public abstract class Packet {
 
 	public static final List<Class<?>> CLASS_REGISTRATION_LIST = Arrays.asList(
 			TestPacket.class,
-			LoadChunkPacket.class,
+			PacketLoadChunk.class,
+			PacketPlayerTransform.class,
+			PacketPlayerJump.class,
+			PacketPlayerMovementInputs.class,
+			Transform.class,
+			Vector3f.class,
+			Vector3d.class,
+			boolean[].class,
 			byte[].class,
 			byte[][].class
 	);
@@ -50,6 +62,7 @@ public abstract class Packet {
 
 
 
+	// called on main thread
 	public abstract void received(SenderType senderType, Connection connection);
 
 

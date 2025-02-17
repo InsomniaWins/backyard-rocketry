@@ -1,13 +1,10 @@
 package wins.insomnia.backyardrocketry.world;
 
-import com.esotericsoftware.kryonet.Server;
-import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.network.world.LoadChunkPacket;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -15,13 +12,19 @@ import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 public class ServerWorld extends World {
 
+	private final HashMap<Integer, EntityServerPlayer> SERVER_PLAYER_HASH_MAP;
+
+	public ServerWorld() {
+		super();
+		SERVER_PLAYER_HASH_MAP = new HashMap<>();
+	}
 
 	private List<EntityServerPlayer> getPlayersNearChunk(Chunk chunk) {
 		List<EntityServerPlayer> returnList = new ArrayList<>();
@@ -96,6 +99,17 @@ public class ServerWorld extends World {
 
 
 	}
+
+	public void setServerPlayer(int connectionId, EntityServerPlayer serverPlayer) {
+		SERVER_PLAYER_HASH_MAP.put(connectionId, serverPlayer);
+	}
+
+	public EntityServerPlayer getServerPlayer(int connectionId) {
+
+		return SERVER_PLAYER_HASH_MAP.get(connectionId);
+
+	}
+
 
 	@Override
 	protected void loadChunk(ChunkPosition chunkPosition) {

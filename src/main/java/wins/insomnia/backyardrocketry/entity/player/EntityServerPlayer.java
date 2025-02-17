@@ -2,17 +2,25 @@ package wins.insomnia.backyardrocketry.entity.player;
 
 import org.joml.Math;
 import org.joml.Vector3f;
+import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerTransform;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
+
+import java.util.Arrays;
 
 
 public class EntityServerPlayer extends EntityPlayer {
-    private boolean[] movementInputs = new boolean[6];
+    private boolean[] movementInputs = new boolean[MOVEMENT_INPUT_SIZE];
     private final int CONNECTION_ID;
+    private boolean jumping = false; // true when player queued a jump
 
     public EntityServerPlayer(int connectionId, ServerWorld world) {
         super(world);
         CONNECTION_ID = connectionId;
+
+        moveSpeed = WALK_SPEED;
     }
 
     public int getConnectionId() {
@@ -21,12 +29,26 @@ public class EntityServerPlayer extends EntityPlayer {
 
     public void setMovementInputs(boolean[] movementInputs) {
 
-        if (movementInputs.length < MOVEMENT_INPUT_SIZE) return;
+        if (movementInputs.length != MOVEMENT_INPUT_SIZE) return;
 
         this.movementInputs = movementInputs;
 
     }
 
+    public void sendUnreliableInfoToClients() {
+
+        ServerController.sendUnreliable(
+                new PacketPlayerTransform().setTransform(getTransform())
+        );
+
+    }
+
+
+    public void jump() {
+
+        jumping = true;
+
+    }
 
 
     @Override
@@ -62,21 +84,38 @@ public class EntityServerPlayer extends EntityPlayer {
         }
 
         moveAmount.y = (upDirection - downDirection);
+
+        if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
+            moveSpeed = CROUCH_SPEED;
+        } else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
+            moveSpeed = SPRINT_SPEED;
+        } else {
+            moveSpeed = WALK_SPEED;
+        }
+
         moveAmount.mul(moveSpeed);
 
 
         getVelocity().x = Math.lerp(getVelocity().x, moveAmount.x, 0.5f);
         getVelocity().z = Math.lerp(getVelocity().z, moveAmount.z, 0.5f);
 
+
         if (!hasEntityComponent(ComponentGravity.class)) {
             float verticalMoveAmount = upDirection - downDirection;
             getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+        } else {
+            GRAVITY_COMPONENT.fixedUpdate();
         }
 
-        if (isOnGround() && movementInputs[MOVEMENT_INPUT_JUMP]) {
-            getVelocity().y = JUMP_SPEED;
-            FOOTSTEP_AUDIO.playAudio();
+        if (jumping) {
+            if (isOnGround()) {
+                getVelocity().y = JUMP_SPEED;
+                FOOTSTEP_AUDIO.playAudio();
+            }
+
+            jumping = false;
         }
+
 
         // apply translation and rotation
         getPreviousTransform().set(getTransform());
@@ -96,5 +135,11 @@ public class EntityServerPlayer extends EntityPlayer {
 
         //pickupNearbyItems();
 
+    }
+
+    @Override
+    public void update(double deltaTime) {
+        super.update(deltaTime);
+        sendUnreliableInfoToClients();
     }
 }

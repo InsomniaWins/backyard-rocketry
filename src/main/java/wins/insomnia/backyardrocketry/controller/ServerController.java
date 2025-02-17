@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.controller;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import org.joml.Vector3d;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
@@ -23,7 +24,8 @@ public class ServerController extends GameController {
 
 			if (!(object instanceof Packet packet)) return;
 
-			packet.received(Packet.SenderType.CLIENT, connection);
+			Updater.get().queueMainThreadInstruction(() ->
+					packet.received(Packet.SenderType.CLIENT, connection));
 
 
 		}
@@ -37,7 +39,9 @@ public class ServerController extends GameController {
 				ServerWorld serverWorld = serverController.world;
 
 				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld);
-				serverWorld.addEntity(serverPlayer, 100, 100, 100);
+				serverPlayer.getTransform().setPosition(new Vector3d(100, 100, 100));
+
+				serverWorld.setServerPlayer(connection.getID(), serverPlayer);
 
 			});
 

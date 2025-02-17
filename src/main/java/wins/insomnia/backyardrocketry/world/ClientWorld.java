@@ -3,6 +3,8 @@ package wins.insomnia.backyardrocketry.world;
 
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ClientController;
+import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -13,6 +15,16 @@ import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 public class ClientWorld extends World {
 
+	private EntityClientPlayer clientPlayer;
+
+
+	public void setClientPlayer(EntityClientPlayer clientPlayer) {
+		this.clientPlayer = clientPlayer;
+	}
+
+	public EntityClientPlayer getClientPlayer() {
+		return clientPlayer;
+	}
 
 	@Override
 	public void updateChunksAroundPlayer(IPlayer player) {

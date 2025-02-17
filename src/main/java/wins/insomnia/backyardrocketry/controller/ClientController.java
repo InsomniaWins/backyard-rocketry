@@ -7,6 +7,7 @@ import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.network.TestPacket;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 
 import java.io.IOException;
@@ -18,7 +19,8 @@ public class ClientController extends GameController {
 
 			if (!(object instanceof Packet packet)) return;
 
-			packet.received(Packet.SenderType.SERVER, connection);
+			Updater.get().queueMainThreadInstruction(() ->
+					packet.received(Packet.SenderType.SERVER, connection));
 
 		}
 
@@ -79,10 +81,12 @@ public class ClientController extends GameController {
 
 
 		world = new ClientWorld();
+
 		clientPlayer = new EntityClientPlayer(world);
 		double[] centerXZ = world.getCenterXZ();
 		clientPlayer.getPosition().set(centerXZ[0], 164, centerXZ[1]);
 
+		world.setClientPlayer(clientPlayer);
 	}
 
 

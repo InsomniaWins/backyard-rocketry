@@ -9,7 +9,7 @@ import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 
 
-public class LoadChunkPacket extends Packet {
+public class PacketLoadChunk extends Packet {
 
 
 	private static final int CHUNK_DATA_SECTION_AMOUNT = 4;
@@ -20,12 +20,12 @@ public class LoadChunkPacket extends Packet {
 
 
 	// only used for kryonet
-	public LoadChunkPacket() {
+	public PacketLoadChunk() {
 		serializedChunkData = new byte[0];
 	}
 
 
-	public LoadChunkPacket(ChunkData chunkData) {
+	public PacketLoadChunk(ChunkData chunkData) {
 
 		serializedChunkData = ChunkData.serialize(chunkData);
 
