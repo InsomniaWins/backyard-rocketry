@@ -192,7 +192,7 @@ public class AudioManager {
 		AudioListener.setPosition(position.x, position.y, position.z);
 
 		Vector3f at = new Vector3f();
-		viewMatrix.positiveZ(at).negate();
+		viewMatrix.positiveZ(at);
 
 		Vector3f up = new Vector3f();
 		viewMatrix.positiveY(up);

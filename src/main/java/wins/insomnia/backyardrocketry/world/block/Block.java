@@ -12,16 +12,6 @@ import java.util.Set;
 
 public class Block {
 
-    public enum Face {
-        NULL,
-        NEG_X,
-        NEG_Y,
-        NEG_Z,
-        POS_X,
-        POS_Y,
-        POS_Z
-    }
-
     public static BoundingBox DEFAULT_BLOCK_BOUNDING_BOX = new BoundingBox(
             0,0,0,
             1,1,1
@@ -360,4 +350,41 @@ public class Block {
 		return block;
 
     }
+
+    public static class Face {
+
+        public static final Face NULL = null;
+        public static final Face NEG_X = new Face(-1, 0, 0);
+        public static final Face POS_X = new Face(1, 0, 0);
+        public static final Face NEG_Y = new Face(0, -1, 0);
+        public static final Face POS_Y = new Face(0, 1, 0);
+        public static final Face NEG_Z = new Face(0, 0, -1);
+        public static final Face POS_Z = new Face(0, 0, 1);
+
+        private final int X;
+        private final int Y;
+        private final int Z;
+
+        public Face(int x, int y, int z) {
+
+            X = x;
+            Y = y;
+            Z = z;
+
+        }
+
+        public int getX() {
+            return X;
+        }
+
+        public int getY() {
+            return Y;
+        }
+
+        public int getZ() {
+            return Z;
+        }
+
+    }
+
 }

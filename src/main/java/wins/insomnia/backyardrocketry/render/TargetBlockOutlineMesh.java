@@ -84,27 +84,31 @@ public class TargetBlockOutlineMesh {
 
 	public static Mesh get(Block.Face face) {
 
-		switch (face) {
-			case NEG_Y -> {
-				return NEG_Y_MESH;
-			}
-			case POS_X -> {
-				return POS_X_MESH;
-			}
-			case NEG_X -> {
-				return NEG_X_MESH;
-			}
-			case POS_Z -> {
-				return POS_Z_MESH;
-			}
-			case NEG_Z -> {
-				return NEG_Z_MESH;
-			}
-			default -> {
-				return POS_Y_MESH;
-			}
+		if (face == Block.Face.NEG_X) {
+			return NEG_X_MESH;
 		}
 
+		if (face == Block.Face.POS_X) {
+			return POS_X_MESH;
+		}
+
+		if (face == Block.Face.NEG_Y) {
+			return NEG_Y_MESH;
+		}
+
+		if (face == Block.Face.POS_Y) {
+			return POS_Y_MESH;
+		}
+
+		if (face == Block.Face.NEG_Z) {
+			return NEG_Z_MESH;
+		}
+
+		if (face == Block.Face.POS_Z) {
+			return POS_Z_MESH;
+		}
+
+		return null;
 	}
 
 

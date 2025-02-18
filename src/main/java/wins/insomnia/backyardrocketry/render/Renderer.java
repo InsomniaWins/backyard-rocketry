@@ -436,7 +436,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 getShaderProgram().setUniform("fs_lightingEnabled", false);
                 getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, TargetBlockOutlineMesh.getOutlineAlpha()));
 
-                TargetBlockOutlineMesh.get(raycastResult.getFace()).render(GL_LINES);
+                Mesh targetBlockOutlineMesh = TargetBlockOutlineMesh.get(raycastResult.getFace());
+                if (targetBlockOutlineMesh != null) targetBlockOutlineMesh.render(GL_LINES);
 
                 getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, 1f));
 

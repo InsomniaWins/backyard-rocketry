@@ -1,12 +1,16 @@
 package wins.insomnia.backyardrocketry.world.chunk;
 
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.render.ChunkMesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +42,54 @@ public class ClientChunk extends Chunk {
 
 	}
 
+	public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh, boolean instantly) {
+
+		if (Thread.currentThread() != Main.MAIN_THREAD) {
+
+			throw new ConcurrentModificationException("Tried to \"setBlock\" on thread other than main thread!");
+
+		}
+
+		chunkData.setBlock(x,y,z, block);
+
+        setShouldRegenerateMesh(regenerateMesh, instantly);
+
+        if (regenerateMesh) {
+            updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z), instantly);
+        }
+
+	}
+
+	public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
+
+		setBlock(x, y, z, block, regenerateMesh, false);
+
+	}
+
+	public void breakBlock(int x, int y, int z, boolean regenerateMesh) {
+		byte blockBroken = getBlock(x, y, z);
+		setBlock(x, y, z, Block.AIR, regenerateMesh, true);
+
+		BlockAudio blockAudio = Block.getBlockAudio(blockBroken);
+		if (blockAudio != null) {
+			AudioPlayer audioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getBreakAudio(), false, false, true);
+			audioPlayer.setPosition(toGlobalX(x) + 0.5f, toGlobalY(y) + 0.5f, toGlobalZ(z) + 0.5f);
+			audioPlayer.setPitch(World.RANDOM.nextFloat(0.9f, 1.1f));
+		}
+
+	}
+
+	public void placeBlock(int x, int y, int z, byte block) {
+		setBlock(x, y, z, block, true, true);
+
+		BlockAudio blockAudio = Block.getBlockAudio(block);
+		if (blockAudio != null) {
+			AudioPlayer audioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getPlaceAudio(), false, false, true);
+			audioPlayer.setPosition(toGlobalX(x) + 0.5f, toGlobalY(y) + 0.5f, toGlobalZ(z) + 0.5f);
+			audioPlayer.setPitch(World.RANDOM.nextFloat(0.9f, 1.1f));
+		}
+
+	}
 
 	public void gotChunkDataFromServer(ChunkData chunkData) {
 
@@ -47,7 +99,7 @@ public class ClientChunk extends Chunk {
 	}
 
 
-	public void updateNeighborChunkMeshes() {
+	public void updateNeighborChunkMeshes(boolean instantly) {
 
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
 			throw new ConcurrentModificationException("Tried updating neighboring chunk meshes from thread other than the main thread!");
@@ -61,16 +113,22 @@ public class ClientChunk extends Chunk {
 			}
 
 			clientChunk.SHOULD_REGENERATE_MESH.set(true);
-			clientChunk.SHOULD_INSTANTLY_REGENERATE_MESH.set(false);
+			clientChunk.SHOULD_INSTANTLY_REGENERATE_MESH.set(instantly);
 		}
 	}
 
-	private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z) {
+	private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z, boolean instantly) {
+
 		if (isBlockOnChunkBorder(x, y, z)) {
 
-			updateNeighborChunkMeshes();
+			updateNeighborChunkMeshes(instantly);
 
 		}
+
+	}
+
+	private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z) {
+		updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z, false);
 	}
 
 	private void generateMesh(boolean isDelayed) {

@@ -3,14 +3,17 @@ package wins.insomnia.backyardrocketry.entity.player;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerBreakBlock;
 import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
 import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
+import wins.insomnia.backyardrocketry.network.player.PacketPlayerPlaceBlock;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
@@ -262,6 +265,43 @@ public class EntityClientPlayer extends EntityPlayer {
 		cameraInterpolationFactor = 0f;
 
 		updateTargetBlock();
+		handleBlockInteractions();
+
+	}
+
+	private void handleBlockInteractions() {
+
+		if (targetBlock == null) return;
+
+		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+			ClientController.sendReliable(
+					new PacketPlayerBreakBlock()
+							.setWorldX(targetBlock.getBlockX())
+							.setWorldY(targetBlock.getBlockY())
+							.setWorldZ(targetBlock.getBlockZ())
+			);
+
+		}
+
+		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+
+			Block.Face face = targetBlock.getFace();
+
+			int worldX = targetBlock.getBlockX() + face.getX();
+			int worldY = targetBlock.getBlockY() + face.getY();
+			int worldZ = targetBlock.getBlockZ() + face.getZ();
+
+			ClientController.sendReliable(
+					new PacketPlayerPlaceBlock()
+							.setWorldX(worldX)
+							.setWorldY(worldY)
+							.setWorldZ(worldZ)
+							.setBlock(Block.STONE)
+			);
+
+		}
+
 
 	}
 
@@ -273,7 +313,6 @@ public class EntityClientPlayer extends EntityPlayer {
 				.rotateX(-getTransform().getRotation().x)
 				.rotateY(-getTransform().getRotation().y);
 
-		BlockRaycastResult previousTargetBlock = targetBlock;
 		targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, getReachDistance());
 
 	}

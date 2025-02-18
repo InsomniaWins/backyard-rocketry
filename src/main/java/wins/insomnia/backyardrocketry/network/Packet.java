@@ -6,10 +6,9 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerTransform;
+import wins.insomnia.backyardrocketry.network.player.*;
 import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
+import wins.insomnia.backyardrocketry.network.world.PacketUpdateBlock;
 import wins.insomnia.backyardrocketry.util.Transform;
 
 import java.util.Arrays;
@@ -28,6 +27,9 @@ public abstract class Packet {
 			PacketPlayerTransform.class,
 			PacketPlayerJump.class,
 			PacketPlayerMovementInputs.class,
+			PacketPlayerBreakBlock.class,
+			PacketUpdateBlock.class,
+			PacketPlayerPlaceBlock.class,
 			Transform.class,
 			Vector3f.class,
 			Vector3d.class,

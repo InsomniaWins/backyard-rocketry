@@ -63,61 +63,12 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
     public void setBlock(int x, int y, int z, byte block) {
-        setBlock(x, y, z, block, true);
-
+        chunkData.setBlock(x, y, z, block);
     }
 
-    public void breakBlock(int x, int y, int z, boolean regenerateMeshInstantly) {
 
-        byte block = getBlock(x, y, z);
-        setBlock(x, y, z, Block.AIR, true, regenerateMeshInstantly);
-
-        BlockLoot blockLoot = BlockLoot.getBlockLoot(block);
-
-        if (blockLoot == null) {
-            return;
-        }
-
-        ArrayList<ArrayList<Object>> defaultLoot = blockLoot.getLootOfType("default");
-        for (ArrayList<Object> lootEntry : defaultLoot) {
-
-            String itemSynonym = (String) lootEntry.get(0);
-            int volume = (Integer) lootEntry.get(1);
-
-            Item item = Item.getItem(itemSynonym);
-            ItemStack itemStack = new ItemStack(item, volume);
-
-            EntityItem itemEntity = new EntityItem(itemStack, WORLD);
-            WORLD.addEntity(itemEntity, X + x + 0.5f, Y + y + 0.5f, Z + z + 0.5f);
-        }
-    }
-
-    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh, boolean instantly) {
-
-        if (Thread.currentThread() != Main.MAIN_THREAD) {
-
-            throw new ConcurrentModificationException("Tried to \"setBlock\" on thread other than main thread!");
-
-        }
-
-        chunkData.setBlock(x,y,z, block);
-
-        /*
-
-        setShouldRegenerateMesh(regenerateMesh, instantly);
-
-        if (shouldRegenerateMesh.get()) {
-            updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
-        }
-
-
-         */
-    }
-
-    public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
-
-        setBlock(x, y, z, block, regenerateMesh, false);
-
+    public World getWorld() {
+        return WORLD;
     }
 
 
