@@ -7,7 +7,9 @@ import java.util.HashMap;
 
 public class BlockAtlasTexture extends Texture {
 
-	public static final float BLOCK_SCALE_ON_ATLAS = 16f / 512f;
+	public static final float PIXEL_SCALE_ON_ATLAS = 1f / 512f;
+	public static final float BLOCK_SCALE_ON_ATLAS = PIXEL_SCALE_ON_ATLAS * 16f;
+	public static final float HALF_BLOCK_SCALE_ON_ATLAS = BLOCK_SCALE_ON_ATLAS * 0.5f;
 	public static final int BLOCK_AMOUNT = 28;
 	private final HashMap<String, BlockTexture> BLOCK_TEXTURE_MAP;
 
@@ -79,6 +81,15 @@ public class BlockAtlasTexture extends Texture {
 
 	}
 
+	public static float[] convertAtlasPositionToTexturePosition(int[] framePosition) {
+
+		return new float[] {
+				framePosition[0] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[0] * 2 * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS + BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS,
+				framePosition[1] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[1] * 2 * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS + BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS
+		};
+
+	}
+
 	public static class BlockTextureFrames {
 
 		private final int TICKS_PER_FRAME;
@@ -131,6 +142,12 @@ public class BlockAtlasTexture extends Texture {
 			double frame = fps * currentTime;
 
 			return ((int) frame) % getFrameAmount();
+
+		}
+
+		public float[] getFrameUV(int frameIndex) {
+
+			return BlockAtlasTexture.convertAtlasPositionToTexturePosition(getFramePosition(frameIndex));
 
 		}
 

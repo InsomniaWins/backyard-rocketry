@@ -3,18 +3,18 @@ package wins.insomnia.backyardrocketry.world;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.item.EntityServerItem;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
+import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.network.PacketDropItem;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ServerWorld extends World {
@@ -35,6 +35,26 @@ public class ServerWorld extends World {
 	}
 
 
+	public void dropItem(ItemStack itemStack, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+		UUID uuid = UUID.randomUUID();
+
+		EntityServerItem itemEntity = new EntityServerItem(itemStack, this, uuid);
+		addEntity(itemEntity, x, y, z);
+		itemEntity.getVelocity().set(velocityX, velocityY, velocityZ);
+
+		int itemId = itemStack.getItem().getId();
+		int volume = itemStack.getVolume();
+
+		ServerController.sendReliable(
+				new PacketDropItem()
+						.setUuid(uuid)
+						.setItem(itemId)
+						.setVolume(volume)
+		);
+
+	}
+
+
 	// DO NOT CALL DIRECTLY
 	// only called on main-thread
 	private void _loadChunk(ChunkPosition chunkPosition) {
@@ -44,7 +64,7 @@ public class ServerWorld extends World {
 
 		CHUNKS.put(chunkPosition, chunk);
 		CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-		ENTITIES.put(chunkPosition, new ArrayList<>());
+		CHUNK_ENTITY_MAP.put(chunkPosition, new HashMap<>());
 
 		// todo: send only to those who need it
 		ServerController.sendReliable(chunk.createLoadPacket());
@@ -126,18 +146,21 @@ public class ServerWorld extends World {
 	protected void unloadChunk(ChunkPosition chunkPosition) {
 
 		if (CHUNKS.get(chunkPosition) != null) {
-			ArrayList<Entity> entitiesInChunk = ENTITIES.get(chunkPosition);
-			ENTITIES.remove(chunkPosition);
+			HashMap<UUID, Entity> entitiesInChunk = CHUNK_ENTITY_MAP.get(chunkPosition);
+			CHUNK_ENTITY_MAP.remove(chunkPosition);
 
 			Chunk chunk = CHUNKS.get(chunkPosition);
 			CHUNKS.remove(chunkPosition);
 
-			Iterator<Entity> entityIterator = entitiesInChunk.iterator();
+
+			Iterator<UUID> entityIterator = entitiesInChunk.keySet().iterator();
 			while (entityIterator.hasNext()) {
-				Entity entity = entityIterator.next();
+				UUID uuid = entityIterator.next();
+				Entity entity = entitiesInChunk.get(uuid);
+
 				entity.removedFromWorld();
 
-				ENTITY_LIST.remove(entity);
+				ENTITY_MAP.remove(uuid);
 				entityIterator.remove();
 			}
 

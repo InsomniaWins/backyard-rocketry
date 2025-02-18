@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.scene.screen;
 
 import wins.insomnia.backyardrocketry.audio.AudioManager;
+import wins.insomnia.backyardrocketry.entity.EntityManager;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
@@ -48,7 +49,6 @@ public class LoadingScene extends Scene {
 			ASSET_LOADER.addLoadTask(task);
 		}
 
-
 		List<LoadTask> blockModelTaskList = BlockModelData.makeBlockModelLoadingTaskList();
 		for (LoadTask task : blockModelTaskList) {
 			ASSET_LOADER.addLoadTask(task);
@@ -68,6 +68,8 @@ public class LoadingScene extends Scene {
 		for (LoadTask task : blockLootTaskList) {
 			ASSET_LOADER.addLoadTask(task);
 		}
+
+		ASSET_LOADER.addLoadTask(new LoadTask("Registering Entities . .  .", EntityManager::registerEntities));
 
 		loading = true;
 

@@ -1,0 +1,23 @@
+{
+  "parent": "block_all",
+  "faces": {
+    "top": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    },
+    "bottom": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    },
+    "left": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    },
+    "right": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    },
+    "back": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    },
+    "front": {
+      "possible_rotations": [0.0, 90.0, 180.0, 270.0]
+    }
+  }
+}

@@ -3,29 +3,27 @@ package wins.insomnia.backyardrocketry.entity.player;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
-import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerBreakBlock;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerJump;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerMovementInputs;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerPlaceBlock;
-import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerBreakBlock;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerJump;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerMovementInputs;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerPlaceBlock;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.block.Block;
+
+import java.util.UUID;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -38,10 +36,10 @@ public class EntityClientPlayer extends EntityPlayer {
 	private final FirstPersonHandItemRenderable FIRST_PERSON_HAND_ITEM;
 	private float cameraInterpolationFactor = 0f;
 	private boolean lockMouseToCenterForCameraRotation = false;
+	private int currentHotbarSlot = 0;
 
-
-	public EntityClientPlayer(ClientWorld world) {
-		super(world);
+	public EntityClientPlayer(ClientWorld world, java.util.UUID uuid) {
+		super(world, uuid);
 
 		INTERPOLATED_CAMERA_ROTATION = new Vector3f(getPreviousTransform().getRotation());
 		INTERPOLATED_CAMERA_POSITION = getCameraPosition();
@@ -264,9 +262,8 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		cameraInterpolationFactor = 0f;
 
-		updateTargetBlock();
 		handleBlockInteractions();
-
+		hotbarManagement();
 	}
 
 	private void handleBlockInteractions() {
@@ -274,6 +271,8 @@ public class EntityClientPlayer extends EntityPlayer {
 		if (targetBlock == null) return;
 
 		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+			FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
 
 			ClientController.sendReliable(
 					new PacketPlayerBreakBlock()
@@ -286,6 +285,8 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 
+			FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
+
 			Block.Face face = targetBlock.getFace();
 
 			int worldX = targetBlock.getBlockX() + face.getX();
@@ -297,7 +298,7 @@ public class EntityClientPlayer extends EntityPlayer {
 							.setWorldX(worldX)
 							.setWorldY(worldY)
 							.setWorldZ(worldZ)
-							.setBlock(Block.STONE)
+							.setBlock(getHotbarSlotContents(getCurrentHotbarSlot()))
 			);
 
 		}
@@ -372,6 +373,7 @@ public class EntityClientPlayer extends EntityPlayer {
 		Camera camera = Renderer.get().getCamera();
 		AudioManager.updateListenerPosition(new Vector3f(camera.getTransform().getPosition()), camera);
 
+		updateTargetBlock();
 
 	}
 
@@ -385,11 +387,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 
 
-
-	/*
 	private void hotbarManagement() {
-
-		if (INVENTORY_MANAGER.isOpen()) return;
 
 		KeyboardInput keyboardInput = KeyboardInput.get();
 		MouseInput mouseInput = MouseInput.get();
@@ -423,11 +421,8 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		}
 
-	}*/
+	}
 
-
-
-	/*
 
 
 	public void offsetCurrentHotbarSlot(int offsetAmount) {
@@ -444,6 +439,8 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		setCurrentHotbarSlot(currentHotbarSlot);
 	}
+
+	/*
 
 	private void blockInteraction() {
 

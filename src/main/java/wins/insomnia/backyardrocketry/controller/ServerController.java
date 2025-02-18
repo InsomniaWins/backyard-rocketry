@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class ServerController extends GameController {
 
@@ -38,7 +39,7 @@ public class ServerController extends GameController {
 				ServerController serverController = ServerController.get();
 				ServerWorld serverWorld = serverController.world;
 
-				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld);
+				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld, UUID.randomUUID());
 				serverPlayer.getTransform().setPosition(new Vector3d(100, 100, 100));
 
 				serverWorld.setServerPlayer(connection.getID(), serverPlayer);

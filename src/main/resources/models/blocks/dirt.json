@@ -1,5 +1,5 @@
 {
-	"parent": "block_all",
+	"parent": "block_all_random_rotation",
 	"textures": {
 		"particle": "dirt",
 		"all": "dirt",

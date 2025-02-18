@@ -1,13 +1,9 @@
-package wins.insomnia.backyardrocketry.network.player;
+package wins.insomnia.backyardrocketry.network.entity.player;
 
 import com.esotericsoftware.kryonet.Connection;
-import org.joml.Vector3i;
-import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.network.Packet;
-import wins.insomnia.backyardrocketry.network.world.PacketUpdateBlock;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
-import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
@@ -47,8 +43,6 @@ public class PacketPlayerBreakBlock extends Packet {
 
 			Chunk chunk = clientWorld.getChunkContainingBlock(worldX, worldY, worldZ);
 
-			if (chunk == null) return;
-
 			if (!(chunk instanceof ClientChunk clientChunk)) return;
 
 			int localX = clientChunk.toLocalX(worldX);
@@ -74,7 +68,7 @@ public class PacketPlayerBreakBlock extends Packet {
 		int localY = serverChunk.toLocalY(worldY);
 		int localZ = serverChunk.toLocalZ(worldZ);
 
-		serverChunk.breakBlock(localX, localY, localZ, false);
+		serverChunk.breakBlock(localX, localY, localZ, true);
 
 	}
 }

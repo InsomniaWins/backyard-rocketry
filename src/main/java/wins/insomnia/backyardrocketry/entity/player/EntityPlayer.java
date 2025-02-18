@@ -23,6 +23,7 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 
@@ -74,8 +75,8 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	private boolean hasCollision = true;
 	private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
 
-	public EntityPlayer(World world) {
-		super(world);
+	public EntityPlayer(World world, java.util.UUID uuid) {
+		super(world, uuid);
 
 		PREVIOUS_TRANSFORM = new Transform();
 
@@ -212,24 +213,6 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 
 	@Override
 	public void fixedUpdate() {
-
-	}
-
-	private void pickupNearbyItems() {
-
-		ArrayList<Entity> entities = getWorld().getEntityList();
-		for (Entity entity : entities) {
-			if (entity instanceof IBoundingBoxEntity boundingBoxEntity) {
-
-				Collision.AABBCollisionResultType collisionResult = boundingBoxEntity.getBoundingBox().collideWithBoundingBox(getBoundingBox());
-				if (collisionResult != Collision.AABBCollisionResultType.OUTSIDE) {
-
-					getWorld().removeEntity(entity);
-
-				}
-
-			}
-		}
 
 	}
 

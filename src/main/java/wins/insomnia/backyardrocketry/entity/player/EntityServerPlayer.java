@@ -4,12 +4,10 @@ import org.joml.Math;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerTransform;
-import wins.insomnia.backyardrocketry.util.FancyToString;
-import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerTransform;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 
 public class EntityServerPlayer extends EntityPlayer {
@@ -17,8 +15,8 @@ public class EntityServerPlayer extends EntityPlayer {
     private final int CONNECTION_ID;
     private boolean jumping = false; // true when player queued a jump
 
-    public EntityServerPlayer(int connectionId, ServerWorld world) {
-        super(world);
+    public EntityServerPlayer(int connectionId, ServerWorld world, java.util.UUID uuid) {
+        super(world, uuid);
         CONNECTION_ID = connectionId;
 
         moveSpeed = WALK_SPEED;

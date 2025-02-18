@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class ClientController extends GameController {
 
@@ -83,7 +84,7 @@ public class ClientController extends GameController {
 
 		world = new ClientWorld();
 
-		clientPlayer = new EntityClientPlayer(world);
+		clientPlayer = new EntityClientPlayer(world, UUID.randomUUID());
 		double[] centerXZ = world.getCenterXZ();
 		clientPlayer.getPosition().set(centerXZ[0], 164, centerXZ[1]);
 

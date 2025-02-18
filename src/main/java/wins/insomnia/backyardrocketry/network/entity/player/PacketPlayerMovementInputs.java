@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.network.player;
+package wins.insomnia.backyardrocketry.network.entity.player;
 
 import com.esotericsoftware.kryonet.Connection;
 import org.joml.Vector3f;

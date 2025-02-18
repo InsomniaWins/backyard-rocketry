@@ -1,14 +1,14 @@
 package wins.insomnia.backyardrocketry.render;
 
 import org.joml.*;
+import org.joml.Math;
 import wins.insomnia.backyardrocketry.Main;
-import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
+import wins.insomnia.backyardrocketry.util.HelpfulMath;
 import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
@@ -54,10 +54,15 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         chunk = null;
     }
 
-    public void createOpenGLMeshData() {
+    public void createOpenGLMeshData() throws ConcurrentModificationException {
 
         if (Thread.currentThread() != Main.MAIN_THREAD) {
-            new ConcurrentModificationException("Tried creating OpenGL mesh data on thread other than main thread!").printStackTrace();
+            ConcurrentModificationException exception = new ConcurrentModificationException(
+                    "Tried creating OpenGL mesh data on thread other than main thread!"
+            );
+            getChunk().getWorld().logInfo(Arrays.toString(exception.getStackTrace()));
+            throw exception;
+
         }
 
         clean();
@@ -94,6 +99,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         isClean.set(false);
         meshIsReadyToRender = true;
         setGenerating(false);
+
+
     }
 
     public ChunkMesh(Chunk chunk, boolean isTransparent) {
@@ -114,7 +121,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             return false;
         }
 
-
         if (vao < 0 || !meshIsReadyToRender || indexCount == 0) {
             return false;
         }
@@ -134,6 +140,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         FrustumIntersection frustum = camera.getFrustum();
         Vector3f boundingBoxMin = chunk.getBoundingBox().getMin().get(new Vector3f());
         Vector3f boundingBoxMax = chunk.getBoundingBox().getMax().get(new Vector3f());
+
+
+        if (isGenerating()) return false;
+
         return frustum.testAab(boundingBoxMin, boundingBoxMax);
 
     }
@@ -188,12 +198,22 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
                 for (int z = 0; z < Chunk.SIZE_Z; z++) {
 
-
+                    int globalX = getChunk().toGlobalX(x);
+                    int globalY = getChunk().toGlobalY(y);
+                    int globalZ = getChunk().toGlobalZ(z);
 
                     byte block = blocks[x][y][z];
                     if (block == Block.AIR) continue;
 
                     if (isTransparent != Block.isBlockTransparent(block)) continue;
+
+                    BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
+
+                    if (blockModelData == null) continue;
+
+                    HashMap<String, String> textures = blockModelData.getTextures();
+
+
 
 
 
@@ -228,8 +248,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     blockNeighbors[2][2][2] = chunk.getBlock(x+1, y+1, z+1);
 
 
-                    BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
-                    HashMap<String, String> textures = blockModelData.getTextures();
 
                     for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 
@@ -239,6 +257,21 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
                         String cullface = (String) faceData.get("cullface");
 
+
+                        double rotationValue = 0.0;
+                        Object possibleRotations = faceData.get("possible_rotations");
+                        if (possibleRotations instanceof ArrayList<?> rotationList) {
+
+                            Object rotation = rotationList.get(BlockModelData.getRandomBlockNumberBasedOnBlockPosition(globalX, globalY, globalZ) % rotationList.size());
+
+                            if (rotation instanceof Double) {
+                                rotationValue = (Double) rotation;
+                            }
+
+                        }
+
+
+
                         if (shouldAddFaceToMesh(cullface, block, blockNeighbors)) {
 
                             addFace(
@@ -247,7 +280,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                                     faceVertexArray, faceIndexArray,
                                     x, y, z,
                                     blockNeighbors,
-                                    BlockAtlasTexture.get().getBlockTexture(textures.get(faceData.get("texture")))
+                                    BlockAtlasTexture.get().getBlockTexture(textures.get(faceData.get("texture"))),
+                                    rotationValue
                             );
 
                         }
@@ -624,7 +658,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture) {
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture, double textureRotationValue) {
+
+        textureRotationValue = Math.toRadians(textureRotationValue);
+
+        float[] textureUV = blockTexture.getFrames().getFrameUV(blockTexture.getFrames().getCurrentFrameIndex());
 
         ChunkPosition chunkPosition = chunk.getChunkPosition();
 
@@ -637,6 +675,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
             float[] vertexPosition = new float[3];
             float[] vertexNormal = new float[3];
+
+
+            // temp variable to store uv for uv rotation
+            float[] uv = new float[] {0f, 0f};
+
 
             for (int i = 0; i < faceVertexArray.size(); i++) {
 
@@ -655,6 +698,26 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     vertexPosition[2] = vertexData;
                     // offset z position of vertex
                     vertexData += offZ;
+                } else if (vertexDataIndex == 3) {
+                    // store u for later
+                    uv[0] = vertexData;
+                    continue;
+
+                } else if (vertexDataIndex == 4) {
+
+                    // rotate u and v
+                    uv[1] = vertexData;
+
+                    float pivotX = textureUV[0] + BlockAtlasTexture.HALF_BLOCK_SCALE_ON_ATLAS;
+                    float pivotY = textureUV[1] + BlockAtlasTexture.HALF_BLOCK_SCALE_ON_ATLAS;
+
+                    HelpfulMath.rotatePoint(uv, pivotX, pivotY, (float) textureRotationValue);
+
+                    vertices.add(uv[0]);
+                    vertices.add(uv[1]);
+
+                    continue;
+
                 } else if (vertexData == 5 || vertexData == 6 || vertexData == 7) {
                     // set normal of vertex
                     vertexNormal[vertexDataIndex - 5] = vertexData;
@@ -676,7 +739,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         //vertices.add(1f);
                         vertices.add(
                                 WorldGeneration.getBlockTint(
-                                        World.getServerWorld().getSeed(),
+                                        getChunk().getWorld().getSeed(),
                                         chunkPosition.getBlockX() + offX,
                                         chunkPosition.getBlockY() + offY,
                                         chunkPosition.getBlockZ() + offZ

@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.entity;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.entity.component.Component;
-import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
@@ -11,6 +10,7 @@ import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Entity implements IUpdateListener, IFixedUpdateListener {
 
@@ -18,9 +18,15 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 	private final List<Component> COMPONENTS = new ArrayList<>();
 	private final Transform TRANSFORM = new Transform();
 	private final Vector3d VELOCITY = new Vector3d();
+	private final UUID UUID;
 
-	public Entity(World world) {
+	public Entity(World world, UUID uuid) {
 		WORLD = world;
+		UUID = uuid;
+	}
+
+	public UUID getUUID() {
+		return UUID;
 	}
 
 	@Override
@@ -105,5 +111,4 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 		getRotation().set(rotX, rotY, rotZ);
 
 	}
-
 }

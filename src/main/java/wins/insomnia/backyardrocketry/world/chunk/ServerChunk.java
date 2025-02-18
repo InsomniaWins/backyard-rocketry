@@ -1,15 +1,16 @@
 package wins.insomnia.backyardrocketry.world.chunk;
 
 import wins.insomnia.backyardrocketry.controller.ServerController;
-import wins.insomnia.backyardrocketry.entity.EntityItem;
+import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerBreakBlock;
-import wins.insomnia.backyardrocketry.network.player.PacketPlayerPlaceBlock;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerBreakBlock;
+import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerPlaceBlock;
 import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
 import wins.insomnia.backyardrocketry.network.world.PacketUpdateBlock;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.ServerWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
@@ -68,7 +69,12 @@ public class ServerChunk extends Chunk {
 
 	public void breakBlock(int x, int y, int z, boolean dropLoot) {
 
+		if (!isBlockInBoundsLocal(x, y, z)) return;
+
 		byte blockBroken = getBlock(x, y, z);
+
+		if (Block.getBlockHealth(blockBroken) < 0) return;
+
 		setBlock(x, y, z, Block.AIR, false);
 
 
@@ -89,8 +95,21 @@ public class ServerChunk extends Chunk {
 				Item item = Item.getItem(itemSynonym);
 				ItemStack itemStack = new ItemStack(item, volume);
 
-				EntityItem itemEntity = new EntityItem(itemStack, getWorld());
-				getWorld().addEntity(itemEntity, getX() + x + 0.5f, getY() + y + 0.5f, getZ() + z + 0.5f);
+				ServerWorld serverWorld = ServerWorld.getServerWorld();
+				if (serverWorld != null) {
+
+					serverWorld.dropItem(
+							itemStack,
+							getX() + x + 0.5f,
+							getY() + y + 0.5f,
+							getZ() + z + 0.5f,
+							0.0,
+							0.0,
+							0.0
+					);
+
+				}
+
 			}
 
 		}

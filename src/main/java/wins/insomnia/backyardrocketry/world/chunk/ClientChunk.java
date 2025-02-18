@@ -55,6 +55,7 @@ public class ClientChunk extends Chunk {
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
         if (regenerateMesh) {
+
             updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z), instantly);
         }
 
@@ -108,7 +109,7 @@ public class ClientChunk extends Chunk {
 
 
 		for (Chunk chunk : getNeighborChunks()) {
-			if (chunk == null || !(chunk instanceof ClientChunk clientChunk)) {
+			if (!(chunk instanceof ClientChunk clientChunk)) {
 				continue;
 			}
 
@@ -135,8 +136,16 @@ public class ClientChunk extends Chunk {
 
 		SHOULD_REGENERATE_MESH.set(false);
 
-		CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
-		TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
+		try {
+
+			CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
+			TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+		}
 
 	}
 
@@ -181,6 +190,7 @@ public class ClientChunk extends Chunk {
 
 			if (!CHUNK_MESH.isGenerating() && !TRANSPARENT_CHUNK_MESH.isGenerating()) {
 
+
 				SHOULD_REGENERATE_MESH.set(false);
 
 				CHUNK_MESH.setGenerating(true);
@@ -188,11 +198,7 @@ public class ClientChunk extends Chunk {
 
 				boolean instantly = SHOULD_INSTANTLY_REGENERATE_MESH.getAndSet(false);
 
-				chunkMeshGenerationExecutorService.submit(() -> {
-
-					generateMesh(instantly);
-
-				});
+				chunkMeshGenerationExecutorService.submit(() -> generateMesh(instantly));
 			}
 		}
 

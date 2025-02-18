@@ -2,21 +2,15 @@ package wins.insomnia.backyardrocketry.world.chunk;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import wins.insomnia.backyardrocketry.Main;
-import wins.insomnia.backyardrocketry.entity.EntityItem;
-import wins.insomnia.backyardrocketry.item.Item;
-import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
+
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

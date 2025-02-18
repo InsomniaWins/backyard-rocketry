@@ -1,12 +1,10 @@
-package wins.insomnia.backyardrocketry.network.player;
+package wins.insomnia.backyardrocketry.network.entity.player;
 
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.Transform;
-import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
-import wins.insomnia.backyardrocketry.world.World;
 
 public class PacketPlayerTransform extends Packet {
 

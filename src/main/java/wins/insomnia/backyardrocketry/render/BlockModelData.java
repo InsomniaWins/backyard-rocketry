@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.io.LoadTask;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
+import java.security.KeyPair;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -21,7 +23,7 @@ public class BlockModelData {
     private HashMap<String, String> textures = null;
     private HashMap<String, Object> faces = null;
     private String parent = null;
-
+    private String modelName = "";
 
     private static final HashMap<Byte, HashMap<String, Object>> BLOCK_STATE_MODEL_MAP = new HashMap();
     private static final HashMap<String, BlockModelData> MODEL_MAP = new HashMap<>();
@@ -130,6 +132,7 @@ public class BlockModelData {
                 double blockU = faceVertexArray.get(uIndex);
                 double blockV = faceVertexArray.get(vIndex);
 
+
                 double u = blockU * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS
                         + BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[0];
                 double v = blockV * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS
@@ -164,34 +167,61 @@ public class BlockModelData {
 
         }
 
+
         // load model
         BlockModelData blockModelData = mapper.readValue(src, BlockModelData.class);
+        blockModelData.modelName = modelName;
 
         if (blockModelData.parent != null) {
 
             BlockModelData parentBlockModelData = loadBlockModelData(mapper, blockModelData.parent);
 
-
-            if (blockModelData.faces != null) {
-
-                parentBlockModelData.faces = blockModelData.faces;
-
-            }
-
-
-            if (blockModelData.textures != null) {
-
-                parentBlockModelData.textures = blockModelData.textures;
-
-            }
-
-
-            blockModelData = parentBlockModelData;
+            blockModelData = inheritParentBlockModel(blockModelData, parentBlockModelData);
 
         }
 
         return blockModelData;
     }
+
+
+    private static BlockModelData inheritParentBlockModel(BlockModelData blockModelData, BlockModelData parentBlockModelData) {
+
+        if (blockModelData.faces != null) {
+
+            for (String faceName : blockModelData.faces.keySet()) {
+
+                if (parentBlockModelData.getFaces().get(faceName) == null) {
+                    parentBlockModelData.getFaces().put(faceName, blockModelData.faces.get(faceName));
+                    continue;
+                }
+
+                if (!(blockModelData.faces.get(faceName) instanceof HashMap<?,?>)) continue;
+                if (!(parentBlockModelData.faces.get(faceName) instanceof HashMap<?,?>)) continue;
+
+                HashMap<String, Object> faceProperties = (HashMap<String, Object>) blockModelData.faces.get(faceName);
+                HashMap<String, Object> parentFacePropeties = (HashMap<String, Object>) parentBlockModelData.faces.get(faceName);
+
+                if (faceProperties != null) {
+                    for (String facePropertyName : faceProperties.keySet()) {
+
+                        parentFacePropeties.put(facePropertyName, faceProperties.get(facePropertyName));
+
+                    }
+                }
+
+                parentBlockModelData.faces.put(faceName, parentFacePropeties);
+
+
+            }
+        }
+
+        if (blockModelData.textures != null) {
+            parentBlockModelData.textures = blockModelData.textures;
+        }
+
+        return parentBlockModelData;
+    }
+
 
     private static void loadBlockModel(ObjectMapper mapper, String modelName) throws IOException {
 
@@ -434,6 +464,9 @@ public class BlockModelData {
 
     @Override
     public String toString() {
+
+        if (faces == null) return super.toString();
+
         return faces.toString();
     }
 }
