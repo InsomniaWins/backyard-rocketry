@@ -1,13 +1,7 @@
 package wins.insomnia.backyardrocketry.entity;
-
-import wins.insomnia.backyardrocketry.entity.item.EntityClientItem;
 import wins.insomnia.backyardrocketry.entity.item.EntityItem;
-import wins.insomnia.backyardrocketry.entity.item.EntityServerItem;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class EntityManager {
 
@@ -16,37 +10,62 @@ public class EntityManager {
 		SERVER
 	}
 
-	private static final HashMap<String, List<Class<? extends Entity>>> ENTITY_HASH_MAP = new HashMap<>();
-
-
+	private static final HashMap<Class<? extends Entity>, EntityRegistrationInformation> ENTITY_MAP = new HashMap<>();
+	private static final HashMap<String, EntityRegistrationInformation> ENTITY_ID_MAP = new HashMap<>();
 
 	public static void registerEntities() {
 
-		registerEntity("item", EntityServerItem.class, EntityClientItem.class);
-
-
-	}
-
-
-
-
-	public static void registerEntity(String entityId, Class<? extends Entity> serverEntityClass, Class<? extends Entity> clientEntityClass) {
-
-		ENTITY_HASH_MAP.put(entityId, Arrays.asList(serverEntityClass, clientEntityClass));
+		registerEntity(EntityItem.class, "item", "Item");
 
 	}
 
 
-	public static Class<? extends Entity> getEntityClass(String entityId, EntitySide side) {
 
-		List<Class<? extends Entity>> entityList = ENTITY_HASH_MAP.get(entityId);
 
-		if (entityList == null) return null;
+	public static void registerEntity(Class<? extends Entity> entityClass, String entityId, String entityName) {
 
-		if (side == EntitySide.SERVER) return entityList.get(0);
-
-		return entityList.get(1);
+		EntityRegistrationInformation entityRegistrationInformation = new EntityRegistrationInformation(
+				entityId,
+				entityName
+		);
+		ENTITY_MAP.put(entityClass, entityRegistrationInformation);
+		ENTITY_ID_MAP.put(entityId, entityRegistrationInformation);
 
 	}
+
+	public static EntityRegistrationInformation getEntityInformation(String entityId) {
+
+		return ENTITY_ID_MAP.get(entityId);
+
+	}
+
+	public static EntityRegistrationInformation getEntityInformation(Class<? extends Entity> entityClass) {
+
+		EntityRegistrationInformation information = ENTITY_MAP.get(entityClass);
+
+		Class<?> classIterator = entityClass;
+		while (information == null) {
+
+			Class<?> superClass = classIterator.getSuperclass();
+
+			if (superClass == null || superClass == Entity.class) return null;
+
+			if (!Entity.class.isAssignableFrom(superClass)) {
+				return null;
+			}
+
+			classIterator = superClass;
+			information = ENTITY_MAP.get(classIterator);
+
+		}
+
+		return information;
+	}
+
+
+	public record EntityRegistrationInformation(
+			String entityId,
+			String entityName
+	) {}
 
 }

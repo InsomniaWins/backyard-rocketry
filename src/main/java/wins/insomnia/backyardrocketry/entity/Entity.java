@@ -20,6 +20,7 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 	private final Vector3d VELOCITY = new Vector3d();
 	private final UUID ENTITY_UUID;
 
+
 	public Entity(World world, UUID uuid) {
 		WORLD = world;
 		ENTITY_UUID = uuid;

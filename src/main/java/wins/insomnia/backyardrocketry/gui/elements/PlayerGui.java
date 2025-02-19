@@ -3,10 +3,18 @@ package wins.insomnia.backyardrocketry.gui.elements;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL11;
+import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.EntityManager;
+import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
+import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
+import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
+import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
+import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
@@ -14,9 +22,14 @@ import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
+import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+
+import java.util.Collection;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -189,7 +202,17 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 				renderTargetBlock(targetBlockId);
 			}
 
+		} else {
+			BoundingBoxRaycastResult targetEntity = player.getTargetEntity();
+
+			if (targetEntity != null && targetEntity.getEntity() instanceof Entity entity) {
+
+				renderTargetEntity(entity);
+
+			}
+
 		}
+
 
 
 		// draw crosshair
@@ -270,6 +293,93 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
 		TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
 	}
+
+
+	private void renderTargetEntity(Entity entity) {
+
+		Renderer renderer = Renderer.get();
+
+		EntityManager.EntityRegistrationInformation entityInformation = EntityManager.getEntityInformation(entity.getClass());
+
+		if (entityInformation == null) return;
+
+		// render w.a.i.l.a gui
+
+		Texture wailaTexture = TextureManager.getTexture("waila");
+
+		if (entity instanceof EntityItem entityItem) {
+
+			ItemStack itemStack = entityItem.getItemStack();
+			if (itemStack != null) {
+
+				String itemName = itemStack.getItem().getName() + " x " + (int) itemStack.getItemAmount();
+				String volumeString = (itemStack.getVolume() / 1000f) + " Liters";
+
+				int wailaWidth = Math.max(
+						10,
+						Math.max(
+								TextRenderer.getTextPixelWidth(itemName) + 35,
+								TextRenderer.getTextPixelWidth(volumeString) + 35
+						)
+				);
+				int wailaHeight = TextRenderer.getTextPixelHeight(2) + 6;
+				int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
+				int wailaPosY = 0;
+
+				TextureRenderer.drawGuiTextureNineSlice(
+						wailaTexture,
+						wailaPosX,
+						wailaPosY,
+						wailaWidth,
+						wailaHeight,
+						5,
+						true
+				);
+
+				renderItemIcon(
+						itemStack.getItem(),
+						wailaPosX + (int) (wailaHeight / 2f),
+						wailaPosY + (int) (wailaHeight / 2f),
+						NORMAL_HOTBAR_ITEM_SCALE
+				);
+
+				TextRenderer.drawText(
+						itemName + "\n" + volumeString,
+						wailaPosX + 32,
+						wailaPosY + 3
+				);
+
+				return;
+
+
+
+			}
+
+		}
+
+		String entityName = entityInformation.entityName();
+		int textWidth = TextRenderer.getTextPixelWidth(entityName);
+
+		int wailaWidth = textWidth + 16;
+		int wailaHeight = TextRenderer.getTextPixelHeight(1) + 6;
+		int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
+		int wailaPosY = 0;
+
+		TextureRenderer.drawGuiTextureNineSlice(
+				wailaTexture,
+				wailaPosX,
+				wailaPosY,
+				wailaWidth,
+				wailaHeight,
+				5,
+				true
+		);
+
+
+		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
+		TextRenderer.drawText(entityName, wailaTextPosX, wailaPosY + 2);
+	}
+
 
 
 	@Override

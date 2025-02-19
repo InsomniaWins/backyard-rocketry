@@ -2,6 +2,8 @@ package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Math;
 import org.joml.Vector3d;
+import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
@@ -109,6 +111,61 @@ public class Collision {
         if (Block.getBlockCollision(blockId) == null) return null;
 
         return new BlockRaycastResult(chunk, blockX, blockY, blockZ, face);
+    }
+
+
+
+    public static BoundingBoxRaycastResult entityRaycast(Vector3d start, Vector3d end, List<IBoundingBoxEntity> entities) {
+
+        BoundingBoxRaycastResult raycastResult = new BoundingBoxRaycastResult();
+        double shortestDistance = Double.MAX_VALUE;
+
+        for (IBoundingBoxEntity entity : entities) {
+
+            BoundingBox boundingBox = entity.getBoundingBox();
+
+            double[] hitPoint = new double[3];
+            boolean colliding = boundingBox.lineAABB(start, end, hitPoint);
+
+            if (colliding) {
+                double distance = start.distance(hitPoint[0], hitPoint[1], hitPoint[2]);
+                if (distance <= shortestDistance) {
+                    shortestDistance = distance;
+
+                    raycastResult.setCollidingBoundingBox(boundingBox);
+                    raycastResult.setCollisionPoint(hitPoint[0], hitPoint[1], hitPoint[2]);
+                    raycastResult.setEntity(entity);
+                }
+            }
+
+        }
+
+        return raycastResult;
+    }
+
+
+
+    public static BoundingBoxRaycastResult boundingBoxRaycast(Vector3d start, Vector3d end, List<BoundingBox> boundingBoxes) {
+
+        BoundingBoxRaycastResult raycastResult = new BoundingBoxRaycastResult();
+        double shortestDistance = -1;
+
+        for (BoundingBox boundingBox : boundingBoxes) {
+
+            double[] hitPoint = new double[3];
+            boundingBox.lineAABB(start, end, hitPoint);
+
+            double distance = start.distance(hitPoint[0], hitPoint[1], hitPoint[2]);
+            if (shortestDistance < 0 || distance < shortestDistance) {
+                shortestDistance = distance;
+
+                raycastResult.setCollidingBoundingBox(boundingBox);
+                raycastResult.setCollisionPoint(hitPoint[0], hitPoint[1], hitPoint[2]);
+            }
+
+        }
+
+        return raycastResult;
     }
 
 

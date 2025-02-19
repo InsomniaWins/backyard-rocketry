@@ -25,7 +25,7 @@ public class EntityItem extends Entity implements IBoundingBoxEntity {
 		super(world, uuid);
 		this.itemStack = itemStack;
 
-		addEntityComponent(new ComponentGravity(this, 0.125f));
+		addEntityComponent(new ComponentGravity(this, 0.25f));
 		VELOCITY_MOVEMENT_COMPONENT = new ComponentGenericVelocityMovement(this);
 		addEntityComponent(VELOCITY_MOVEMENT_COMPONENT);
 		CREATION_TIME = Updater.getCurrentTime();
@@ -47,8 +47,8 @@ public class EntityItem extends Entity implements IBoundingBoxEntity {
 
 
 	private void updateBoundingBox() {
-		BOUNDING_BOX.getMin().set(getPosition()).add(-0.4, -0.4, -0.4);
-		BOUNDING_BOX.getMax().set(getPosition()).add(0.4, 0.4, 0.4);
+		BOUNDING_BOX.getMin().set(getPosition()).add(-0.2, -0.2, -0.2);
+		BOUNDING_BOX.getMax().set(getPosition()).add(0.2, 0.2, 0.2);
 	}
 
 	@Override

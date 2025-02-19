@@ -418,58 +418,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         renderTime = DebugTime.getElapsedTime(renderTime);
 
 
-        // render ray-picking ???
-        ClientWorld clientWorld = ClientWorld.getClientWorld();
-        if (clientWorld != null) {
 
-            EntityClientPlayer clientPlayer = clientWorld.getClientPlayer();
-
-            if (clientPlayer != null) {
-
-                BoundingBox broadPhaseBoundingBox = new BoundingBox(
-                        clientPlayer.getPosX() - clientPlayer.getReachDistance(),
-                        clientPlayer.getPosY() - clientPlayer.getReachDistance(),
-                        clientPlayer.getPosZ() - clientPlayer.getReachDistance(),
-                        clientPlayer.getPosX() + clientPlayer.getReachDistance(),
-                        clientPlayer.getPosY() + clientPlayer.getReachDistance(),
-                        clientPlayer.getPosZ() + clientPlayer.getReachDistance()
-                );
-                Collision.getChunksTouchingBoundingBox(clientWorld, broadPhaseBoundingBox);
-                Collection<Chunk> chunks = clientWorld.getChunks();
-
-                Vector3d rayStart = new Vector3d(camera.getTransform().getPosition());
-
-                Vector3d rayEnd = new Vector3d(0, 0, -1)
-                        .rotateX(-camera.getTransform().getRotation().x)
-                        .rotateY(-camera.getTransform().getRotation().y)
-                        .mul(clientPlayer.getReachDistance()).add(rayStart);
-
-                double[] hitPoint = new double[3];
-
-                for (Chunk chunk : chunks) {
-
-                    for (BoundingBox blockBoundingBox : chunk.getBlockBoundingBoxes(broadPhaseBoundingBox)) {
-
-                        if ((blockBoundingBox.lineAABB(rayStart, rayEnd, hitPoint))) {
-
-                            getModelMatrix()
-                                    .identity()
-                                    .translate(new Vector3f((float) hitPoint[0], (float) hitPoint[1], (float) hitPoint[2]))
-                                    .scale(0.25f, 0.25f, 0.25f)
-                                    .translate(-0.5f, -0.5f, -0.5f);
-
-
-                            defaultShaderProgram.setUniform("vs_modelMatrix", getModelMatrix());
-                            BlockModelData.getMeshFromBlock(Block.COBBLESTONE).render();
-
-                        }
-
-                    }
-
-                }
-            }
-
-        }
 
 
         // render target block
@@ -542,16 +491,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 debugString.append("\n").append(DebugInfo.getPlayerBlockPosition(clientPlayer));
                 debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(clientPlayer));
             }
-
-            if (clientWorld != null) {
-                debugString.append("\n").append(DebugInfo.getWorldEntitiesInfo(clientWorld));
-            }
-
-            if (ServerWorld.getServerWorld() != null) {
-                debugString.append("\n").append(DebugInfo.getWorldEntitiesInfo(ServerWorld.getServerWorld()));
-            }
-
-
 
             TextRenderer.drawText(debugString.toString(), 0, 0, getGuiScale(), TextureManager.getTexture("debug_font"));
         }

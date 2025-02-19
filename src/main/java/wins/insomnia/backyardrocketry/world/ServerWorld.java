@@ -8,6 +8,7 @@ import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.network.PacketDropItem;
+import wins.insomnia.backyardrocketry.network.entity.PacketRemoveEntity;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -34,6 +35,20 @@ public class ServerWorld extends World {
 		return returnList;
 	}
 
+	public void removeEntity(Entity entity, boolean notifyClients) {
+
+		super.removeEntity(entity);
+
+		if (notifyClients) {
+
+			ServerController.sendReliable(
+					new PacketRemoveEntity()
+							.setUuid(entity.getUUID())
+			);
+
+		}
+
+	}
 
 	public void dropItem(ItemStack itemStack, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
 

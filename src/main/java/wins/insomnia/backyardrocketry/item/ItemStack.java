@@ -30,9 +30,13 @@ public class ItemStack {
 		return getVolume() / (float) getItem().getVolumePerItem();
 	}
 
+	public double getItemAmount() {
+		return getVolume() / (double) item.getVolumePerItem();
+	}
+
 	@Override
 	public String toString() {
-		return "ItemStack{" + item.getName() + " x " + volume / (double) item.getVolumePerItem() + " m^3 (" + volume + " liters)}";
+		return "ItemStack{" + item.getName() + " x " + getItemAmount() + " m^3 (" + volume + " liters)}";
 	}
 
 }

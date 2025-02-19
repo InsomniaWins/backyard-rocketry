@@ -6,12 +6,12 @@ import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
+import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
-import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerBreakBlock;
-import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerJump;
-import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerMovementInputs;
-import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerPlaceBlock;
+import wins.insomnia.backyardrocketry.network.entity.player.*;
+import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
@@ -22,8 +22,7 @@ import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.block.Block;
-
-import java.util.UUID;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -37,6 +36,7 @@ public class EntityClientPlayer extends EntityPlayer {
 	private float cameraInterpolationFactor = 0f;
 	private boolean lockMouseToCenterForCameraRotation = false;
 	private int currentHotbarSlot = 0;
+	private BoundingBoxRaycastResult targetEntity = null;
 
 	public EntityClientPlayer(ClientWorld world, java.util.UUID uuid) {
 		super(world, uuid);
@@ -64,7 +64,9 @@ public class EntityClientPlayer extends EntityPlayer {
 		return INTERPOLATED_CAMERA_POSITION;
 	}
 
-
+	public BoundingBoxRaycastResult getTargetEntity() {
+		return targetEntity;
+	}
 
 	public void updateCursorVisibility() {
 		glfwSetInputMode(
@@ -262,9 +264,32 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		cameraInterpolationFactor = 0f;
 
-		handleBlockInteractions();
+
+		if (targetEntity != null) {
+			handleEntityInteractions();
+		} else {
+			handleBlockInteractions();
+		}
 		hotbarManagement();
 	}
+
+	private void handleEntityInteractions() {
+
+		if (targetEntity == null || !(targetEntity.getEntity() instanceof Entity entity)) return;
+
+		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+			FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
+
+			ClientController.sendReliable(
+					new PacketPlayerPunchEntity()
+							.setUuid(entity.getUUID()
+			));
+
+		}
+
+	}
+
 
 	private void handleBlockInteractions() {
 
@@ -313,6 +338,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 	private void updateTargetBlock() {
 
+
 		Vector3d rayFrom = new Vector3d(getPosition()).add(0, EYE_HEIGHT, 0);
 		Vector3d rayDirection = new Vector3d(0, 0, -1)
 				.rotateX(-getTransform().getRotation().x)
@@ -320,6 +346,41 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, getReachDistance());
 
+
+
+
+
+
+
+
+
+
+		Camera camera = Renderer.get().getCamera();
+
+		ArrayList<IBoundingBoxEntity> entities = new ArrayList<>();
+		for (Entity entity : getWorld().getEntityList()) {
+			if (entity instanceof IBoundingBoxEntity boundingBoxEntity) {
+
+				entities.add(boundingBoxEntity);
+
+			}
+		}
+
+		Vector3d rayStart = new Vector3d(camera.getTransform().getPosition());
+
+		Vector3d rayEnd = new Vector3d(0, 0, -1)
+				.rotateX(-camera.getTransform().getRotation().x)
+				.rotateY(-camera.getTransform().getRotation().y)
+				.mul(getReachDistance()).add(rayStart);
+
+		BoundingBoxRaycastResult result = Collision.entityRaycast(rayStart, rayEnd, entities);
+
+		if (result.hasEntity()) {
+			targetEntity = result;
+			targetBlock = null;
+		} else {
+			targetEntity = null;
+		}
 	}
 
 

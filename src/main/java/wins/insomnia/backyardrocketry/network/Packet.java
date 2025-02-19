@@ -34,6 +34,7 @@ public abstract class Packet {
 			PacketPlayerJump.class,
 			PacketPlayerBreakBlock.class,
 			PacketPlayerPlaceBlock.class,
+			PacketPlayerPunchEntity.class,
 			PacketUpdateBlock.class,
 			PacketPlayerMovementInputs.class,
 			PacketDropItem.class,
