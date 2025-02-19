@@ -1,8 +1,8 @@
 package wins.insomnia.backyardrocketry.render.gui;
 
+import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.render.IMesh;
 import wins.insomnia.backyardrocketry.render.IRenderable;
-import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,7 +31,7 @@ public class GuiMesh implements IRenderable, IMesh {
 
 		indexCount = indexArray.length;
 
-		vao = OpenGLWrapper.glGenVertexArrays();
+		vao = GL30.glGenVertexArrays();
 		vbo = glGenBuffers();
 		ebo = glGenBuffers();
 
@@ -54,7 +54,7 @@ public class GuiMesh implements IRenderable, IMesh {
 		if (vao > -1) {
 			glDeleteBuffers(vbo);
 			glDeleteBuffers(ebo);
-			OpenGLWrapper.glDeleteVertexArrays(vao);
+			GL30.glDeleteVertexArrays(vao);
 		}
 
 

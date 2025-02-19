@@ -516,14 +516,16 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         return ENTITY_MAP.get(uuid);
     }
 
+    public List<Entity> getEntityList() {
+        return ENTITY_MAP.values().stream().toList();
+    }
+
     public void removeEntity(Entity entity) {
         UUID uuid = entity.getUUID();
 
         if (getEntity(uuid) == null) return;
 
         ENTITY_MAP.remove(uuid);
-
-        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) entity.getPosition().x, (int) entity.getPosition().y, (int) entity.getPosition().z);
 
         Updater.get().unregisterUpdateListener(entity);
         Updater.get().unregisterFixedUpdateListener(entity);

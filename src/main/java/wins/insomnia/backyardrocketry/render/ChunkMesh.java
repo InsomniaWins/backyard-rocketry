@@ -2,10 +2,10 @@ package wins.insomnia.backyardrocketry.render;
 
 import org.joml.*;
 import org.joml.Math;
+import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.HelpfulMath;
-import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
@@ -75,7 +75,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         indexCount = meshDataIndexCount;
 
-        vao = OpenGLWrapper.glGenVertexArrays();
+        vao = GL30.glGenVertexArrays();
 
         vbo = glGenBuffers();
         ebo = glGenBuffers();

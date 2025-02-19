@@ -289,17 +289,21 @@ public class EntityClientPlayer extends EntityPlayer {
 
 			Block.Face face = targetBlock.getFace();
 
-			int worldX = targetBlock.getBlockX() + face.getX();
-			int worldY = targetBlock.getBlockY() + face.getY();
-			int worldZ = targetBlock.getBlockZ() + face.getZ();
+			if (face != null) {
 
-			ClientController.sendReliable(
-					new PacketPlayerPlaceBlock()
-							.setWorldX(worldX)
-							.setWorldY(worldY)
-							.setWorldZ(worldZ)
-							.setBlock(getHotbarSlotContents(getCurrentHotbarSlot()))
-			);
+				int worldX = targetBlock.getBlockX() + face.getX();
+				int worldY = targetBlock.getBlockY() + face.getY();
+				int worldZ = targetBlock.getBlockZ() + face.getZ();
+
+				ClientController.sendReliable(
+						new PacketPlayerPlaceBlock()
+								.setWorldX(worldX)
+								.setWorldY(worldY)
+								.setWorldZ(worldZ)
+								.setBlock(getHotbarSlotContents(getCurrentHotbarSlot()))
+				);
+
+			}
 
 		}
 

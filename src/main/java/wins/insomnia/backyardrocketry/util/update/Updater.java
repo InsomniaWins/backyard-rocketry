@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.util.update;
 
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
 
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Updater {
-
+    public static final boolean LOG_DUPLICATE_REGISTRATIONS = true;
     public static final int FIXED_UPDATES_PER_SECOND = 20;
     private final List<IUpdateListener> UPDATE_LISTENERS;
     private final List<IFixedUpdateListener> FIXED_UPDATE_LISTENERS;
@@ -37,7 +38,8 @@ public class Updater {
     public void registerUpdateListener(IUpdateListener updateListener) {
         UPDATE_LISTENER_INSTRUCTION_QUEUE.add(new UpdateListenerInstruction(
                 UpdateListenerInstruction.InstructionType.REGISTER_LISTENER,
-                updateListener
+                updateListener,
+                LOG_DUPLICATE_REGISTRATIONS ? Thread.currentThread().getStackTrace() : null
         ));
     }
 
@@ -45,7 +47,8 @@ public class Updater {
     public void registerFixedUpdateListener(IFixedUpdateListener updateListener) {
         UPDATE_LISTENER_INSTRUCTION_QUEUE.add(new UpdateListenerInstruction(
                 UpdateListenerInstruction.InstructionType.REGISTER_FIXED_LISTENER,
-                updateListener
+                updateListener,
+                LOG_DUPLICATE_REGISTRATIONS ? Thread.currentThread().getStackTrace() : null
         ));
     }
 
@@ -53,7 +56,8 @@ public class Updater {
     public void unregisterUpdateListener(IUpdateListener updateListener) {
         UPDATE_LISTENER_INSTRUCTION_QUEUE.add(new UpdateListenerInstruction(
                 UpdateListenerInstruction.InstructionType.UNREGISTER_LISTENER,
-                updateListener
+                updateListener,
+                LOG_DUPLICATE_REGISTRATIONS ? Thread.currentThread().getStackTrace() : null
         ));
     }
 
@@ -61,7 +65,8 @@ public class Updater {
     public void unregisterFixedUpdateListener(IFixedUpdateListener updateListener) {
         UPDATE_LISTENER_INSTRUCTION_QUEUE.add(new UpdateListenerInstruction(
                 UpdateListenerInstruction.InstructionType.UNREGISTER_FIXED_LISTENER,
-                updateListener
+                updateListener,
+                LOG_DUPLICATE_REGISTRATIONS ? Thread.currentThread().getStackTrace() : null
         ));
     }
 
@@ -84,8 +89,17 @@ public class Updater {
 
             switch (instruction.instructionType()) {
                 case REGISTER_FIXED_LISTENER -> {
+
+                    if (LOG_DUPLICATE_REGISTRATIONS) {
+                        if (FIXED_UPDATE_LISTENERS.contains((IFixedUpdateListener) instruction.listener())) {
+                            System.err.println("Registered fixed update listener twice: " + Arrays.toString(instruction.stackTrace()));
+                        }
+                    }
+
                     FIXED_UPDATE_LISTENERS.add((IFixedUpdateListener) instruction.listener());
                     ((IFixedUpdateListener) instruction.listener()).registeredFixedUpdateListener();
+
+
                 }
                 case UNREGISTER_FIXED_LISTENER -> {
                     FIXED_UPDATE_LISTENERS.remove((IFixedUpdateListener) instruction.listener());
@@ -132,6 +146,14 @@ public class Updater {
 
             switch (instruction.instructionType()) {
                 case REGISTER_LISTENER -> {
+
+                    if (LOG_DUPLICATE_REGISTRATIONS) {
+                        if (UPDATE_LISTENERS.contains((IUpdateListener) instruction.listener())) {
+
+                            System.err.println("Registered update listener twice: " + Arrays.toString(instruction.stackTrace()));
+                        }
+                    }
+
                     UPDATE_LISTENERS.add((IUpdateListener) instruction.listener());
                     ((IUpdateListener) instruction.listener()).registeredUpdateListener();
                 }

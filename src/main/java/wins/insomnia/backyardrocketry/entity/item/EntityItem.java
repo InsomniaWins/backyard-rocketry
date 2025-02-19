@@ -45,17 +45,6 @@ public class EntityItem extends Entity implements IBoundingBoxEntity {
 	}
 
 
-	@Override
-	public void removedFromWorld() {
-		Updater.get().unregisterUpdateListener(this);
-		Updater.get().unregisterFixedUpdateListener(this);
-	}
-
-	@Override
-	public void addedToWorld() {
-		Updater.get().registerUpdateListener(this);
-		Updater.get().registerFixedUpdateListener(this);
-	}
 
 	private void updateBoundingBox() {
 		BOUNDING_BOX.getMin().set(getPosition()).add(-0.4, -0.4, -0.4);

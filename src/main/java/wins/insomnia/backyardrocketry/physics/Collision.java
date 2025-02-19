@@ -22,13 +22,6 @@ public class Collision {
 
     }
 
-    public static boolean isBlockInWorldBorder(World world, int x, int y, int z) {
-
-        return world.isBlockInWorldBorder(x, y, z);
-    }
-
-    public static final List<WeakReference<ICollisionBody>> COLLISION_BODIES = new ArrayList<>();
-
     public static List<Chunk> getChunksTouchingBoundingBox(World world, BoundingBox boundingBox, boolean includeUnloadedChunks) {
 
         List<Chunk> chunks = new ArrayList<>();

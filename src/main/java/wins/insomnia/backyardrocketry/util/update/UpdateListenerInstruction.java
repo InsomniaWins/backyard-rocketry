@@ -1,6 +1,6 @@
 package wins.insomnia.backyardrocketry.util.update;
 
-public record UpdateListenerInstruction(InstructionType instructionType, IGenericUpdateListener listener) {
+public record UpdateListenerInstruction(InstructionType instructionType, IGenericUpdateListener listener, StackTraceElement[] stackTrace) {
 
 	enum InstructionType {
 		REGISTER_LISTENER,
@@ -8,6 +8,7 @@ public record UpdateListenerInstruction(InstructionType instructionType, IGeneri
 		UNREGISTER_LISTENER,
 		UNREGISTER_FIXED_LISTENER
 	}
+
 
 
 }

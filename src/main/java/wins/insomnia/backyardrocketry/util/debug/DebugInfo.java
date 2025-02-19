@@ -8,6 +8,7 @@ import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 
 import java.text.DecimalFormat;
@@ -21,6 +22,12 @@ public class DebugInfo {
 		long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
 		return "Cur Mem: " + usedMemory / 1_048_576 + "MiB\nMax Mem: " + Runtime.getRuntime().totalMemory() / 1_048_576 + "MiB";
+	}
+
+	public static String getWorldEntitiesInfo(World world) {
+
+		return "Entity Amount: " + world.getEntityList().size();
+
 	}
 
 	public static String getFramesPerSecond() {

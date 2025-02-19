@@ -226,6 +226,8 @@ public class Block {
 
     public static BlockAudio getBlockAudio(byte block) {
 
+        if (BLOCK_DETAILS_MAP.get(block) == null) return null;
+
         return (BlockAudio) BLOCK_DETAILS_MAP.get(block).get(BlockDetail.AUDIO);
 
     }

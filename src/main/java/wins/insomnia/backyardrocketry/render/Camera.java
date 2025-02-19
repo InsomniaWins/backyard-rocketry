@@ -21,6 +21,8 @@ public class Camera {
     private float fov;
     private float renderDistance = 364f;
     private float viewBobValue = 0f;
+    private float zNear = 0.1f;
+    private float zFar = renderDistance * 2f;
 
     public Camera() {
 
@@ -37,6 +39,30 @@ public class Camera {
         updateViewMatrix();
 
         FRUSTUM = new FrustumIntersection();
+    }
+
+    public float getFov() {
+        return fov;
+    }
+
+    public void setRenderDistance(float renderDistance) {
+        this.renderDistance = renderDistance;
+        updateZNearFar();
+    }
+
+    private void updateZNearFar() {
+
+        zNear = 0.1f;
+        zFar = renderDistance * 2f;
+
+    }
+
+    public float getZNear() {
+        return zNear;
+    }
+
+    public float getZFar() {
+        return zFar;
     }
 
     public float getViewBobValue() {
@@ -60,7 +86,7 @@ public class Camera {
             aspect = Window.get().getResolutionFrameBuffer().getWidth() / (float) Window.get().getResolutionFrameBuffer().getHeight();
         }
 
-        PROJECTION_MATRIX.setPerspective(fov, aspect, 0.01f, renderDistance * 2);
+        PROJECTION_MATRIX.setPerspective(fov, aspect, zNear, zFar);
     }
 
     public void updateViewMatrix() {

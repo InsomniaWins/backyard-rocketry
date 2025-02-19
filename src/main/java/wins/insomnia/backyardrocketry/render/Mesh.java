@@ -1,16 +1,14 @@
 package wins.insomnia.backyardrocketry.render;
 
 
+import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
-import wins.insomnia.backyardrocketry.util.OpenGLWrapper;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.glCopyBufferSubData;
 
 public class Mesh implements IRenderable, IMesh {
 
@@ -31,7 +29,7 @@ public class Mesh implements IRenderable, IMesh {
         indexCount = indexArray.length;
         vertexCount = vertexArray.length;
 
-        vao = OpenGLWrapper.glGenVertexArrays();
+        vao = GL30.glGenVertexArrays();
         vbo = glGenBuffers();
         ebo = glGenBuffers();
 
@@ -70,7 +68,7 @@ public class Mesh implements IRenderable, IMesh {
         indexCount = indexArray.length;
         vertexCount = vertexArray.length;
 
-        vao = OpenGLWrapper.glGenVertexArrays();
+        vao = GL30.glGenVertexArrays();
         vbo = glGenBuffers();
         ebo = glGenBuffers();
 
@@ -102,7 +100,7 @@ public class Mesh implements IRenderable, IMesh {
 
         isClean.set(true);
 
-        OpenGLWrapper.glDeleteVertexArrays(vao);
+        GL30.glDeleteVertexArrays(vao);
         vao = -1;
         glDeleteBuffers(ebo);
         ebo = -1;

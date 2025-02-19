@@ -18,15 +18,15 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 	private final List<Component> COMPONENTS = new ArrayList<>();
 	private final Transform TRANSFORM = new Transform();
 	private final Vector3d VELOCITY = new Vector3d();
-	private final UUID UUID;
+	private final UUID ENTITY_UUID;
 
 	public Entity(World world, UUID uuid) {
 		WORLD = world;
-		UUID = uuid;
+		ENTITY_UUID = uuid;
 	}
 
 	public UUID getUUID() {
-		return UUID;
+		return ENTITY_UUID;
 	}
 
 	@Override

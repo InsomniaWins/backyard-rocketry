@@ -100,8 +100,6 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 	public void removedFromWorld() {
 		super.removedFromWorld();
 
-
-
 		Renderer.get().removeRenderable(this);
 		clean();
 	}
