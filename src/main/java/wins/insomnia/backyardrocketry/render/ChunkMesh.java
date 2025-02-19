@@ -141,9 +141,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         Vector3f boundingBoxMin = chunk.getBoundingBox().getMin().get(new Vector3f());
         Vector3f boundingBoxMax = chunk.getBoundingBox().getMax().get(new Vector3f());
 
-
-        if (isGenerating()) return false;
-
         return frustum.testAab(boundingBoxMin, boundingBoxMax);
 
     }

@@ -34,7 +34,6 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
     protected final HashMap<ChunkPosition, Chunk> CHUNKS;
-    protected final HashMap<ChunkPosition, HashMap<UUID, Entity>> CHUNK_ENTITY_MAP;
     protected final HashMap<UUID, Entity> ENTITY_MAP;
     public static final Random RANDOM = new Random();
     protected final ExecutorService CHUNK_MANAGEMENT_EXECUTOR_SERVICE;
@@ -51,7 +50,6 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         seed = RANDOM.nextLong();
         CHUNKS = new HashMap<>();
         ENTITY_MAP = new HashMap<>();
-        CHUNK_ENTITY_MAP = new HashMap<>();
         CHUNK_MANAGEMENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(10, r -> new Thread(r, "chunk-management-thread"));
         CHUNK_MANAGEMENT_QUEUE = new LinkedList<>();
         CHUNKS_CURRENTLY_LOADING = new ArrayList<>();
@@ -412,17 +410,6 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     @Override
     public void fixedUpdate() {
 
-        for (HashMap<UUID, Entity> entityMap : CHUNK_ENTITY_MAP.values()) {
-
-            for (UUID uuid : entityMap.keySet()) {
-
-                Entity entity = entityMap.get(uuid);
-                entity.fixedUpdate();
-
-            }
-
-        }
-
     }
 
     @Override
@@ -530,31 +517,25 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     public void removeEntity(Entity entity) {
-
         UUID uuid = entity.getUUID();
 
         if (getEntity(uuid) == null) return;
 
-        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) entity.getPosition().x, (int) entity.getPosition().y, (int) entity.getPosition().z);
-
-        HashMap<UUID, Entity> chunkEntities = CHUNK_ENTITY_MAP.get(chunkPosition);
-
-        if (chunkEntities == null) {
-            throw new RuntimeException("Tried removing entity in chunk which is not loaded: " + entity + " : " + chunkPosition);
-        }
-
-        entity.removedFromWorld();
-
-        chunkEntities.remove(uuid);
         ENTITY_MAP.remove(uuid);
 
+        ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) entity.getPosition().x, (int) entity.getPosition().y, (int) entity.getPosition().z);
+
+        Updater.get().unregisterUpdateListener(entity);
+        Updater.get().unregisterFixedUpdateListener(entity);
+
+        entity.removedFromWorld();
     }
 
     public void addEntity(Entity entity, double x, double y, double z) {
 
         UUID uuid = entity.getUUID();
 
-        if (getEntity(uuid) == null) return;
+        if (getEntity(uuid) != null) return;
 
         ChunkPosition chunkPosition = getChunkPositionFromBlockPositionClamped((int) x, (int) y, (int) z);
 
@@ -564,23 +545,13 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
 			loadChunk(chunkPosition);
 		}
 
-        HashMap<UUID, Entity> chunkEntities = CHUNK_ENTITY_MAP.get(chunkPosition);
-
-        if (chunkEntities == null) {
-            throw new RuntimeException("Could not get list of entities when adding entity to chunk at: " + chunkPosition);
-        }
-
-        if (chunkEntities.get(uuid) != null) {
-            System.out.println("Tried adding already added entity to the world: " + entity);
-            return;
-        }
-
-        chunkEntities.put(uuid, entity);
         ENTITY_MAP.put(uuid, entity);
 
         entity.teleport(x, y, z, 0, 0, 0);
         entity.addedToWorld();
 
+        Updater.get().registerUpdateListener(entity);
+        Updater.get().registerFixedUpdateListener(entity);
     }
 
     public Random getRandom() {

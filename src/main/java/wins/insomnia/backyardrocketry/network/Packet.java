@@ -9,6 +9,8 @@ import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.network.entity.PacketRemoveEntity;
+import wins.insomnia.backyardrocketry.network.entity.PacketUpdateEntityTransform;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
 import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
 import wins.insomnia.backyardrocketry.network.world.PacketUpdateBlock;
@@ -35,6 +37,8 @@ public abstract class Packet {
 			PacketUpdateBlock.class,
 			PacketPlayerMovementInputs.class,
 			PacketDropItem.class,
+			PacketUpdateEntityTransform.class,
+			PacketRemoveEntity.class,
 			String.class,
 			Transform.class,
 			Vector3f.class,

@@ -85,6 +85,12 @@ public class Entity implements IUpdateListener, IFixedUpdateListener {
 		return TRANSFORM;
 	}
 
+	public void setTransform(Transform transform) {
+
+		TRANSFORM.set(transform);
+
+	}
+
 	public Vector3d getPosition() {
 		return TRANSFORM.getPosition();
 	}

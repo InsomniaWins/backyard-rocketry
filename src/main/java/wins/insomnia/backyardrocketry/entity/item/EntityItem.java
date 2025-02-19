@@ -20,7 +20,6 @@ public class EntityItem extends Entity implements IBoundingBoxEntity {
 	private final double CREATION_TIME;
 	private final ComponentGenericVelocityMovement VELOCITY_MOVEMENT_COMPONENT;
 	protected final Transform PREVIOUS_TRANSFORM = new Transform();
-	protected final Transform INTERPOLATED_TRANSFORM = new Transform();
 
 	public EntityItem(ItemStack itemStack, World world, java.util.UUID uuid) {
 		super(world, uuid);

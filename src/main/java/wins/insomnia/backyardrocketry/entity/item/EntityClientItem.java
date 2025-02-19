@@ -23,7 +23,7 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 	private float modelYRotation = 0f;
 	private float modelXRotation = 0f;
 	private float visualInterpolationFactor = 0f;
-	private DroppedItemIcon droppedItemIcon;
+	private final Transform INTERPOLATED_TRANSFORM = new Transform();
 
 	public EntityClientItem(ItemStack itemStack, World world, java.util.UUID uuid) {
 		super(itemStack, world, uuid);
@@ -99,6 +99,9 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 	@Override
 	public void removedFromWorld() {
 		super.removedFromWorld();
+
+
+
 		Renderer.get().removeRenderable(this);
 		clean();
 	}
@@ -135,6 +138,7 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 
 	public Transform getInterpolatedTransform() {
 
+		/*
 		// reset interpolation to t = 0 to begin interpolation
 		Vector3f interpolatedRotation = new Vector3f(PREVIOUS_TRANSFORM.getRotation());
 		Vector3d interpolatedPostion = new Vector3d(PREVIOUS_TRANSFORM.getPosition());
@@ -147,19 +151,10 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 		);
 		interpolatedPostion.lerp(getPosition(), visualInterpolationFactor);
 
-		return INTERPOLATED_TRANSFORM.setPosition(interpolatedPostion).setRotation(interpolatedRotation);
+		return INTERPOLATED_TRANSFORM.setPosition(interpolatedPostion).setRotation(interpolatedRotation);*/
+
+		return getTransform();
 	}
 
-	@Override
-	public void registeredFixedUpdateListener() {
-		droppedItemIcon = new DroppedItemIcon(getItemStack().getItem(), this);
-		droppedItemIcon.register();
-	}
-
-	@Override
-	public void unregisteredFixedUpdateListener() {
-		droppedItemIcon.unregister();
-		droppedItemIcon = null;
-	}
 
 }

@@ -11,7 +11,10 @@ public class Transform {
     private Vector3d position;
     private Vector3f rotation;
 
-    
+    public Transform(Transform from) {
+        this.set(from);
+    }
+
     public Transform() {
         position = new Vector3d();
         rotation = new Vector3f();

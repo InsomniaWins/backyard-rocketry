@@ -36,6 +36,7 @@ public class ServerWorld extends World {
 
 
 	public void dropItem(ItemStack itemStack, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+
 		UUID uuid = UUID.randomUUID();
 
 		EntityServerItem itemEntity = new EntityServerItem(itemStack, this, uuid);
@@ -64,7 +65,6 @@ public class ServerWorld extends World {
 
 		CHUNKS.put(chunkPosition, chunk);
 		CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-		CHUNK_ENTITY_MAP.put(chunkPosition, new HashMap<>());
 
 		// todo: send only to those who need it
 		ServerController.sendReliable(chunk.createLoadPacket());
@@ -146,11 +146,8 @@ public class ServerWorld extends World {
 	protected void unloadChunk(ChunkPosition chunkPosition) {
 
 		if (CHUNKS.get(chunkPosition) != null) {
-			HashMap<UUID, Entity> entitiesInChunk = CHUNK_ENTITY_MAP.get(chunkPosition);
+			/*HashMap<UUID, Entity> entitiesInChunk = CHUNK_ENTITY_MAP.get(chunkPosition);
 			CHUNK_ENTITY_MAP.remove(chunkPosition);
-
-			Chunk chunk = CHUNKS.get(chunkPosition);
-			CHUNKS.remove(chunkPosition);
 
 
 			Iterator<UUID> entityIterator = entitiesInChunk.keySet().iterator();
@@ -162,7 +159,10 @@ public class ServerWorld extends World {
 
 				ENTITY_MAP.remove(uuid);
 				entityIterator.remove();
-			}
+			}*/
+
+			Chunk chunk = CHUNKS.get(chunkPosition);
+			CHUNKS.remove(chunkPosition);
 
 			Updater.get().unregisterUpdateListener(chunk);
 			Updater.get().unregisterFixedUpdateListener(chunk);
