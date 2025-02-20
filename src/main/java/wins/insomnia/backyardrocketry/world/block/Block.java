@@ -3,9 +3,13 @@ package wins.insomnia.backyardrocketry.world.block;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.physics.BlockBoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateWoodenPlanks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.blockproperty.BlockProperties;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,8 +64,8 @@ public class Block {
             "Grass",
             false,
             true,
-            null,
             "grass",
+            null,
             40,
             BlockAudio.GENERIC_DIRT
     );
@@ -69,8 +73,8 @@ public class Block {
             "Cobblestone",
             false,
             true,
-            null,
             "cobblestone",
+            null,
             120,
             BlockAudio.GENERIC_STONE
     );
@@ -78,8 +82,8 @@ public class Block {
             "Dirt",
             false,
             true,
-            null,
             "dirt",
+            null,
             30,
             BlockAudio.GENERIC_DIRT
     );
@@ -87,8 +91,8 @@ public class Block {
             "Stone",
             false,
             true,
-            null,
             "stone",
+            null,
             120,
             BlockAudio.GENERIC_STONE
     );
@@ -96,8 +100,8 @@ public class Block {
             "Log",
             false,
             true,
-            null,
             "log",
+            null,
             90,
             BlockAudio.GENERIC_WOOD
     );
@@ -106,8 +110,8 @@ public class Block {
             "Wood",
             false,
             true,
-            null,
             "wood",
+            null,
             90,
             BlockAudio.GENERIC_WOOD
     );
@@ -116,17 +120,18 @@ public class Block {
             "Leaves",
             true,
             true,
-            null,
             "leaves",
+            null,
             20,
             BlockAudio.GENERIC_LEAVES
     );
+
     public static final byte WOODEN_PLANKS = registerBlock(
             "Wooden Planks",
             false,
             true,
-            null,
             "wooden_planks",
+            new BlockStateWoodenPlanks(),
             90,
             BlockAudio.GENERIC_WOOD
     );
@@ -135,8 +140,8 @@ public class Block {
             "Glass",
             true,
             true,
-            null,
             "glass",
+            null,
             20,
             BlockAudio.GENERIC_GLASS
     );
@@ -145,8 +150,8 @@ public class Block {
             "Bricks",
             false,
             true,
-            null,
             "bricks",
+            null,
             120,
             BlockAudio.GENERIC_STONE
     );
@@ -155,8 +160,8 @@ public class Block {
             "Water",
             true,
             true,
-            null,
             "water",
+            null,
             -1
     );
 
@@ -177,19 +182,19 @@ public class Block {
             String blockName,
             boolean isTransparent,
             boolean hideNeighboringFaces,
-            BlockProperties blockProperties,
             String blockStateFileName,
+            BlockState blockStateObject,
             int blockHealth
     ) {
-        return registerBlock(blockName, isTransparent, hideNeighboringFaces, blockProperties, blockStateFileName, blockHealth, null);
+        return registerBlock(blockName, isTransparent, hideNeighboringFaces, blockStateFileName, blockStateObject, blockHealth, null);
     }
 
     public static byte registerBlock(
             String blockName,
             boolean isTransparent,
             boolean hideNeighboringFaces,
-            BlockProperties blockProperties,
             String blockStateFileName,
+            BlockState blockStateObject,
             int blockHealth,
             BlockAudio blockAudio
         ) {
@@ -206,10 +211,6 @@ public class Block {
 
         detailsMap.put(BlockDetail.HIDE_NEIGHBORING_FACES, hideNeighboringFaces);
 
-        if (blockProperties != null) {
-            detailsMap.put(BlockDetail.PROPERTIES, blockProperties);
-        }
-
         if (blockStateFileName != null) {
             detailsMap.put(BlockDetail.STATE, blockStateFileName);
             BLOCK_SYNONYM_MAP.put(blockStateFileName, blockId);
@@ -220,6 +221,11 @@ public class Block {
 
 
         BLOCK_DETAILS_MAP.put(blockId, detailsMap);
+
+        BlockStateManager.registerBlockState(blockId, blockStateObject);
+        System.out.println(
+				Arrays.toString(BlockStateManager.getBlockStates(blockId))
+        );
 
         return blockId;
     }
@@ -232,19 +238,6 @@ public class Block {
 
     }
 
-    public static BlockProperties getBlockProperties(byte block) {
-        HashMap<BlockDetail, Object> blockDetails = BLOCK_DETAILS_MAP.get(block);
-
-        if (blockDetails == null) blockDetails = BLOCK_DETAILS_MAP.get(NULL);
-
-        BlockProperties result = (BlockProperties) blockDetails.get(BlockDetail.PROPERTIES);
-
-        if (result == null) {
-            return (BlockProperties) BLOCK_DETAILS_MAP.get(NULL).get(BlockDetail.PROPERTIES);
-        }
-
-        return result;
-    }
 
     public static boolean shouldHideNeighboringFaces(int block) {
 

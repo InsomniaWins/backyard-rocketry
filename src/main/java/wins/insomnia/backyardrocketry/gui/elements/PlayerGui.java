@@ -19,6 +19,7 @@ import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
+import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
@@ -270,28 +271,22 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 		// render w.a.i.l.a gui
 		String blockName = Block.getBlockName(targetBlockId);
-		int textWidth = TextRenderer.getTextPixelWidth(blockName);
 
-		Texture wailaTexture = TextureManager.getTexture("waila");
-
-		int wailaWidth = textWidth + 16;
-		int wailaHeight = TextRenderer.getTextPixelHeight(1) + 6;
-		int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
+		int wailaHeight = TextRenderer.getTextPixelHeight(2);
+		int wailaPosX = 0;
 		int wailaPosY = 0;
 
-		TextureRenderer.drawGuiTextureNineSlice(
-				wailaTexture,
-				wailaPosX,
-				wailaPosY,
-				wailaWidth,
-				wailaHeight,
-				5,
-				true
+		renderItemIcon(
+				Item.getBlockItem(targetBlockId),
+				wailaPosX + (int) (wailaHeight / 2f),
+				(int) (wailaHeight / 2f)
 		);
 
-
-		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
-		TextRenderer.drawText(blockName, wailaTextPosX, wailaPosY + 2);
+		TextRenderer.drawTextOutline(
+				blockName,
+				wailaPosX + (int) (wailaHeight / 2f) + 14,
+				wailaPosY + (int) (wailaHeight / 2f - TextRenderer.getTextPixelHeight(1) / 2f)
+		);
 	}
 
 
@@ -315,37 +310,19 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 				String itemName = itemStack.getItem().getName() + " x " + (int) itemStack.getItemAmount();
 				String volumeString = (itemStack.getVolume() / 1000f) + " Liters";
 
-				int wailaWidth = Math.max(
-						10,
-						Math.max(
-								TextRenderer.getTextPixelWidth(itemName) + 35,
-								TextRenderer.getTextPixelWidth(volumeString) + 35
-						)
-				);
-				int wailaHeight = TextRenderer.getTextPixelHeight(2) + 6;
-				int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
+				int wailaHeight = TextRenderer.getTextPixelHeight(2);
+				int wailaPosX = 0;
 				int wailaPosY = 0;
-
-				TextureRenderer.drawGuiTextureNineSlice(
-						wailaTexture,
-						wailaPosX,
-						wailaPosY,
-						wailaWidth,
-						wailaHeight,
-						5,
-						true
-				);
 
 				renderItemIcon(
 						itemStack.getItem(),
 						wailaPosX + (int) (wailaHeight / 2f),
-						wailaPosY + (int) (wailaHeight / 2f),
-						NORMAL_HOTBAR_ITEM_SCALE
+						(int) (wailaHeight / 2f)
 				);
 
-				TextRenderer.drawText(
+				TextRenderer.drawTextOutline(
 						itemName + "\n" + volumeString,
-						wailaPosX + 32,
+						wailaPosX + (int) (wailaHeight / 2f) + 14,
 						wailaPosY + 3
 				);
 
@@ -360,24 +337,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		String entityName = entityInformation.entityName();
 		int textWidth = TextRenderer.getTextPixelWidth(entityName);
 
-		int wailaWidth = textWidth + 16;
-		int wailaHeight = TextRenderer.getTextPixelHeight(1) + 6;
-		int wailaPosX = renderer.getCenterAnchorX() - wailaWidth / 2;
-		int wailaPosY = 0;
-
-		TextureRenderer.drawGuiTextureNineSlice(
-				wailaTexture,
-				wailaPosX,
-				wailaPosY,
-				wailaWidth,
-				wailaHeight,
-				5,
-				true
-		);
-
-
-		int wailaTextPosX = renderer.getCenterAnchorX() - textWidth / 2;
-		TextRenderer.drawText(entityName, wailaTextPosX, wailaPosY + 2);
+		int wailaTextPosX = 14;
+		TextRenderer.drawText(entityName, wailaTextPosX, 2);
 	}
 
 

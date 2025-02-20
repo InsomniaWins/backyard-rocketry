@@ -1,6 +1,6 @@
 {
 
-  "default": "wooden_planks"
-
+  "default": "wooden_planks",
+  "alt": "wooden_planks_alt"
 }
 

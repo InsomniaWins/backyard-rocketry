@@ -268,6 +268,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         }
 
 
+                        String faceTextureName = (String) textures.get(faceData.get("texture"));
 
                         if (shouldAddFaceToMesh(cullface, block, blockNeighbors)) {
 
@@ -277,7 +278,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                                     faceVertexArray, faceIndexArray,
                                     x, y, z,
                                     blockNeighbors,
-                                    BlockAtlasTexture.get().getBlockTexture(textures.get(faceData.get("texture"))),
+                                    BlockAtlasTexture.get().getBlockTexture(faceTextureName),
                                     rotationValue
                             );
 

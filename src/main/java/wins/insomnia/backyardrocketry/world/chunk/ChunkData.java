@@ -6,6 +6,7 @@ import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
 public class ChunkData {
 
@@ -14,6 +15,7 @@ public class ChunkData {
 	private final int Y;
 	private final int Z;
 	private byte[][][] blocks;
+	private BlockStateManager[][][] blockStatePalette;
 
 
 	private ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {

@@ -26,6 +26,7 @@ public class BlockAtlasTexture extends Texture {
 		registerBlockTexture("log_side", new BlockTextureFrames(new Vector2i(1, 1)));
 		registerBlockTexture("leaves", new BlockTextureFrames(new Vector2i(2, 1)));
 		registerBlockTexture("wooden_planks", new BlockTextureFrames(new Vector2i(3, 1)));
+		registerBlockTexture("wooden_planks_alt", new BlockTextureFrames(new Vector2i(5, 0)));
 		registerBlockTexture("glass", new BlockTextureFrames(new Vector2i(4, 1)));
 		registerBlockTexture("bricks", new BlockTextureFrames(new Vector2i(5, 1)));
 		registerBlockTexture("wood", new BlockTextureFrames(new Vector2i(0, 2)));
