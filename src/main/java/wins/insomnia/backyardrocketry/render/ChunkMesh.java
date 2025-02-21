@@ -180,11 +180,11 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDisableVertexAttribArray(5);
     }
 
-    public void generateMesh(byte[][][] blocks) {
-        generateMesh(blocks, true);
+    public void generateMesh(byte[][][] blocks, byte[][][] blockStates) {
+        generateMesh(blocks, blockStates, true);
     }
 
-    public void generateMesh(byte[][][] blocks, boolean isDelayed) {
+    public void generateMesh(byte[][][] blocks, byte[][][] blockStates, boolean isDelayed) {
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -204,14 +204,13 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
                     if (isTransparent != Block.isBlockTransparent(block)) continue;
 
-                    BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, x, y, z);
+                    byte blockState = blockStates[x][y][z];
+
+                    BlockModelData blockModelData = BlockModelData.getBlockModelFromBlock(block, blockState, x, y, z);
 
                     if (blockModelData == null) continue;
 
                     HashMap<String, String> textures = blockModelData.getTextures();
-
-
-
 
 
                     blockNeighbors[0][0][0] = chunk.getBlock(x-1, y-1, z-1);

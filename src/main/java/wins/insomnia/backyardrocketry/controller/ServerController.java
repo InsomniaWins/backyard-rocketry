@@ -25,8 +25,8 @@ public class ServerController extends GameController {
 
 			if (!(object instanceof Packet packet)) return;
 
-			Updater.get().queueMainThreadInstruction(() ->
-					packet.received(Packet.SenderType.CLIENT, connection));
+
+			packet.received(Packet.SenderType.CLIENT, connection);
 
 
 		}

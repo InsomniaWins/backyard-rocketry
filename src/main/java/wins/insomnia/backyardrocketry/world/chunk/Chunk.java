@@ -56,8 +56,9 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return LOADED.get();
     }
 
-    public void setBlock(int x, int y, int z, byte block) {
+    public void setBlock(int x, int y, int z, byte block, byte blockState) {
         chunkData.setBlock(x, y, z, block);
+        chunkData.setBlockState(x, y, z, blockState);
     }
 
 

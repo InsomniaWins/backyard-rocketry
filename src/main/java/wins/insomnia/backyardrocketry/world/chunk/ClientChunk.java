@@ -42,7 +42,7 @@ public class ClientChunk extends Chunk {
 
 	}
 
-	public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh, boolean instantly) {
+	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean regenerateMesh, boolean instantly) {
 
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
 
@@ -51,6 +51,7 @@ public class ClientChunk extends Chunk {
 		}
 
 		chunkData.setBlock(x,y,z, block);
+		chunkData.setBlockState(x, y, z, blockState);
 
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
@@ -61,15 +62,15 @@ public class ClientChunk extends Chunk {
 
 	}
 
-	public void setBlock(int x, int y, int z, byte block, boolean regenerateMesh) {
+	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean regenerateMesh) {
 
-		setBlock(x, y, z, block, regenerateMesh, false);
+		setBlock(x, y, z, block, blockState, regenerateMesh, false);
 
 	}
 
 	public void breakBlock(int x, int y, int z, boolean regenerateMesh) {
 		byte blockBroken = getBlock(x, y, z);
-		setBlock(x, y, z, Block.AIR, regenerateMesh, true);
+		setBlock(x, y, z, Block.AIR, (byte) 0, regenerateMesh, true);
 
 		BlockAudio blockAudio = Block.getBlockAudio(blockBroken);
 		if (blockAudio != null) {
@@ -80,8 +81,8 @@ public class ClientChunk extends Chunk {
 
 	}
 
-	public void placeBlock(int x, int y, int z, byte block) {
-		setBlock(x, y, z, block, true, true);
+	public void placeBlock(int x, int y, int z, byte block, byte blockState) {
+		setBlock(x, y, z, block, blockState, true, true);
 
 		BlockAudio blockAudio = Block.getBlockAudio(block);
 		if (blockAudio != null) {
@@ -138,8 +139,8 @@ public class ClientChunk extends Chunk {
 
 		try {
 
-			CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
-			TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), isDelayed);
+			CHUNK_MESH.generateMesh(chunkData.getBlocks(), chunkData.getBlockStates(), isDelayed);
+			TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), chunkData.getBlockStates(), isDelayed);
 
 		} catch (Exception e) {
 

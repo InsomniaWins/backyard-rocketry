@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.network.world;
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
@@ -42,9 +43,7 @@ public class PacketLoadChunk extends Packet {
 
 		if (clientWorld == null) return;
 
-
 		ChunkData chunkData = ChunkData.deserialize(serializedChunkData);
-
 		ChunkPosition chunkPosition = chunkData.getChunkPosition(clientWorld);
 
 		if (chunkPosition != null) {

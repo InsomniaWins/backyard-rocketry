@@ -32,8 +32,8 @@ public class ServerChunk extends Chunk {
 	}
 
 
-	public void setBlock(int x, int y, int z, byte block, boolean updateClients) {
-		super.setBlock(x, y, z, block);
+	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean updateClients) {
+		super.setBlock(x, y, z, block, blockState);
 
 		if (updateClients) {
 			ServerController.sendReliable(
@@ -42,19 +42,20 @@ public class ServerChunk extends Chunk {
 							.setWorldY(toGlobalY(y))
 							.setWorldZ(toGlobalZ(z))
 							.setBlock(getBlock(x, y, z))
+							.setBlockState(blockState)
 			);
 		}
 
 	}
 
-	public void setBlock(int x, int y, int z, byte block) {
-		setBlock(x, y, z, block, true);
+	public void setBlock(int x, int y, int z, byte block, byte blockState) {
+		setBlock(x, y, z, block, blockState, true);
 	}
 
 
-	public void placeBlock(int x, int y, int z, byte block) {
+	public void placeBlock(int x, int y, int z, byte block, byte blockState) {
 
-		setBlock(x, y, z, block, false);
+		setBlock(x, y, z, block, blockState, false);
 
 		ServerController.sendReliable(
 				new PacketPlayerPlaceBlock()
@@ -62,6 +63,7 @@ public class ServerChunk extends Chunk {
 						.setWorldY(toGlobalY(y))
 						.setWorldZ(toGlobalZ(z))
 						.setBlock(block)
+						.setBlockState(blockState)
 		);
 
 	}
@@ -75,7 +77,7 @@ public class ServerChunk extends Chunk {
 
 		if (Block.getBlockHealth(blockBroken) < 0) return;
 
-		setBlock(x, y, z, Block.AIR, false);
+		setBlock(x, y, z, Block.AIR, (byte) 0, false);
 
 
 		if (dropLoot) {

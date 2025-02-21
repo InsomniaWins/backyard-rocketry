@@ -8,12 +8,8 @@ public class BlockStateWoodenPlanks extends BlockState {
 	public static final int PROPERTY_ALT_TEXTURE_INDEX = 0;
 
 	private final BlockStateProperty<?>[] PROPERTIES = new BlockStateProperty[] {
-
-			new PropertyInteger("alt_texture_index", 0, 2),
-
+			new PropertyInteger("planks_style", 0, 1),
 	};
-
-	public BlockStateWoodenPlanks() {}
 
 
 	public void setAltTextureIndex(int index) {

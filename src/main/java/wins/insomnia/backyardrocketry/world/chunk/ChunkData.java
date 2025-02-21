@@ -15,7 +15,7 @@ public class ChunkData {
 	private final int Y;
 	private final int Z;
 	private byte[][][] blocks;
-	private BlockStateManager[][][] blockStatePalette;
+	private byte[][][] blockStates;
 
 
 	private ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {
@@ -75,6 +75,7 @@ public class ChunkData {
 	private void initializeBlocks() {
 
 		blocks = new byte[Chunk.SIZE_X][Chunk.SIZE_Y][Chunk.SIZE_Z];
+		blockStates = new byte[Chunk.SIZE_X][Chunk.SIZE_Y][Chunk.SIZE_Z];
 
 	}
 
@@ -82,12 +83,24 @@ public class ChunkData {
 		blocks[x][y][z] = block;
 	}
 
+	public void setBlockState(int x, int y, int z, byte blockState) {
+		blockStates[x][y][z] = blockState;
+	}
+
 	public byte getBlock(int x, int y, int z) {
 		return blocks[x][y][z];
 	}
 
+	public byte getBlockState(int x, int y, int z) {
+		return blockStates[x][y][z];
+	}
+
 	public byte[][][] getBlocks() {
 		return blocks;
+	}
+
+	public byte[][][] getBlockStates() {
+		return blockStates;
 	}
 
 
@@ -149,6 +162,18 @@ public class ChunkData {
 			}
 		}
 
+		// read block states
+
+		for (int x = 0; x < Chunk.SIZE_X; x++) {
+			for (int y = 0; y < Chunk.SIZE_Y; y++) {
+				for (int z = 0; z < Chunk.SIZE_Z; z++) {
+
+					chunkData.blockStates[x][y][z] = data[dataIndex++];
+
+				}
+			}
+		}
+
 		return chunkData;
 
 	}
@@ -199,6 +224,17 @@ public class ChunkData {
 			for (int y = 0; y < Chunk.SIZE_Y; y++) {
 				for (int z = 0; z < Chunk.SIZE_Z; z++) {
 					data[dataIndex++] = chunkData.blocks[x][y][z];
+				}
+			}
+		}
+
+
+		// store block states
+
+		for (int x = 0; x < Chunk.SIZE_X; x++) {
+			for (int y = 0; y < Chunk.SIZE_Y; y++) {
+				for (int z = 0; z < Chunk.SIZE_Z; z++) {
+					data[dataIndex++] = chunkData.blockStates[x][y][z];
 				}
 			}
 		}

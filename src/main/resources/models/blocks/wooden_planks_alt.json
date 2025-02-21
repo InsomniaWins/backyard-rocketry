@@ -1,8 +1,0 @@
-{
-  "parent": "block_all",
-  "textures": {
-    "particle": "wooden_planks_alt",
-    "all": "wooden_planks",
-    "icon": "wooden_planks"
-  }
-}

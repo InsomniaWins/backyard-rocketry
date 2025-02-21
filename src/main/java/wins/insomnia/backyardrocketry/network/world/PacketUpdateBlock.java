@@ -13,12 +13,18 @@ public class PacketUpdateBlock extends Packet {
 	int worldY;
 	int worldZ;
 	byte block;
+	byte blockState;
 
 	public PacketUpdateBlock setBlock(byte block) {
 
 		this.block = block;
 		return this;
 
+	}
+
+	public PacketUpdateBlock setBlockState(byte blockState) {
+		this.blockState = block;
+		return this;
 	}
 
 	public PacketUpdateBlock setWorldX(int x) {
@@ -56,6 +62,7 @@ public class PacketUpdateBlock extends Packet {
 				chunk.toLocalY(worldY),
 				chunk.toLocalZ(worldZ),
 				block,
+				blockState,
 				true,
 				true
 		);

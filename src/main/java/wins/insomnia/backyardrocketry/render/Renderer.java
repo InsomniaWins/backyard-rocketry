@@ -5,6 +5,7 @@ import org.joml.Math;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
@@ -247,6 +248,11 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     // is thread-safe
     public void addRenderable(IRenderable renderable) {
 
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            Updater.get().queueMainThreadInstruction(() -> addRenderable(renderable));
+            return;
+        }
+
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.add((IGuiRenderable) renderable);
         } else {
@@ -344,6 +350,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     //  NOT THREAD SAFE
     public void removeRenderable(IRenderable renderable) {
+
+        if (Thread.currentThread() != Main.MAIN_THREAD) {
+            Updater.get().queueMainThreadInstruction(() -> removeRenderable(renderable));
+            return;
+        }
+
         if (renderable instanceof IGuiRenderable) {
             GUI_RENDER_LIST.remove((IGuiRenderable) renderable);
         } else {

@@ -17,9 +17,10 @@ public class ChunkIO {
 	public static final int REGION_SIZE = 20;
 	public static final String REGION_FILE_EXTENSION = ".region";
 	public static final String TEMP_REGION_FILE_EXTENSION = ".tempregion";
-	public static final int BYTES_PER_CHUNK = Long.BYTES + // seed
-			(Integer.BYTES * 3) +                          // chunk position
-			Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z;    // block data
+	public static final int BYTES_PER_CHUNK = Long.BYTES +  // seed
+			(Integer.BYTES * 3) +                           // chunk position
+			Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z +    // block data
+			Chunk.SIZE_X * Chunk.SIZE_Y * Chunk.SIZE_Z;     // block state data
 	private static Path chunksPath = null;
 
 	public static int limitChunkAmount(int chunkAmount) {

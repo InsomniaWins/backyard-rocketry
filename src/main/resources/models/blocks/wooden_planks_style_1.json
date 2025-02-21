@@ -1,0 +1,8 @@
+{
+  "parent": "block_all",
+  "textures": {
+    "particle": "wooden_planks_style_1",
+    "all": "wooden_planks_style_1",
+    "icon": "wooden_planks_style_1"
+  }
+}

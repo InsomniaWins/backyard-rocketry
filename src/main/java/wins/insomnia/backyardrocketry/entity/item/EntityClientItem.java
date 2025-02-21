@@ -51,6 +51,9 @@ public class EntityClientItem extends EntityItem implements IRenderable {
 	@Override
 	public void render() {
 
+
+		if (mesh==null || mesh.isClean()) return;
+
 		Transform transform = getInterpolatedTransform();
 
 		Renderer.get().getModelMatrix().identity()

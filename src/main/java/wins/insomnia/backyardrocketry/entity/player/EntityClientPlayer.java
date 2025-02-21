@@ -21,7 +21,11 @@ import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
+
 import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -320,12 +324,17 @@ public class EntityClientPlayer extends EntityPlayer {
 				int worldY = targetBlock.getBlockY() + face.getY();
 				int worldZ = targetBlock.getBlockZ() + face.getZ();
 
+				byte block = getHotbarSlotContents(getCurrentHotbarSlot());
+				int blockStateAmount = BlockStateManager.getBlockStates(block).length;
+				byte blockState = blockStateAmount < 2 ? (byte) 0 : (byte) World.RANDOM.nextInt(0, blockStateAmount);
+
 				ClientController.sendReliable(
 						new PacketPlayerPlaceBlock()
 								.setWorldX(worldX)
 								.setWorldY(worldY)
 								.setWorldZ(worldZ)
-								.setBlock(getHotbarSlotContents(getCurrentHotbarSlot()))
+								.setBlock(block)
+								.setBlockState(blockState)
 				);
 
 			}

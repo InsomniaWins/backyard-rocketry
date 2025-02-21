@@ -20,8 +20,7 @@ public class ClientController extends GameController {
 
 			if (!(object instanceof Packet packet)) return;
 
-			Updater.get().queueMainThreadInstruction(() ->
-					packet.received(Packet.SenderType.SERVER, connection));
+			packet.received(Packet.SenderType.SERVER, connection);
 
 		}
 
