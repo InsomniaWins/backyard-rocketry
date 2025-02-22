@@ -216,8 +216,6 @@ public class ChunkIO {
 
 		int byteIndex = specificChunkIndex * BYTES_PER_CHUNK;
 
-		int byteAmount = BYTES_PER_CHUNK * REGION_SIZE * REGION_SIZE * REGION_SIZE;
-
 		if (byteIndex > 0) {
 			buffer.put(fileData, 0, byteIndex);
 		}

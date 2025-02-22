@@ -126,6 +126,15 @@ public class Blocks {
         public static final Face POS_Y = new Face(0, 1, 0);
         public static final Face NEG_Z = new Face(0, 0, -1);
         public static final Face POS_Z = new Face(0, 0, 1);
+        public static final Face[] FACE_PRESETS = new Face[] {
+                NULL,
+                POS_X,
+                POS_Y,
+                POS_Z,
+                NEG_X,
+                NEG_Y,
+                NEG_Z
+        };
 
         private final int X;
         private final int Y;
@@ -136,6 +145,17 @@ public class Blocks {
             X = x;
             Y = y;
             Z = z;
+
+        }
+
+        public static int getFaceIndex(Face face) {
+
+            for (int i = 0; i < FACE_PRESETS.length; i++) {
+                if (FACE_PRESETS[i] != face) continue;
+                return i;
+            }
+
+            return 0;
 
         }
 

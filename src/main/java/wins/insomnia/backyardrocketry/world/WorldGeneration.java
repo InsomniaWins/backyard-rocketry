@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.world;
 
+import org.joml.Math;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
@@ -7,6 +8,7 @@ import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.nio.ByteBuffer;
 
@@ -111,14 +113,7 @@ public class WorldGeneration {
         return 0.9f + tint * 0.2f;
     }
 
-    public static void getWorldPreview(long seed, ByteBuffer textureData) {
-
-        final int SEED_WIDTH = World.CHUNK_AMOUNT_X * Chunk.SIZE_X;
-        final int SEED_HEIGHT = World.CHUNK_AMOUNT_Z * Chunk.SIZE_Z;
-
-        if (textureData.capacity() / 4 != SEED_WIDTH * SEED_HEIGHT) {
-            return;
-        }
+    public static void getWorldPreview(long seed, ByteBuffer textureData, final int SEED_WIDTH, final int SEED_HEIGHT) {
 
         final Color LAND_COLOR = new Color(90, 197, 79);
         final Color WATER_COLOR = new Color(0, 152, 220);
@@ -168,5 +163,32 @@ public class WorldGeneration {
         return getGroundHeight(seed, globalBlockX, globalBlockZ);
     }
 
+
+
+
+
+    // WARNING: called on thread other than main thread
+    public static void runChunkGenerationPass(ServerChunk chunk, ChunkData chunkData, ServerChunk.GenerationPass pass) {
+
+        switch (pass) {
+            case TERRAIN -> generateTerrain(chunk, chunkData);
+            case DECORATION -> decorateChunk(chunk, chunkData);
+        }
+
+    }
+
+    // WARNING: called on thread other than main thread!
+    private static void generateTerrain(ServerChunk chunk, ChunkData chunkData) {
+
+        generateLand(chunkData);
+
+    }
+
+    // WARNING: called on thread other than main thread
+    private static void decorateChunk(ServerChunk chunk, ChunkData chunkData) {
+
+
+
+    }
 
 }

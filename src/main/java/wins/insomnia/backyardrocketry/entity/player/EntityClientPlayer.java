@@ -23,6 +23,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.block.blockstate.property.PropertyFaceDirection;
 import wins.insomnia.backyardrocketry.world.block.blockstate.types.BlockStateLog;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
@@ -325,14 +326,6 @@ public class EntityClientPlayer extends EntityPlayer {
 				int worldZ = targetBlock.getBlockZ() + face.getZ();
 
 				byte block = getHotbarSlotContents(getCurrentHotbarSlot());
-				int blockStateAmount = BlockStateManager.getBlockStates(block).length;
-				byte blockState = blockStateAmount < 2 ? (byte) 0 : (byte) World.RANDOM.nextInt(0, blockStateAmount);
-
-				if (block == Blocks.LOG) {
-
-					blockState = BlockStateManager.getBlockStateIndex(block, BlockStateLog.getFromFace(face));
-
-				}
 
 				ClientController.sendReliable(
 						new PacketPlayerPlaceBlock()
@@ -340,7 +333,7 @@ public class EntityClientPlayer extends EntityPlayer {
 								.setWorldY(worldY)
 								.setWorldZ(worldZ)
 								.setBlock(block)
-								.setBlockState(blockState)
+								.setFace(Blocks.Face.getFaceIndex(face))
 				);
 
 			}

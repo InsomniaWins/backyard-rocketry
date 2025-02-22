@@ -71,18 +71,35 @@ public class ServerWorld extends World {
 	}
 
 
+	public void submitChunkTask(Runnable task) {
+		CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(task);
+	}
+
+
+
+
 	// DO NOT CALL DIRECTLY
 	// only called on main-thread
-	private void _loadChunk(ChunkPosition chunkPosition) {
+	private void _loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
 
-		if (CHUNKS.get(chunkPosition) != null) return;
+		if (CHUNKS.get(chunkPosition) != null) {
+
+			ServerChunk serverChunk = (ServerChunk) CHUNKS.get(chunkPosition);
+
+			if (serverChunk.getDesiredGenerationPassOrdinal() >= generationPass.ordinal()) {
+
+				return;
+
+			}
+
+		}
+
 		ServerChunk chunk = new ServerChunk(this, chunkPosition);
+
+		chunk.setDesiredGenerationPass(generationPass);
 
 		CHUNKS.put(chunkPosition, chunk);
 		CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
-
-		// todo: send only to those who need it
-		ServerController.sendReliable(chunk.createLoadPacket());
 
 	}
 
@@ -146,14 +163,20 @@ public class ServerWorld extends World {
 	}
 
 
+	protected void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
+
+		if (Thread.currentThread() != Main.MAIN_THREAD) {
+			Updater.get().queueMainThreadInstruction(() -> _loadChunk(chunkPosition, generationPass));
+		} else {
+			_loadChunk(chunkPosition, generationPass);
+		}
+
+	}
+
 	@Override
 	protected void loadChunk(ChunkPosition chunkPosition) {
 
-		if (Thread.currentThread() != Main.MAIN_THREAD) {
-			Updater.get().queueMainThreadInstruction(() -> _loadChunk(chunkPosition));
-		} else {
-			_loadChunk(chunkPosition);
-		}
+		loadChunk(chunkPosition, ServerChunk.GenerationPass.DECORATION);
 
 	}
 

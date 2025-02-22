@@ -1,10 +1,12 @@
 package wins.insomnia.backyardrocketry.network.entity.player;
 
 import com.esotericsoftware.kryonet.Connection;
+import org.joml.Math;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
@@ -15,6 +17,12 @@ public class PacketPlayerPlaceBlock extends Packet {
 	int worldZ;
 	byte block;
 	byte blockState;
+	int face;
+
+	public PacketPlayerPlaceBlock setFace(int face) {
+		this.face = face;
+		return this;
+	}
 
 	public PacketPlayerPlaceBlock setWorldX(int x) {
 		this.worldX = x;
@@ -87,7 +95,7 @@ public class PacketPlayerPlaceBlock extends Packet {
 					serverChunk.toLocalY(worldY),
 					serverChunk.toLocalZ(worldZ),
 					block,
-					blockState
+					Blocks.Face.FACE_PRESETS[Math.clamp(face, 0, Blocks.Face.FACE_PRESETS.length - 1)]
 			);
 
 		});

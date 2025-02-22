@@ -27,9 +27,9 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         UNLOAD
     }
 
-    public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(1);
-    public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(1);
-    public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(1);
+    public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(500);
+    public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(30);
+    public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(500);
     public static int chunkLoadDistance = 8; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;

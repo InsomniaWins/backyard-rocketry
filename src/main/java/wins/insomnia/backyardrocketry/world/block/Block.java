@@ -3,8 +3,9 @@ package wins.insomnia.backyardrocketry.world.block;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
+import wins.insomnia.backyardrocketry.world.block.blockstate.property.PropertyFaceDirection;
 
-public abstract class Block {
+public class Block {
 
 	public static final BoundingBox DEFAULT_BLOCK_BOUNDING_BOX = new BoundingBox(
 			0,0,0,
@@ -63,6 +64,11 @@ public abstract class Block {
 
 	public BoundingBox getBlockCollision() {
 		return new BoundingBox(DEFAULT_BLOCK_BOUNDING_BOX);
+	}
+
+	// returns the block-state index to place into the chunk (0 is default block-state)
+	public byte onPlace(int localBlockX, int localBlockY, int localBlockZ, Blocks.Face face) {
+		return 0;
 	}
 
 }

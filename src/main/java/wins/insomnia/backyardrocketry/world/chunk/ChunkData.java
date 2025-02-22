@@ -18,7 +18,7 @@ public class ChunkData {
 	private byte[][][] blockStates;
 
 
-	private ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {
+	public ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {
 
 		SEED = seed;
 

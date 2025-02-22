@@ -48,8 +48,8 @@ public class NewSaveScene extends Scene {
 	private float previewCameraY;
 	private final int PREVIEW_WIDTH = 91;
 	private final int PREVIEW_HEIGHT = 91;
-	private final int SEED_WIDTH = World.CHUNK_AMOUNT_X * Chunk.SIZE_X;
-	private final int SEED_HEIGHT = World.CHUNK_AMOUNT_Z * Chunk.SIZE_Z;
+	private final int SEED_WIDTH = Math.clamp(1, Chunk.SIZE_X * 20, World.CHUNK_AMOUNT_X * Chunk.SIZE_X);
+	private final int SEED_HEIGHT = Math.clamp(1, Chunk.SIZE_Z * 20, World.CHUNK_AMOUNT_Z * Chunk.SIZE_Z);
 	private final ByteBuffer SEED_TEXTURE_DATA = ByteBuffer.allocateDirect(4 * SEED_WIDTH * SEED_HEIGHT);
 	private Thread seedPreviewThread;
 	private boolean shouldUpdateSeedPreview = false;
@@ -62,7 +62,7 @@ public class NewSaveScene extends Scene {
 		public void run() {
 			long seed = getSeed();
 
-			WorldGeneration.getWorldPreview(seed, SEED_TEXTURE_DATA);
+			WorldGeneration.getWorldPreview(seed, SEED_TEXTURE_DATA, SEED_WIDTH, SEED_HEIGHT);
 			SEED_PREVIEW_STATUS.set(SEED_PREVIEW_GENERATED);
 
 			Updater.get().queueMainThreadInstruction(() -> {
@@ -560,7 +560,7 @@ public class NewSaveScene extends Scene {
 								}
 							}
 						}
-					} catch (IOException e) {
+					} catch (Exception e) {
 
 
 
@@ -587,8 +587,13 @@ public class NewSaveScene extends Scene {
 				"Save-Creation-Thread"
 		);
 
-		saveCreationThread.start();
+		//saveCreationThread.start();
+		Updater.get().queueMainThreadInstruction(() -> {
 
+			GameplayScene gameplayScene = new GameplayScene(GameplayScene.GameType.CLIENT_SERVER);
+			SceneManager.get().changeScene(gameplayScene);
+
+		});
 
 	}
 
