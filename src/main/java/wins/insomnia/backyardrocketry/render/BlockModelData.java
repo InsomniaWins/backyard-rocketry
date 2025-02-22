@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.io.LoadTask;
-import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
-import java.security.KeyPair;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -35,9 +33,9 @@ public class BlockModelData {
 
         List<LoadTask> list = new ArrayList<>();
 
-        for (Byte block : Block.getBlocks()) {
+        for (Byte block : Blocks.getBlocks()) {
             list.add(new LoadTask(
-                    "Registering block mesh: " + Block.getBlockName(block),
+                    "Registering block mesh: " + Blocks.getBlockName(block),
                     () -> {
                         registerBlockMesh(block);
                     }
@@ -387,9 +385,9 @@ public class BlockModelData {
 
         ObjectMapper mapper = new ObjectMapper();
 
-		for (byte block : Block.getBlocks()) {
+		for (byte block : Blocks.getBlocks()) {
 
-			String blockStateFileName = Block.getBlockStateName(block);
+			String blockStateFileName = Blocks.getBlockStateName(block);
 
 			if (blockStateFileName == null || blockStateFileName.isEmpty()) continue;
 

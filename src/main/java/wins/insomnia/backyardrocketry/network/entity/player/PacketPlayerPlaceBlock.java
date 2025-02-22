@@ -72,21 +72,25 @@ public class PacketPlayerPlaceBlock extends Packet {
 
 		}
 
-		ServerWorld serverWorld = ServerWorld.getServerWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (serverWorld == null) return;
+			ServerWorld serverWorld = ServerWorld.getServerWorld();
 
-		Chunk chunk = serverWorld.getChunkContainingBlock(worldX, worldY, worldZ);
+			if (serverWorld == null) return;
 
-		if (!(chunk instanceof ServerChunk serverChunk)) return;
+			Chunk chunk = serverWorld.getChunkContainingBlock(worldX, worldY, worldZ);
 
-		serverChunk.placeBlock(
-				serverChunk.toLocalX(worldX),
-				serverChunk.toLocalY(worldY),
-				serverChunk.toLocalZ(worldZ),
-				block,
-				blockState
-		);
+			if (!(chunk instanceof ServerChunk serverChunk)) return;
+
+			serverChunk.placeBlock(
+					serverChunk.toLocalX(worldX),
+					serverChunk.toLocalY(worldY),
+					serverChunk.toLocalZ(worldZ),
+					block,
+					blockState
+			);
+
+		});
 
 	}
 }

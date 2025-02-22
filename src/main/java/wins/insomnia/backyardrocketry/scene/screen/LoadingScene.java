@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.scene.Scene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
 import wins.insomnia.backyardrocketry.util.io.AssetLoader;
 import wins.insomnia.backyardrocketry.util.io.LoadTask;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
@@ -57,6 +58,11 @@ public class LoadingScene extends Scene {
 
 		List<LoadTask> blockStateTaskList = BlockModelData.makeBlockStateLoadingTaskList();
 		for (LoadTask task : blockStateTaskList) {
+			ASSET_LOADER.addLoadTask(task);
+		}
+
+		List<LoadTask> blockStateRegisterTaskList = BlockStateManager.makeBlockStateRegisterTaskList();
+		for (LoadTask task : blockStateRegisterTaskList) {
 			ASSET_LOADER.addLoadTask(task);
 		}
 

@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 
 public class PacketPlayerTransform extends Packet {
@@ -22,19 +23,23 @@ public class PacketPlayerTransform extends Packet {
 			return;
 		}
 
-		ClientWorld clientWorld = ClientWorld.getClientWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (clientWorld == null) {
-			return;
-		}
+			ClientWorld clientWorld = ClientWorld.getClientWorld();
 
-		EntityClientPlayer clientPlayer = clientWorld.getClientPlayer();
+			if (clientWorld == null) {
+				return;
+			}
 
-		if (clientPlayer == null) {
-			return;
-		}
+			EntityClientPlayer clientPlayer = clientWorld.getClientPlayer();
 
-		clientPlayer.gotTransformFromServer(transform);
+			if (clientPlayer == null) {
+				return;
+			}
+
+			clientPlayer.gotTransformFromServer(transform);
+
+		});
 
 	}
 }

@@ -13,7 +13,7 @@ import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 import java.util.*;
@@ -128,12 +128,12 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
 
         // if out of world border
         if (x > getSizeX()-1 || x < 0 || y > getSizeY()-1 || y < 0 || z > getSizeZ()-1 || z < 0 ) {
-            return Block.WORLD_BORDER;
+            return Blocks.WORLD_BORDER;
         }
 
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
-        if (chunk == null) return Block.NULL;
+        if (chunk == null) return Blocks.NULL;
 
         if (!chunk.isBlockInBounds(x, y, z)) {
             System.out.println("failed at: " + chunk.getChunkPosition() + " : " + x + ", " + y + ", " + z + " : " + getChunkPositionFromBlockPosition(x, y, z));
@@ -177,7 +177,7 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         Chunk chunk = getChunkContainingBlock(x, y, z);
 
         if (chunk == null) {
-            return BitHelper.getBlockStateWithoutPropertiesFromBlockId(Block.NULL);
+            return BitHelper.getBlockStateWithoutPropertiesFromBlockId(Blocks.NULL);
         }
 
         return chunk.getBlockState(x, y, z);

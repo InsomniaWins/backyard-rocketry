@@ -1,7 +1,7 @@
 package wins.insomnia.backyardrocketry.world;
 
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class WorldDecorations {
 
@@ -18,53 +18,53 @@ public class WorldDecorations {
 	public static final Decoration TREE = new Decoration(
 			new BoundingBox(-1, 0, -1,   1, 8, 1),
 			new int[][] {
-					{0,0,0, Block.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
+					{0,0,0, Blocks.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
 
 
-					{0,1,0, Block.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
+					{0,1,0, Blocks.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
 
 
-					{0,2,0, Block.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
+					{0,2,0, Blocks.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
 
 
-					{0,3,0, Block.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
-					{1,3,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,3,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,3,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,3,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,3,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,3,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,3,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,3,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,3,0, Blocks.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
+					{1,3,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,3,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,3,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,3,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,3,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,3,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,3,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,3,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
 
 
-					{0,4,0, Block.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
-					{1,4,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,4,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,4,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,4,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,4,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,4,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,4,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,4,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,4,0, Blocks.LOG, PlacementBehavior.REPLACE_ANY_BREAKABLE_BLOCK.ordinal()},
+					{1,4,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,4,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,4,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,4,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,4,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,4,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,4,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,4,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
 
-					{0,5,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,5,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,5,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,5,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,5,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{1,5,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{-1,5,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,5,1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-					{0,5,-1, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,5,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,5,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,5,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,5,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,5,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{1,5,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{-1,5,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,5,1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,5,-1, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
 
-					{0,6,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
-
-
-					{0,7,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+					{0,6,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
 
 
-					{0,8,0, Block.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()}
+					{0,7,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()},
+
+
+					{0,8,0, Blocks.LEAVES, PlacementBehavior.ONLY_REPLACE_AIR.ordinal()}
 			}
 	);
 

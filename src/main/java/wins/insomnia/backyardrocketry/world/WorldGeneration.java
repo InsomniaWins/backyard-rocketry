@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 
@@ -63,30 +63,30 @@ public class WorldGeneration {
 
                     if (isBlockWorldBorder(globalBlockX, globalBlockY, globalBlockZ)) {
 
-                        block = Block.WORLD_BORDER;
+                        block = Blocks.WORLD_BORDER;
 
                     } else if (globalBlockY > groundHeight) {
 
                         if (globalBlockY <= WorldGeneration.SEA_LEVEL) {
-                            block = Block.WATER;
+                            block = Blocks.WATER;
                         } else {
-                            block = Block.AIR;
+                            block = Blocks.AIR;
                         }
 
                     } else {
 
                         if (globalBlockY == groundHeight) {
-                            block = Block.GRASS;
+                            block = Blocks.GRASS;
 
 
 
                         } else if (globalBlockY > groundHeight - 4) {
-                            block = Block.DIRT;
+                            block = Blocks.DIRT;
                         } else {
                             if (World.RANDOM.nextInt(2) == 0) {
-                                block = Block.COBBLESTONE;
+                                block = Blocks.COBBLESTONE;
                             } else {
-                                block = Block.STONE;
+                                block = Blocks.STONE;
                             }
                         }
                     }

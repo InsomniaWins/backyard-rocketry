@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.network.entity.player;
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 public class PacketPlayerJump extends Packet {
@@ -12,15 +13,19 @@ public class PacketPlayerJump extends Packet {
 
 		if (senderType != SenderType.CLIENT) return;
 
-		ServerWorld serverWorld = ServerWorld.getServerWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (serverWorld == null) return;
+			ServerWorld serverWorld = ServerWorld.getServerWorld();
 
-		EntityServerPlayer serverPlayer = serverWorld.getServerPlayer(connection.getID());
+			if (serverWorld == null) return;
 
-		if (serverPlayer == null) return;
+			EntityServerPlayer serverPlayer = serverWorld.getServerPlayer(connection.getID());
 
-		serverPlayer.jump();
+			if (serverPlayer == null) return;
+
+			serverPlayer.jump();
+
+		});
 
 	}
 }

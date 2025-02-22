@@ -1,0 +1,13 @@
+{
+	"parent": "block",
+	"textures": {
+		"particle": "log_side",
+		"pos_y": "log_top",
+		"pos_x": "log_side",
+		"neg_x": "log_side",
+		"pos_z": "log_side",
+		"neg_z": "log_side",
+		"neg_y": "log_top",
+		"icon": "log_side"
+	}
+}

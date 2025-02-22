@@ -3,13 +3,12 @@ package wins.insomnia.backyardrocketry.util.debug;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.entity.player.EntityPlayer;
 import wins.insomnia.backyardrocketry.entity.player.IPlayer;
-import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.text.DecimalFormat;
 
@@ -76,7 +75,7 @@ public class DebugInfo {
 	public static String getPlayerTargetBlockInfo(EntityPlayer player) {
 
 		int targetBlockHealth = 0;
-		byte targetBlock = Block.NULL;
+		byte targetBlock = Blocks.NULL;
 
 		if (player.getTargetBlock() != null) {
 
@@ -85,14 +84,14 @@ public class DebugInfo {
 					player.getTargetBlock().getBlockY(),
 					player.getTargetBlock().getBlockZ());
 
-			targetBlockHealth = Block.getBlockHealth(targetBlock);
+			targetBlockHealth = Blocks.getBlockStrength(targetBlock);
 
 		}
 
 		if (player.getTargetBlock() == null) {
 			return "T Bl: NULL";
 		} else {
-			return "T Bl: " + Block.getBlockName(targetBlock) +
+			return "T Bl: " + Blocks.getBlockName(targetBlock) +
 					"\nT Bl Pos: <" +
 					player.getTargetBlock().getBlockX() + ", " +
 					player.getTargetBlock().getBlockY() + ", " +

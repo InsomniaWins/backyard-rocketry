@@ -8,7 +8,7 @@ import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,9 +95,9 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
                     byte block = getBlock(x, y, z);
 
-                    if (block == Block.NULL) continue;
+                    if (block == Blocks.NULL) continue;
 
-                    BoundingBox blockBoundingBox = Block.getBlockCollision(block);
+                    BoundingBox blockBoundingBox = Blocks.getBlockCollision(block);
 
                     if (blockBoundingBox == null) continue;
 
@@ -158,7 +158,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public byte getBlockOrNull(int x, int y, int z) {
         // if out of chunk boundaries
         if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
-            return Block.NULL;
+            return Blocks.NULL;
         }
 
         return chunkData.getBlock(x, y, z);
@@ -175,7 +175,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
             // if block is out of world border
             if (globalX > WORLD.getSizeX()-1 || globalX < 0 || globalY > WORLD.getSizeY()-1 || globalY < 0 || globalZ > WORLD.getSizeZ()-1 || globalZ < 0 ) {
-                return Block.WORLD_BORDER;
+                return Blocks.WORLD_BORDER;
             }
 
             // get neighbor chunk with block
@@ -187,7 +187,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             Chunk chunk = WORLD.getChunk(chunkPosition);
 
             if (chunk == null) {
-                return Block.NULL;
+                return Blocks.NULL;
             }
 
             return chunk.getBlock(chunk.toLocalX(globalX), chunk.toLocalY(globalY), chunk.toLocalZ(globalZ));

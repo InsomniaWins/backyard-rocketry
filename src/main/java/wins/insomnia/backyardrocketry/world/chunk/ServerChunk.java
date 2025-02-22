@@ -1,7 +1,6 @@
 package wins.insomnia.backyardrocketry.world.chunk;
 
 import wins.insomnia.backyardrocketry.controller.ServerController;
-import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerBreakBlock;
@@ -12,7 +11,7 @@ import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.util.ArrayList;
@@ -75,9 +74,9 @@ public class ServerChunk extends Chunk {
 
 		byte blockBroken = getBlock(x, y, z);
 
-		if (Block.getBlockHealth(blockBroken) < 0) return;
+		if (Blocks.getBlockStrength(blockBroken) < 0) return;
 
-		setBlock(x, y, z, Block.AIR, (byte) 0, false);
+		setBlock(x, y, z, Blocks.AIR, (byte) 0, false);
 
 
 		if (dropLoot) {

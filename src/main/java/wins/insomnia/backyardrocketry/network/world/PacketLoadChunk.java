@@ -39,18 +39,22 @@ public class PacketLoadChunk extends Packet {
 		// clients can only be told by server to load chunks, no other way
 		if (senderType != SenderType.SERVER) return;
 
-		ClientWorld clientWorld = World.getClientWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (clientWorld == null) return;
+			ClientWorld clientWorld = World.getClientWorld();
 
-		ChunkData chunkData = ChunkData.deserialize(serializedChunkData);
-		ChunkPosition chunkPosition = chunkData.getChunkPosition(clientWorld);
+			if (clientWorld == null) return;
 
-		if (chunkPosition != null) {
+			ChunkData chunkData = ChunkData.deserialize(serializedChunkData);
+			ChunkPosition chunkPosition = chunkData.getChunkPosition(clientWorld);
 
-			clientWorld.receivedChunkDataFromServer(chunkData);
+			if (chunkPosition != null) {
 
-		}
+				clientWorld.receivedChunkDataFromServer(chunkData);
+
+			}
+
+		});
 
 	}
 

@@ -22,8 +22,8 @@ import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.block.blockstate.types.BlockStateLog;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		FIRST_PERSON_HAND_ITEM = new FirstPersonHandItemRenderable();
 		Renderer.get().addRenderable(FIRST_PERSON_HAND_ITEM);
-		FIRST_PERSON_HAND_ITEM.setBlock(Block.GRASS);
+		FIRST_PERSON_HAND_ITEM.setBlock(Blocks.GRASS);
 
 	}
 
@@ -316,7 +316,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 			FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
 
-			Block.Face face = targetBlock.getFace();
+			Blocks.Face face = targetBlock.getFace();
 
 			if (face != null) {
 
@@ -327,6 +327,12 @@ public class EntityClientPlayer extends EntityPlayer {
 				byte block = getHotbarSlotContents(getCurrentHotbarSlot());
 				int blockStateAmount = BlockStateManager.getBlockStates(block).length;
 				byte blockState = blockStateAmount < 2 ? (byte) 0 : (byte) World.RANDOM.nextInt(0, blockStateAmount);
+
+				if (block == Blocks.LOG) {
+
+					blockState = BlockStateManager.getBlockStateIndex(block, BlockStateLog.getFromFace(face));
+
+				}
 
 				ClientController.sendReliable(
 						new PacketPlayerPlaceBlock()

@@ -6,7 +6,7 @@ import wins.insomnia.backyardrocketry.audio.AudioBuffer;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 
 public class ComponentFootstepAudio extends Component {
@@ -111,7 +111,7 @@ public class ComponentFootstepAudio extends Component {
 		Vector3i blockPosition = getEntity().getWorld().getBlockPosition(position);
 		byte block = getEntity().getWorld().getBlock(blockPosition.x, blockPosition.y, blockPosition.z);
 
-		BlockAudio blockAudio = Block.getBlockAudio(block);
+		BlockAudio blockAudio = Blocks.getBlockAudio(block);
 		if (blockAudio == null) return;
 
 		AudioBuffer stepAudio = blockAudio.getStepAudio();

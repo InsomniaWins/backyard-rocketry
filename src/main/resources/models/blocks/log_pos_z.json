@@ -1,0 +1,21 @@
+{
+	"parent": "block",
+	"textures": {
+		"particle": "log_side",
+		"pos_y": "log_side",
+		"pos_x": "log_side",
+		"neg_x": "log_side",
+		"pos_z": "log_top",
+		"neg_z": "log_top",
+		"neg_y": "log_side",
+		"icon": "log_side"
+	},
+	"faces": {
+		"left": {
+			"possible_rotations": [90.0, 270.0]
+		},
+		"right": {
+			"possible_rotations": [90.0, 270.0]
+		}
+	}
+}

@@ -1,7 +1,7 @@
 package wins.insomnia.backyardrocketry.physics;
 
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class BlockRaycastResult {
 
@@ -9,10 +9,10 @@ public class BlockRaycastResult {
     private int blockX;
     private int blockY;
     private int blockZ;
-    private Block.Face face;
+    private Blocks.Face face;
 
 
-    public BlockRaycastResult(Chunk chunk, int blockX, int blockY, int blockZ, Block.Face face) {
+    public BlockRaycastResult(Chunk chunk, int blockX, int blockY, int blockZ, Blocks.Face face) {
         this.chunk = chunk;
 
         this.blockX = blockX;
@@ -37,7 +37,7 @@ public class BlockRaycastResult {
     public int getBlockZ() {
         return blockZ;
     }
-    public Block.Face getFace() {
+    public Blocks.Face getFace() {
         return face;
     }
 

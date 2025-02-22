@@ -1,9 +1,8 @@
 package wins.insomnia.backyardrocketry.item;
 
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class Item {
 
@@ -18,7 +17,7 @@ public class Item {
 	public static final HashMap<Byte, BlockItem> BLOCK_ITEM_MAP = new HashMap<>();
 
 	public static final BlockItem COBBLESTONE = registerBlockItem(
-			Block.COBBLESTONE,
+			Blocks.COBBLESTONE,
 			"Cobblestone",
 			"cobblestone",
 			1000,
@@ -26,7 +25,7 @@ public class Item {
 	);
 
 	public static final Item GRASS = registerBlockItem(
-			Block.GRASS,
+			Blocks.GRASS,
 			"Grass",
 			"grass",
 			1000,
@@ -34,7 +33,7 @@ public class Item {
 	);
 
 	public static final Item DIRT = registerBlockItem(
-			Block.DIRT,
+			Blocks.DIRT,
 			"Dirt",
 			"dirt",
 			1000,
@@ -42,7 +41,7 @@ public class Item {
 	);
 
 	public static final Item LEAVES = registerBlockItem(
-			Block.LEAVES,
+			Blocks.LEAVES,
 			"Leaves",
 			"leaves",
 			1000,
@@ -50,7 +49,7 @@ public class Item {
 	);
 
 	public static final Item STONE = registerBlockItem(
-			Block.STONE,
+			Blocks.STONE,
 			"Stone",
 			"stone",
 			1000,
@@ -58,7 +57,7 @@ public class Item {
 	);
 
 	public static final Item WOODEN_PLANKS = registerBlockItem(
-			Block.WOODEN_PLANKS,
+			Blocks.WOODEN_PLANKS,
 			"Wooden Planks",
 			"wooden_planks",
 			1000,
@@ -66,7 +65,7 @@ public class Item {
 	);
 
 	public static final Item WOOD = registerBlockItem(
-			Block.WOOD,
+			Blocks.WOOD,
 			"Wood",
 			"wood",
 			1000,
@@ -74,7 +73,7 @@ public class Item {
 	);
 
 	public static final Item LOG = registerBlockItem(
-			Block.LOG,
+			Blocks.LOG,
 			"Log",
 			"log",
 			1000,
@@ -82,7 +81,7 @@ public class Item {
 	);
 
 	public static final Item GLASS = registerBlockItem(
-			Block.GLASS,
+			Blocks.GLASS,
 			"Glass",
 			"glass",
 			1000,
@@ -90,7 +89,7 @@ public class Item {
 	);
 
 	public static final Item BRICKS = registerBlockItem(
-			Block.BRICKS,
+			Blocks.BRICKS,
 			"Bricks",
 			"bricks",
 			1000,

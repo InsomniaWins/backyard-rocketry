@@ -4,8 +4,6 @@ import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
-import wins.insomnia.backyardrocketry.entity.Entity;
-import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
@@ -14,16 +12,14 @@ import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.physics.ICollisionBody;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody {
 
@@ -58,16 +54,16 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	private final Transform PREVIOUS_TRANSFORM;
 	private int breakAudioDelay = 0;
 	private byte[] hotbarItems = {
-			Block.GRASS,
-			Block.COBBLESTONE,
-			Block.DIRT,
-			Block.STONE,
-			Block.LOG,
-			Block.LEAVES,
-			Block.WOODEN_PLANKS,
-			Block.GLASS,
-			Block.BRICKS,
-			Block.WOOD
+			Blocks.GRASS,
+			Blocks.COBBLESTONE,
+			Blocks.DIRT,
+			Blocks.STONE,
+			Blocks.LOG,
+			Blocks.LEAVES,
+			Blocks.WOODEN_PLANKS,
+			Blocks.GLASS,
+			Blocks.BRICKS,
+			Blocks.WOOD
 	};
 	private int currentHotbarSlot = 0;
 	private int blockInteractionTimer = 0;

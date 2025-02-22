@@ -1,9 +1,13 @@
 package wins.insomnia.backyardrocketry.world.block.blockstate;
 
 
+import wins.insomnia.backyardrocketry.util.io.LoadTask;
 import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.blockstate.property.BlockStateProperty;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,16 +66,50 @@ public class BlockStateManager {
 		return 0;
 	}
 
+	public static List<LoadTask> makeBlockStateRegisterTaskList() {
 
-	public static void registerBlockState(byte block, BlockState blockState) {
+		List<LoadTask> list = new ArrayList<>();
 
-		if (blockState == null) {
-			BLOCK_STATES.put(block, new ArrayList<>(List.of("default")));
-			return;
+		for (byte blockId : Blocks.getBlocks()) {
+
+			String blockName = Blocks.getBlockName(blockId);
+
+			list.add(new LoadTask("Registering " + blockName + " Block States . . .", () -> {
+
+				registerBlockState(blockId);
+
+			}));
+
 		}
 
-		BlockStateProperty<?>[] properties = blockState.getProperties();
-		registerPropertyCombinations(block, properties);
+		return list;
+
+	}
+
+	public static void registerBlockState(byte block) {
+		Block blockObject = Blocks.getBlock(block);
+
+		if (blockObject == null || blockObject.getBlockState() == null || !registerBlockState(block, blockObject)) {
+			BLOCK_STATES.put(block, new ArrayList<>(List.of("default")));
+		}
+	}
+
+	public static boolean registerBlockState(byte blockId, Block block) {
+		Constructor<?>[] constructors = block.getBlockState().getDeclaredConstructors();
+
+		if (constructors.length == 0) return false;
+
+		try {
+			BlockState blockState = (BlockState) constructors[0].newInstance();
+
+			BlockStateProperty<?>[] properties = blockState.getProperties();
+			registerPropertyCombinations(blockId, properties);
+
+			return true;
+
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 
@@ -114,7 +152,7 @@ public class BlockStateManager {
 		ArrayList<String> states = BLOCK_STATES.get(block);
 
 		if (states.size() == MAX_STATES) {
-			throw new RuntimeException("Cannot add any more block states for block:" + Block.getBlockName(block));
+			throw new RuntimeException("Cannot add any more block states for block:" + Blocks.getBlockName(block));
 		}
 
 		StringBuilder stateName = new StringBuilder("{");

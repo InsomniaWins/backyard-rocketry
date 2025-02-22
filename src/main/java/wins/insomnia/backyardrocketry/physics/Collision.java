@@ -2,14 +2,12 @@ package wins.insomnia.backyardrocketry.physics;
 
 import org.joml.Math;
 import org.joml.Vector3d;
-import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +98,7 @@ public class Collision {
     }
 
 
-    private static BlockRaycastResult blockCollisionCheck(World world, int blockX, int blockY, int blockZ, Block.Face face) {
+    private static BlockRaycastResult blockCollisionCheck(World world, int blockX, int blockY, int blockZ, Blocks.Face face) {
 
         Chunk chunk = world.getChunkContainingBlock(blockX, blockY, blockZ);
 
@@ -108,7 +106,7 @@ public class Collision {
 
         byte blockId = world.getBlock(blockX, blockY, blockZ);
 
-        if (Block.getBlockCollision(blockId) == null) return null;
+        if (Blocks.getBlockCollision(blockId) == null) return null;
 
         return new BlockRaycastResult(chunk, blockX, blockY, blockZ, face);
     }
@@ -204,7 +202,7 @@ public class Collision {
         double tDeltaZ = stepZ/dz;
 
         // Buffer for reporting faces to the callback.
-        Block.Face face = Block.Face.NULL;
+        Blocks.Face face = Blocks.Face.NULL;
 
         // Avoids an infinite loop.
         if (dx == 0 && dy == 0 && dz == 0)
@@ -242,26 +240,26 @@ public class Collision {
                     // Adjust tMaxX to the next X-oriented boundary crossing.
                     tMaxX += tDeltaX;
                     // Record the normal vector of the cube face we entered.
-                    face = stepX > 0 ? Block.Face.NEG_X : Block.Face.POS_X;
+                    face = stepX > 0 ? Blocks.Face.NEG_X : Blocks.Face.POS_X;
                 } else {
                     if (tMaxZ > length) break;
                     z += stepZ;
                     tMaxZ += tDeltaZ;
-                    face = stepZ > 0 ? Block.Face.NEG_Z : Block.Face.POS_Z;
+                    face = stepZ > 0 ? Blocks.Face.NEG_Z : Blocks.Face.POS_Z;
                 }
             } else {
                 if (tMaxY < tMaxZ) {
                     if (tMaxY > length) break;
                     y += stepY;
                     tMaxY += tDeltaY;
-                    face = stepY > 0 ? Block.Face.NEG_Y : Block.Face.POS_Y;
+                    face = stepY > 0 ? Blocks.Face.NEG_Y : Blocks.Face.POS_Y;
                 } else {
                     // Identical to the second case, repeated for simplicity in
                     // the conditionals.
                     if (tMaxZ > length) break;
                     z += stepZ;
                     tMaxZ += tDeltaZ;
-                    face = stepZ > 0 ? Block.Face.NEG_Z : Block.Face.POS_Z;
+                    face = stepZ > 0 ? Blocks.Face.NEG_Z : Blocks.Face.POS_Z;
                 }
             }
         }

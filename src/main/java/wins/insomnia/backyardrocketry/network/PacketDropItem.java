@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.item.EntityClientItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 
 import java.util.UUID;
@@ -34,18 +35,22 @@ public class PacketDropItem extends Packet {
 
 		if (senderType != SenderType.SERVER) return;
 
-		ClientWorld world = ClientWorld.getClientWorld();
-		if (world == null) return;
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		ItemStack itemStack = new ItemStack(Item.getItem(itemId), itemVolume);
+			ClientWorld world = ClientWorld.getClientWorld();
+			if (world == null) return;
 
-		EntityClientItem entity = new EntityClientItem(
-				itemStack,
-				world,
-				UUID.fromString(uuid)
-		);
+			ItemStack itemStack = new ItemStack(Item.getItem(itemId), itemVolume);
 
-		world.addEntity(entity, 0, 0, 0);
+			EntityClientItem entity = new EntityClientItem(
+					itemStack,
+					world,
+					UUID.fromString(uuid)
+			);
+
+			world.addEntity(entity, 0, 0, 0);
+
+		});
 
 	}
 }

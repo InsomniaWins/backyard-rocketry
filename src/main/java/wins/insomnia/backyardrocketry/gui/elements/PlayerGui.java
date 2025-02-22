@@ -5,32 +5,22 @@ import org.joml.Math;
 import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.EntityManager;
-import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
-import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
-import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.*;
-import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
-import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
-import wins.insomnia.backyardrocketry.util.FancyToString;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.ClientWorld;
-import wins.insomnia.backyardrocketry.world.block.Block;
-import wins.insomnia.backyardrocketry.world.chunk.Chunk;
-
-import java.util.Collection;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -199,7 +189,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
 			);
 			
-			if (targetBlockId != Block.AIR) {
+			if (targetBlockId != Blocks.AIR) {
 				renderTargetBlock(targetBlockId);
 			}
 
@@ -270,7 +260,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		}
 
 		// render w.a.i.l.a gui
-		String blockName = Block.getBlockName(targetBlockId);
+		String blockName = Blocks.getBlockName(targetBlockId);
 
 		int wailaHeight = TextRenderer.getTextPixelHeight(2);
 		int wailaPosX = 0;
@@ -396,9 +386,9 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					targetBlock.getChunk().toLocalZ(targetBlock.getBlockZ())
 			);
 
-			desiredBreakProgress = (player.getBreakProgress()) / (float) Block.getBlockHealth(targetBlockId);
+			desiredBreakProgress = (player.getBreakProgress()) / (float) Blocks.getBlockStrength(targetBlockId);
 
-			breakProgressRatio = desiredBreakProgress + (tickUpdateFactor / (float) Block.getBlockHealth(targetBlockId));
+			breakProgressRatio = desiredBreakProgress + (tickUpdateFactor / (float) Blocks.getBlockStrength(targetBlockId));
 
 		} else {
 			breakProgressRatio = 0f;

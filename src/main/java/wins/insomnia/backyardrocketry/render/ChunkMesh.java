@@ -10,7 +10,7 @@ import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 
 import java.util.*;
@@ -200,9 +200,9 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     int globalZ = getChunk().toGlobalZ(z);
 
                     byte block = blocks[x][y][z];
-                    if (block == Block.AIR) continue;
+                    if (block == Blocks.AIR) continue;
 
-                    if (isTransparent != Block.isBlockTransparent(block)) continue;
+                    if (isTransparent != Blocks.isBlockTransparent(block)) continue;
 
                     byte blockState = blockStates[x][y][z];
 
@@ -343,81 +343,81 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
         switch (cullface) {
             case "top" -> {
-                if (posYNeighbor == Block.WORLD_BORDER || posYNeighbor == Block.NULL) {
+                if (posYNeighbor == Blocks.WORLD_BORDER || posYNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && posYNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && posYNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(posYNeighbor)) {
+                if (Blocks.isBlockTransparent(posYNeighbor)) {
                     return true;
                 }
             }
             case "bottom" -> {
 
-                if (negYNeighbor == Block.WORLD_BORDER || negYNeighbor == Block.NULL) {
+                if (negYNeighbor == Blocks.WORLD_BORDER || negYNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && negYNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && negYNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(negYNeighbor)) {
+                if (Blocks.isBlockTransparent(negYNeighbor)) {
                     return true;
                 }
             }
             case "left" -> {
-                if (negXNeighbor == Block.WORLD_BORDER || negXNeighbor == Block.NULL) {
+                if (negXNeighbor == Blocks.WORLD_BORDER || negXNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && negXNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && negXNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(negXNeighbor)) {
+                if (Blocks.isBlockTransparent(negXNeighbor)) {
                     return true;
                 }
             }
             case "right" -> {
-                if (posXNeighbor == Block.WORLD_BORDER || posXNeighbor == Block.NULL) {
+                if (posXNeighbor == Blocks.WORLD_BORDER || posXNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && posXNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && posXNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(posXNeighbor)) {
+                if (Blocks.isBlockTransparent(posXNeighbor)) {
                     return true;
                 }
             }
             case "front" -> {
-                if (posZNeighbor == Block.WORLD_BORDER || posZNeighbor == Block.NULL) {
+                if (posZNeighbor == Blocks.WORLD_BORDER || posZNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && posZNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && posZNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(posZNeighbor)) {
+                if (Blocks.isBlockTransparent(posZNeighbor)) {
                     return true;
                 }
             }
             case "back" -> {
-                if (negZNeighbor == Block.WORLD_BORDER || negZNeighbor == Block.NULL) {
+                if (negZNeighbor == Blocks.WORLD_BORDER || negZNeighbor == Blocks.NULL) {
                     return false;
                 }
 
-                if (Block.shouldHideNeighboringFaces(block) && negZNeighbor == block) {
+                if (Blocks.shouldHideNeighboringFaces(block) && negZNeighbor == block) {
                     return false;
                 }
 
-                if (Block.isBlockTransparent(negZNeighbor)) {
+                if (Blocks.isBlockTransparent(negZNeighbor)) {
                     return true;
                 }
             }
@@ -454,14 +454,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
             if (vertexPosition[1] == 0f && vertexPosition[2] == 1f) {
@@ -487,14 +487,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
             if (vertexPosition[1] == 0f && vertexPosition[2] == 0f) {
@@ -522,14 +522,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
             if (vertexPosition[0] == 0f && vertexPosition[2] == 0f) {
@@ -555,14 +555,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
             if (vertexPosition[0] == 0f && vertexPosition[2] == 1f) {
@@ -589,14 +589,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
 
@@ -624,14 +624,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
             };
 
             boolean[] neighborResults = new boolean[] {
-                    !Block.isBlockTransparent(neighbors[0]),
-                    !Block.isBlockTransparent(neighbors[1]),
-                    !Block.isBlockTransparent(neighbors[2]),
-                    !Block.isBlockTransparent(neighbors[3]),
-                    !Block.isBlockTransparent(neighbors[4]),
-                    !Block.isBlockTransparent(neighbors[5]),
-                    !Block.isBlockTransparent(neighbors[6]),
-                    !Block.isBlockTransparent(neighbors[7])
+                    !Blocks.isBlockTransparent(neighbors[0]),
+                    !Blocks.isBlockTransparent(neighbors[1]),
+                    !Blocks.isBlockTransparent(neighbors[2]),
+                    !Blocks.isBlockTransparent(neighbors[3]),
+                    !Blocks.isBlockTransparent(neighbors[4]),
+                    !Blocks.isBlockTransparent(neighbors[5]),
+                    !Blocks.isBlockTransparent(neighbors[6]),
+                    !Blocks.isBlockTransparent(neighbors[7])
             };
 
 

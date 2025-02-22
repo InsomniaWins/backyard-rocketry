@@ -6,6 +6,7 @@ import java.util.List;
 
 public abstract class BlockState {
 
+
 	public abstract BlockStateProperty<?>[] getProperties();
 	public String getStateString() {
 

@@ -3,7 +3,7 @@ package wins.insomnia.backyardrocketry.world.block.loot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.util.io.LoadTask;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,9 +28,9 @@ public class BlockLoot {
 
 		List<LoadTask> taskList = new ArrayList<>();
 
-		for (byte block : Block.getBlocks()) {
+		for (byte block : Blocks.getBlocks()) {
 
-			String blockStateName = Block.getBlockStateName(block);
+			String blockStateName = Blocks.getBlockStateName(block);
 
 			taskList.add(new LoadTask("Loading block loot: " + blockStateName, () -> {
 				BlockLoot blockLoot = loadBlockLoot(blockStateName);
@@ -48,7 +48,7 @@ public class BlockLoot {
 
 	public static BlockLoot getBlockLoot(String blockStateName) {
 
-		return BLOCK_LOOT_HASH_MAP.get(Block.getBlockIdFromSynonym(blockStateName));
+		return BLOCK_LOOT_HASH_MAP.get(Blocks.getBlockIdFromSynonym(blockStateName));
 
 	}
 

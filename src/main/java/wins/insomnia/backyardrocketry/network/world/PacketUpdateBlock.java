@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.network.world;
 
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.network.Packet;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
@@ -48,24 +49,30 @@ public class PacketUpdateBlock extends Packet {
 
 		if (senderType != SenderType.SERVER) return;
 
-		ClientWorld clientWorld = ClientWorld.getClientWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (clientWorld == null) return;
+			ClientWorld clientWorld = ClientWorld.getClientWorld();
 
-		Chunk chunk = clientWorld.getChunkContainingBlock(worldX, worldY, worldZ);
+			if (clientWorld == null) return;
 
-		if (!(chunk instanceof ClientChunk clientChunk)) return;
+			Chunk chunk = clientWorld.getChunkContainingBlock(worldX, worldY, worldZ);
+
+			if (!(chunk instanceof ClientChunk clientChunk)) return;
 
 
-		clientChunk.setBlock(
-				chunk.toLocalX(worldX),
-				chunk.toLocalY(worldY),
-				chunk.toLocalZ(worldZ),
-				block,
-				blockState,
-				true,
-				true
-		);
+			clientChunk.setBlock(
+					chunk.toLocalX(worldX),
+					chunk.toLocalY(worldY),
+					chunk.toLocalZ(worldZ),
+					block,
+					blockState,
+					true,
+					true
+			);
+
+		});
+
+
 
 
 	}

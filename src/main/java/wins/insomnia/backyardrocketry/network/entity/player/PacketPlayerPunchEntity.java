@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.network.entity.player;
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.network.Packet;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
 
 import java.util.UUID;
@@ -21,15 +22,19 @@ public class PacketPlayerPunchEntity extends Packet {
 
 		if (senderType != SenderType.CLIENT) return;
 
-		ServerWorld serverWorld = ServerWorld.getServerWorld();
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		if (serverWorld == null) return;
+			ServerWorld serverWorld = ServerWorld.getServerWorld();
 
-		Entity entity = serverWorld.getEntity(UUID.fromString(uuid));
+			if (serverWorld == null) return;
 
-		if (entity == null) return;
+			Entity entity = serverWorld.getEntity(UUID.fromString(uuid));
 
-		serverWorld.removeEntity(entity, true);
+			if (entity == null) return;
+
+			serverWorld.removeEntity(entity, true);
+
+		});
 
 	}
 }

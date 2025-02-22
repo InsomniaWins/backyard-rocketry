@@ -57,21 +57,28 @@ public class PacketPlayerBreakBlock extends Packet {
 			return;
 		}
 
-		ServerWorld serverWorld = ServerWorld.getServerWorld();
 
-		if (serverWorld == null) return;
+		Updater.get().queueMainThreadInstruction(() -> {
 
-		Chunk chunk = serverWorld.getChunkContainingBlock(worldX, worldY, worldZ);
+			ServerWorld serverWorld = ServerWorld.getServerWorld();
 
-		if (chunk == null) return;
+			if (serverWorld == null) return;
 
-		if (!(chunk instanceof ServerChunk serverChunk)) return;
+			Chunk chunk = serverWorld.getChunkContainingBlock(worldX, worldY, worldZ);
 
-		int localX = serverChunk.toLocalX(worldX);
-		int localY = serverChunk.toLocalY(worldY);
-		int localZ = serverChunk.toLocalZ(worldZ);
+			if (chunk == null) return;
 
-		serverChunk.breakBlock(localX, localY, localZ, true);
+			if (!(chunk instanceof ServerChunk serverChunk)) return;
+
+			int localX = serverChunk.toLocalX(worldX);
+			int localY = serverChunk.toLocalY(worldY);
+			int localZ = serverChunk.toLocalZ(worldZ);
+
+			serverChunk.breakBlock(localX, localY, localZ, true);
+
+		});
+
+
 
 	}
 }

@@ -10,7 +10,7 @@ import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.scene.Scene;
 import wins.insomnia.backyardrocketry.scene.SceneManager;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
@@ -24,7 +24,7 @@ public class TitleScene extends Scene {
 	private final int TITLE_Y = 10;
 	private final int CHANGE_BLOCK_TIMER_WAIT_TIME = Updater.FIXED_UPDATES_PER_SECOND;
 	private int changeBlockTimer = CHANGE_BLOCK_TIMER_WAIT_TIME;
-	private byte block = Block.COBBLESTONE;
+	private byte block = Blocks.COBBLESTONE;
 
 	public TitleScene() {
 
@@ -106,10 +106,10 @@ public class TitleScene extends Scene {
 	private void changeBlock() {
 
 		byte previousBlock = block;
-		block = Block.getRandomBlock();
+		block = Blocks.getRandomBlock();
 
 		while (block == previousBlock || BlockModelData.getMeshFromBlock(block) == null) {
-			block = Block.getRandomBlock();
+			block = Blocks.getRandomBlock();
 		}
 
 	}

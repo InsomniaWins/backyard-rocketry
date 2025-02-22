@@ -9,7 +9,7 @@ import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
-import wins.insomnia.backyardrocketry.world.block.Block;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 
 import java.util.ConcurrentModificationException;
@@ -70,9 +70,9 @@ public class ClientChunk extends Chunk {
 
 	public void breakBlock(int x, int y, int z, boolean regenerateMesh) {
 		byte blockBroken = getBlock(x, y, z);
-		setBlock(x, y, z, Block.AIR, (byte) 0, regenerateMesh, true);
+		setBlock(x, y, z, Blocks.AIR, (byte) 0, regenerateMesh, true);
 
-		BlockAudio blockAudio = Block.getBlockAudio(blockBroken);
+		BlockAudio blockAudio = Blocks.getBlockAudio(blockBroken);
 		if (blockAudio != null) {
 			AudioPlayer audioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getBreakAudio(), false, false, true);
 			audioPlayer.setPosition(toGlobalX(x) + 0.5f, toGlobalY(y) + 0.5f, toGlobalZ(z) + 0.5f);
@@ -84,7 +84,7 @@ public class ClientChunk extends Chunk {
 	public void placeBlock(int x, int y, int z, byte block, byte blockState) {
 		setBlock(x, y, z, block, blockState, true, true);
 
-		BlockAudio blockAudio = Block.getBlockAudio(block);
+		BlockAudio blockAudio = Blocks.getBlockAudio(block);
 		if (blockAudio != null) {
 			AudioPlayer audioPlayer = AudioManager.get().playAudioSpatial(blockAudio.getPlaceAudio(), false, false, true);
 			audioPlayer.setPosition(toGlobalX(x) + 0.5f, toGlobalY(y) + 0.5f, toGlobalZ(z) + 0.5f);
