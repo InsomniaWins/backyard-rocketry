@@ -188,6 +188,45 @@ public class WorldGeneration {
     private static void decorateChunk(ServerChunk chunk, ChunkData chunkData) {
 
 
+        ServerWorld serverWorld = ServerWorld.getServerWorld();
+
+        for (int x = 0; x < Chunk.SIZE_X; x++) {
+
+            int blockX = chunk.getX() + x;
+
+            for (int y = 0; y < Chunk.SIZE_Y; y++) {
+
+                int blockY = chunk.getY() + y;
+
+                for (int z = 0; z < Chunk.SIZE_Z; z++) {
+
+                    int blockZ = chunk.getZ() + z;
+
+                    int groundHeight = WorldGeneration.getGroundHeight(chunkData.getSeed(), blockX, blockZ);
+
+
+                    if (blockY == groundHeight + 1 && serverWorld.getBlock(blockX, blockY, blockZ) == Blocks.AIR && World.RANDOM.nextInt(0, 140) == 0) {
+
+                        //System.err.println("Placed tree at: " + blockX + ", " + blockY + ", " + blockZ);
+
+                        StructureManager.placeDecoration(
+                                StructureManager.DECO_PINE_TREE,
+                                blockX,
+                                blockY,
+                                blockZ,
+                                true
+                        );
+
+                    }
+
+
+
+                }
+            }
+        }
+
+
+
 
     }
 

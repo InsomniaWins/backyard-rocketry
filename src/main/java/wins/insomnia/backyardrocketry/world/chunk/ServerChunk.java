@@ -19,6 +19,9 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class ServerChunk extends Chunk {
 
@@ -28,6 +31,7 @@ public class ServerChunk extends Chunk {
 		DECORATION
 
 	}
+	private final Queue<SetBlockQueueElement> SET_BLOCK_QUEUE = new LinkedList<>();
 	public static final GenerationPass[] GENERATION_PASS_VALUES = GenerationPass.values();
 	private boolean finishedGenerationPass = false;
 	private boolean startedGenerationPass = false;
@@ -119,6 +123,25 @@ public class ServerChunk extends Chunk {
 
 		}
 
+
+		Iterator<SetBlockQueueElement> iterator = SET_BLOCK_QUEUE.iterator();
+		while (iterator.hasNext()) {
+			SetBlockQueueElement element = iterator.next();
+			iterator.remove();
+
+			setBlock(
+					element.localX,
+					element.localY,
+					element.localZ,
+					element.block,
+					element.blockState,
+					element.updateClients
+			);
+		}
+
+
+
+
 	}
 
 	public GenerationPass getDesiredGenerationPass() {
@@ -149,7 +172,30 @@ public class ServerChunk extends Chunk {
 	}
 
 
+
 	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean updateClients) {
+
+		if (Thread.currentThread() != Main.MAIN_THREAD) {
+			Updater.get().queueMainThreadInstruction(() -> {
+				setBlock(x, y, z, block, blockState, updateClients);
+			});
+			return;
+		}
+
+
+		if (!hasFinishedPass(GenerationPass.TERRAIN)) {
+
+			SET_BLOCK_QUEUE.add(new SetBlockQueueElement(
+					x, y, z,
+					block,
+					blockState,
+					updateClients
+			));
+
+			return;
+		}
+
+
 		super.setBlock(x, y, z, block, blockState);
 
 		if (updateClients) {
@@ -248,5 +294,13 @@ public class ServerChunk extends Chunk {
 		);
 
 	}
+
+
+	public record SetBlockQueueElement(
+		int localX, int localY, int localZ,
+		byte block,
+		byte blockState,
+		boolean updateClients
+	) {}
 
 }

@@ -8,6 +8,8 @@ import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
+import java.util.Arrays;
+
 public class ChunkData {
 
 	private final long SEED;

@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.entity.player;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
@@ -17,15 +18,12 @@ import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.world.StructureManager;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
-import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
-import wins.insomnia.backyardrocketry.world.block.blockstate.property.PropertyFaceDirection;
-import wins.insomnia.backyardrocketry.world.block.blockstate.types.BlockStateLog;
-import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 
 import java.util.ArrayList;
 
@@ -42,6 +40,8 @@ public class EntityClientPlayer extends EntityPlayer {
 	private boolean lockMouseToCenterForCameraRotation = false;
 	private int currentHotbarSlot = 0;
 	private BoundingBoxRaycastResult targetEntity = null;
+
+
 
 	public EntityClientPlayer(ClientWorld world, java.util.UUID uuid) {
 		super(world, uuid);
@@ -174,12 +174,16 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		moveAmount.y = (upDirection - downDirection);
 
-		if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
-			moveSpeed = CROUCH_SPEED;
-		} else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
-			moveSpeed = SPRINT_SPEED;
+		if (isFlying()) {
+			moveSpeed = FLY_SPEED;
 		} else {
-			moveSpeed = WALK_SPEED;
+			if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
+				moveSpeed = CROUCH_SPEED;
+			} else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
+				moveSpeed = SPRINT_SPEED;
+			} else {
+				moveSpeed = WALK_SPEED;
+			}
 		}
 
 		moveAmount.mul(moveSpeed);
@@ -189,11 +193,17 @@ public class EntityClientPlayer extends EntityPlayer {
 		getVelocity().z = Math.lerp(getVelocity().z, moveAmount.z, 0.5f);
 
 
-		if (!hasEntityComponent(ComponentGravity.class)) {
-			float verticalMoveAmount = upDirection - downDirection;
-			getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+		if (isFlying()) {
+
+			getVelocity().y = Math.lerp(getVelocity().y, moveAmount.y, 0.5f);
+
 		} else {
-			GRAVITY_COMPONENT.fixedUpdate();
+			if (!hasEntityComponent(ComponentGravity.class)) {
+				float verticalMoveAmount = upDirection - downDirection;
+				getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+			} else {
+				GRAVITY_COMPONENT.fixedUpdate();
+			}
 		}
 
 		if (KeyboardInput.get().isKeyPressed(GLFW_KEY_SPACE)) {
@@ -276,6 +286,17 @@ public class EntityClientPlayer extends EntityPlayer {
 			handleBlockInteractions();
 		}
 		hotbarManagement();
+
+
+		if (keyboardInput.isKeyJustPressed(GLFW_KEY_ENTER)) {
+
+
+			Vector3i blockPos = getBlockPosition();
+			StructureManager.placeDecoration(StructureManager.DECO_PINE_TREE, blockPos.x, blockPos.y, blockPos.z);
+
+		}
+
+
 	}
 
 	private void handleEntityInteractions() {

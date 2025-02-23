@@ -1,20 +1,15 @@
 package wins.insomnia.backyardrocketry.entity.item;
 
 import org.joml.Math;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.render.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.render.gui.DroppedItemIcon;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.World;
-
-import java.util.UUID;
 
 public class EntityClientItem extends EntityItem implements IRenderable {
 

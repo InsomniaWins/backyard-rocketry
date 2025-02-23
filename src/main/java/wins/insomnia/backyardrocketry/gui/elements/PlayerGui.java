@@ -20,6 +20,7 @@ import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -170,9 +171,6 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			);
 
 			 */
-
-
-
 		}
 
 

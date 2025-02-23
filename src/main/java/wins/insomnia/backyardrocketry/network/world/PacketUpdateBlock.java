@@ -24,7 +24,7 @@ public class PacketUpdateBlock extends Packet {
 	}
 
 	public PacketUpdateBlock setBlockState(byte blockState) {
-		this.blockState = block;
+		this.blockState = blockState;
 		return this;
 	}
 

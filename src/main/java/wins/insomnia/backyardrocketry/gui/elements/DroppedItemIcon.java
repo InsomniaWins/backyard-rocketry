@@ -1,4 +1,4 @@
-package wins.insomnia.backyardrocketry.render.gui;
+package wins.insomnia.backyardrocketry.gui.elements;
 
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -7,6 +7,7 @@ import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;

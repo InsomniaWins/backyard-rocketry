@@ -32,12 +32,13 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	protected final int MOVEMENT_INPUT_CROUCH = 5;
 	protected final int MOVEMENT_INPUT_SPRINT = 6;
 
-	private final float REACH_DISTANCE = 4f;
+	private final float REACH_DISTANCE = 8f;
 
 	// movement speeds (meters per tick)
 	public final float CROUCH_SPEED = 1f / Updater.getFixedUpdatesPerSecond();
 	public final float WALK_SPEED = 3f / Updater.getFixedUpdatesPerSecond();
 	public final float SPRINT_SPEED = 6f / Updater.getFixedUpdatesPerSecond();
+	public final float FLY_SPEED = WALK_SPEED * 2.5f;
 	public final float JUMP_SPEED = 0.5f;
 	protected float moveSpeed;
 	protected boolean onGround = false;
@@ -69,6 +70,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	private int blockInteractionTimer = 0;
 	private int breakProgress = 0;
 	private boolean hasCollision = true;
+	private boolean flying = false;
 	private final PlayerInventoryManager INVENTORY_MANAGER = new PlayerInventoryManager(this);
 
 	public EntityPlayer(World world, java.util.UUID uuid) {
@@ -90,6 +92,10 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 		addEntityComponent(GRAVITY_COMPONENT);
 		FOOTSTEP_AUDIO = new ComponentFootstepAudio(this);
 		addEntityComponent(FOOTSTEP_AUDIO);
+	}
+
+	public void setFlying(boolean value) {
+		flying = value;
 	}
 
 	public float getReachDistance() {
@@ -136,6 +142,10 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 
 	public double getPosZ() {
 		return getTransform().getPosition().z;
+	}
+
+	public boolean isFlying() {
+		return flying;
 	}
 
 	public void move() {

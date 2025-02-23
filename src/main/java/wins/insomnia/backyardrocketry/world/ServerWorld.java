@@ -76,6 +76,32 @@ public class ServerWorld extends World {
 	}
 
 
+	@Override
+	public void setBlock(int x, int y, int z, byte block, byte blockState) {
+
+		if (Thread.currentThread() != Main.MAIN_THREAD) {
+
+			//logInfo("Tried setting block in thread other than main thread! Queuing block placement instead.");
+
+			Updater.get().queueMainThreadInstruction(() -> {
+				setBlock(x, y, z, block, blockState);
+			});
+			return;
+		}
+
+
+		Chunk chunk = getChunkContainingBlock(x, y, z);
+
+		if (chunk == null) {
+			// TODO: implement queue
+			System.err.println("Failed to place block in unloaded chunk!");
+			return;
+		}
+
+		chunk.setBlock(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z), block, blockState);
+
+	}
+
 
 
 	// DO NOT CALL DIRECTLY

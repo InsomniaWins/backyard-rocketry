@@ -172,17 +172,24 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         return Chunk.SIZE_Z * CHUNK_AMOUNT_Z;
     }
 
-    public int getBlockState(int x, int y, int z) {
+    public byte getBlockState(int x, int y, int z) {
 
         Chunk chunk = getChunkContainingBlock(x, y, z);
 
         if (chunk == null) {
-            return BitHelper.getBlockStateWithoutPropertiesFromBlockId(Blocks.NULL);
+            return 0;
         }
 
         return chunk.getBlockState(x, y, z);
     }
 
+
+    public void setBlock(int x, int y, int z, byte block, byte blockState) {
+
+        Chunk chunk = getChunkContainingBlock(x, y, z);
+        chunk.setBlock(chunk.toLocalX(x), chunk.toLocalY(y), chunk.toLocalZ(z), block, blockState);
+
+    }
 
 
     public static ServerWorld getServerWorld() {

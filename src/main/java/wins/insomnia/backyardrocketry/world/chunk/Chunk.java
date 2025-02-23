@@ -197,12 +197,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
 
-    public int getBlockState(int x, int y, int z) {
+    public byte getBlockState(int x, int y, int z) {
 
         if (!isBlockInBounds(x, y, z)) {
             return WORLD.getBlockState(x, y, z);
         }
-        return chunkData.getBlock(toLocalX(x), toLocalY(y), toLocalZ(z));
+
+        return chunkData.getBlockState(toLocalX(x), toLocalY(y), toLocalZ(z));
     }
 
     public int getBlockStateLocal(int x, int y, int z) {

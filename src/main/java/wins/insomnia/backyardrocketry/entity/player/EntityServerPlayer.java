@@ -79,12 +79,16 @@ public class EntityServerPlayer extends EntityPlayer {
 
         moveAmount.y = (upDirection - downDirection);
 
-        if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
-            moveSpeed = CROUCH_SPEED;
-        } else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
-            moveSpeed = SPRINT_SPEED;
+        if (isFlying()) {
+            moveSpeed = FLY_SPEED;
         } else {
-            moveSpeed = WALK_SPEED;
+            if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
+                moveSpeed = CROUCH_SPEED;
+            } else if (movementInputs[MOVEMENT_INPUT_SPRINT]) {
+                moveSpeed = SPRINT_SPEED;
+            } else {
+                moveSpeed = WALK_SPEED;
+            }
         }
 
         moveAmount.mul(moveSpeed);
@@ -94,14 +98,20 @@ public class EntityServerPlayer extends EntityPlayer {
         getVelocity().z = Math.lerp(getVelocity().z, moveAmount.z, 0.5f);
 
 
-        if (!hasEntityComponent(ComponentGravity.class)) {
-            float verticalMoveAmount = upDirection - downDirection;
-            getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+        if (isFlying()) {
+
+            getVelocity().y = Math.lerp(getVelocity().y, moveAmount.y, 0.5f);
+
         } else {
-            GRAVITY_COMPONENT.fixedUpdate();
+            if (!hasEntityComponent(ComponentGravity.class)) {
+                float verticalMoveAmount = upDirection - downDirection;
+                getVelocity().y = Math.lerp(getVelocity().y, verticalMoveAmount * moveSpeed, 0.6f);
+            } else {
+                GRAVITY_COMPONENT.fixedUpdate();
+            }
         }
 
-        if (jumping) {
+        if (!isFlying() && jumping) {
             if (isOnGround()) {
                 getVelocity().y = JUMP_SPEED;
                 FOOTSTEP_AUDIO.playAudio();
