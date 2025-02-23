@@ -9,10 +9,7 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +21,7 @@ public class StructureManager {
 
 	private static final HashMap<Integer, Decoration> DECORATION_MAP = new HashMap<>();
 
-	public static final int DECO_PINE_TREE = registerDecoration("pine_tree");
+	public static final int DECO_PINE_TREE = registerDecoration("foliage/pine_tree");
 
 	private static int nextAvailableDecorationId = 0;
 
@@ -40,37 +37,40 @@ public class StructureManager {
 		int originY;
 		int originZ;
 
-		Path path = Paths.get(FileIO.getRootPath() + FILE_SEPARATOR + name + ".deco");
+
+		InputStream inputStream = null;
+
 		try {
-			FileInputStream fis = new FileInputStream(new File(path.toUri()));
+
+			inputStream = StructureManager.class.getResourceAsStream("/decoration/" + name + ".deco");
 
 			byte[] buffer = new byte[Ints.BYTES];
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int x1 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int y1 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int z1 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int x2 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int y2 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			int z2 = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			originX = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			originY = Ints.fromByteArray(buffer);
 
-			fis.read(buffer);
+			inputStream.read(buffer);
 			originZ = Ints.fromByteArray(buffer);
 
 			sizeX = x2 - x1 + 1;
@@ -84,7 +84,7 @@ public class StructureManager {
 					for (int z = z1, zi = 0;     z < z2 + 1;     z++, zi++) {
 
 						byte[] block = new byte[2];
-						fis.read(block);
+						inputStream.read(block);
 
 						blocks[xi][yi][zi] = Shorts.fromByteArray(block);
 
@@ -92,7 +92,7 @@ public class StructureManager {
 				}
 			}
 
-			fis.close();
+			inputStream.close();
 
 
 		} catch (IOException e) {
