@@ -40,7 +40,10 @@ public class ServerController extends GameController {
 				ServerWorld serverWorld = serverController.world;
 
 				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld, UUID.randomUUID());
-				serverPlayer.getTransform().setPosition(new Vector3d(100, 100, 100));
+
+				double[] worldCenter = serverWorld.getCenterXZ();
+
+				serverPlayer.getTransform().setPosition(new Vector3d(worldCenter[0], 100, worldCenter[1]));
 
 				serverWorld.setServerPlayer(connection.getID(), serverPlayer);
 

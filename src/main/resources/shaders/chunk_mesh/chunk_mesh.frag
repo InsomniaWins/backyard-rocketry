@@ -68,7 +68,7 @@ void main() {
         // fog calculations
         float fogCoordinate = abs(fs_eyeSpacePosition.z / fs_eyeSpacePosition.w);
 
-        float linearEnd = 200.0;
+        float linearEnd = 170.0;
         float linearStart = 0.0;
         float fogLength = linearEnd - linearStart;
         float fogFactor = (linearEnd - fogCoordinate) / fogLength;

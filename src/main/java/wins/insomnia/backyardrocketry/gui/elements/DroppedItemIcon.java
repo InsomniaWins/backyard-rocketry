@@ -4,7 +4,6 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.entity.item.EntityItem;
-import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;

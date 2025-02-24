@@ -148,7 +148,7 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
 
     }
 
-    public double[] getCenterXZ() {
+    public static double[] getCenterXZ() {
 
         return new double[]{
                 getSizeX() * 0.5,
@@ -161,15 +161,15 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
         return seed;
     }
 
-    public int getSizeX() {
+    public static int getSizeX() {
         return Chunk.SIZE_X * CHUNK_AMOUNT_X;
     }
 
-    public int getSizeY() {
+    public static int getSizeY() {
         return Chunk.SIZE_Y * CHUNK_AMOUNT_Y;
     }
 
-    public int getSizeZ() {
+    public static int getSizeZ() {
         return Chunk.SIZE_Z * CHUNK_AMOUNT_Z;
     }
 

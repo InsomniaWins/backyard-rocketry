@@ -121,8 +121,12 @@ public class WorldGeneration {
         final Color LAND_COLOR = new Color(90, 197, 79);
         final Color WATER_COLOR = new Color(0, 152, 220);
 
-        for (int blockZ = 0; blockZ < SEED_WIDTH; blockZ++) {
-            for (int blockX = 0; blockX < SEED_HEIGHT; blockX++) {
+        for (int iz = 0; iz < SEED_WIDTH; iz++) {
+            for (int ix = 0; ix < SEED_HEIGHT; ix++) {
+
+                double[] center = World.getCenterXZ();
+                int blockX = (int) center[0] - (SEED_WIDTH / 2) + ix;
+                int blockZ = (int) center[1] - (SEED_HEIGHT / 2) + iz;
 
                 int groundHeight = WorldGeneration.getGroundHeight(seed, blockX, blockZ);
 
@@ -141,6 +145,7 @@ public class WorldGeneration {
                     color.setRGB(rgb);
 
                 }
+
 
                 textureData.put(color.getRByte());
                 textureData.put(color.getGByte());

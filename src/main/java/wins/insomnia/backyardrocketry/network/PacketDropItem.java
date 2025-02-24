@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.item.EntityClientItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.item.Items;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 
@@ -40,7 +41,7 @@ public class PacketDropItem extends Packet {
 			ClientWorld world = ClientWorld.getClientWorld();
 			if (world == null) return;
 
-			ItemStack itemStack = new ItemStack(Item.getItem(itemId), itemVolume);
+			ItemStack itemStack = new ItemStack(Items.getItem(itemId), itemVolume);
 
 			EntityClientItem entity = new EntityClientItem(
 					itemStack,

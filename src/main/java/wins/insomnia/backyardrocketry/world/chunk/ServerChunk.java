@@ -5,6 +5,7 @@ import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.item.Items;
 import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerBreakBlock;
 import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerPlaceBlock;
 import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
@@ -328,7 +329,7 @@ public class ServerChunk extends Chunk {
 				String itemSynonym = (String) lootEntry.get(0);
 				int volume = (Integer) lootEntry.get(1);
 
-				Item item = Item.getItem(itemSynonym);
+				Item item = Items.getItem(itemSynonym);
 				ItemStack itemStack = new ItemStack(item, volume);
 
 				ServerWorld serverWorld = ServerWorld.getServerWorld();

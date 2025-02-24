@@ -28,13 +28,6 @@ public class ServerWorld extends World {
 		SERVER_PLAYER_HASH_MAP = new HashMap<>();
 	}
 
-	private List<EntityServerPlayer> getPlayersNearChunk(Chunk chunk) {
-		List<EntityServerPlayer> returnList = new ArrayList<>();
-
-
-
-		return returnList;
-	}
 
 	public void removeEntity(Entity entity, boolean notifyClients) {
 

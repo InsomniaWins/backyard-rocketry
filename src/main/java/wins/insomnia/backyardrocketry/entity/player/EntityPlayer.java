@@ -32,7 +32,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	protected final int MOVEMENT_INPUT_CROUCH = 5;
 	protected final int MOVEMENT_INPUT_SPRINT = 6;
 
-	private final float REACH_DISTANCE = 8f;
+	private final float REACH_DISTANCE = 4f;
 
 	// movement speeds (meters per tick)
 	public final float CROUCH_SPEED = 1f / Updater.getFixedUpdatesPerSecond();
@@ -64,7 +64,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 			Blocks.WOODEN_PLANKS,
 			Blocks.GLASS,
 			Blocks.BRICKS,
-			Blocks.WOOD
+			Blocks.LIMESTONE
 	};
 	private int currentHotbarSlot = 0;
 	private int blockInteractionTimer = 0;

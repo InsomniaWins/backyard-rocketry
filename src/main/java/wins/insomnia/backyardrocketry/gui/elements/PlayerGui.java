@@ -10,6 +10,7 @@ import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.item.Items;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
@@ -20,11 +21,7 @@ import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
-import wins.insomnia.backyardrocketry.world.ServerWorld;
-import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
-import wins.insomnia.backyardrocketry.world.chunk.Chunk;
-import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -142,7 +139,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			float blockMeshScale = hotbarItemScales[i];
 
 			renderItemIcon(
-					Item.getBlockItem(player.getHotbarSlotContents(i)),
+					Items.getBlockItem(player.getHotbarSlotContents(i)),
 					guiX, guiY,
 					blockMeshScale
 			);
@@ -300,7 +297,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		int wailaPosY = 0;
 
 		renderItemIcon(
-				Item.getBlockItem(targetBlockId),
+				Items.getBlockItem(targetBlockId),
 				wailaPosX + (int) (wailaHeight / 2f),
 				(int) (wailaHeight / 2f)
 		);
