@@ -20,8 +20,11 @@ import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ServerWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -204,6 +207,38 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 
 
+		/* OLD CODE TO RENDER CHUNKS WHICH HAVE NOT FINISHED DECORATING FOR DEBUGGING
+
+		Mesh mesh = BlockModelData.getMeshFromBlock(Blocks.COBBLESTONE);
+
+		for (Chunk chunk : ServerWorld.getServerWorld().getChunks()) {
+
+			if (((ServerChunk) chunk).hasFinishedPass(ServerChunk.GenerationPass.DECORATION)) continue;
+
+			Matrix4f modelMatrix = renderer.getModelMatrix();
+			modelMatrix.identity()
+					.translate(
+							chunk.getX(),
+							chunk.getY(),
+							chunk.getZ()
+					)
+					.scale(
+							20,
+							20,
+							20
+					);
+
+			renderer.getShaderProgram().setUniform("vs_modelMatrix", modelMatrix);
+			mesh.render();
+
+		}
+
+
+*/
+
+
+
+
 		// draw crosshair
 		TextureRenderer.drawGuiTexture(TextureManager.getTexture("crosshair"), renderer.getCenterAnchorX() - 8, renderer.getCenterAnchorY() - 8);
 
@@ -327,6 +362,10 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 		int wailaTextPosX = 14;
 		TextRenderer.drawText(entityName, wailaTextPosX, 2);
+
+
+
+
 	}
 
 

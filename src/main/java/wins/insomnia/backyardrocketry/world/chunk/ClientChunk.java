@@ -133,6 +133,10 @@ public class ClientChunk extends Chunk {
 		updateNeighborChunkMeshesIfBlockIsOnBorder(x, y, z, false);
 	}
 
+	public ChunkData getChunkData() {
+		return chunkData;
+	}
+
 	private void generateMesh(boolean isDelayed) {
 
 		SHOULD_REGENERATE_MESH.set(false);

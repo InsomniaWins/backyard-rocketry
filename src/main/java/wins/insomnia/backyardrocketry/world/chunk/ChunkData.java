@@ -6,9 +6,6 @@ import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
-import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
-
-import java.util.Arrays;
 
 public class ChunkData {
 
@@ -18,6 +15,7 @@ public class ChunkData {
 	private final int Z;
 	private byte[][][] blocks;
 	private byte[][][] blockStates;
+	private Thread ownerThread = null;
 
 
 	public ChunkData(long seed, int x, int y, int z, boolean shouldGenerate, boolean areWorldCoordinates) {
@@ -42,6 +40,17 @@ public class ChunkData {
 
 	}
 
+	public void replace(ChunkData newChunkData) {
+
+		while (!grabThreadOwnership());
+
+		blocks = newChunkData.blocks;
+		blockStates = newChunkData.blockStates;
+
+		while (!loseThreadOwnership());
+
+	}
+
 	private ChunkData(long seed, int chunkX, int chunkY, int chunkZ, boolean shouldGenerate) {
 
 		this(seed, chunkX, chunkY, chunkZ, shouldGenerate, false);
@@ -51,6 +60,26 @@ public class ChunkData {
 	public ChunkData(long seed, int chunkX, int chunkY, int chunkZ) {
 		this(seed, chunkX, chunkY, chunkZ, true);
 	}
+
+	public boolean loseThreadOwnership() {
+		if (ownerThread != Thread.currentThread()) return false;
+
+		ownerThread = null;
+		return true;
+	}
+
+	public synchronized boolean grabThreadOwnership() {
+		if (ownerThread != null) return false;
+
+		ownerThread = Thread.currentThread();
+		return true;
+	}
+
+
+
+
+
+
 
 	public ChunkPosition getChunkPosition(World world) {
 
@@ -81,10 +110,13 @@ public class ChunkData {
 
 	}
 
+
+	// make sure you have thread ownership
 	public void setBlock(int x, int y, int z, byte block) {
 		blocks[x][y][z] = block;
 	}
 
+	// make sure you have thread ownership
 	public void setBlockState(int x, int y, int z, byte blockState) {
 		blockStates[x][y][z] = blockState;
 	}

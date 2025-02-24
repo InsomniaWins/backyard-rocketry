@@ -93,6 +93,65 @@ public class Collision {
         return chunks;
     }
 
+
+    public static List<ChunkPosition> getChunkPositionsTouchingBoundingBox(World world, BoundingBox boundingBox) {
+
+        List<ChunkPosition> chunks = new ArrayList<>();
+
+
+        // get min chunk position, and get range for chunk loops
+
+        ChunkPosition currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
+                (int) boundingBox.getMax().x,
+                (int) boundingBox.getMax().y,
+                (int) boundingBox.getMax().z
+        );
+
+        int xRange = currentChunkPosition.getX();
+        int yRange = currentChunkPosition.getY();
+        int zRange = currentChunkPosition.getZ();
+
+        currentChunkPosition = world.getChunkPositionFromBlockPositionClamped(
+                (int) boundingBox.getMin().x,
+                (int) boundingBox.getMin().y,
+                (int) boundingBox.getMin().z
+        );
+
+        int minChunkX = currentChunkPosition.getX();
+        int minChunkY = currentChunkPosition.getY();
+        int minChunkZ = currentChunkPosition.getZ();
+
+        xRange -= currentChunkPosition.getX();
+        yRange -= currentChunkPosition.getY();
+        zRange -= currentChunkPosition.getZ();
+
+
+        // loop through chunks to find loaded chunks colliding
+        for (int x = 0; x <= xRange; x++) {
+            for (int y = 0; y <= yRange; y++) {
+                for (int z = 0; z <= zRange; z++) {
+
+                    currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
+
+                    if (!world.isChunkPositionInWorldBorder(currentChunkPosition)) {
+
+                        continue;
+                    }
+
+
+
+                    chunks.add(currentChunkPosition);
+
+                }
+            }
+        }
+
+
+        return chunks;
+    }
+
+
+
     public static List<Chunk> getChunksTouchingBoundingBox(World world, BoundingBox boundingBox) {
         return getChunksTouchingBoundingBox(world, boundingBox, false);
     }

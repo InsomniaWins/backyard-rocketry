@@ -15,6 +15,7 @@ import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.util.*;
 import java.util.Random;
@@ -30,7 +31,7 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(500);
     public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(30);
     public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(500);
-    public static int chunkLoadDistance = 8; // chunk loading RADIUS
+    public static int chunkLoadDistance = 7; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
     protected final HashMap<ChunkPosition, Chunk> CHUNKS;
@@ -306,31 +307,49 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
      */
     public void queueChunkForLoading(ChunkPosition chunkPosition) {
 
+        queueChunkForLoading(chunkPosition, ServerChunk.GenerationPass.DECORATION);
+
+    }
+
+    public void queueChunkForLoading(ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
+
         if (Thread.currentThread() != Main.MAIN_THREAD) {
-            Updater.get().queueMainThreadInstruction(() -> _queueChunkForLoading(chunkPosition));
+            Updater.get().queueMainThreadInstruction(() -> _queueChunkForLoading(chunkPosition, pass));
         } else {
-            _queueChunkForLoading(chunkPosition);
+            _queueChunkForLoading(chunkPosition, pass);
         }
 
     }
 
     // MUST RUN IN MAIN THREAD
-    private void _queueChunkForLoading(ChunkPosition chunkPosition) {
+    private void _queueChunkForLoading(ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
 
         // check already loaded
-        if (getChunkAt(chunkPosition) != null) {
-            return;
-        }
+        if (getChunk(chunkPosition) != null) {
 
-        // check already queued
-        for (ChunkManagementData chunkManagementData : CHUNK_MANAGEMENT_QUEUE) {
-            if (chunkManagementData.managementType == ChunkManagementType.LOAD &&
-                    chunkManagementData.chunkPosition.equals(chunkPosition)) {
+            if (this instanceof ServerWorld serverWorld) {
+
+                ServerChunk serverChunk = (ServerChunk) getChunk(chunkPosition);
+                if (serverChunk.hasFinishedPass(pass)) return;
+
+                serverChunk.setDesiredGenerationPass(pass);
+
+            } else {
                 return;
             }
         }
 
-        CHUNK_MANAGEMENT_QUEUE.offer(new ChunkManagementData(ChunkManagementType.LOAD, chunkPosition));
+        // check already queued
+        for (ChunkManagementData chunkManagementData : CHUNK_MANAGEMENT_QUEUE) {
+            if (chunkManagementData.type == ChunkManagementType.LOAD &&
+                    chunkManagementData.chunkPosition.equals(chunkPosition) &&
+                    chunkManagementData.pass == pass
+            ) {
+                return;
+            }
+        }
+
+        CHUNK_MANAGEMENT_QUEUE.offer(new ChunkManagementData(ChunkManagementType.LOAD, chunkPosition, pass));
     }
 
 
@@ -389,12 +408,12 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
      *
      * @param chunkPosition
      */
-    protected void loadChunk(ChunkPosition chunkPosition) {
+    protected void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
     }
 
 	public boolean isChunkLoaded(ChunkPosition chunkPosition) {
-		return CHUNKS.get(chunkPosition) != null;
-	}
+        return CHUNKS.get(chunkPosition) != null;
+    }
 
 	public Chunk getChunk(ChunkPosition chunkPosition) {
 		return CHUNKS.get(chunkPosition);
@@ -439,19 +458,19 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
 
             if (chunkManagementData == null) continue;
 
-            switch (chunkManagementData.managementType()) {
+            switch (chunkManagementData.type) {
                 case LOAD -> {
 
-                    if (!CHUNKS_CURRENTLY_LOADING.contains(chunkManagementData.chunkPosition())) {
-                        if (CHUNKS.get(chunkManagementData.chunkPosition()) == null) {
-                            CHUNKS_CURRENTLY_LOADING.add(chunkManagementData.chunkPosition());
-                            CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(() -> loadChunk(chunkManagementData.chunkPosition()));
+                    if (!CHUNKS_CURRENTLY_LOADING.contains(chunkManagementData.chunkPosition)) {
+                        if (CHUNKS.get(chunkManagementData.chunkPosition) == null) {
+                            CHUNKS_CURRENTLY_LOADING.add(chunkManagementData.chunkPosition);
+                            CHUNK_MANAGEMENT_EXECUTOR_SERVICE.submit(() -> loadChunk(chunkManagementData.chunkPosition, chunkManagementData.pass));
                         }
                     }
 
                 }
                 case UNLOAD -> {
-                    ChunkPosition chunkPosition = chunkManagementData.chunkPosition();
+                    ChunkPosition chunkPosition = chunkManagementData.chunkPosition;
 
                     // if chunk is still loading, wait for it to finish loading before unloading it
                     if (CHUNKS_CURRENTLY_LOADING.contains(chunkPosition)) {
@@ -513,7 +532,24 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     }
 
 
-    record ChunkManagementData(ChunkManagementType managementType, ChunkPosition chunkPosition) {}
+    public static class ChunkManagementData {
+        public ChunkManagementType type;
+        public ChunkPosition chunkPosition;
+        public ServerChunk.GenerationPass pass;
+
+        public ChunkManagementData(ChunkManagementType type, ChunkPosition chunkPosition) {
+            this(type, chunkPosition, ServerChunk.GenerationPass.DECORATION);
+        }
+
+        public ChunkManagementData(ChunkManagementType type, ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
+            this.type = type;
+            this.chunkPosition = chunkPosition;
+            this.pass = pass;
+        }
+    }
+
+
+
 
     public float getGravity() {
         return GRAVITY;
@@ -551,7 +587,7 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
 		// if chunk is not loaded
 		if (!isChunkLoaded(chunkPosition)) {
 			// force chunk to load on main thread (very slow, but idc rn)
-			loadChunk(chunkPosition);
+			loadChunk(chunkPosition, ServerChunk.GenerationPass.DECORATION);
 		}
 
         ENTITY_MAP.put(uuid, entity);

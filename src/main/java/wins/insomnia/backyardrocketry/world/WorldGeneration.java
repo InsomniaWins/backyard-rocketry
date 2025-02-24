@@ -1,6 +1,5 @@
 package wins.insomnia.backyardrocketry.world;
 
-import org.joml.Math;
 import org.joml.Vector3f;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
@@ -49,6 +48,8 @@ public class WorldGeneration {
 
 
     private static void generateLand(ChunkData chunkData) {
+
+        while (!chunkData.grabThreadOwnership());
 
         for (int y = 0; y < Chunk.SIZE_Y; y++) {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
@@ -99,6 +100,8 @@ public class WorldGeneration {
                 }
             }
         }
+
+        while (!chunkData.loseThreadOwnership());
 
     }
 
@@ -168,24 +171,31 @@ public class WorldGeneration {
 
 
     // WARNING: called on thread other than main thread
-    public static void runChunkGenerationPass(ServerChunk chunk, ChunkData chunkData, ServerChunk.GenerationPass pass) {
+    public static void runChunkGenerationPass(ServerChunk chunk, ChunkData chunkData, ServerChunk.GenerationPass pass, Runnable finishedPassRunnable) {
 
         switch (pass) {
-            case TERRAIN -> generateTerrain(chunk, chunkData);
-            case DECORATION -> decorateChunk(chunk, chunkData);
+            case TERRAIN -> generateTerrain(chunk, chunkData, finishedPassRunnable);
+            case DECORATION -> {
+                try {
+                    decorateChunk(chunk, chunkData, finishedPassRunnable);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
 
     // WARNING: called on thread other than main thread!
-    private static void generateTerrain(ServerChunk chunk, ChunkData chunkData) {
+    private static void generateTerrain(ServerChunk chunk, ChunkData chunkData, Runnable finishedPassRunnable) {
 
         generateLand(chunkData);
+        finishedPassRunnable.run();
 
     }
 
     // WARNING: called on thread other than main thread
-    private static void decorateChunk(ServerChunk chunk, ChunkData chunkData) {
+    private static void decorateChunk(ServerChunk chunk, ChunkData chunkData, Runnable finishedPassRunnable) {
 
 
         ServerWorld serverWorld = ServerWorld.getServerWorld();
@@ -209,6 +219,7 @@ public class WorldGeneration {
 
                         //System.err.println("Placed tree at: " + blockX + ", " + blockY + ", " + blockZ);
 
+
                         StructureManager.placeDecoration(
                                 StructureManager.DECO_PINE_TREE,
                                 blockX,
@@ -226,7 +237,7 @@ public class WorldGeneration {
         }
 
 
-
+        finishedPassRunnable.run();
 
     }
 

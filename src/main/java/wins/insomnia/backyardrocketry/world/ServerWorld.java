@@ -1,5 +1,6 @@
 package wins.insomnia.backyardrocketry.world;
 
+import com.esotericsoftware.kryonet.Server;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.Entity;
@@ -94,7 +95,6 @@ public class ServerWorld extends World {
 
 		if (chunk == null) {
 			// TODO: implement queue
-			System.err.println("Failed to place block in unloaded chunk!");
 			return;
 		}
 
@@ -129,6 +129,17 @@ public class ServerWorld extends World {
 
 	}
 
+	public boolean isChunkLoaded(ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
+
+		Chunk chunk = CHUNKS.get(chunkPosition);
+		if (chunk == null) return false;
+
+		ServerChunk serverChunk = (ServerChunk) chunk;
+		if (!serverChunk.hasFinishedPass(pass)) return false;
+
+		return true;
+	}
+
 
 	@Override
 	public void updateChunksAroundPlayer(IPlayer player) {
@@ -136,13 +147,12 @@ public class ServerWorld extends World {
 		List<ChunkPosition> chunkPositionsAroundPlayer = getChunkPositionsAroundPlayer(player, chunkLoadDistance);
 		for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
 
-			Chunk chunk = CHUNKS.get(chunkPosition);
 			double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
 
-			if (chunk == null) {
+			if (!isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
 
 				if (chunkDistance <= chunkLoadDistance) {
-					queueChunkForLoading(chunkPosition);
+					queueChunkForLoading(chunkPosition, ServerChunk.GenerationPass.DECORATION);
 				}
 			}
 		}
@@ -189,7 +199,8 @@ public class ServerWorld extends World {
 	}
 
 
-	protected void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
+	@Override
+	public void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
 
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
 			Updater.get().queueMainThreadInstruction(() -> _loadChunk(chunkPosition, generationPass));
@@ -199,12 +210,6 @@ public class ServerWorld extends World {
 
 	}
 
-	@Override
-	protected void loadChunk(ChunkPosition chunkPosition) {
-
-		loadChunk(chunkPosition, ServerChunk.GenerationPass.DECORATION);
-
-	}
 
 	@Override
 	protected void unloadChunk(ChunkPosition chunkPosition) {

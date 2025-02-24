@@ -57,8 +57,14 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
     public void setBlock(int x, int y, int z, byte block, byte blockState) {
+
+        while (!chunkData.grabThreadOwnership());
+
         chunkData.setBlock(x, y, z, block);
         chunkData.setBlockState(x, y, z, blockState);
+
+        while (!chunkData.loseThreadOwnership());
+
     }
 
 

@@ -18,10 +18,7 @@ import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class ServerChunk extends Chunk {
 
@@ -52,6 +49,7 @@ public class ServerChunk extends Chunk {
 
 		finishedGenerationPass = true;
 		startedGenerationPass = false;
+
 	}
 
 
@@ -73,31 +71,93 @@ public class ServerChunk extends Chunk {
 			return false;
 		}
 
+
+		// neighboring chunks not ready
+		if (pass.ordinal() > GenerationPass.TERRAIN.ordinal()) {
+			if (!areNeighboringChunksFinishedWithPass(GENERATION_PASS_VALUES[currentGenerationPass], true)) {
+				return false;
+			}
+		}
+
+
 		finishedGenerationPass = false;
 		startedGenerationPass = true;
 		currentGenerationPass = pass.ordinal();
 
 		((ServerWorld) getWorld()).submitChunkTask(() -> {
 
-			WorldGeneration.runChunkGenerationPass(this, chunkData, getCurrentGenerationPass());
+			WorldGeneration.runChunkGenerationPass(
+					this,
+					chunkData,
+					getCurrentGenerationPass(),
+					() -> Updater.get().queueMainThreadInstruction(() -> {
 
-			Updater.get().queueMainThreadInstruction(() -> {
+						finishedGenerationPass = true;
+						startedGenerationPass = false;
 
-				finishedGenerationPass = true;
-				startedGenerationPass = false;
+						if (hasFinishedPass(GenerationPass.DECORATION)) {
+							ServerController.sendReliable(createLoadPacket());
+						}
 
-				if (hasFinishedPass(GenerationPass.DECORATION)) {
+					})
+			);
 
-					ServerController.sendReliable(createLoadPacket());
-
-				}
-
-
-			});
 		});
 
 		return true;
 
+	}
+
+	// must run on main thread
+	public boolean areNeighboringChunksFinishedWithPass(GenerationPass pass, boolean loadPass) {
+
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				for (int z = 0; z < 3; z++) {
+
+					if (z == 0 && y == 0 && x == 0) {
+
+						continue;
+
+					}
+
+
+					ServerWorld serverWorld = (ServerWorld) getWorld();
+					ChunkPosition neighborPosition = new ChunkPosition(getChunkPosition().add(x, y, z));
+
+					if (!serverWorld.isChunkPositionInWorldBorder(neighborPosition)) continue;
+
+					ServerChunk chunk = (ServerChunk) serverWorld.getChunk(neighborPosition);
+
+					if (chunk == null) {
+						if (loadPass) {
+							serverWorld.queueChunkForLoading(neighborPosition, GenerationPass.TERRAIN);
+						}
+						return false;
+					}
+
+					if (!chunk.hasFinishedPass(pass)) {
+
+						if (loadPass) {
+							int desiredPass = Math.max(pass.ordinal(), chunk.desiredGenerationPass);
+							chunk.setDesiredGenerationPass(GENERATION_PASS_VALUES[desiredPass]);
+
+						}
+
+						//System.err.println("chunk " + chunk.getChunkPosition() + " not finished with " + pass + ": " + GENERATION_PASS_VALUES[chunk.currentGenerationPass]);
+						return false;
+					}
+
+				}
+			}
+		}
+
+
+		return true;
+	}
+
+	public ChunkData getChunkData() {
+		return chunkData;
 	}
 
 	public boolean hasFinishedPass(GenerationPass pass) {
@@ -123,21 +183,25 @@ public class ServerChunk extends Chunk {
 
 		}
 
+		/*
+		try {
+			Iterator<SetBlockQueueElement> iterator = SET_BLOCK_QUEUE.iterator();
+			while (iterator.hasNext()) {
+				SetBlockQueueElement element = iterator.next();
+				iterator.remove();
 
-		Iterator<SetBlockQueueElement> iterator = SET_BLOCK_QUEUE.iterator();
-		while (iterator.hasNext()) {
-			SetBlockQueueElement element = iterator.next();
-			iterator.remove();
-
-			setBlock(
-					element.localX,
-					element.localY,
-					element.localZ,
-					element.block,
-					element.blockState,
-					element.updateClients
-			);
-		}
+				setBlock(
+						element.localX,
+						element.localY,
+						element.localZ,
+						element.block,
+						element.blockState,
+						element.updateClients
+				);
+			}
+		} catch (ConcurrentModificationException e) {
+			e.printStackTrace();
+		}*/
 
 
 

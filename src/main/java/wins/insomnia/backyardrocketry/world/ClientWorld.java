@@ -58,7 +58,7 @@ public class ClientWorld extends World {
 
 
 	@Override
-	protected void loadChunk(ChunkPosition chunkPosition) {
+	protected void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass pass) {
 
 		// TODO: implement or make exclusive to ServerWorld???
 

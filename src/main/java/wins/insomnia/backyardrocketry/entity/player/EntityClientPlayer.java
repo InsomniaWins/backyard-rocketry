@@ -12,18 +12,21 @@ import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
+import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.StructureManager;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
 import java.util.ArrayList;
 
@@ -286,15 +289,6 @@ public class EntityClientPlayer extends EntityPlayer {
 			handleBlockInteractions();
 		}
 		hotbarManagement();
-
-
-		if (keyboardInput.isKeyJustPressed(GLFW_KEY_ENTER)) {
-
-
-			Vector3i blockPos = getBlockPosition();
-			StructureManager.placeDecoration(StructureManager.DECO_PINE_TREE, blockPos.x, blockPos.y, blockPos.z);
-
-		}
 
 
 	}

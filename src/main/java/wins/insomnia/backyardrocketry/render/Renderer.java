@@ -572,6 +572,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         return Window.get().getResolutionFrameBuffer().getWidth() / customGuiScale; // Window.get().getWidth() / customGuiScale;
     }
 
+    public void setRenderMode(int renderMode) {
+        this.renderMode = renderMode;
+    }
+
     public int getRenderMode() {
         return renderMode;
     }
