@@ -385,6 +385,13 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         chunkMeshShaderProgram.setUniform("vs_projectionMatrix",Renderer.get().getCamera().getProjectionMatrix());
         chunkMeshShaderProgram.setUniform("vs_time", (float) Updater.getCurrentTime());
         chunkMeshShaderProgram.setUniform("fs_time", (float) Updater.getCurrentTime());
+        chunkMeshShaderProgram.setUniform("fs_viewPosition", new Vector3f(getCamera().getTransform().getPosition()));
+
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas_height_map").getTextureHandle());
+        chunkMeshShaderProgram.setUniform("fs_heightMap", 1);
+        glActiveTexture(GL_TEXTURE0);
 
         defaultShaderProgram.use();
 

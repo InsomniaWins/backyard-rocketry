@@ -30,7 +30,7 @@ void main() {
     fs_normal = normalMatrix * vs_normal;
     fs_normal.z *= -1;
 
-    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    gl_Position = snap(gl_Position, vec2(320 * 0.5, 240 * 0.5));
 
     fs_textureCoordinates = vs_textureCoordinates;
 

@@ -3,7 +3,6 @@ package wins.insomnia.backyardrocketry.entity.player;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
@@ -12,21 +11,17 @@ import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
-import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.Camera;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.util.Transform;
-import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.StructureManager;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
-import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
 import java.util.ArrayList;
 
@@ -445,6 +440,8 @@ public class EntityClientPlayer extends EntityPlayer {
 	public void setCurrentHotbarSlot(int index) {
 
 		super.setCurrentHotbarSlot(index);
+
+		GUI_ELEMENT.setItemToolTipAlpha(1f);
 
 		FIRST_PERSON_HAND_ITEM.setBlock(getHotbarSlotContents(index));
 

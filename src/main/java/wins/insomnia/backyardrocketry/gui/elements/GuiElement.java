@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.gui.elements;
 
 import org.joml.Vector2f;
 import wins.insomnia.backyardrocketry.render.IRenderable;
+import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 
@@ -13,9 +14,11 @@ public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRende
 
 	public boolean containsPoint(double x, double y) {
 
-		if (x < POSITION.x || x > POSITION.x + SIZE.x) return false;
+		int guiScale = Renderer.get().getGuiScale();
 
-		if (y < POSITION.y || y > POSITION.y + SIZE.y) return false;
+		if (x < POSITION.x * guiScale || x > POSITION.x * guiScale + SIZE.x * guiScale) return false;
+
+		if (y < POSITION.y * guiScale || y > POSITION.y * guiScale + SIZE.y * guiScale) return false;
 
 		return true;
 	}

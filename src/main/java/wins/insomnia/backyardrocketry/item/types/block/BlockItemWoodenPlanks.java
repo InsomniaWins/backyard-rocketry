@@ -5,6 +5,6 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class BlockItemWoodenPlanks extends BlockItem {
 	public BlockItemWoodenPlanks() {
-		super(Blocks.WOODEN_PLANKS, "Wooden Planks", "wooden_planks", 1000, 99000);
+		super(Blocks.WOODEN_PLANKS, "Wooden Planks", "wooden_planks", 1000, 99000, 0.5);
 	}
 }

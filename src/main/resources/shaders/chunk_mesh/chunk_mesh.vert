@@ -6,6 +6,7 @@ layout (location = 2) in vec3 vs_normal;
 layout (location = 3) in float vs_ambientOcclusionValue;
 layout (location = 4) in float vs_framesPerSecond;
 layout (location = 5) in float vs_frameAmount;
+layout (location = 7) in vec3 vs_tangent;
 
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
@@ -14,6 +15,7 @@ out float fs_ambientOcclusionValue;
 out float fs_affine;
 out float fs_framesPerSecond;
 out int fs_frameAmount;
+out vec3 fs_fragmentPosition;
 
 uniform float vs_time;
 
@@ -24,15 +26,12 @@ uniform vec2 vs_uvOffset;
 
 // taken from u/PixelbearGames on reddit
 vec4 snap(vec4 vertex, vec2 resolution) {
-
     vec4 snappedPos = vertex;
     snappedPos.xyz = vertex.xyz / vertex.w; // convert to normalised device coordinates (NDC)
     snappedPos.xy = floor(resolution * snappedPos.xy) / resolution; // snap the vertex to the lower-resolution grid
     snappedPos.xyz *= vertex.w; // convert back to projection-space
     return snappedPos;
 }
-
-
 
 void main() {
     vec4 vertexVector = vec4(vs_vertexPosition, 1.0);
@@ -42,12 +41,15 @@ void main() {
 
     gl_Position = modelViewProjectionMatrix * vertexVector;
 
-    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    gl_Position = snap(gl_Position, vec2(320 * 0.5, 240 * 0.5));
 
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = normalize(vs_normal);
+
     fs_eyeSpacePosition = modelViewMatrix * vertexVector;
     fs_ambientOcclusionValue = vs_ambientOcclusionValue;
     fs_framesPerSecond = vs_framesPerSecond;
     fs_frameAmount = int(vs_frameAmount);
+    fs_fragmentPosition = vec3(vs_modelMatrix * vec4(vs_vertexPosition, 1.0));
+
 }

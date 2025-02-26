@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 public class TextRenderer {
 
+	private static float fontAlpha = 1f;
 	private static Color fontColor = Color.WHITE;
 
 	public static int getTextPixelWidth(String text) {
@@ -26,6 +27,10 @@ public class TextRenderer {
 
 	public static void drawText(String text, int guiX, int guiY) {
 		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));
+	}
+
+	public static void drawText(String text, int guiX, int guiY, int scale) {
+		drawText(text, guiX, guiY, scale, TextureManager.getTexture("font"));
 	}
 
 	public static void drawText(String text, int guiX, int guiY, Texture fontTexture) {
@@ -83,6 +88,9 @@ public class TextRenderer {
 		Renderer.get().getGuiShaderProgram().setUniform("vs_posY", guiY);
 		Renderer.get().getGuiShaderProgram().setUniform("fs_texture", GL_TEXTURE0);
 		Renderer.get().getGuiShaderProgram().setUniform("fs_colorModulation", fontColor.getRGB());
+
+		if (fontAlpha < 1f) Renderer.get().getGuiShaderProgram().setUniform("fs_alpha", fontAlpha);
+
 		Renderer.get().getGuiShaderProgram().setUniform("vs_projectionMatrix", Renderer.get().getModelMatrix().ortho(
 				0f, // left
 				Window.get().getResolutionFrameBuffer().getWidth(), // right
@@ -113,6 +121,8 @@ public class TextRenderer {
 
 		Renderer.get().getGuiShaderProgram().setUniform("fs_colorModulation", Color.WHITE.getRGB());
 
+		if (fontAlpha < 1f) Renderer.get().getGuiShaderProgram().setUniform("fs_alpha", 1f);
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 
@@ -129,6 +139,14 @@ public class TextRenderer {
 
 	public static void setFontColor(Color color) {
 		fontColor = color;
+	}
+
+	public static void setFontAlpha(float alpha) {
+		fontAlpha = alpha;
+	}
+
+	public static float getFontAlpha() {
+		return fontAlpha;
 	}
 
 	public static Color getFontColor() {

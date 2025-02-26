@@ -39,7 +39,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	public final float WALK_SPEED = 3f / Updater.getFixedUpdatesPerSecond();
 	public final float SPRINT_SPEED = 6f / Updater.getFixedUpdatesPerSecond();
 	public final float FLY_SPEED = WALK_SPEED * 2.5f;
-	public final float JUMP_SPEED = 0.5f;
+	public final float JUMP_SPEED = 0.45f;
 	protected float moveSpeed;
 	protected boolean onGround = false;
 	protected boolean crouching = false;

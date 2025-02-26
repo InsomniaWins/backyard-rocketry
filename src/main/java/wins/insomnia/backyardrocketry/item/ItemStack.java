@@ -18,6 +18,10 @@ public class ItemStack {
 		return volume;
 	}
 
+	public double getKilograms() {
+		return getItem().getKilogramsPerLiter() * getVolume();
+	}
+
 	public int getMaxVolume() {
 		return item.getMaxVolume();
 	}

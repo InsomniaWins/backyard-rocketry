@@ -13,8 +13,8 @@ public class BlockAtlasTexture extends Texture {
 	public static final int BLOCK_AMOUNT = 28;
 	private final HashMap<String, BlockTexture> BLOCK_TEXTURE_MAP;
 
-	public BlockAtlasTexture() {
-		super("block_atlas.png", false);
+	public BlockAtlasTexture(String atlasName) {
+		super(atlasName, false);
 
 		BLOCK_TEXTURE_MAP = new HashMap<>();
 		registerBlockTexture("cobblestone", new BlockTextureFrames(new Vector2i(0, 0)));
@@ -59,6 +59,10 @@ public class BlockAtlasTexture extends Texture {
 
 	public static BlockAtlasTexture get() {
 		return (BlockAtlasTexture) TextureManager.getTexture("block_atlas");
+	}
+
+	public static BlockAtlasTexture getNormalMap() {
+		return (BlockAtlasTexture) TextureManager.getTexture("block_atlas_normal_map");
 	}
 
 

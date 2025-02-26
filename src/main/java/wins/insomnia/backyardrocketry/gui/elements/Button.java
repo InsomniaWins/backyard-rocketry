@@ -122,7 +122,7 @@ public class Button extends GuiElement {
 				TextRenderer.setFontColor(Color.WHITE);
 			}
 
-			TextRenderer.drawTextOutline(buttonName, textX, textY, 1, TextureManager.getTexture("font"));
+			TextRenderer.drawTextOutline(buttonName, textX, textY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));
 
 			TextRenderer.setFontColor(Color.WHITE);
 		}

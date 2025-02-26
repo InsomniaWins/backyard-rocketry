@@ -138,15 +138,13 @@ public class TitleScene extends Scene {
 				renderer.getRightAnchor(), renderer.getBottomAnchor()
 		);
 
-		TextRenderer.drawTextOutline(TITLE_STRING, TITLE_X, TITLE_Y, 1, TextureManager.getTexture("font"));
+		TextRenderer.drawTextOutline(TITLE_STRING, TITLE_X, TITLE_Y);
 
 		String versionString = BackyardRocketry.getVersionString();
 		TextRenderer.drawTextOutline(
 				versionString,
 				Renderer.get().getRightAnchor() - TextRenderer.getTextPixelWidth(versionString),
-				Renderer.get().getBottomAnchor() - TextRenderer.getTextPixelHeight(1),
-				1,
-				TextureManager.getTexture("font")
+				Renderer.get().getBottomAnchor() - TextRenderer.getTextPixelHeight(1)
 		);
 
 

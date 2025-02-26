@@ -19,7 +19,8 @@ public class TextureManager {
 
     private static void registerTextures() {
 
-        registerTexture("block_atlas", new BlockAtlasTexture());
+        registerTexture("block_atlas", new BlockAtlasTexture("block_atlas.png"));
+        registerTexture("block_atlas_height_map", "block_atlas_height_map.png");
 
         registerTexture("placeholder_inventory", "gui/inventory/placeholder_inventory.png");
         registerTexture("font", "font.png");

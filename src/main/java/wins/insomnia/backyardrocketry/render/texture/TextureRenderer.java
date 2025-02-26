@@ -379,7 +379,7 @@ public class TextureRenderer {
 		guiShaderProgram.setUniform("vs_textureSizeY", texture.getHeight());
 		guiShaderProgram.setUniform("vs_posX", guiX);
 		guiShaderProgram.setUniform("vs_posY", guiY);
-		guiShaderProgram.setUniform("fs_texture", GL_TEXTURE0);
+		guiShaderProgram.setUniform("fs_texture", 0);
 		guiShaderProgram.setUniform("vs_projectionMatrix", modelMatrix.ortho(
 				0f, // left
 				Window.get().getResolutionFrameBuffer().getWidth(), // right

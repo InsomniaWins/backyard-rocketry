@@ -37,8 +37,15 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 	private EntityClientPlayer player;
 	private float desiredBreakProgress = 0f;
 
+
+	private float itemToolTipAlpha = 1f;
+
 	public PlayerGui(EntityClientPlayer player) {
 		this.player = player;
+	}
+
+	public void setItemToolTipAlpha(float alpha) {
+		itemToolTipAlpha = alpha;
 	}
 
 	public static void renderItemIcon(Item item, int guiX, int guiY) {
@@ -144,33 +151,20 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 					blockMeshScale
 			);
 
+			// tooltip
+			if (i == player.getCurrentHotbarSlot()) {
 
+				String itemName = Items.getBlockItem(player.getHotbarSlotContents(i)).getName();
 
-
-			/*     OLD 2D ICON RENDERING
-			BlockModelData blockModelData = BlockModelData.getBlockModel(currentBlock, 0, 0, 0);
-
-			if (blockModelData == null) continue;
-
-			String iconName = blockModelData.getTextures().get("icon");
-
-			if (iconName == null) {
-				continue;
+				TextRenderer.setFontAlpha(itemToolTipAlpha);
+				TextRenderer.drawTextOutline(
+						itemName,
+						renderer.getCenterAnchorX() - TextRenderer.getTextPixelWidth(itemName) / 2,
+						renderer.getBottomAnchor() - 60
+				);
+				TextRenderer.setFontAlpha(1f);
 			}
 
-			int[] blockAtlasCoordinates = TextureManager.getBlockAtlasCoordinates(iconName);
-			blockAtlasCoordinates[0] *= 16;
-			blockAtlasCoordinates[1] *= 16;
-
-			renderer.drawGuiTextureClipped(
-					TextureManager.getBlockAtlasTexture(), //texture
-					hotbarX + 5 + 28 * i, hotbarY + 20, // screen x, y
-					16, 16, // screen width, height
-					blockAtlasCoordinates[0], blockAtlasCoordinates[1], // texture x, y
-					16, 16 // texture width, height
-			);
-
-			 */
 		}
 
 
@@ -201,38 +195,6 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			}
 
 		}
-
-
-
-		/* OLD CODE TO RENDER CHUNKS WHICH HAVE NOT FINISHED DECORATING FOR DEBUGGING
-
-		Mesh mesh = BlockModelData.getMeshFromBlock(Blocks.COBBLESTONE);
-
-		for (Chunk chunk : ServerWorld.getServerWorld().getChunks()) {
-
-			if (((ServerChunk) chunk).hasFinishedPass(ServerChunk.GenerationPass.DECORATION)) continue;
-
-			Matrix4f modelMatrix = renderer.getModelMatrix();
-			modelMatrix.identity()
-					.translate(
-							chunk.getX(),
-							chunk.getY(),
-							chunk.getZ()
-					)
-					.scale(
-							20,
-							20,
-							20
-					);
-
-			renderer.getShaderProgram().setUniform("vs_modelMatrix", modelMatrix);
-			mesh.render();
-
-		}
-
-
-*/
-
 
 
 
@@ -320,15 +282,14 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 		// render w.a.i.l.a gui
 
-		Texture wailaTexture = TextureManager.getTexture("waila");
-
 		if (entity instanceof EntityItem entityItem) {
 
 			ItemStack itemStack = entityItem.getItemStack();
 			if (itemStack != null) {
 
 				String itemName = itemStack.getItem().getName() + " x " + (int) itemStack.getItemAmount();
-				String volumeString = (itemStack.getVolume() / 1000f) + " Liters";
+				String volumeString = (itemStack.getVolume() / 1000f) + " L";
+				String weightString = itemStack.getKilograms() + " Kg";
 
 				int wailaHeight = TextRenderer.getTextPixelHeight(2);
 				int wailaPosX = 0;
@@ -341,7 +302,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 				);
 
 				TextRenderer.drawTextOutline(
-						itemName + "\n" + volumeString,
+						itemName + "\n" + volumeString + "\n" + weightString,
 						wailaPosX + (int) (wailaHeight / 2f) + 14,
 						wailaPosY + 3
 				);
@@ -355,10 +316,9 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		}
 
 		String entityName = entityInformation.entityName();
-		int textWidth = TextRenderer.getTextPixelWidth(entityName);
 
 		int wailaTextPosX = 14;
-		TextRenderer.drawText(entityName, wailaTextPosX, 2);
+		TextRenderer.drawText(entityName, wailaTextPosX, 2, Math.max(1, Renderer.get().getGuiScale() - 1));
 
 
 
@@ -394,6 +354,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 	@Override
 	public void update(double deltaTime) {
+
+		itemToolTipAlpha = Math.max(0f, (float) (itemToolTipAlpha - 0.25f * deltaTime));
 
 		BLOCK_ITEM_ICON_ROTATION.y += (float) (deltaTime * 1.5);
 		BLOCK_ITEM_ICON_ROTATION.x = (float) Math.sin(Updater.getCurrentTime());
