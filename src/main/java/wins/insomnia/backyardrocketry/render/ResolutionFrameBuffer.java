@@ -15,13 +15,28 @@ public class ResolutionFrameBuffer {
 	private int handle = -1;
 	private int textureHandle = -1;
 	private int depthTextureHandle = -1;
-	private int width;
-	private int height;
+	private int desiredWidth;
+	private int desiredHeight;
+	private int expandWidth;
+	private int expandHeight;
 
-	public ResolutionFrameBuffer(int width, int height) {
+	public ResolutionFrameBuffer(int desiredWidth, int desiredHeight) {
 
-		this.width = width;
-		this.height = height;
+		this.desiredWidth = desiredWidth;
+		this.desiredHeight = desiredHeight;
+
+		expandWidth = 0;
+		expandHeight = 0;
+
+		updateFrameBuffer();
+
+	}
+
+
+	private void updateFrameBuffer() {
+		if (!isClean()) {
+			clean();
+		}
 
 		handle = GL30.glGenFramebuffers();
 
@@ -34,7 +49,7 @@ public class ResolutionFrameBuffer {
 		textureHandle = glGenTextures();
 
 		glBindTexture(GL_TEXTURE_2D, textureHandle);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, desiredWidth + expandWidth, desiredHeight + expandHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, (ByteBuffer) null);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -46,20 +61,56 @@ public class ResolutionFrameBuffer {
 		depthTextureHandle = glGenTextures();
 
 		glBindTexture(GL_TEXTURE_2D, depthTextureHandle);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, desiredWidth + expandWidth, desiredHeight + expandHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureHandle, 0);
+	}
 
+
+	public int getExpandWidth() {
+		return expandWidth;
+	}
+
+	public int getExpandHeight() {
+		return expandHeight;
+	}
+
+	public void setExpandWidth(int expandWidth) {
+		this.expandWidth = expandWidth;
+		updateFrameBuffer();
+	}
+
+	public void setExpandHeight(int expandHeight) {
+		this.expandHeight = expandHeight;
+		updateFrameBuffer();
 	}
 
 	public int getWidth() {
-		return width;
+		return desiredWidth + getExpandWidth();
 	}
 
 	public int getHeight() {
-		return height;
+		return desiredHeight + getExpandHeight();
+	}
+
+	public void setDesiredWidth(int desiredWidth) {
+		this.desiredWidth = desiredWidth;
+		updateFrameBuffer();
+	}
+
+	public void setDesiredHeight(int desiredHeight) {
+		this.desiredHeight = desiredHeight;
+		updateFrameBuffer();
+	}
+
+	public int getDesiredWidth() {
+		return desiredWidth;
+	}
+
+	public int getDesiredHeight() {
+		return desiredHeight;
 	}
 
 	public boolean hasHandle() {

@@ -76,7 +76,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
         chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
 
-        setGuiScale(1);
+        setGuiScale(guiScale);
 
         modelMatrix = new Matrix4f().identity();
 

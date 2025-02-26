@@ -25,6 +25,7 @@ public class Window {
     private int width;
     private int height;
     private boolean pixelPerfectViewport = false;
+    private boolean expandViewport = false;
     private ResolutionFrameBuffer resolutionFrameBuffer;
     private IInputCallback keyboardInputCallback;
     private boolean fullscreen = false;
@@ -47,7 +48,6 @@ public class Window {
 
         }
 
-
         // setup callback for window
         glfwSetWindowSizeCallback(WINDOW_HANDLE, this::windowResizeCallback);
 
@@ -55,7 +55,7 @@ public class Window {
     }
 
     public void postInitialize() {
-        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true);
+        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true, true);
 
         keyboardInputCallback = inputEvent -> {
 
@@ -131,14 +131,23 @@ public class Window {
         getResolutionFrameBuffer().clean();
     }
 
-    public void setResolution(int width, int height, boolean pixelPerfect) {
+    public void setResolution(int width, int height, boolean pixelPerfect, boolean expanding) {
 
-        if (resolutionFrameBuffer != null) {
-            resolutionFrameBuffer.clean();
+        setPixelPerfectViewport(pixelPerfect);
+        setViewportExpanding(expanding);
+
+        if (resolutionFrameBuffer == null) {
+            resolutionFrameBuffer = new ResolutionFrameBuffer(width, height);
+            return;
         }
 
-        resolutionFrameBuffer = new ResolutionFrameBuffer(width, height);
-        setPixelPerfectViewport(pixelPerfect);
+        resolutionFrameBuffer.setDesiredWidth(width);
+        resolutionFrameBuffer.setDesiredHeight(height);
+    }
+
+    public void setResolution(int width, int height, boolean pixelPerfect) {
+
+        setResolution(width, height, pixelPerfect, isViewportExpanding());
 
     }
 
@@ -150,6 +159,14 @@ public class Window {
 
     public ResolutionFrameBuffer getResolutionFrameBuffer() {
         return resolutionFrameBuffer;
+    }
+
+    public void setViewportExpanding(boolean value) {
+        expandViewport = value;
+    }
+
+    public boolean isViewportExpanding() {
+        return expandViewport;
     }
 
     public boolean isPixelPerfectViewport() {
@@ -167,25 +184,31 @@ public class Window {
         window.width = width;
         window.height = height;
 
-        glViewport(0, 0, window.width, window.height);
+        if (isViewportExpanding()) {
 
+            double viewportScale = getViewportScale(true);
 
-        /*
+            int viewportWidth = getResolutionFrameBuffer().getDesiredWidth();
+            int viewportHeight = getResolutionFrameBuffer().getDesiredHeight();
 
+            double viewportExpandWidth = viewportWidth * viewportScale;
+            double viewportExpandHeight = viewportHeight * viewportScale;
 
-        //
-        //the following code expands the viewport to the window borders
-        //
+            viewportExpandWidth = window.width - viewportExpandWidth;
+            viewportExpandHeight = window.height - viewportExpandHeight;
 
+            viewportExpandWidth = viewportExpandWidth / viewportScale;
+            viewportExpandHeight = viewportExpandHeight / viewportScale;
 
-        int pixelsNeededX = (int) ((window.width / getViewportScale()) - DEFAULT_RESOLUTION_WIDTH);
-        int pixelsNeededY = (int) ((window.height / getViewportScale()) - DEFAULT_RESOLUTION_HEIGHT);
+            getResolutionFrameBuffer().setExpandWidth((int) viewportExpandWidth);
+            getResolutionFrameBuffer().setExpandHeight((int) viewportExpandHeight);
 
-        setResolution(
-                DEFAULT_RESOLUTION_WIDTH + pixelsNeededX,
-                DEFAULT_RESOLUTION_HEIGHT + pixelsNeededY
-        );*/
+        } else {
 
+            getResolutionFrameBuffer().setExpandWidth(0);
+            getResolutionFrameBuffer().setExpandHeight(0);
+
+        }
 
     }
 
@@ -220,20 +243,33 @@ public class Window {
         );
     }
 
-    public double getViewportScale() {
+    public double getViewportScale(boolean isDesiredScale) {
+
+        ResolutionFrameBuffer frameBuffer = getResolutionFrameBuffer();
+
         if (isPixelPerfectViewport()) {
-            int pixelPerfectScaleX = getWidth() / getResolutionFrameBuffer().getWidth();
-            int pixelPerfectScaleY = getHeight() / getResolutionFrameBuffer().getHeight();
+            int pixelPerfectScaleX = getWidth() / (isDesiredScale ? frameBuffer.getDesiredWidth() : frameBuffer.getWidth());
+            int pixelPerfectScaleY = getHeight() / (isDesiredScale ? frameBuffer.getDesiredHeight() : frameBuffer.getHeight());
 
             return Math.max(1, Math.min(pixelPerfectScaleX, pixelPerfectScaleY));
         } else {
-            double viewportScaleX = getWidth() / (double) getResolutionFrameBuffer().getWidth();
-            double viewportScaleY = getHeight() / (double) getResolutionFrameBuffer().getHeight();
+            double viewportScaleX = getWidth() / (isDesiredScale
+                    ? (double) getResolutionFrameBuffer().getDesiredWidth()
+                    : (double) getResolutionFrameBuffer().getWidth()
+            );
+
+            double viewportScaleY = getHeight() / (isDesiredScale
+                    ? (double) getResolutionFrameBuffer().getDesiredHeight()
+                    : (double) getResolutionFrameBuffer().getHeight()
+            );
 
             return Math.min(viewportScaleX, viewportScaleY);
         }
     }
 
+    public double getViewportScale() {
+        return getViewportScale(false);
+    }
 
 
     public Rectanglei getViewportDimensions() {
@@ -256,8 +292,8 @@ public class Window {
         viewportY = getHeight() / 2 - viewportHeight / 2;
 
         return new Rectanglei(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
-    }
 
+    }
 
     public long getWindowHandle() {
         return WINDOW_HANDLE;
