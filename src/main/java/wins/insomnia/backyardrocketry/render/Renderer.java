@@ -21,6 +21,7 @@ import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.World;
 
 import java.util.*;
 
@@ -378,6 +379,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
+
+        EntityClientPlayer clientPlayer = BackyardRocketry.getInstance().getClientPlayer();
+
+
         // TODO: implement dynamic way for shaders to listen for default uniforms like camera uniforms
         chunkMeshShaderProgram.use();
 
@@ -387,14 +392,12 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         chunkMeshShaderProgram.setUniform("fs_time", (float) Updater.getCurrentTime());
         chunkMeshShaderProgram.setUniform("fs_viewPosition", new Vector3f(getCamera().getTransform().getPosition()));
 
-
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_atlas_height_map").getTextureHandle());
         chunkMeshShaderProgram.setUniform("fs_heightMap", 1);
         glActiveTexture(GL_TEXTURE0);
 
         defaultShaderProgram.use();
-
         defaultShaderProgram.setUniform("vs_viewMatrix", viewMatrix);
         defaultShaderProgram.setUniform("vs_projectionMatrix", projectionMatrix);
 
@@ -433,8 +436,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
         // render target block
-
-        EntityClientPlayer clientPlayer = BackyardRocketry.getInstance().getClientPlayer();
         if (clientPlayer != null) {
 
             BlockRaycastResult raycastResult = clientPlayer.getTargetBlock();

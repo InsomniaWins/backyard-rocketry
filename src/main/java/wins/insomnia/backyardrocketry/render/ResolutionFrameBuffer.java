@@ -22,6 +22,8 @@ public class ResolutionFrameBuffer {
 
 	public ResolutionFrameBuffer(int desiredWidth, int desiredHeight) {
 
+		if (desiredWidth == 0 || desiredHeight == 0) throw new RuntimeException("Cannot initialize resolution width or height to 0!");
+
 		this.desiredWidth = desiredWidth;
 		this.desiredHeight = desiredHeight;
 
@@ -78,11 +80,17 @@ public class ResolutionFrameBuffer {
 	}
 
 	public void setExpandWidth(int expandWidth) {
+
+		if (expandWidth < 0) return;
+
 		this.expandWidth = expandWidth;
 		updateFrameBuffer();
 	}
 
 	public void setExpandHeight(int expandHeight) {
+
+		if (expandHeight < 0) return;
+
 		this.expandHeight = expandHeight;
 		updateFrameBuffer();
 	}
@@ -96,11 +104,17 @@ public class ResolutionFrameBuffer {
 	}
 
 	public void setDesiredWidth(int desiredWidth) {
+
+		if (desiredWidth == 0) return;
+
 		this.desiredWidth = desiredWidth;
 		updateFrameBuffer();
 	}
 
 	public void setDesiredHeight(int desiredHeight) {
+
+		if (desiredHeight == 0) return;
+
 		this.desiredHeight = desiredHeight;
 		updateFrameBuffer();
 	}

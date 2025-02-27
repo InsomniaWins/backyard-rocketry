@@ -18,6 +18,8 @@ uniform float fs_time;
 // fog
 uniform vec3 fs_fogColor;
 uniform bool fs_fogEnabled = true;
+uniform float fs_fogStart = 0.0;
+uniform float fs_fogEnd = 1.0;
 
 // lighting
 vec3 lightDirection = -normalize(vec3(-0.7, -0.8, -0.45));
@@ -78,11 +80,11 @@ void main() {
         // fog calculations
         float fogCoordinate = abs(fs_eyeSpacePosition.z / fs_eyeSpacePosition.w);
 
-        float linearEnd = 170.0;
-        float linearStart = 0.0;
-        float fogLength = linearEnd - linearStart;
-        float fogFactor = (linearEnd - fogCoordinate) / fogLength;
+        float fogLength = fs_fogEnd - fs_fogStart;
+        float fogFactor = (fs_fogEnd - fogCoordinate) / fogLength;
         fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
+
+
 
         if (fogFactor < 1.0) {
 

@@ -62,6 +62,7 @@ public class WorldGeneration {
                     int groundHeight = WorldGeneration.getGroundHeight(chunkData.getSeed(), globalBlockX, globalBlockZ);
 
                     byte block;
+                    byte blockState = 0;
 
 
                     if (isBlockWorldBorder(globalBlockX, globalBlockY, globalBlockZ)) {
@@ -71,7 +72,10 @@ public class WorldGeneration {
                     } else if (globalBlockY > groundHeight) {
 
                         if (globalBlockY <= WorldGeneration.SEA_LEVEL) {
+
                             block = Blocks.WATER;
+
+
                         } else {
                             block = Blocks.AIR;
                         }
@@ -96,6 +100,7 @@ public class WorldGeneration {
 
 
                     chunkData.setBlock(x, y, z, block);
+                    chunkData.setBlockState(x, y, z, blockState);
 
                 }
             }

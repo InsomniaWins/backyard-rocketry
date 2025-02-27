@@ -55,7 +55,7 @@ public class Window {
     }
 
     public void postInitialize() {
-        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true, true);
+        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, false, true);
 
         keyboardInputCallback = inputEvent -> {
 
@@ -132,6 +132,8 @@ public class Window {
     }
 
     public void setResolution(int width, int height, boolean pixelPerfect, boolean expanding) {
+
+        if (width == 0 || height == 0) return;
 
         setPixelPerfectViewport(pixelPerfect);
         setViewportExpanding(expanding);

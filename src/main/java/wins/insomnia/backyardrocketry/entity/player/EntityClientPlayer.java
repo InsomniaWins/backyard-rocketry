@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.entity.player;
 import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.controller.ClientController;
@@ -13,15 +14,15 @@ import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
-import wins.insomnia.backyardrocketry.render.Camera;
-import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
+import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
 import java.util.ArrayList;
 
@@ -38,7 +39,7 @@ public class EntityClientPlayer extends EntityPlayer {
 	private boolean lockMouseToCenterForCameraRotation = false;
 	private int currentHotbarSlot = 0;
 	private BoundingBoxRaycastResult targetEntity = null;
-
+	private boolean underWater = false;
 
 
 	public EntityClientPlayer(ClientWorld world, java.util.UUID uuid) {
@@ -252,6 +253,18 @@ public class EntityClientPlayer extends EntityPlayer {
 		}
 
 
+		underWater = false;
+		ClientWorld clientWorld = World.getClientWorld();
+		if (clientWorld != null) {
+			Vector3i blockPos = getBlockPosition().add(0, 1, 0);
+			ClientChunk clientChunk = (ClientChunk) clientWorld.getChunkContainingBlock(blockPos);
+
+			if (clientChunk != null) {
+				if (clientWorld.getBlock(blockPos.x, blockPos.y, blockPos.z) == Blocks.WATER) {
+					underWater = true;
+				}
+			}
+		}
 
 		predictMovement(movementInputs);
 
@@ -286,6 +299,10 @@ public class EntityClientPlayer extends EntityPlayer {
 		hotbarManagement();
 
 
+	}
+
+	public boolean isUnderWater() {
+		return underWater;
 	}
 
 	private void handleEntityInteractions() {
@@ -459,6 +476,23 @@ public class EntityClientPlayer extends EntityPlayer {
 		AudioManager.updateListenerPosition(new Vector3f(camera.getTransform().getPosition()), camera);
 
 		updateTargetBlock();
+
+		FogManager fogManager = ((ClientWorld) getWorld()).FOG_MANAGER;
+
+		if (isUnderWater()) {
+			fogManager.setDesiredFogStart(0f);
+			fogManager.setDesiredFogEnd(6f);
+		} else {
+			fogManager.setDesiredFogStart(0f);
+			fogManager.setDesiredFogEnd(130f);
+		}
+
+		fogManager.update(deltaTime);
+
+		ShaderProgram chunkMeshShaderProgram = Renderer.get().getShaderProgram("chunk_mesh");
+		chunkMeshShaderProgram.use();
+		chunkMeshShaderProgram.setUniform("fs_fogStart", fogManager.getFogStart());
+		chunkMeshShaderProgram.setUniform("fs_fogEnd", fogManager.getFogEnd());
 
 	}
 

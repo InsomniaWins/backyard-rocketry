@@ -7,22 +7,28 @@
 	},
 	"faces": {
 		"top": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		},
 		"bottom": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		},
 		"left": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		},
 		"right": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		},
 		"back": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		},
 		"front": {
-			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0],
+			"wave_strength": 0.05
 		}
 	}
 }

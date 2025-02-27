@@ -6,7 +6,7 @@ layout (location = 2) in vec3 vs_normal;
 layout (location = 3) in float vs_ambientOcclusionValue;
 layout (location = 4) in float vs_framesPerSecond;
 layout (location = 5) in float vs_frameAmount;
-layout (location = 7) in vec3 vs_tangent;
+layout (location = 6) in float vs_waveStrength;
 
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
@@ -35,6 +35,12 @@ vec4 snap(vec4 vertex, vec2 resolution) {
 
 void main() {
     vec4 vertexVector = vec4(vs_vertexPosition, 1.0);
+
+    vec4 worldPosition = vs_modelMatrix * vertexVector;
+    // TODO: implement vector waving (not just vertical per face)
+    //vertexVector.x += sin(worldPosition.x + worldPosition.z + vs_time) * vs_waveStrength;
+    vertexVector.y += sin(worldPosition.x + worldPosition.z + vs_time) * vs_waveStrength;
+    //vertexVector.z += sin(worldPosition.x + worldPosition.z + vs_time) * vs_waveStrength;
 
     mat4 modelViewMatrix = vs_viewMatrix * vs_modelMatrix;
     mat4 modelViewProjectionMatrix = vs_projectionMatrix * modelViewMatrix;

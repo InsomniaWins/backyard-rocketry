@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ChunkMesh extends Mesh implements IPositionOwner {
 
-    public static final int VERTEX_ATTRIBUTE_FLOAT_AMOUNT = 11;
+    public static final int VERTEX_ATTRIBUTE_FLOAT_AMOUNT = 12;
     private Chunk chunk;
     public boolean unloaded = false;
 
@@ -97,6 +97,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glVertexAttribPointer(3, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 8 * Float.BYTES);
         glVertexAttribPointer(4, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 9 * Float.BYTES);
         glVertexAttribPointer(5, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 10 * Float.BYTES);
+        glVertexAttribPointer(6, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 11 * Float.BYTES);
 
 
         readyToCreateOpenGLMeshData.set(false);
@@ -175,6 +176,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glEnableVertexAttribArray(3);
         glEnableVertexAttribArray(4);
         glEnableVertexAttribArray(5);
+        glEnableVertexAttribArray(6);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
@@ -182,6 +184,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDisableVertexAttribArray(3);
         glDisableVertexAttribArray(4);
         glDisableVertexAttribArray(5);
+        glDisableVertexAttribArray(6);
     }
 
     public void generateMesh(byte[][][] blocks, byte[][][] blockStates) {
@@ -256,7 +259,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         ArrayList<Integer> faceIndexArray = (ArrayList<Integer>) faceData.get("indices");
 
                         String cullface = (String) faceData.get("cullface");
-
+                        float blockWaveStrength = ((Double) faceData.getOrDefault("wave_strength", 0.0)).floatValue();
 
                         double rotationValue = 0.0;
                         Object possibleRotations = faceData.get("possible_rotations");
@@ -282,7 +285,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                                     x, y, z,
                                     blockNeighbors,
                                     BlockAtlasTexture.get().getBlockTexture(faceTextureName),
-                                    rotationValue
+                                    rotationValue,
+                                    blockWaveStrength
                             );
 
                         }
@@ -659,7 +663,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture, double textureRotationValue) {
+    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture, double textureRotationValue, float waveStrength) {
 
         textureRotationValue = Math.toRadians(textureRotationValue);
 
@@ -751,6 +755,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
                     vertices.add((float) blockTexture.getFrames().getFramesPerSecond());
                     vertices.add((float) blockTexture.getFrames().getFrameAmount());
+                    vertices.add(waveStrength);
                 }
 
             }

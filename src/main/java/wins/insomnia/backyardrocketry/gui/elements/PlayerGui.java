@@ -16,6 +16,7 @@ import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
+import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.render.texture.TextureRenderer;
@@ -125,11 +126,36 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 		Renderer renderer = Renderer.get();
 
+
+		// render under water overlay
+		if (player.isUnderWater()) {
+
+			ShaderProgram guiShaderProgram = renderer.getShaderProgram("gui");
+			guiShaderProgram.use();
+			guiShaderProgram.setUniform("fs_alpha", 0.7f);
+
+			TextureRenderer.drawGuiTextureClipped(
+					BlockAtlasTexture.get(),
+					0, 0,
+					Window.get().getResolutionFrameBuffer().getWidth(), Window.get().getResolutionFrameBuffer().getHeight(),
+					109, 1,
+					1, 1
+			);
+
+			guiShaderProgram.use();
+			guiShaderProgram.setUniform("fs_alpha", 1f);
+		}
+
+
 		int hotbarX = renderer.getCenterAnchorX() - 139;
 		int hotbarY = renderer.getBottomAnchor() - 41;
 		int selectedHotbarSlotX = hotbarX + player.getCurrentHotbarSlot() * 28;
 		TextureRenderer.drawGuiTexture(TextureManager.getTexture("hotbar"), hotbarX, hotbarY);
 		TextureRenderer.drawGuiTexture(TextureManager.getTexture("selected_hotbar_slot"), selectedHotbarSlotX, hotbarY);
+
+
+
+
 
 
 
