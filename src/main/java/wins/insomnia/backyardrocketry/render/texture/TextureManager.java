@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.render.texture;
 import org.lwjgl.stb.STBImage;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 
+import java.awt.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -23,8 +24,8 @@ public class TextureManager {
         registerTexture("block_atlas_height_map", "block_atlas_height_map.png");
 
         registerTexture("placeholder_inventory", "gui/inventory/placeholder_inventory.png");
-        registerTexture("font", "font.png");
-        registerTexture("debug_font", "debug_font.png");
+        registerTexture("font", new FontTexture("font.png", 12, FontTexture.DEFAULT_FONT_CHARACTER_DIMENSIONS));
+        registerTexture("debug_font", new FontTexture("debug_font.png", 9, FontTexture.DEBUG_FONT_CHARACTER_DIMENSIONS));
         registerTexture("block_outline", "block_outline.png");
         registerTexture("crosshair", "gui/crosshair.png");
         registerTexture("hotbar", "gui/hotbar.png");

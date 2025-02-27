@@ -3,6 +3,7 @@ package wins.insomnia.backyardrocketry.render.text;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
+import wins.insomnia.backyardrocketry.render.texture.FontTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 
@@ -63,7 +64,13 @@ public class TextRenderer {
 		drawText(text, guiX, guiY, scale, fontTexture);
 	}
 
-	public static void drawText(String text, int guiX, int guiY, int scale, Texture fontTexture) {
+	public static void drawText(String text, int guiX, int guiY, int scale, Texture texture) {
+
+
+		if (!(texture instanceof FontTexture fontTexture)) {
+			System.err.println("Tried drawing text with non-font texture: " + texture.getTextureName() + "!");
+			return;
+		}
 
 
 		int[] previousTexture = new int[1];
@@ -113,7 +120,7 @@ public class TextRenderer {
 
 
 		// generate and draw font mesh
-		Renderer.get().getFontMesh().setText(text);
+		Renderer.get().getFontMesh().setText(text, fontTexture);
 		glBindVertexArray(Renderer.get().getFontMesh().getVao());
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);

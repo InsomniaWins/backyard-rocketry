@@ -11,6 +11,7 @@ public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRende
 	private static GuiElement selectedElement = null;
 	private final Vector2f POSITION = new Vector2f();
 	private Vector2f SIZE = new Vector2f();
+	private Runnable updatePositionRunnable;
 
 	public boolean containsPoint(double x, double y) {
 
@@ -21,6 +22,10 @@ public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRende
 		if (y < POSITION.y * guiScale || y > POSITION.y * guiScale + SIZE.y * guiScale) return false;
 
 		return true;
+	}
+
+	public void setUpdatePositionRunnable(Runnable updatePositionRunnable) {
+		this.updatePositionRunnable = updatePositionRunnable;
 	}
 
 	public void setXPosition(float x) {
@@ -121,7 +126,9 @@ public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRende
 
 	@Override
 	public void update(double deltaTime) {
-
+		if (updatePositionRunnable != null) {
+			updatePositionRunnable.run();
+		}
 	}
 
 	@Override

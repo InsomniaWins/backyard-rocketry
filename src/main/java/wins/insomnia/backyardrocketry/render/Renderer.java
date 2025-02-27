@@ -455,8 +455,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
                 glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_outline").getTextureHandle());
 
+                glLineWidth(1.5f);
+
                 getShaderProgram().setUniform("fs_lightingEnabled", false);
-                getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, TargetBlockOutlineMesh.getOutlineAlpha()));
+                getShaderProgram().setUniform("fs_color", new Vector4f(TargetBlockOutlineMesh.getOutlineAlpha(), TargetBlockOutlineMesh.getOutlineAlpha(), TargetBlockOutlineMesh.getOutlineAlpha(), 1f));
 
                 Mesh targetBlockOutlineMesh = TargetBlockOutlineMesh.get(raycastResult.getFace());
                 if (targetBlockOutlineMesh != null) targetBlockOutlineMesh.render(GL_LINES);
@@ -504,7 +506,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(clientPlayer));
             }
 
-            TextRenderer.drawText(debugString.toString(), 0, 0, getGuiScale(), TextureManager.getTexture("debug_font"));
+            TextRenderer.drawText(debugString.toString(), 0, 32, getGuiScale(), TextureManager.getTexture("debug_font"));
         }
 
 

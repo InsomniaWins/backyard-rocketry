@@ -18,7 +18,7 @@ out int fs_frameAmount;
 out vec3 fs_fragmentPosition;
 
 uniform float vs_time;
-
+uniform bool vs_vertexSnapping = false;
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;
@@ -47,7 +47,9 @@ void main() {
 
     gl_Position = modelViewProjectionMatrix * vertexVector;
 
-    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    if (vs_vertexSnapping) {
+        gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    }
 
     fs_textureCoordinates = vs_textureCoordinates;
     fs_normal = normalize(vs_normal);

@@ -1,6 +1,9 @@
 package wins.insomnia.backyardrocketry.render.text;
 
 import org.lwjgl.opengl.GL30;
+import wins.insomnia.backyardrocketry.render.texture.FontTexture;
+
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -10,14 +13,11 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 
 public class FontMesh {
-
-    private final int[] CHARACTER_SIZE = new int[]{7, 12};
-    private final float CHARACTER_UV_WIDTH = (float) CHARACTER_SIZE[0] / 128f;
-    private final float CHARACTER_UV_HEIGHT = (float) CHARACTER_SIZE[1] / 128f;
     private final int VAO;
     private int vbo;
     private int ebo;
     private String text;
+    private FontTexture fontTexture;
     private int indexCount;
 
     private final HashMap<Character, float[]> CHARACTER_LOCATIONS;
@@ -25,7 +25,7 @@ public class FontMesh {
     public FontMesh() {
 
         CHARACTER_LOCATIONS = new HashMap<>();
-        createCharacterLocations("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"\\()|}{;<>-+%?,./!:$_=&~*#][`@^ ");
+        updateCharacterLocations();
 
         text = "";
         VAO = GL30.glGenVertexArrays();
@@ -50,32 +50,39 @@ public class FontMesh {
         indexCount = 0;
     }
 
-    private void createCharacterLocations(String characters) {
+    public void setFontTexture(FontTexture fontTexture) {
+        this.fontTexture = fontTexture;
+        updateCharacterLocations();
+    }
 
-        int columns = 128 / CHARACTER_SIZE[0];
-        int rows = 128 / CHARACTER_SIZE[1];
+    private void updateCharacterLocations() {
 
-        int characterIndex = 0;
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < columns; x++) {
+        if (fontTexture == null || fontTexture.isClean()) return;
 
-                if (characterIndex > characters.length() - 1) break;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"\\()|}{;<>-+%?,./!:$_=&~*#][`@^ ";
 
-                char character = characters.charAt(characterIndex);
+        CHARACTER_LOCATIONS.clear();
 
-                CHARACTER_LOCATIONS.put(character, new float[] {
-                        CHARACTER_UV_WIDTH * x,
-                        CHARACTER_UV_HEIGHT * y
-                });
+        for (int characterIndex = 0; characterIndex < characters.length(); characterIndex++) {
 
-                characterIndex++;
-            }
+            char character = characters.charAt(characterIndex);
+            CHARACTER_LOCATIONS.put(character, new float[] {
+                    fontTexture.getCharacterX(characterIndex) / (float) fontTexture.getWidth(),
+                    fontTexture.getCharacterY(characterIndex) / (float) fontTexture.getHeight(),
+                    fontTexture.getCharacterWidth(characterIndex)
+            });
+
         }
 
     }
 
-    public void setText(String text) {
+    public void setText(String text, FontTexture fontTexture) {
         this.text = text;
+
+        if (this.fontTexture != fontTexture) {
+            setFontTexture(fontTexture);
+        }
+
         updateMesh();
     }
 
@@ -91,6 +98,8 @@ public class FontMesh {
     }
 
     private void updateMesh() {
+
+        if (fontTexture == null || fontTexture.isClean()) return;
 
         float pixelAspect = 1f;
         int currentLine = 0;
@@ -113,7 +122,7 @@ public class FontMesh {
             // how to handle a new line
             if (character == '\n') {
                 currentLine++;
-                characterOffsetAmounts[1] = currentLine * pixelAspect * CHARACTER_SIZE[1];
+                characterOffsetAmounts[1] = currentLine * pixelAspect * fontTexture.getCharacterHeight();
                 characterOffsetAmounts[0] = 0f;
                 continue;
             }
@@ -126,14 +135,19 @@ public class FontMesh {
                 characterUvs = CHARACTER_LOCATIONS.get(' ');
             }
 
+            int characterWidth = (int) characterUvs[2];
+            int characterHeight = fontTexture.getCharacterHeight();
+            float characterUvWidth = characterWidth / (float) fontTexture.getWidth();
+            float characterUvHeight = characterHeight / (float) fontTexture.getHeight();
+
             // calculate texture coordinates for vbo
-            float rightU = characterUvs[0] + CHARACTER_UV_WIDTH;
+            float rightU = characterUvs[0] + characterUvWidth;
             float leftU = characterUvs[0];
             float topV = characterUvs[1];
-            float bottomV = topV + CHARACTER_UV_HEIGHT;
+            float bottomV = topV + characterUvHeight;
 
             // top right vertex
-            vertexArray[vertexIndex] = pixelAspect * 7 + characterOffsetAmounts[0]; // x
+            vertexArray[vertexIndex] = pixelAspect * characterWidth + characterOffsetAmounts[0]; // x
             vertexArray[vertexIndex + 1] = characterOffsetAmounts[1]; // y
             vertexArray[vertexIndex + 2] = rightU; // u
             vertexArray[vertexIndex + 3] = topV; // v
@@ -141,8 +155,8 @@ public class FontMesh {
             vertexIndex += 4;
 
             // bottom right vertex
-            vertexArray[vertexIndex] = pixelAspect * 7 + characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = pixelAspect * 12 + characterOffsetAmounts[1]; // y
+            vertexArray[vertexIndex] = pixelAspect * characterWidth + characterOffsetAmounts[0]; // x
+            vertexArray[vertexIndex + 1] = pixelAspect * characterHeight + characterOffsetAmounts[1]; // y
             vertexArray[vertexIndex + 2] = rightU; // u
             vertexArray[vertexIndex + 3] = bottomV; // v
 
@@ -150,7 +164,7 @@ public class FontMesh {
 
             // bottom left vertex
             vertexArray[vertexIndex] = characterOffsetAmounts[0]; // x
-            vertexArray[vertexIndex + 1] = pixelAspect * 12 + characterOffsetAmounts[1]; // y
+            vertexArray[vertexIndex + 1] = pixelAspect * characterHeight + characterOffsetAmounts[1]; // y
             vertexArray[vertexIndex + 2] = leftU; // u
             vertexArray[vertexIndex + 3] = bottomV; // v
 
@@ -175,7 +189,7 @@ public class FontMesh {
             indexIndex += 6;
             currentVisibleCharacter++;
 
-            characterOffsetAmounts[0] += pixelAspect * CHARACTER_SIZE[0];
+            characterOffsetAmounts[0] += pixelAspect * characterWidth;
         }
 
         glBindVertexArray(VAO);

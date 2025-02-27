@@ -23,11 +23,11 @@ public class SaveSelectionScene extends Scene {
 
 		BACK_BUTTON = new Button("Back To Title", () -> SceneManager.get().changeScene(new TitleScene()));
 		BACK_BUTTON.setSize(100, 20);
-		BACK_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - BACK_BUTTON.getWidth() / 2, Renderer.get().getBottomAnchor() - 25);
+
 
 		CREATE_BUTTON = new Button("New Save", () -> SceneManager.get().changeScene(new NewSaveScene()));
 		CREATE_BUTTON.setSize(100, 20);
-		CREATE_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 30);
+
 
 		LOAD_BUTTON = new Button("Load Save", () -> {
 
@@ -38,14 +38,14 @@ public class SaveSelectionScene extends Scene {
 
 		});
 		LOAD_BUTTON.setSize(100, 20);
-		LOAD_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 55);
+
 	}
 
 	@Override
 	public void update(double deltaTime) {
-
-
-
+		BACK_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - BACK_BUTTON.getWidth() / 2, Renderer.get().getBottomAnchor() - 25);
+		CREATE_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 30);
+		LOAD_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - CREATE_BUTTON.getWidth() / 2, 55);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ layout (location = 2) in vec3 vs_normal;
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
 
+uniform bool vs_vertexSnapping = false;
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;
@@ -30,7 +31,9 @@ void main() {
     fs_normal = normalMatrix * vs_normal;
     fs_normal.z *= -1;
 
-    gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    if (vs_vertexSnapping) {
+        gl_Position = snap(gl_Position, vec2(320 * 0.25, 240 * 0.25));
+    }
 
     fs_textureCoordinates = vs_textureCoordinates;
 

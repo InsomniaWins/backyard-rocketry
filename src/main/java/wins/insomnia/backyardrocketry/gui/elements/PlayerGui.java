@@ -132,7 +132,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 
 			ShaderProgram guiShaderProgram = renderer.getShaderProgram("gui");
 			guiShaderProgram.use();
-			guiShaderProgram.setUniform("fs_alpha", 0.7f);
+			guiShaderProgram.setUniform("fs_alpha", 0.9f);
 
 			TextureRenderer.drawGuiTextureClipped(
 					BlockAtlasTexture.get(),
@@ -167,8 +167,8 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			int hotbarIndex = i == 9 ? 0 : i + 1;
 			TextRenderer.drawText(Integer.toString(hotbarIndex), hotbarX + 11 + i * 28, hotbarY + 5);
 
-			int guiX = hotbarX + 14 + 28 * i;
-			int guiY = hotbarY + 27;
+			int guiX = hotbarX + 13 + 28 * i;
+			int guiY = hotbarY + 28;
 			float blockMeshScale = hotbarItemScales[i];
 
 			renderItemIcon(

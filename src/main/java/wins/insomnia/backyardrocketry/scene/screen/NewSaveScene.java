@@ -151,6 +151,56 @@ public class NewSaveScene extends Scene {
 
 	}
 
+
+	@Override
+	public void update(double deltaTime) {
+
+		previewCameraX = (float) Math.lerp(previewCameraX, desiredPreviewCameraX, deltaTime * 10f);
+		previewCameraY = (float) Math.lerp(previewCameraY, desiredPreviewCameraY, deltaTime * 10f);
+
+
+		if (shouldUpdateSeedPreview) {
+
+			switch (SEED_PREVIEW_STATUS.get()) {
+				case SEED_PREVIEW_GENERATED, SEED_PREVIEW_UNGENERATED -> {
+
+					SEED_PREVIEW_STATUS.set(SEED_PREVIEW_GENERATING);
+					seedPreviewThread = new Thread(GENERATE_SEED_PREVIEW_RUNNABLE, "Seed-Preview-Thread");
+					seedPreviewThread.start();
+					shouldUpdateSeedPreview = false;
+
+				}
+			}
+		}
+
+		int verticalObjectPosition = 15;
+		int verticalObjectIndex = 0;
+		int verticalObjectHeight = 36;
+
+		BACK_BUTTON.setPosition(Renderer.get().getCenterAnchorX() - BACK_BUTTON.getWidth() / 2, Renderer.get().getBottomAnchor() - 25);
+		SAVE_NAME_LINE_EDIT.setPosition(
+				Renderer.get().getCenterAnchorX() - SAVE_NAME_LINE_EDIT.getWidth() / 2,
+				verticalObjectPosition + verticalObjectIndex * verticalObjectHeight
+		);
+		verticalObjectIndex++;
+
+		SAVE_SEED_LINE_EDIT.setPosition(
+				Renderer.get().getCenterAnchorX() - SAVE_SEED_LINE_EDIT.getWidth() / 2,
+				verticalObjectPosition + verticalObjectIndex * verticalObjectHeight
+		);
+
+		verticalObjectIndex++;
+		REFRESH_SEED_BUTTON.setXPosition(SAVE_SEED_LINE_EDIT.getXPosition() + SAVE_SEED_LINE_EDIT.getWidth() + 5);
+		verticalObjectIndex++;
+		REFRESH_SEED_BUTTON.setYPosition(SAVE_SEED_LINE_EDIT.getYPosition());
+		verticalObjectIndex++;
+		CREATE_SAVE_BUTTON.setPosition(
+				Renderer.get().getCenterAnchorX() - CREATE_SAVE_BUTTON.getWidth() / 2,
+				verticalObjectPosition + verticalObjectIndex * verticalObjectHeight + 30
+		);
+		verticalObjectIndex++;
+	}
+
 	private void randomizeSeed() {
 
 		SAVE_SEED_LINE_EDIT.setText(String.valueOf(World.RANDOM.nextLong(0, 999999999999999L)));
@@ -411,28 +461,7 @@ public class NewSaveScene extends Scene {
 
 	}
 
-	@Override
-	public void update(double deltaTime) {
 
-		previewCameraX = (float) Math.lerp(previewCameraX, desiredPreviewCameraX, deltaTime * 10f);
-		previewCameraY = (float) Math.lerp(previewCameraY, desiredPreviewCameraY, deltaTime * 10f);
-
-
-		if (shouldUpdateSeedPreview) {
-
-			switch (SEED_PREVIEW_STATUS.get()) {
-				case SEED_PREVIEW_GENERATED, SEED_PREVIEW_UNGENERATED -> {
-
-					SEED_PREVIEW_STATUS.set(SEED_PREVIEW_GENERATING);
-					seedPreviewThread = new Thread(GENERATE_SEED_PREVIEW_RUNNABLE, "Seed-Preview-Thread");
-					seedPreviewThread.start();
-					shouldUpdateSeedPreview = false;
-
-				}
-			}
-		}
-
-	}
 
 
 	@Override
