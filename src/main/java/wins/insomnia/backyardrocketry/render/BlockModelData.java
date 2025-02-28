@@ -154,6 +154,10 @@ public class BlockModelData {
         return (int) (3f * (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 1f));
     }
 
+    public static float getRandomFloatBasedOnBlockPosition(int x, int y, int z) {
+        return (OpenSimplex2.noise3_ImproveXZ(1, x, y, z) * 0.5f + 0.5f);
+    }
+
     private static BlockModelData fixModelUvs(BlockModelData blockModelData) {
 
         double pixelUnit = BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * (1.0 / 16.0);
@@ -182,11 +186,8 @@ public class BlockModelData {
                 double v = blockV * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS
                         + BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS * atlasCoordinates[1];
 
-                u += pixelUnit;
-                v += pixelUnit;
-
-                u += pixelUnit * 2 * atlasCoordinates[0];
-                v += pixelUnit * 2 * atlasCoordinates[1];
+                u += pixelUnit * BlockAtlasTexture.PIXEL_GAP * atlasCoordinates[0];
+                v += pixelUnit * BlockAtlasTexture.PIXEL_GAP * atlasCoordinates[1];
 
                 faceVertexArray.set(uIndex, u);
                 faceVertexArray.set(vIndex, v);

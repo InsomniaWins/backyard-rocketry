@@ -59,7 +59,7 @@ public class FontMesh {
 
         if (fontTexture == null || fontTexture.isClean()) return;
 
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"\\()|}{;<>-+%?,./!:$_=&~*#][`@^ ";
+        String characters = fontTexture.getKeyString();
 
         CHARACTER_LOCATIONS.clear();
 

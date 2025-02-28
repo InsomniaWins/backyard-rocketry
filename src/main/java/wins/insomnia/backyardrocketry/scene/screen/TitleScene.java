@@ -19,7 +19,7 @@ public class TitleScene extends Scene {
 	private final Button OFFLINE_BUTTON;
 	private final Button QUIT_BUTTON;
 	private final IRenderable POST_RENDER_OBJECT;
-	private final String TITLE_STRING = "Backyard Rocketry";
+	private final String TITLE_STRING = "B A C K Y A R D   R O C K E T R Y";
 	private int titleX = Renderer.get().getCenterAnchorX() - TextRenderer.getTextPixelWidth(TITLE_STRING) / 2;
 	private final int TITLE_Y = 10;
 	private final int CHANGE_BLOCK_TIMER_WAIT_TIME = Updater.FIXED_UPDATES_PER_SECOND;

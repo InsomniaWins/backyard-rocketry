@@ -18,12 +18,31 @@ public class TextRenderer {
 	private static float fontAlpha = 1f;
 	private static Color fontColor = Color.WHITE;
 
+
+	public static int getTextPixelWidth(String text, FontTexture fontTexture) {
+
+		int width = 0;
+
+		for (int i = 0; i < text.length(); i++) {
+
+			char character = text.charAt(i);
+			width += fontTexture.getCharacterWidth(character);
+
+		}
+
+		return width;
+	}
+
 	public static int getTextPixelWidth(String text) {
-		return text.length() * 7;
+		return getTextPixelWidth(text, (FontTexture) TextureManager.getTexture("font"));
+	}
+
+	public static int getTextPixelHeight(int lineAmount, FontTexture fontTexture) {
+		return lineAmount * fontTexture.getCharacterHeight();
 	}
 
 	public static int getTextPixelHeight(int lineAmount) {
-		return lineAmount * 12;
+		return getTextPixelHeight(lineAmount, (FontTexture) TextureManager.getTexture("font"));
 	}
 
 	public static void drawText(String text, int guiX, int guiY) {

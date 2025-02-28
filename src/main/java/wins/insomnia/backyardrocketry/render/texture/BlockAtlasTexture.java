@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 public class BlockAtlasTexture extends Texture {
 
+	public static final int PIXEL_GAP = 0;
 	public static final float PIXEL_SCALE_ON_ATLAS = 1f / 512f;
 	public static final float BLOCK_SCALE_ON_ATLAS = PIXEL_SCALE_ON_ATLAS * 16f;
 	public static final float HALF_BLOCK_SCALE_ON_ATLAS = BLOCK_SCALE_ON_ATLAS * 0.5f;
@@ -22,6 +23,7 @@ public class BlockAtlasTexture extends Texture {
 		registerBlockTexture("dirt", new BlockTextureFrames(new Vector2i(2, 0)));
 		registerBlockTexture("grass_bottom", new BlockTextureFrames(new Vector2i(3, 0)));
 		registerBlockTexture("grass_top", new BlockTextureFrames(new Vector2i(4, 0)));
+		registerBlockTexture("grass_top_flowers", new BlockTextureFrames(new Vector2i(3, 2)));
 		registerBlockTexture("log_top", new BlockTextureFrames(new Vector2i(0, 1)));
 		registerBlockTexture("log_side", new BlockTextureFrames(new Vector2i(1, 1)));
 		registerBlockTexture("leaves", new BlockTextureFrames(new Vector2i(2, 1)));
@@ -89,8 +91,8 @@ public class BlockAtlasTexture extends Texture {
 	public static float[] convertAtlasPositionToTexturePosition(int[] framePosition) {
 
 		return new float[] {
-				framePosition[0] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[0] * 2 * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS + BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS,
-				framePosition[1] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[1] * 2 * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS + BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS
+				framePosition[0] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[0] * PIXEL_GAP * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS,
+				framePosition[1] * BlockAtlasTexture.BLOCK_SCALE_ON_ATLAS + framePosition[1] * PIXEL_GAP * BlockAtlasTexture.PIXEL_SCALE_ON_ATLAS
 		};
 
 	}

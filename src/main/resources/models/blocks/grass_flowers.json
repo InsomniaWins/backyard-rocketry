@@ -1,0 +1,18 @@
+{
+	"parent": "grass",
+	"textures": {
+		"particle": "grass_top",
+		"pos_y": "grass_top_flowers",
+		"pos_x": "grass_top",
+		"neg_x": "grass_top",
+		"pos_z": "grass_top",
+		"neg_z": "grass_top",
+		"neg_y": "grass_bottom",
+		"icon": "grass_top"
+	},
+	"faces": {
+		"top": {
+			"possible_rotations": [0.0, 90.0, 180.0, 270.0]
+		}
+	}
+}

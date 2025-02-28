@@ -22,14 +22,6 @@ public class ItemStack {
 		return getItem().getKilogramsPerLiter() * getVolume();
 	}
 
-	public int getMaxVolume() {
-		return item.getMaxVolume();
-	}
-
-	public int getRemainingVolumeForFullStack() {
-		return item.getMaxVolume() - volume;
-	}
-
 	public float getStackDisplayAmount() {
 		return getVolume() / (float) getItem().getVolumePerItem();
 	}

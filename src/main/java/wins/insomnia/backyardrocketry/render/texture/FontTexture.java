@@ -154,7 +154,7 @@ public class FontTexture extends Texture {
 			5, 7 * 4,  26, // o
 			5, 7 * 5,  26, // p
 			6, 7 * 6,  26, // q
-			5, 7 * 7,  26, // r
+			4, 7 * 7,  26, // r
 			4, 7 * 8,  26, // s
 			4, 7 * 9,  26, // t
 			5, 7 * 10, 26, // u
@@ -211,7 +211,7 @@ public class FontTexture extends Texture {
 	};
 
 
-
+	private final String KEY_STRING; // string holding order of characeters
 	private final int[] CHARACTER_DIMENSIONS;
 	private final int CHARACTER_HEIGHT;
 
@@ -219,6 +219,25 @@ public class FontTexture extends Texture {
 		super(textureName);
 		CHARACTER_HEIGHT = characterHeight;
 		CHARACTER_DIMENSIONS = characterDimensions;
+		KEY_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"\\()|}{;<>-+%?,./!:$_=&~*#][`@^ ";
+	}
+
+	public String getKeyString() {
+		return KEY_STRING;
+	}
+
+	public int getCharacterWidth(char character) {
+
+		for (int i = 0; i < getKeyString().length(); i++) {
+
+			if (KEY_STRING.charAt(i) == character) {
+				return getCharacterWidth(i);
+			}
+
+		}
+
+		return 0;
+
 	}
 
 	public int getCharacterWidth(int characterIndex) {

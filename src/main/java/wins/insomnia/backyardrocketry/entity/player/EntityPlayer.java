@@ -4,6 +4,7 @@ import org.joml.Math;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
+import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
@@ -21,7 +22,7 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody {
+public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBody, IBoundingBoxEntity {
 
 	public static final int MOVEMENT_INPUT_SIZE = 7; // amount of inputs to send
 	protected final int MOVEMENT_INPUT_FORWARD = 0;
@@ -300,4 +301,18 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	public BlockRaycastResult getTargetBlock() {
 		return targetBlock;
 	}
+
+
+	public static class PlayerMovementResult {
+
+		public Vector3d position;
+		public Vector3d velocity;
+		public boolean onGround;
+
+		public PlayerMovementResult(EntityPlayer player) {
+			onGround = player.isOnGround();
+		}
+
+	}
+
 }

@@ -5,6 +5,6 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class BlockItemGlass extends BlockItem {
 	public BlockItemGlass() {
-		super(Blocks.GLASS, "Glass", "glass", 1000, 99000, 2.5);
+		super(Blocks.GLASS, "Glass", "glass", 1000, 2.5);
 	}
 }

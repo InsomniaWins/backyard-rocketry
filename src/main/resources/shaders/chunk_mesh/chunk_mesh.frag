@@ -28,7 +28,7 @@ float ambientLightStrength = 0.7;
 
 void main() {
 
-    float sizeOfBlockOnAtlas = 18.0 / 512.0;
+    float sizeOfBlockOnAtlas = 16.0 / 512.0;
 
     vec2 texCoord = vec2(fs_textureCoordinates.x, fs_textureCoordinates.y);
     int frameIndex = (int(fs_time * fs_framesPerSecond) % fs_frameAmount);

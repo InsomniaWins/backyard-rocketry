@@ -355,6 +355,10 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     return false;
                 }
 
+                if (block == Blocks.WATER) {
+                    return (posYNeighbor != Blocks.WATER);
+                }
+
                 if (Blocks.shouldHideNeighboringFaces(block) && posYNeighbor == block) {
                     return false;
                 }

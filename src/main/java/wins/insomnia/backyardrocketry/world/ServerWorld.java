@@ -191,6 +191,9 @@ public class ServerWorld extends World {
 
 	}
 
+	public Collection<EntityServerPlayer> getServerPlayers() {
+		return SERVER_PLAYER_HASH_MAP.values();
+	}
 
 	@Override
 	public void loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {

@@ -12,6 +12,8 @@ import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
+import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
+import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.*;
@@ -21,6 +23,7 @@ import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
@@ -175,6 +178,9 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		if (isFlying()) {
 			moveSpeed = FLY_SPEED;
+
+			crouching = false;
+
 		} else {
 			if (movementInputs[MOVEMENT_INPUT_CROUCH]) {
 				moveSpeed = CROUCH_SPEED;
@@ -183,7 +189,11 @@ public class EntityClientPlayer extends EntityPlayer {
 			} else {
 				moveSpeed = WALK_SPEED;
 			}
+
+			crouching = movementInputs[MOVEMENT_INPUT_CROUCH];
 		}
+
+
 
 		moveAmount.mul(moveSpeed);
 
@@ -348,9 +358,83 @@ public class EntityClientPlayer extends EntityPlayer {
 
 			if (face != null) {
 
-				int worldX = targetBlock.getBlockX() + face.getX();
-				int worldY = targetBlock.getBlockY() + face.getY();
-				int worldZ = targetBlock.getBlockZ() + face.getZ();
+
+
+				int placeOffsetX = 0;
+				int placeOffsetY = 0;
+				int placeOffsetZ = 0;
+
+				if (KeyboardInput.get().isKeyPressed(GLFW_KEY_LEFT_ALT)) {
+					Camera camera = Renderer.get().getCamera();
+
+					Vector3d rayStart = new Vector3d(camera.getTransform().getPosition());
+
+					Vector3d rayEnd = new Vector3d(0, 0, -1)
+							.rotateX(-camera.getTransform().getRotation().x)
+							.rotateY(-camera.getTransform().getRotation().y)
+							.mul(getReachDistance()).add(rayStart);
+
+					BoundingBox blockBoundingBox = Blocks.getBlockCollision(targetBlock.getBlock());
+					blockBoundingBox.getMin().add(targetBlock.getBlockX(), targetBlock.getBlockY(), targetBlock.getBlockZ());
+					blockBoundingBox.getMax().add(targetBlock.getBlockX(), targetBlock.getBlockY(), targetBlock.getBlockZ());
+
+					double[] hitPoint = new double[3];
+					boolean result = blockBoundingBox.lineAABB(rayStart, rayEnd, hitPoint);
+
+					double hitPointX = hitPoint[0] - targetBlock.getBlockX() - 0.5f;
+					double hitPointY = hitPoint[1] - targetBlock.getBlockY() - 0.5f;
+					double hitPointZ = hitPoint[2] - targetBlock.getBlockZ() - 0.5f;
+
+					if (result) {
+
+
+						if (face == Blocks.Face.POS_Y || face == Blocks.Face.NEG_Y) {
+
+							int yOff = face == Blocks.Face.POS_Y ? -1 : 1;
+
+							if (Math.abs(hitPointX) > Math.abs(hitPointZ)) {
+								placeOffsetX = (int) Math.signum(hitPointX);
+								placeOffsetY = yOff;
+							} else if (Math.abs(hitPointX) < Math.abs(hitPointZ)) {
+								placeOffsetZ = (int) Math.signum(hitPointZ);
+								placeOffsetY = yOff;
+							}
+
+						} else if (face == Blocks.Face.POS_X || face == Blocks.Face.NEG_X) {
+
+							int xOff = face == Blocks.Face.POS_X ? -1 : 1;
+
+							if (Math.abs(hitPointY) > Math.abs(hitPointZ)) {
+								placeOffsetY = (int) Math.signum(hitPointY);
+								placeOffsetX = xOff;
+							} else if (Math.abs(hitPointY) < Math.abs(hitPointZ)) {
+								placeOffsetZ = (int) Math.signum(hitPointZ);
+								placeOffsetX = xOff;
+							}
+
+						} else if (face == Blocks.Face.POS_Z || face == Blocks.Face.NEG_Z) {
+
+							int zOff = face == Blocks.Face.POS_Z ? -1 : 1;
+
+							if (Math.abs(hitPointY) > Math.abs(hitPointX)) {
+								placeOffsetY = (int) Math.signum(hitPointY);
+								placeOffsetZ = zOff;
+							} else if (Math.abs(hitPointY) < Math.abs(hitPointX)) {
+								placeOffsetX = (int) Math.signum(hitPointX);
+								placeOffsetZ = zOff;
+							}
+
+						}
+
+
+
+
+					}
+				}
+
+				int worldX = targetBlock.getBlockX() + face.getX() + placeOffsetX;
+				int worldY = targetBlock.getBlockY() + face.getY() + placeOffsetY;
+				int worldZ = targetBlock.getBlockZ() + face.getZ() + placeOffsetZ;
 
 				byte block = getHotbarSlotContents(getCurrentHotbarSlot());
 
@@ -380,12 +464,6 @@ public class EntityClientPlayer extends EntityPlayer {
 				.rotateY(-getTransform().getRotation().y);
 
 		targetBlock = Collision.blockRaycast(getWorld(), rayFrom, rayDirection, getReachDistance());
-
-
-
-
-
-
 
 
 

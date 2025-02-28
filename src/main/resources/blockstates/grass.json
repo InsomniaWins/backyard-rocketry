@@ -1,6 +1,8 @@
 {
 
-  "default": "grass"
+  "default": "grass",
+  "{flowers=false}": "grass",
+  "{flowers=true}": "grass_flowers"
 
 }
 

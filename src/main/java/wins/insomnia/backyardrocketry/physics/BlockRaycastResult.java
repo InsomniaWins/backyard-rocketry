@@ -58,4 +58,11 @@ public class BlockRaycastResult {
         return equals(otherBlockRaycastResult, true);
     }
 
+    public byte getBlock() {
+        return chunk.getBlock(
+                chunk.toLocalX(blockX),
+                chunk.toLocalY(blockY),
+                chunk.toLocalZ(blockZ)
+        );
+    }
 }
