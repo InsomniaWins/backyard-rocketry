@@ -7,6 +7,7 @@ layout (location = 3) in float vs_ambientOcclusionValue;
 layout (location = 4) in float vs_framesPerSecond;
 layout (location = 5) in float vs_frameAmount;
 layout (location = 6) in float vs_waveStrength;
+layout (location = 7) in vec4 vs_lightValue;
 
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
@@ -16,9 +17,10 @@ out float fs_affine;
 out float fs_framesPerSecond;
 out int fs_frameAmount;
 out vec3 fs_fragmentPosition;
+out vec3 fs_lightValue;
 
 uniform float vs_time;
-uniform bool vs_vertexSnapping = false;
+uniform bool vs_vertexSnapping = true;
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;
@@ -60,4 +62,5 @@ void main() {
     fs_frameAmount = int(vs_frameAmount);
     fs_fragmentPosition = vec3(vs_modelMatrix * vec4(vs_vertexPosition, 1.0));
 
+    fs_lightValue = vs_lightValue.xyz / 16.0;
 }

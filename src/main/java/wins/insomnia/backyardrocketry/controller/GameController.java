@@ -42,7 +42,7 @@ public abstract class GameController implements IUpdateListener, IFixedUpdateLis
 
 				String level = "[" + record.getLevel().getName() + "]";
 
-				return record.getLoggerName() + " " + level + " " + time + " " + record.getMessage() + "\"\n";
+				return record.getLoggerName() + " " + level + " " + time + " \"" + record.getMessage() + "\"\n";
 			}
 		};
 		LOGGER_CONSOLE_HANDLER.setFormatter(LOGGER_CONSOLE_HANDLER_FORMATTER);

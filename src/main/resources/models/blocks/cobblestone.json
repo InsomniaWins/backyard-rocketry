@@ -1,5 +1,5 @@
 {
-	"parent": "block_all_random_rotation",
+	"parent": "block_all",
 	"textures": {
 		"particle": "cobblestone",
 		"all": "cobblestone",

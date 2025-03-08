@@ -16,6 +16,7 @@ import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.util.debug.DebugInfo;
+import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.debug.DebugTime;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
@@ -506,7 +507,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 debugString.append("\n").append(DebugInfo.getPlayerTargetBlockInfo(clientPlayer));
             }
 
-            TextRenderer.drawText(debugString.toString(), 0, 32, getGuiScale(), TextureManager.getTexture("debug_font"));
+            TextRenderer.drawText(debugString.toString(), 0, 120, getGuiScale(), TextureManager.getTexture("debug_font"));
+            DebugOutput.render();
         }
 
 

@@ -95,7 +95,7 @@ public class PacketLoadChunk extends Packet {
 					clientWorld.receivedChunkDataFromServer(chunkData);
 				} else {
 
-					((ClientChunk) chunk).getChunkData().replace(chunkData);
+					((ClientChunk) chunk).getChunkData().replaceBlocks(chunkData);
 
 				}
 

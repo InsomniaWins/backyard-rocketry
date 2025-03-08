@@ -2,7 +2,11 @@ package wins.insomnia.backyardrocketry.world.chunk;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import wins.insomnia.backyardrocketry.controller.ClientController;
+import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.render.Color;
+import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -72,7 +76,9 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return WORLD;
     }
 
-
+    public void updateLighting() {
+        chunkData.updateLighting();
+    }
 
 
     public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
@@ -168,6 +174,33 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         }
 
         return chunkData.getBlock(x, y, z);
+    }
+
+    public short getLightLevel(int x, int y, int z) {
+
+        // if block is out of chunk bounds
+        if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
+
+            int globalX = toGlobalX(x);
+            int globalY = toGlobalY(y);
+            int globalZ = toGlobalZ(z);
+
+            // if block is out of world border
+            if (globalX > World.getSizeX()-1 || globalX < 0 || globalY > World.getSizeY()-1 || globalY < 0 || globalZ > World.getSizeZ()-1 || globalZ < 0 ) {
+                return 0x0000;
+            }
+
+            Chunk chunk = WORLD.getChunkContainingBlock(globalX, globalY, globalZ);
+
+            if (chunk == null) {
+                return 0x010ff;
+            }
+
+            return chunk.getLightLevel(chunk.toLocalX(globalX), chunk.toLocalY(globalY), chunk.toLocalZ(globalZ));
+        }
+
+        return chunkData.getLightValue(x, y, z);
+
     }
 
     public byte getBlock(int x, int y, int z) {

@@ -9,6 +9,7 @@ in float fs_ambientOcclusionValue;
 in float fs_framesPerSecond;
 in vec3 fs_fragmentPosition;
 flat in int fs_frameAmount;
+in vec3 fs_lightValue;
 
 uniform vec3 fs_viewPosition;
 uniform sampler2D fs_texture;
@@ -59,7 +60,7 @@ void main() {
     vec4 nextFrameFragmentColor = texture(fs_texture, vec2(nextFrameTexCoord.x, nextFrameTexCoord.y));
 
     vec4 fragmentColor = mix(currentFrameFragmentColor, nextFrameFragmentColor, mod(fs_time * fs_framesPerSecond, 1));
-
+    fragmentColor.rgb *= fs_lightValue;
 
     // transparency
     if (fragmentColor.a == 0.0) {
@@ -102,6 +103,7 @@ void main() {
 
             // apply fog
             fragmentColor = mix(fragmentColor, vec4(fs_fogColor, 1.0), fogFactor);
+
 
         } else {
 

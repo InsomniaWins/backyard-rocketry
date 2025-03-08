@@ -614,4 +614,8 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     public Vector3i getBlockPosition(Vector3d position) {
         return new Vector3i((int) position.x, (int) position.y, (int) position.z);
     }
+
+    public Set<ChunkPosition> getLoadedChunkPositions() {
+        return CHUNKS.keySet();
+    }
 }

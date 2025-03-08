@@ -18,6 +18,7 @@ import wins.insomnia.backyardrocketry.physics.BoundingBoxRaycastResult;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.render.*;
 import wins.insomnia.backyardrocketry.util.Transform;
+import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -25,6 +26,7 @@ import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
 
 import java.util.ArrayList;
@@ -309,6 +311,12 @@ public class EntityClientPlayer extends EntityPlayer {
 		hotbarManagement();
 
 
+		if (KeyboardInput.get().isKeyJustPressed(GLFW_KEY_B)) {
+			DebugOutput.outputText(new DebugOutput.DebugText[] {
+					new DebugOutput.DebugText("Player Chunk: " + getWorld().getPlayersChunkPosition(this), Color.GREEN)
+			});
+		}
+
 	}
 
 	public boolean isUnderWater() {
@@ -338,7 +346,7 @@ public class EntityClientPlayer extends EntityPlayer {
 	gets block-placement offset for alt-placing blocks
 
 	 */
-	private void getBlockPlacementFaceOffset(BlockRaycastResult targetBlock, int[] dest) {
+	/*private void getBlockPlacementFaceOffset(BlockRaycastResult targetBlock, int[] dest) {
 		Camera camera = Renderer.get().getCamera();
 
 		Vector3d rayStart = new Vector3d(camera.getTransform().getPosition());
@@ -363,7 +371,6 @@ public class EntityClientPlayer extends EntityPlayer {
 		double hitPointZ = hitPoint[2] - targetBlock.getBlockZ() - 0.5f;
 
 		if (!result) return;
-
 
 		if (targetBlock.getFace() == Blocks.Face.POS_Y || targetBlock.getFace() == Blocks.Face.NEG_Y) {
 
@@ -402,7 +409,79 @@ public class EntityClientPlayer extends EntityPlayer {
 			}
 
 		}
+	}*/
+
+
+	private void getBlockPlacementFaceOffset(BlockRaycastResult targetBlock, int[] dest) {
+		Camera camera = Renderer.get().getCamera();
+
+		Vector3d rayStart = new Vector3d(camera.getTransform().getPosition());
+
+		Vector3d rayEnd = new Vector3d(0, 0, -1)
+				.rotateX(-camera.getTransform().getRotation().x)
+				.rotateY(-camera.getTransform().getRotation().y)
+				.mul(getReachDistance());
+
+		Vector3d direction = new Vector3d(rayEnd);
+		rayEnd.add(rayStart);
+
+		BoundingBox blockBoundingBox = Blocks.getBlockCollision(targetBlock.getBlock());
+
+		if (blockBoundingBox == null) return;
+
+		blockBoundingBox.getMin().add(targetBlock.getBlockX(), targetBlock.getBlockY(), targetBlock.getBlockZ());
+		blockBoundingBox.getMax().add(targetBlock.getBlockX(), targetBlock.getBlockY(), targetBlock.getBlockZ());
+
+		double[] hitPoint = new double[3];
+		boolean result = blockBoundingBox.lineAABB(rayStart, rayEnd, hitPoint);
+
+		double hitPointX = hitPoint[0] - targetBlock.getBlockX() - 0.5f;
+		double hitPointY = hitPoint[1] - targetBlock.getBlockY() - 0.5f;
+		double hitPointZ = hitPoint[2] - targetBlock.getBlockZ() - 0.5f;
+
+		if (!result) return;
+
+		if (targetBlock.getFace() == Blocks.Face.POS_Y || targetBlock.getFace() == Blocks.Face.NEG_Y) {
+
+			if (Math.abs(direction.x) > Math.abs(direction.z)) {
+
+				dest[0] = (int) Math.signum(direction.x);
+				dest[1] = targetBlock.getFace() == Blocks.Face.POS_Y ? -1 : 1;
+
+			} else if (Math.abs(direction.x) < Math.abs(direction.z)) {
+
+				dest[1] = targetBlock.getFace() == Blocks.Face.POS_Y ? -1 : 1;
+				dest[2] = (int) Math.signum(direction.z);
+
+			}
+
+		} else if (targetBlock.getFace() == Blocks.Face.POS_X || targetBlock.getFace() == Blocks.Face.NEG_X) {
+
+			int xOff = targetBlock.getFace() == Blocks.Face.POS_X ? -1 : 1;
+
+			if (Math.abs(hitPointY) > Math.abs(hitPointZ)) {
+				dest[1] = (int) Math.signum(hitPointY);
+				dest[0] = xOff;
+			} else if (Math.abs(hitPointY) < Math.abs(hitPointZ)) {
+				dest[2] = (int) Math.signum(hitPointZ);
+				dest[0] = xOff;
+			}
+
+		} else if (targetBlock.getFace() == Blocks.Face.POS_Z || targetBlock.getFace() == Blocks.Face.NEG_Z) {
+
+			int zOff = targetBlock.getFace() == Blocks.Face.POS_Z ? -1 : 1;
+
+			if (Math.abs(hitPointY) > Math.abs(hitPointX)) {
+				dest[1] = (int) Math.signum(hitPointY);
+				dest[2] = zOff;
+			} else if (Math.abs(hitPointY) < Math.abs(hitPointX)) {
+				dest[0] = (int) Math.signum(hitPointX);
+				dest[2] = zOff;
+			}
+
+		}
 	}
+
 
 
 	private void handleBlockInteractions() {

@@ -98,12 +98,12 @@ public class WorldGeneration {
                         }
                     }
 
-
                     chunkData.setBlock(x, y, z, block);
 
                     blockState = Blocks.getBlock(block).onPlace(x, y, z, null);
 
                     chunkData.setBlockState(x, y, z, blockState);
+
 
                 }
             }

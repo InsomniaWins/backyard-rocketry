@@ -15,6 +15,7 @@ public class ChunkData {
 	private final int Z;
 	private byte[][][] blocks;
 	private byte[][][] blockStates;
+	private short[][][] lightValues;
 	private Thread ownerThread = null;
 
 
@@ -40,7 +41,7 @@ public class ChunkData {
 
 	}
 
-	public void replace(ChunkData newChunkData) {
+	public void replaceBlocks(ChunkData newChunkData) {
 
 		while (!grabThreadOwnership());
 
@@ -51,6 +52,23 @@ public class ChunkData {
 
 	}
 
+	public void updateLighting() {
+
+		while (!grabThreadOwnership());
+
+		for (int x = 0; x < Chunk.SIZE_X; x++) {
+			for (int y = 0; y < Chunk.SIZE_Y; y++) {
+				for (int z = 0; z < Chunk.SIZE_Z; z++) {
+					setLightValue(x, y, z, (short) 0xFFFF);
+				}
+			}
+		}
+
+		while (!loseThreadOwnership());
+
+	}
+
+
 	private ChunkData(long seed, int chunkX, int chunkY, int chunkZ, boolean shouldGenerate) {
 
 		this(seed, chunkX, chunkY, chunkZ, shouldGenerate, false);
@@ -59,6 +77,10 @@ public class ChunkData {
 
 	public ChunkData(long seed, int chunkX, int chunkY, int chunkZ) {
 		this(seed, chunkX, chunkY, chunkZ, true);
+	}
+
+	public boolean hasThreadOwnership() {
+		return ownerThread == Thread.currentThread();
 	}
 
 	public boolean loseThreadOwnership() {
@@ -107,6 +129,7 @@ public class ChunkData {
 
 		blocks = new byte[Chunk.SIZE_X][Chunk.SIZE_Y][Chunk.SIZE_Z];
 		blockStates = new byte[Chunk.SIZE_X][Chunk.SIZE_Y][Chunk.SIZE_Z];
+		lightValues = new short[Chunk.SIZE_X][Chunk.SIZE_Y][Chunk.SIZE_Z];
 
 	}
 
@@ -121,12 +144,21 @@ public class ChunkData {
 		blockStates[x][y][z] = blockState;
 	}
 
+	// make sure you have thread ownership
+	public void setLightValue(int x, int y, int z, short lightValue) {
+		lightValues[x][y][z] = lightValue;
+	}
+
 	public byte getBlock(int x, int y, int z) {
 		return blocks[x][y][z];
 	}
 
 	public byte getBlockState(int x, int y, int z) {
 		return blockStates[x][y][z];
+	}
+
+	public short getLightValue(int x, int y, int z) {
+		return lightValues[x][y][z];
 	}
 
 	public byte[][][] getBlocks() {

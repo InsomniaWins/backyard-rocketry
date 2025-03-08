@@ -7,7 +7,7 @@ layout (location = 2) in vec3 vs_normal;
 out vec2 fs_textureCoordinates;
 out vec3 fs_normal;
 
-uniform bool vs_vertexSnapping = false;
+uniform bool vs_vertexSnapping = true;
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;

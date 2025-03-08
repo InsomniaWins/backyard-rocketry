@@ -1,16 +1,16 @@
 package wins.insomnia.backyardrocketry.render;
 
+import com.google.common.primitives.Shorts;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
-import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.util.HelpfulMath;
+import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
-import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ChunkMesh extends Mesh implements IPositionOwner {
 
-    public static final int VERTEX_ATTRIBUTE_FLOAT_AMOUNT = 12;
+    public static final int VERTEX_ATTRIBUTE_FLOAT_AMOUNT = 16;
     private Chunk chunk;
     public boolean unloaded = false;
 
@@ -98,6 +98,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glVertexAttribPointer(4, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 9 * Float.BYTES);
         glVertexAttribPointer(5, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 10 * Float.BYTES);
         glVertexAttribPointer(6, 1, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 11 * Float.BYTES);
+        glVertexAttribPointer(7, 4, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 12 * Float.BYTES);
 
 
         readyToCreateOpenGLMeshData.set(false);
@@ -177,6 +178,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glEnableVertexAttribArray(4);
         glEnableVertexAttribArray(5);
         glEnableVertexAttribArray(6);
+        glEnableVertexAttribArray(7);
 
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
@@ -185,6 +187,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glDisableVertexAttribArray(4);
         glDisableVertexAttribArray(5);
         glDisableVertexAttribArray(6);
+        glDisableVertexAttribArray(7);
     }
 
     public void generateMesh(byte[][][] blocks, byte[][][] blockStates) {
@@ -192,6 +195,8 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     }
 
     public void generateMesh(byte[][][] blocks, byte[][][] blockStates, boolean isDelayed) {
+
+        chunk.updateLighting();
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
@@ -274,7 +279,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         }
 
 
-                        String faceTextureName = (String) textures.get(faceData.get("texture"));
+                        String faceTextureName = textures.get((String) faceData.get("texture"));
 
                         if (shouldAddFaceToMesh(cullface, block, blockNeighbors)) {
 
@@ -667,11 +672,24 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
 
 
-    public void addFace(boolean ambientOcclusion, ArrayList<Float> vertices, ArrayList<Integer> indices, ArrayList<Double> faceVertexArray, ArrayList<Integer> faceIndexArray, int offX, int offY, int offZ, byte[][][] blockNeighbors, BlockAtlasTexture.BlockTexture blockTexture, double textureRotationValue, float waveStrength) {
+    public void addFace(
+            boolean ambientOcclusion,
+            ArrayList<Float> vertices,
+            ArrayList<Integer> indices,
+            ArrayList<Double> faceVertexArray,
+            ArrayList<Integer> faceIndexArray,
+            int offX, int offY, int offZ,
+            byte[][][] blockNeighbors,
+            BlockAtlasTexture.BlockTexture blockTexture,
+            double textureRotationValue,
+            float waveStrength
+    ) {
 
         textureRotationValue = Math.toRadians(textureRotationValue);
 
         float[] textureUV = blockTexture.getFrames().getFrameUV(blockTexture.getFrames().getCurrentFrameIndex());
+
+        int lightValue = 0x0000;
 
         ChunkPosition chunkPosition = chunk.getChunkPosition();
 
@@ -727,9 +745,60 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
                     continue;
 
-                } else if (vertexData == 5 || vertexData == 6 || vertexData == 7) {
+                } else if (vertexDataIndex == 5 || vertexDataIndex == 6 || vertexDataIndex == 7) {
                     // set normal of vertex
                     vertexNormal[vertexDataIndex - 5] = vertexData;
+
+                    // if the normal of the vertex is ready
+                    if (vertexDataIndex == 7) {
+
+
+
+                        // add lighting
+                        short lightValueShort;
+
+                        byte block = blockNeighbors[1][1][1];
+                        if (Blocks.isBlockTransparent(block)) {
+
+                             lightValueShort = chunk.getLightLevel(offX, offY, offZ);
+
+                        } else {
+
+                            float absX = Math.abs(vertexNormal[0]);
+                            float absY = Math.abs(vertexNormal[1]);
+                            float absZ = Math.abs(vertexNormal[2]);
+
+                            if (absX > absY && absX > absZ) {
+
+                                if (vertexNormal[0] > 0f) {
+                                    lightValueShort = chunk.getLightLevel(offX + 1, offY, offZ);
+                                } else {
+                                    lightValueShort = chunk.getLightLevel(offX - 1, offY, offZ);
+                                }
+
+                            } else if (absY > absX && absY > absZ) {
+
+                                if (vertexNormal[1] > 0f) {
+                                    lightValueShort = chunk.getLightLevel(offX, offY + 1, offZ);
+                                } else {
+                                    lightValueShort = chunk.getLightLevel(offX, offY - 1, offZ);
+                                }
+
+                            } else {
+
+                                if (vertexNormal[2] > 0f) {
+                                    lightValueShort = chunk.getLightLevel(offX, offY, offZ + 1);
+                                } else {
+                                    lightValueShort = chunk.getLightLevel(offX, offY, offZ - 1);
+                                }
+
+                            }
+
+                        }
+
+                        lightValue = (lightValueShort << 16);
+
+                    }
 
                 }
 
@@ -746,7 +815,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         vertices.add(aoValue);
 
                     } else {
-                        //vertices.add(1f);
                         vertices.add(
                                 WorldGeneration.getBlockTint(
                                         getChunk().getWorld().getSeed(),
@@ -760,6 +828,17 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     vertices.add((float) blockTexture.getFrames().getFramesPerSecond());
                     vertices.add((float) blockTexture.getFrames().getFrameAmount());
                     vertices.add(waveStrength);
+
+                    float lightRed = (float) ((lightValue) >>> 28);
+                    float lightGreen = (float) ((lightValue << 4) >>> 28);
+                    float lightBlue = (float) ((lightValue << 8) >>> 28);
+                    float lightSun = (float) ((lightValue << 12) >>> 28);
+
+                    vertices.add(lightRed);
+                    vertices.add(lightGreen);
+                    vertices.add(lightBlue);
+                    vertices.add(lightSun);
+
                 }
 
             }
