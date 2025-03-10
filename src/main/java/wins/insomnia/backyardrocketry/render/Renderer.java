@@ -4,6 +4,7 @@ import org.joml.*;
 import org.joml.Math;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11;
+import org.w3c.dom.Text;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
@@ -511,6 +512,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
             DebugOutput.render();
         }
 
+        TextRenderer.drawText(BackyardRocketry.getVersionString(), getRightAnchor() - TextRenderer.getTextPixelWidth(BackyardRocketry.getVersionString()), 0, getGuiScale(), TextureManager.getTexture("debug_font"));
 
         /*
         StringBuilder controlsStringBuilder = new StringBuilder();

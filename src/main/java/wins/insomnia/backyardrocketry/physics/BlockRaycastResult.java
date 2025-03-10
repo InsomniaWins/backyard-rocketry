@@ -65,4 +65,12 @@ public class BlockRaycastResult {
                 chunk.toLocalZ(blockZ)
         );
     }
+
+    public short getLightValue() {
+        return chunk.getLightValue(
+                chunk.toLocalX(blockX),
+                chunk.toLocalY(blockY),
+                chunk.toLocalZ(blockZ)
+        );
+    }
 }

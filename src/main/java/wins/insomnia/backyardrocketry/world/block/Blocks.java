@@ -93,6 +93,12 @@ public class Blocks {
         return BLOCK_MAP.get(block).getName();
     }
 
+    public static short getBlockMinimumLightLevel(byte block) {
+        if (BLOCK_MAP.get(block) == null) return 0x00;
+
+        return BLOCK_MAP.get(block).getMinimumLightLevel();
+    }
+
     public static boolean isBlockTransparent(byte block) {
 
         if (BLOCK_MAP.get(block) == null) return false;

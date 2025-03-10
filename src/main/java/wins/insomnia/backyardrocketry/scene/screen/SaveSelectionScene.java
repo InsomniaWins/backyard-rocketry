@@ -72,12 +72,6 @@ public class SaveSelectionScene extends Scene {
 
 		TextRenderer.drawTextOutline(titleString, textX, 10);
 
-		String versionString = BackyardRocketry.getVersionString();
-		TextRenderer.drawTextOutline(
-				versionString,
-				Renderer.get().getRightAnchor() - TextRenderer.getTextPixelWidth(versionString),
-				Renderer.get().getBottomAnchor() - TextRenderer.getTextPixelHeight(1)
-		);
 
 	}
 

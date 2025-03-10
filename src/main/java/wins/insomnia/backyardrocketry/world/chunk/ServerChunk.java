@@ -314,40 +314,14 @@ public class ServerChunk extends Chunk {
 
 		setBlock(x, y, z, Blocks.AIR, (byte) 0, false);
 
-
 		if (dropLoot) {
 
-			BlockLoot blockLoot = BlockLoot.getBlockLoot(blockBroken);
-
-			if (blockLoot == null) {
-				return;
-			}
-
-			ArrayList<ArrayList<Object>> defaultLoot = blockLoot.getLootOfType("default");
-			for (ArrayList<Object> lootEntry : defaultLoot) {
-
-				String itemSynonym = (String) lootEntry.get(0);
-				int volume = (Integer) lootEntry.get(1);
-
-				Item item = Items.getItem(itemSynonym);
-				ItemStack itemStack = new ItemStack(item, volume);
-
-				ServerWorld serverWorld = ServerWorld.getServerWorld();
-				if (serverWorld != null) {
-
-					serverWorld.dropItem(
-							itemStack,
-							getX() + x + 0.5f,
-							getY() + y + 0.5f,
-							getZ() + z + 0.5f,
-							0.0,
-							0.0,
-							0.0
-					);
-
-				}
-
-			}
+			dropBlockLoot(
+					blockBroken,
+					getX() + x + 0.5f,
+					getY() + y + 0.5f,
+					getZ() + z + 0.5f
+			);
 
 		}
 
@@ -358,6 +332,38 @@ public class ServerChunk extends Chunk {
 						.setWorldZ(toGlobalZ(z))
 		);
 
+	}
+
+	public void dropBlockLoot(byte block, double x, double y, double z) {
+		BlockLoot blockLoot = BlockLoot.getBlockLoot(block);
+
+		if (blockLoot == null) {
+			return;
+		}
+
+		ArrayList<ArrayList<Object>> defaultLoot = blockLoot.getLootOfType("default");
+		for (ArrayList<Object> lootEntry : defaultLoot) {
+
+			String itemSynonym = (String) lootEntry.get(0);
+			int volume = (Integer) lootEntry.get(1);
+
+			Item item = Items.getItem(itemSynonym);
+			ItemStack itemStack = new ItemStack(item, volume);
+
+			ServerWorld serverWorld = ServerWorld.getServerWorld();
+			if (serverWorld != null) {
+
+				serverWorld.dropItem(
+						itemStack,
+						x, y, z,
+						0.0,
+						0.0,
+						0.0
+				);
+
+			}
+
+		}
 	}
 
 

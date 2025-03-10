@@ -1,13 +1,11 @@
 package wins.insomnia.backyardrocketry.render;
 
-import com.google.common.primitives.Shorts;
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.HelpfulMath;
-import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
@@ -760,7 +758,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                         byte block = blockNeighbors[1][1][1];
                         if (Blocks.isBlockTransparent(block)) {
 
-                             lightValueShort = chunk.getLightLevel(offX, offY, offZ);
+                             lightValueShort = chunk.getLightValue(offX, offY, offZ);
 
                         } else {
 
@@ -771,25 +769,25 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                             if (absX > absY && absX > absZ) {
 
                                 if (vertexNormal[0] > 0f) {
-                                    lightValueShort = chunk.getLightLevel(offX + 1, offY, offZ);
+                                    lightValueShort = chunk.getLightValue(offX + 1, offY, offZ);
                                 } else {
-                                    lightValueShort = chunk.getLightLevel(offX - 1, offY, offZ);
+                                    lightValueShort = chunk.getLightValue(offX - 1, offY, offZ);
                                 }
 
                             } else if (absY > absX && absY > absZ) {
 
                                 if (vertexNormal[1] > 0f) {
-                                    lightValueShort = chunk.getLightLevel(offX, offY + 1, offZ);
+                                    lightValueShort = chunk.getLightValue(offX, offY + 1, offZ);
                                 } else {
-                                    lightValueShort = chunk.getLightLevel(offX, offY - 1, offZ);
+                                    lightValueShort = chunk.getLightValue(offX, offY - 1, offZ);
                                 }
 
                             } else {
 
                                 if (vertexNormal[2] > 0f) {
-                                    lightValueShort = chunk.getLightLevel(offX, offY, offZ + 1);
+                                    lightValueShort = chunk.getLightValue(offX, offY, offZ + 1);
                                 } else {
-                                    lightValueShort = chunk.getLightLevel(offX, offY, offZ - 1);
+                                    lightValueShort = chunk.getLightValue(offX, offY, offZ - 1);
                                 }
 
                             }

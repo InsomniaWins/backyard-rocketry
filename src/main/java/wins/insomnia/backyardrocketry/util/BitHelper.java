@@ -2,16 +2,17 @@ package wins.insomnia.backyardrocketry.util;
 
 public class BitHelper {
 
+
 	public static int getBit(int num, int position) {
 		return (num >> position) & 1;
 	}
 
 	public static int setBitToOne(int num, int position) {
-		return num |= 1 << position;
+		return num | 1 << position;
 	}
 
 	public static int setBitToZero(int num, int position) {
-		return num &= ~(1 << position);
+		return num & ~(1 << position);
 	}
 
 	public static int setBitToValue(int num, int position, int value) {

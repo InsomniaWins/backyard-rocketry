@@ -91,11 +91,16 @@ public class DebugInfo {
 		if (player.getTargetBlock() == null) {
 			return "T Bl: NULL";
 		} else {
+
+			String lightBinary = Integer.toBinaryString(player.getTargetBlock().getLightValue());
+			lightBinary = "00000000000000000000000000000000".substring(lightBinary.length()) + lightBinary;
+
 			return "T Bl: " + Blocks.getBlockName(targetBlock) +
 					"\nT Bl Pos: <" +
 					player.getTargetBlock().getBlockX() + ", " +
 					player.getTargetBlock().getBlockY() + ", " +
-					player.getTargetBlock().getBlockZ() + ">";
+					player.getTargetBlock().getBlockZ() + ">\n" +
+					lightBinary;
 
 			/*
 			return "Targeted Block: \n  " + targetBlock + " : <" +

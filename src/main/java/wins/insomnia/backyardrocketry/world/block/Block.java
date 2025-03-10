@@ -71,4 +71,10 @@ public class Block {
 		return 0;
 	}
 
+	public short getMinimumLightLevel() {
+		// when overriding: CAST TO SHORT! (simulates unsigned short because java is dumb)
+		// 0bRRRR_GGGG_BBBB_SSSS <- red, green, blue, sky (prob not a good idea to change sky from 0000)
+		return 0b0000_0000_0000_0000;
+	}
+
 }
