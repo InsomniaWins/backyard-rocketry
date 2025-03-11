@@ -65,7 +65,7 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 			Blocks.WOODEN_PLANKS,
 			Blocks.GLASS,
 			Blocks.BRICKS,
-			Blocks.LIMESTONE
+			Blocks.LIGHT
 	};
 	private int currentHotbarSlot = 0;
 	private int blockInteractionTimer = 0;

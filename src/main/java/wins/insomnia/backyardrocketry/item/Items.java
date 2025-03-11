@@ -1,6 +1,7 @@
 package wins.insomnia.backyardrocketry.item;
 
 import wins.insomnia.backyardrocketry.item.types.block.*;
+import wins.insomnia.backyardrocketry.world.BlockLight;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class Items {
 	public static final Item GLASS = registerItem(new BlockItemGlass());
 	public static final Item BRICKS = registerItem(new BlockItemBricks());
 	public static final Item LIMESTONE = registerItem(new BlockItemLimestone());
+	public static final Item LIGHT = registerItem(new BlockItemLight());
 
 
 	public static Item getItem(int itemId) {

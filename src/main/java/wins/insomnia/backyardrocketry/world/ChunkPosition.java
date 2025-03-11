@@ -90,6 +90,10 @@ public class ChunkPosition {
         generateHashCode();
     }
 
+    public ChunkPosition newOffsetChunkPosition(int offsetX, int offsetY, int offsetZ) {
+        return new ChunkPosition(this).add(offsetX, offsetY, offsetZ);
+    }
+
     public int getX() {
         return x;
     }

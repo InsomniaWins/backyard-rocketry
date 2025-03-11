@@ -38,6 +38,7 @@ public class BlockAtlasTexture extends Texture {
 				new Vector2i(6, 0))
 		);
 		registerBlockTexture("limestone", new BlockTextureFrames(new Vector2i(1, 2)));
+		registerBlockTexture("light", new BlockTextureFrames(new Vector2i(4, 2)));
 	}
 
 	private void registerBlockTexture(String textureName, BlockTextureFrames textureFrames) {

@@ -67,13 +67,32 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    public boolean containsLocalBlockPosition(int localX, int localY, int localZ) {
+
+        if (localX < 0 || localX > SIZE_X - 1) return false;
+        if (localY < 0 || localY > SIZE_Y - 1) return false;
+        if (localZ < 0 || localZ > SIZE_Z - 1) return false;
+
+        return true;
+
+    }
+
+    public boolean containsGlobalBlockPosition(int blockX, int blockY, int blockZ) {
+
+        int localX = toLocalX(blockX);
+        int localY = toLocalY(blockY);
+        int localZ = toLocalZ(blockZ);
+
+        return containsLocalBlockPosition(localX, localY, localZ);
+
+    }
 
     public World getWorld() {
         return WORLD;
     }
 
     public void updateLighting() {
-        chunkData.updateLighting(this);
+        ChunkLighting.updateLighting(this);
     }
 
 
@@ -309,16 +328,52 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return World.getServerWorld().getChunkPositionFromBlockPosition(getX(), getY(), getZ());
     }
 
-    public Chunk[] getNeighborChunks() {
+    public Chunk[] getNeighborChunks(boolean includeCorners) {
+
+        if (!includeCorners) {
+            return new Chunk[] {
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1))
+            };
+        }
 
         return new Chunk[] {
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(-1, 0, 0)),
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(1, 0, 0)),
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, -1, 0)),
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, 1, 0)),
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, 0, -1)),
-                WORLD.getChunkAt(new ChunkPosition(getChunkPosition()).add(0, 0, 1))
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, -1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, 0)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 1)),
+                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, 1)),
+
         };
+    }
+
+    public Chunk[] getNeighborChunks() {
+        return getNeighborChunks(false);
     }
 
 

@@ -29,6 +29,7 @@ public class Blocks {
     public static final byte BRICKS = registerBlock(new BlockBricks());
     public static final byte WATER = registerBlock(new BlockWater());
     public static final byte LIMESTONE = registerBlock(new BlockLimestone());
+    public static final byte LIGHT = registerBlock(new BlockLight());
 
     public static byte getBlockIdFromSynonym(String blockSynonym) {
         return BLOCK_SYNONYM_MAP.get(blockSynonym);

@@ -56,7 +56,6 @@ public class ClientChunk extends Chunk {
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
         if (regenerateMesh) {
-
             updateNeighborChunkMeshesIfBlockIsOnBorder(toGlobalX(x), toGlobalY(y), toGlobalZ(z), instantly);
         }
 
@@ -101,15 +100,14 @@ public class ClientChunk extends Chunk {
 	}
 
 
-	public void updateNeighborChunkMeshes(boolean instantly) {
-
+	public void updateNeighborChunkMeshes(boolean instantly, boolean includeCorners) {
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
 			throw new ConcurrentModificationException("Tried updating neighboring chunk meshes from thread other than the main thread!");
 		}
 
 
 
-		for (Chunk chunk : getNeighborChunks()) {
+		for (Chunk chunk : getNeighborChunks(includeCorners)) {
 			if (!(chunk instanceof ClientChunk clientChunk)) {
 				continue;
 			}
@@ -117,6 +115,11 @@ public class ClientChunk extends Chunk {
 			clientChunk.SHOULD_REGENERATE_MESH.set(true);
 			clientChunk.SHOULD_INSTANTLY_REGENERATE_MESH.set(instantly);
 		}
+	}
+
+	public void updateNeighborChunkMeshes(boolean instantly) {
+
+		updateNeighborChunkMeshes(instantly, false);
 	}
 
 	private void updateNeighborChunkMeshesIfBlockIsOnBorder(int x, int y, int z, boolean instantly) {
