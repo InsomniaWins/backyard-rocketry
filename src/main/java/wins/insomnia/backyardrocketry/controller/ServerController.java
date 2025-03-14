@@ -201,15 +201,19 @@ public class ServerController extends GameController {
 		ServerController serverController = get();
 		Server server = serverController.server;
 
-		if (reliable) {
+		try {
+			if (reliable) {
 
-			server.sendToAllTCP(packet);
+				server.sendToAllTCP(packet);
 
 
-		} else {
+			} else {
 
-			server.sendToAllUDP(packet);
+				server.sendToAllUDP(packet);
 
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}

@@ -9,6 +9,7 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.lighting.ChunkLighting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -220,6 +221,64 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    // gets the chunk containing the block at x,y,z local to this chunk,
+    // then the xyz array will be given new local x,y,z values based on returned chunk
+    // the new x,y,z values will be the same block position inputted, but local to the returned chunk
+    // for example: <-1, 0, 0> will change to <Chunk.SIZE_X - 1, 0, 0> and the chunk to the -x of this one will be returned
+    // they will not change if chunk is NULL or the block resides within this chunk
+    public Chunk getChunkOrNeighborFromLocalBlock(int[] xyz) {
+
+        if (xyz.length < 3) return null;
+
+        // if block is out of chunk bounds
+        if ((xyz[0] < 0 || xyz[0] > SIZE_X - 1) || (xyz[1] < 0 || xyz[1] > SIZE_Y - 1) || (xyz[2] < 0 || xyz[2] > SIZE_Z - 1)) {
+
+            int globalX = toGlobalX(xyz[0]);
+            int globalY = toGlobalY(xyz[1]);
+            int globalZ = toGlobalZ(xyz[2]);
+
+            // if block is out of world border
+            if (globalX > World.getSizeX()-1 || globalX < 0 || globalY > World.getSizeY()-1 || globalY < 0 || globalZ > World.getSizeZ()-1 || globalZ < 0 ) {
+                return null;
+            }
+
+            Chunk chunk = WORLD.getChunkContainingBlock(globalX, globalY, globalZ);
+
+            if (chunk != null) {
+
+                xyz[0] = chunk.toLocalX(globalX);
+                xyz[1] = chunk.toLocalY(globalY);
+                xyz[2] = chunk.toLocalZ(globalZ);
+
+            }
+
+            return chunk;
+        }
+
+        return this;
+
+    }
+
+    public Chunk getChunkOrNeighborFromLocalBlock(int x, int y, int z) {
+
+        // if block is out of chunk bounds
+        if ((x < 0 || x > SIZE_X - 1) || (y < 0 || y > SIZE_Y - 1) || (z < 0 || z > SIZE_Z - 1)) {
+
+            int globalX = toGlobalX(x);
+            int globalY = toGlobalY(y);
+            int globalZ = toGlobalZ(z);
+
+            // if block is out of world border
+            if (globalX > World.getSizeX()-1 || globalX < 0 || globalY > World.getSizeY()-1 || globalY < 0 || globalZ > World.getSizeZ()-1 || globalZ < 0 ) {
+                return null;
+            }
+
+            return WORLD.getChunkContainingBlock(globalX, globalY, globalZ);
+        }
+
+        return this;
+
+    }
 
     public short getLightValue(int x, int y, int z) {
 
@@ -232,13 +291,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
             // if block is out of world border
             if (globalX > World.getSizeX()-1 || globalX < 0 || globalY > World.getSizeY()-1 || globalY < 0 || globalZ > World.getSizeZ()-1 || globalZ < 0 ) {
-                return 0x0000;
+                return 0b0000_0000_0000_0000;
             }
 
             Chunk chunk = WORLD.getChunkContainingBlock(globalX, globalY, globalZ);
 
             if (chunk == null) {
-                return 0x010ff;
+                return 0b0000_0000_0000_0000;
             }
 
             return chunk.getLightValue(chunk.toLocalX(globalX), chunk.toLocalY(globalY), chunk.toLocalZ(globalZ));
@@ -336,8 +395,8 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
                     WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
                     WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
                     WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1))
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
+                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 0))
             };
         }
 

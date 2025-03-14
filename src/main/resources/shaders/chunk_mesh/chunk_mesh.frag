@@ -10,6 +10,7 @@ in float fs_framesPerSecond;
 in vec3 fs_fragmentPosition;
 flat in int fs_frameAmount;
 in vec3 fs_lightValue;
+in float fs_sunlightValue;
 
 uniform vec3 fs_viewPosition;
 uniform sampler2D fs_texture;
@@ -60,6 +61,7 @@ void main() {
     vec4 nextFrameFragmentColor = texture(fs_texture, vec2(nextFrameTexCoord.x, nextFrameTexCoord.y));
 
     vec4 fragmentColor = mix(currentFrameFragmentColor, nextFrameFragmentColor, mod(fs_time * fs_framesPerSecond, 1));
+    //fragmentColor.rgb *= (fs_sunlightValue / 16.0);
     fragmentColor.rgb *= fs_lightValue;
 
     // transparency

@@ -4,13 +4,18 @@ import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.audio.AudioPlayer;
 import wins.insomnia.backyardrocketry.render.ChunkMesh;
+import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.util.debug.DebugInfo;
+import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
+import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.BlockAudio;
+import wins.insomnia.backyardrocketry.world.lighting.ChunkLighting;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.ExecutorService;
@@ -28,18 +33,18 @@ public class ClientChunk extends Chunk {
 	public ClientChunk(World world, ChunkPosition chunkPosition) {
 		super(world, chunkPosition);
 
+
 		SHOULD_REGENERATE_MESH.set(true);
 
 		CHUNK_MESH = new ChunkMesh(this, false);
 		TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
 
+		updateNeighborChunkMeshes(true);
 	}
 
 	public ClientChunk(ClientWorld world, ChunkData chunkData) {
 		this(world, chunkData.getChunkPosition(world));
-
 		gotChunkDataFromServer(chunkData);
-
 	}
 
 	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean regenerateMesh, boolean instantly) {
@@ -50,8 +55,18 @@ public class ClientChunk extends Chunk {
 
 		}
 
+
 		chunkData.setBlock(x,y,z, block);
 		chunkData.setBlockState(x, y, z, blockState);
+
+		short lightColor = Blocks.getBlockMinimumLightLevel(block);
+		if (lightColor != 0) {
+			ChunkLighting.setLight(this, x, y, z, lightColor);
+		} else {
+			ChunkLighting.removeLight(this, x, y, z);
+		}
+
+
 
         setShouldRegenerateMesh(regenerateMesh, instantly);
 
@@ -93,16 +108,19 @@ public class ClientChunk extends Chunk {
 	}
 
 	public void gotChunkDataFromServer(ChunkData chunkData) {
-
 		this.chunkData = chunkData;
 		SHOULD_REGENERATE_MESH.set(true);
-
 	}
 
 
 	public void updateNeighborChunkMeshes(boolean instantly, boolean includeCorners) {
 		if (Thread.currentThread() != Main.MAIN_THREAD) {
-			throw new ConcurrentModificationException("Tried updating neighboring chunk meshes from thread other than the main thread!");
+
+			DebugOutput.outputText(new DebugOutput.DebugText[]{
+					new DebugOutput.DebugText("Tried updating neighboring chunk meshes from thread other than the main thread!", Color.RED)
+			});
+
+			return;
 		}
 
 
@@ -112,8 +130,8 @@ public class ClientChunk extends Chunk {
 				continue;
 			}
 
-			clientChunk.SHOULD_REGENERATE_MESH.set(true);
 			clientChunk.SHOULD_INSTANTLY_REGENERATE_MESH.set(instantly);
+			clientChunk.SHOULD_REGENERATE_MESH.set(true);
 		}
 	}
 

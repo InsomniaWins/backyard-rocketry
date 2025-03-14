@@ -37,6 +37,8 @@ public class PacketLoadChunk extends Packet {
 
 		serializedChunkData = ChunkData.serialize(chunkData);
 
+
+
 	}
 
 

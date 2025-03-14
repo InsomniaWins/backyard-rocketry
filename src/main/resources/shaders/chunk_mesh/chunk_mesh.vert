@@ -18,6 +18,7 @@ out float fs_framesPerSecond;
 out int fs_frameAmount;
 out vec3 fs_fragmentPosition;
 out vec3 fs_lightValue;
+out float fs_sunlightValue;
 
 uniform float vs_time;
 uniform bool vs_vertexSnapping = true;
@@ -63,4 +64,5 @@ void main() {
     fs_fragmentPosition = vec3(vs_modelMatrix * vec4(vs_vertexPosition, 1.0));
 
     fs_lightValue = vs_lightValue.xyz / 16.0;
+    fs_sunlightValue = vs_lightValue.w;
 }
