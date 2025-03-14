@@ -11,7 +11,7 @@ public class BlockLight extends Block {
 
 	@Override
 	public short getMinimumLightLevel() {
-		return (short) 0b1100_1100_0011_0000;
+		return (short) 0b1110_1110_1110_0000;
 	}
 
 }

@@ -142,13 +142,28 @@ public class ChunkLighting {
 
 		if (neighborColor != 0 && neighborColor < currentColor) {
 
-			neighborChunk.setLightValue(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2], makeLightValue(0, 0, 0, 0));
+			neighborChunk.setLightValue(
+					neighborXYZ[0], neighborXYZ[1], neighborXYZ[2],
+					makeLightValue(
+							0,
+							0,
+							0,
+							0
+					)
+			);
+
 			LIGHT_REMOVAL_QUEUE.push(new LightRemovalNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborLight, neighborChunk));
 
 		} else if (neighborColor >= currentColor) {
 
 			LIGHT_QUEUE.push(new LightNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborChunk));
 
+		}
+
+		short neighborMinLight = Blocks.getBlockMinimumLightLevel(neighborChunk.getBlock(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]));
+		if (neighborMinLight != 0) {
+			neighborChunk.setLightValue((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborMinLight);
+			LIGHT_QUEUE.push(new LightNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborChunk));
 		}
 	}
 
@@ -228,10 +243,16 @@ public class ChunkLighting {
 
 	public static void setLight(Chunk chunk, int localX, int localY, int localZ, short light) {
 
+		if (light == 0) {
+			removeLight(chunk, localX, localY, localZ);
+			return;
+		}
+
 		chunk.setLightValue(localX, localY, localZ, light);
 
 		LIGHT_QUEUE.push(new LightNode((byte) localX, (byte) localY, (byte) localZ, chunk));
 
+		flushLightRemovalQueue();
 		flushLightQueue();
 
 		if (chunk instanceof ClientChunk clientChunk) {

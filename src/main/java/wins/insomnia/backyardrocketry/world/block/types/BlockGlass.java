@@ -8,4 +8,5 @@ public class BlockGlass extends Block {
 	public BlockGlass() {
 		super("Glass", "glass", null, true, true, 20, BlockAudio.GENERIC_GLASS);
 	}
+
 }
