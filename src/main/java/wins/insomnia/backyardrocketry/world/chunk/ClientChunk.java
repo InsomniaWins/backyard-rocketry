@@ -59,7 +59,7 @@ public class ClientChunk extends Chunk {
 		chunkData.setBlock(x,y,z, block);
 		chunkData.setBlockState(x, y, z, blockState);
 
-		short lightColor = Blocks.getBlockMinimumLightLevel(block);
+		short lightColor = Blocks.getBlockMinimumLightLevel(block, blockState, x, y, z);
 		if (lightColor != 0) {
 			ChunkLighting.setLight(this, x, y, z, lightColor);
 		} else {

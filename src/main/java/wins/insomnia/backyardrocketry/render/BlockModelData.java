@@ -90,7 +90,7 @@ public class BlockModelData {
 
         if (modelStates == null) return null;
 
-        Object model = modelStates.get(BlockStateManager.getBlockState(block, blockStateIndex));
+        Object model = modelStates.get(BlockStateManager.getBlockStateName(block, blockStateIndex));
 
         if (model == null) {
 

@@ -8,4 +8,5 @@ public class BlockWoodenPlanks extends Block {
 	public BlockWoodenPlanks() {
 		super("Wooden Planks", "wooden_planks", BlockStateWoodenPlanks.class, false, true, 90, BlockAudio.GENERIC_WOOD);
 	}
+
 }

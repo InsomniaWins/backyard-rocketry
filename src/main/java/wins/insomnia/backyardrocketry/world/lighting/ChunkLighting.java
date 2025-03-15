@@ -158,12 +158,18 @@ public class ChunkLighting {
 
 			LIGHT_QUEUE.push(new LightNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborChunk));
 
-		}
+		} else {
 
-		short neighborMinLight = Blocks.getBlockMinimumLightLevel(neighborChunk.getBlock(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]));
-		if (neighborMinLight != 0) {
-			neighborChunk.setLightValue((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborMinLight);
-			LIGHT_QUEUE.push(new LightNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborChunk));
+			short neighborMinLight = Blocks.getBlockMinimumLightLevel(
+					neighborChunk.getBlock(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]),
+					neighborChunk.getBlockState(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]),
+					neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]
+			);
+			if (neighborMinLight != 0) {
+				neighborChunk.setLightValue((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborMinLight);
+				LIGHT_QUEUE.push(new LightNode((byte) neighborXYZ[0], (byte) neighborXYZ[1], (byte) neighborXYZ[2], neighborChunk));
+			}
+
 		}
 	}
 
@@ -252,7 +258,6 @@ public class ChunkLighting {
 
 		LIGHT_QUEUE.push(new LightNode((byte) localX, (byte) localY, (byte) localZ, chunk));
 
-		flushLightRemovalQueue();
 		flushLightQueue();
 
 		if (chunk instanceof ClientChunk clientChunk) {

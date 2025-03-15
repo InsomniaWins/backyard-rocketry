@@ -7,7 +7,6 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.blockstate.property.BlockStateProperty;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +41,7 @@ public class BlockStateManager {
 		return BLOCK_STATES.get(block).toArray(new String[1]);
 	}
 
-	public static String getBlockState(byte block, int blockStateIndex) {
+	public static String getBlockStateName(byte block, int blockStateIndex) {
 		return BLOCK_STATES.get(block).get(blockStateIndex);
 	}
 

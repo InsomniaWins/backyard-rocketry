@@ -1,6 +1,8 @@
 package wins.insomnia.backyardrocketry.world.block;
 
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 import wins.insomnia.backyardrocketry.world.block.types.*;
 import wins.insomnia.backyardrocketry.world.World;
 
@@ -94,10 +96,10 @@ public class Blocks {
         return BLOCK_MAP.get(block).getName();
     }
 
-    public static short getBlockMinimumLightLevel(byte block) {
+    public static short getBlockMinimumLightLevel(byte block, byte blockState, int localX, int localY, int localZ) {
         if (BLOCK_MAP.get(block) == null) return 0x00;
 
-        return BLOCK_MAP.get(block).getMinimumLightLevel();
+        return BLOCK_MAP.get(block).getMinimumLightLevel(blockState, localX, localY, localZ);
     }
 
     public static boolean isBlockTransparent(byte block) {
