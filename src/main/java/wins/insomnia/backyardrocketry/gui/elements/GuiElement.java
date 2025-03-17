@@ -3,10 +3,11 @@ package wins.insomnia.backyardrocketry.gui.elements;
 import org.joml.Vector2f;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 import wins.insomnia.backyardrocketry.render.Renderer;
+import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 
-public class GuiElement implements IFixedUpdateListener, IUpdateListener, IRenderable {
+public class GuiElement implements IFixedUpdateListener, IUpdateListener, IGuiRenderable {
 
 	private static GuiElement selectedElement = null;
 	private final Vector2f POSITION = new Vector2f();

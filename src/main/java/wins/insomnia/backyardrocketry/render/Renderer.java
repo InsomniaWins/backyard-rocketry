@@ -480,9 +480,6 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
 
-
-
-
         // render gui
         for (IGuiRenderable renderable : GUI_RENDER_LIST) {
 

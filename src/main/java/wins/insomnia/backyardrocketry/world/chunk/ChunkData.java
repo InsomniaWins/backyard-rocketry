@@ -11,6 +11,7 @@ import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.lighting.ChunkLighting;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -23,7 +23,7 @@ public class TextureManager {
         registerTexture("block_atlas", new BlockAtlasTexture("block_atlas.png"));
         registerTexture("block_atlas_height_map", "block_atlas_height_map.png");
 
-        registerTexture("placeholder_inventory", "gui/inventory/placeholder_inventory.png");
+        registerTexture("inventory", "gui/inventory/inventory.png");
         registerTexture("font", new FontTexture("new_font.png", 9, FontTexture.DEBUG_FONT_CHARACTER_DIMENSIONS));
         registerTexture("debug_font", new FontTexture("debug_font.png", 9, FontTexture.DEBUG_FONT_CHARACTER_DIMENSIONS));
         registerTexture("block_outline", "block_outline.png");

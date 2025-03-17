@@ -45,6 +45,13 @@ public class ClientChunk extends Chunk {
 	public ClientChunk(ClientWorld world, ChunkData chunkData) {
 		this(world, chunkData.getChunkPosition(world));
 		gotChunkDataFromServer(chunkData);
+
+		/*
+		Updater.get().queueMainThreadInstruction(() -> {
+			ChunkLighting.generateSunlight(this);
+		});*/
+
+
 	}
 
 	public void setBlock(int x, int y, int z, byte block, byte blockState, boolean regenerateMesh, boolean instantly) {

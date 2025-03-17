@@ -59,15 +59,28 @@ void main() {
     }
     vec4 currentFrameFragmentColor = texture(fs_texture, vec2(currentFrameTexCoord.x, currentFrameTexCoord.y));;
     vec4 nextFrameFragmentColor = texture(fs_texture, vec2(nextFrameTexCoord.x, nextFrameTexCoord.y));
-
     vec4 fragmentColor = mix(currentFrameFragmentColor, nextFrameFragmentColor, mod(fs_time * fs_framesPerSecond, 1));
-    //fragmentColor.rgb *= (fs_sunlightValue / 16.0);
-    fragmentColor.rgb *= fs_lightValue;
+
+
 
     // transparency
     if (fragmentColor.a == 0.0) {
         discard;
     }
+
+
+
+    // block lighting
+    float sunlight = fs_sunlightValue / 15.0;
+
+    sunlight = 15.0 / 15.0;
+
+    fragmentColor.r *= max(fs_lightValue.r, sunlight);
+    fragmentColor.g *= max(fs_lightValue.g, sunlight);
+    fragmentColor.b *= max(fs_lightValue.b, sunlight);
+
+
+
 
     //specular lighting
     vec3 viewDirection = normalize(fs_viewPosition - fs_fragmentPosition);

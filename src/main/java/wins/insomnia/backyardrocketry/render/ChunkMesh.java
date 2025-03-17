@@ -194,8 +194,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
 
     public void generateMesh(byte[][][] blocks, byte[][][] blockStates, boolean isDelayed) {
 
-        chunk.updateLighting();
-
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
 

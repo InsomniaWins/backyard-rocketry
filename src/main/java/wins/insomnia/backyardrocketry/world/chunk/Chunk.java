@@ -92,10 +92,6 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return WORLD;
     }
 
-    public void updateLighting() {
-        ChunkLighting.updateLighting(this);
-    }
-
 
     public List<BoundingBox> getBlockBoundingBoxes(BoundingBox boundingBox) {
 
@@ -477,6 +473,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     public BoundingBox getBoundingBox() {
         return BOUNDING_BOX;
+    }
+
+    public Chunk getTopChunk() {
+
+        ChunkPosition topChunkPosition = getChunkPosition().newOffsetChunkPosition(0, -1, 0);
+        return getWorld().getChunk(topChunkPosition);
+
     }
 
 }

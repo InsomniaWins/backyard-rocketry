@@ -227,17 +227,6 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		// draw crosshair
 		TextureRenderer.drawGuiTexture(TextureManager.getTexture("crosshair"), renderer.getCenterAnchorX() - 8, renderer.getCenterAnchorY() - 8);
 
-
-		// render inventory
-		if (player.getInventoryManager().isOpen()) {
-			Texture inventoryTexture = TextureManager.getTexture("placeholder_inventory");
-			int textureX = renderer.getCenterAnchorX() - inventoryTexture.getWidth() / 2;
-			int textureY = renderer.getCenterAnchorY() - inventoryTexture.getHeight() / 2;
-			TextureRenderer.drawGuiTexture(inventoryTexture, textureX, textureY);
-		}
-
-
-
 	}
 
 
