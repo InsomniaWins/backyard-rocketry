@@ -14,6 +14,15 @@ public class ItemStack {
 		return item;
 	}
 
+
+	public void addVolume(int addAmount) {
+		volume += addAmount;
+	}
+
+	public void removeVolume(int removeAmount) {
+		volume = Math.max(0, volume - removeAmount);
+	}
+
 	public int getVolume() {
 		return volume;
 	}

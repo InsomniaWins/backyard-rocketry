@@ -11,6 +11,9 @@ import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
+import wins.insomnia.backyardrocketry.item.BlockItem;
+import wins.insomnia.backyardrocketry.item.Item;
+import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
@@ -60,7 +63,6 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		FIRST_PERSON_HAND_ITEM = new FirstPersonHandItemRenderable();
 		Renderer.get().addRenderable(FIRST_PERSON_HAND_ITEM);
-		FIRST_PERSON_HAND_ITEM.setBlock(Blocks.GRASS);
 
 	}
 
@@ -473,16 +475,25 @@ public class EntityClientPlayer extends EntityPlayer {
 				int worldY = targetBlock.getBlockY() + face.getY() + placeOffsetY;
 				int worldZ = targetBlock.getBlockZ() + face.getZ() + placeOffsetZ;
 
-				byte block = getHotbarSlotContents(getCurrentHotbarSlot());
+				ItemStack heldItemStack = getHotbarSlotContents(getCurrentHotbarSlot());
 
-				ClientController.sendReliable(
-						new PacketPlayerPlaceBlock()
-								.setWorldX(worldX)
-								.setWorldY(worldY)
-								.setWorldZ(worldZ)
-								.setBlock(block)
-								.setFace(Blocks.Face.getFaceIndex(face))
-				);
+				if (heldItemStack != null) {
+					Item heldItem = heldItemStack.getItem();
+
+					if (heldItem instanceof BlockItem heldBlockItem) {
+
+						byte block = heldBlockItem.getBlock();
+
+						ClientController.sendReliable(
+								new PacketPlayerPlaceBlock()
+										.setWorldX(worldX)
+										.setWorldY(worldY)
+										.setWorldZ(worldZ)
+										.setBlock(block)
+										.setFace(Blocks.Face.getFaceIndex(face))
+						);
+					}
+				}
 
 			}
 
@@ -575,7 +586,13 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		GUI_ELEMENT.setItemToolTipAlpha(1f);
 
-		FIRST_PERSON_HAND_ITEM.setBlock(getHotbarSlotContents(index));
+
+		Item heldItem = getInventoryManager().getHotbarItem(index);
+		if (heldItem instanceof BlockItem heldBlockItem) {
+			FIRST_PERSON_HAND_ITEM.setBlock(heldBlockItem.getBlock());
+		} else {
+			FIRST_PERSON_HAND_ITEM.resetHandMesh();
+		}
 
 	}
 

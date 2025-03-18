@@ -9,6 +9,8 @@ import wins.insomnia.backyardrocketry.entity.LivingEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentFootstepAudio;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentStandardPlayer;
+import wins.insomnia.backyardrocketry.item.Item;
+import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
 import wins.insomnia.backyardrocketry.physics.Collision;
@@ -55,18 +57,6 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	private final BoundingBox BOUNDING_BOX;
 	private final Transform PREVIOUS_TRANSFORM;
 	private int breakAudioDelay = 0;
-	private byte[] hotbarItems = {
-			Blocks.GRASS,
-			Blocks.COBBLESTONE,
-			Blocks.DIRT,
-			Blocks.STONE,
-			Blocks.LOG,
-			Blocks.LEAVES,
-			Blocks.WOODEN_PLANKS,
-			Blocks.GLASS,
-			Blocks.BRICKS,
-			Blocks.LIGHT
-	};
 	private int currentHotbarSlot = 0;
 	private int blockInteractionTimer = 0;
 	private int breakProgress = 0;
@@ -150,6 +140,9 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 	}
 
 	public void move() {
+
+		Chunk playerChunk = getWorld().getChunkContainingBlock(getBlockPosition());
+		if (playerChunk == null) return;
 
 
 		// get bounding boxes of blocks near player
@@ -286,8 +279,10 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 		this.currentHotbarSlot = currentHotbarSlot;
 	}
 
-	public byte getHotbarSlotContents(int slotIndex) {
-		return hotbarItems[slotIndex];
+	public ItemStack getHotbarSlotContents(int slotIndex) {
+		PlayerInventoryManager inventoryManager = getInventoryManager();
+		Item item = inventoryManager.getHotbarItem(slotIndex);
+		return inventoryManager.getItemStack(item);
 	}
 
 	public int getBreakProgress() {

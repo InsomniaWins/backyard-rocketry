@@ -171,24 +171,31 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			int guiY = hotbarY + 28;
 			float blockMeshScale = hotbarItemScales[i];
 
-			renderItemIcon(
-					Items.getBlockItem(player.getHotbarSlotContents(i)),
-					guiX, guiY,
-					blockMeshScale
-			);
+			ItemStack slotItemStack = player.getHotbarSlotContents(i);
 
-			// tooltip
-			if (i == player.getCurrentHotbarSlot()) {
 
-				String itemName = Items.getBlockItem(player.getHotbarSlotContents(i)).getName();
-
-				TextRenderer.setFontAlpha(itemToolTipAlpha);
-				TextRenderer.drawTextOutline(
-						itemName,
-						renderer.getCenterAnchorX() - TextRenderer.getTextPixelWidth(itemName) / 2,
-						renderer.getBottomAnchor() - 60
+			if (slotItemStack != null && slotItemStack.getVolume() > 0) {
+				renderItemIcon(
+						slotItemStack.getItem(),
+						guiX, guiY,
+						blockMeshScale
 				);
-				TextRenderer.setFontAlpha(1f);
+
+
+				// tooltip
+				if (i == player.getCurrentHotbarSlot()) {
+
+					String itemName = slotItemStack.getItem().getName();
+
+					TextRenderer.setFontAlpha(itemToolTipAlpha);
+					TextRenderer.drawTextOutline(
+							itemName,
+							renderer.getCenterAnchorX() - TextRenderer.getTextPixelWidth(itemName) / 2,
+							renderer.getBottomAnchor() - 60
+					);
+					TextRenderer.setFontAlpha(1f);
+				}
+
 			}
 
 		}
