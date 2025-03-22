@@ -117,6 +117,10 @@ public class ClientChunk extends Chunk {
 	public void gotChunkDataFromServer(ChunkData chunkData) {
 		this.chunkData = chunkData;
 		SHOULD_REGENERATE_MESH.set(true);
+
+		CHUNK_MESH.setFadeTimer(1f);
+		TRANSPARENT_CHUNK_MESH.setFadeTimer(1f);
+
 	}
 
 
@@ -247,6 +251,15 @@ public class ClientChunk extends Chunk {
 			TRANSPARENT_CHUNK_MESH.createOpenGLMeshData();
 		}
 		//</editor-fold>
+
+
+		if (!CHUNK_MESH.isGenerating() && CHUNK_MESH.getFadeTimer() > 0f) {
+			CHUNK_MESH.setFadeTimer((float) (CHUNK_MESH.getFadeTimer() - deltaTime));
+		}
+
+		if (!TRANSPARENT_CHUNK_MESH.isGenerating() && TRANSPARENT_CHUNK_MESH.getFadeTimer() > 0f) {
+			TRANSPARENT_CHUNK_MESH.setFadeTimer((float) (TRANSPARENT_CHUNK_MESH.getFadeTimer() - deltaTime));
+		}
 	}
 
 

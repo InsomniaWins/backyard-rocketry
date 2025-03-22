@@ -2,6 +2,9 @@ package wins.insomnia.backyardrocketry.network.entity.player;
 
 import com.esotericsoftware.kryonet.Connection;
 import wins.insomnia.backyardrocketry.entity.Entity;
+import wins.insomnia.backyardrocketry.entity.item.EntityItem;
+import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
+import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
@@ -32,7 +35,24 @@ public class PacketPlayerPunchEntity extends Packet {
 
 			if (entity == null) return;
 
-			serverWorld.removeEntity(entity, true);
+			if (entity instanceof EntityItem itemEntity) {
+
+				EntityServerPlayer serverPlayer = serverWorld.getServerPlayer(connection.getID());
+				if (serverPlayer == null) return;
+
+				ItemStack itemStack = itemEntity.getItemStack();
+
+				serverPlayer.getInventoryManager().getInventory().addItemStack(itemStack);
+
+				if (itemStack.getAmount() == 0) {
+					serverWorld.removeEntity(entity, true);
+				}
+
+
+			}
+
+
+
 
 		});
 

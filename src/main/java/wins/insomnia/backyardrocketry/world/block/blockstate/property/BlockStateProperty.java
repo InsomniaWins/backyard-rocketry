@@ -18,11 +18,16 @@ public abstract class BlockStateProperty<T> {
 	public abstract T[] getPossibleCombinations();
 
 	public abstract T getValue();
-
+	public abstract void setValue(T value);
 	public int getBitsForProperty() {
 
 		return (int) (Math.log(getPossibleCombinationsAmount()) / Math.log(2));
 
+	}
+
+	@Override
+	public String toString() {
+		return getName() + " : " + getValue();
 	}
 
 }

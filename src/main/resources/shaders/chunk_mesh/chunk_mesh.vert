@@ -21,7 +21,7 @@ out vec3 fs_lightValue;
 out float fs_sunlightValue;
 
 uniform float vs_time;
-uniform bool vs_vertexSnapping = true;
+uniform bool vs_vertexSnapping = false;
 uniform mat4 vs_modelMatrix;
 uniform mat4 vs_viewMatrix;
 uniform mat4 vs_projectionMatrix;

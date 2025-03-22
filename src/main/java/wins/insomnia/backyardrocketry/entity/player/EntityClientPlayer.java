@@ -10,10 +10,12 @@ import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.entity.Entity;
 import wins.insomnia.backyardrocketry.entity.IBoundingBoxEntity;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
+import wins.insomnia.backyardrocketry.entity.item.EntityItem;
 import wins.insomnia.backyardrocketry.gui.elements.PlayerGui;
 import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.Item;
 import wins.insomnia.backyardrocketry.item.ItemStack;
+import wins.insomnia.backyardrocketry.item.Items;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
 import wins.insomnia.backyardrocketry.physics.BlockRaycastResult;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
@@ -64,6 +66,8 @@ public class EntityClientPlayer extends EntityPlayer {
 		FIRST_PERSON_HAND_ITEM = new FirstPersonHandItemRenderable();
 		Renderer.get().addRenderable(FIRST_PERSON_HAND_ITEM);
 
+		BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
+		BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
 	}
 
 	public void gotTransformFromServer(Transform transform) {
@@ -274,9 +278,8 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		if (targetEntity != null) {
 			handleEntityInteractions();
-		} else {
-			handleBlockInteractions();
 		}
+		handleBlockInteractions();
 		hotbarManagement();
 
 	}
@@ -291,7 +294,7 @@ public class EntityClientPlayer extends EntityPlayer {
 		MouseInput mouseInput = MouseInput.get();
 
 
-		if (keyboardInput.isKeyJustPressed(GLFW_KEY_E)) {
+		if (keyboardInput.isKeyJustPressed(GLFW_KEY_TAB)) {
 			if (getInventoryManager().isClosed()) {
 				getInventoryManager().openInventory();
 			} else {
@@ -348,7 +351,7 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		if (targetEntity == null || !(targetEntity.getEntity() instanceof Entity entity)) return;
 
-		if (MouseInput.get().isButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (KeyboardInput.get().isKeyJustPressed(GLFW_KEY_E)) {
 
 			FIRST_PERSON_HAND_ITEM.playSwingAnimation(true);
 
@@ -356,6 +359,15 @@ public class EntityClientPlayer extends EntityPlayer {
 					new PacketPlayerPunchEntity()
 							.setUuid(entity.getUUID()
 			));
+
+			if (targetEntity.getEntity() instanceof EntityItem itemEntity) {
+
+				ItemStack itemStack = itemEntity.getItemStack();
+				getInventoryManager().getInventory().addItemStack(itemStack);
+
+
+			}
+
 
 		}
 
@@ -476,7 +488,7 @@ public class EntityClientPlayer extends EntityPlayer {
 				int worldZ = targetBlock.getBlockZ() + face.getZ() + placeOffsetZ;
 
 				ItemStack heldItemStack = getHotbarSlotContents(getCurrentHotbarSlot());
-
+				heldItemStack = new ItemStack(Items.LOG, 64);
 				if (heldItemStack != null) {
 					Item heldItem = heldItemStack.getItem();
 
@@ -538,7 +550,6 @@ public class EntityClientPlayer extends EntityPlayer {
 
 		if (result.hasEntity()) {
 			targetEntity = result;
-			targetBlock = null;
 		} else {
 			targetEntity = null;
 		}

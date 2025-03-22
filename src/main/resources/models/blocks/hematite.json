@@ -1,0 +1,28 @@
+{
+	"parent": "block_all_random_rotation",
+	"textures": {
+		"particle": "hematite",
+		"all": "hematite",
+		"icon": "hematite"
+	},
+	"faces": {
+		"top": {
+			"cullface": "null"
+		},
+		"bottom": {
+			"cullface": "null"
+		},
+		"left": {
+			"cullface": "null"
+		},
+		"right": {
+			"cullface": "null"
+		},
+		"back": {
+			"cullface": "null"
+		},
+		"front": {
+			"cullface": "null"
+		}
+	}
+}

@@ -22,8 +22,11 @@ public class TextureManager {
 
         registerTexture("block_atlas", new BlockAtlasTexture("block_atlas.png"));
         registerTexture("block_atlas_height_map", "block_atlas_height_map.png");
-
+        registerTexture("scroll_bar", "gui/scroll_bar.png");
+        registerTexture("inventory_slot", "gui/inventory/inventory_slot.png");
+        registerTexture("inventory_slot_highlight", "gui/inventory/inventory_slot_highlight.png");
         registerTexture("inventory", "gui/inventory/inventory.png");
+        registerTexture("item_info_background", "gui/inventory/item_info_background.png");
         registerTexture("font", new FontTexture("new_font.png", 9, FontTexture.DEBUG_FONT_CHARACTER_DIMENSIONS));
         registerTexture("debug_font", new FontTexture("debug_font.png", 9, FontTexture.DEBUG_FONT_CHARACTER_DIMENSIONS));
         registerTexture("block_outline", "block_outline.png");

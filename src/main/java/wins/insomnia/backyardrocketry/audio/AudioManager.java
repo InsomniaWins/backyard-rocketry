@@ -49,6 +49,9 @@ public class AudioManager {
 		put("leaves_step", "blocks/step/leaves_step.ogg");
 		put("leaves_place", "blocks/place/leaves_place.ogg");
 		put("leaves_break", "blocks/break/leaves_break.ogg");
+
+		put("inventory_pickup_0", "interaction/inventory/pick_up_1.ogg");
+		put("inventory_pickup_1", "interaction/inventory/pick_up_2.ogg");
 	}};
 
 	private final HashMap<String, AudioBuffer> AUDIO_BUFFER_MAP;

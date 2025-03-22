@@ -26,11 +26,11 @@ public class PropertyInteger extends BlockStateProperty<Integer> {
 		return value;
 	}
 
-	public void setValue(int value) {
-
+	@Override
+	public void setValue(Integer value) {
 		this.value = Math.min(Math.max(value, minValue), maxValue);
-
 	}
+
 
 
 	public int getMinValue() {

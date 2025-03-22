@@ -9,7 +9,6 @@ import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
-import wins.insomnia.backyardrocketry.world.lighting.ChunkLighting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -336,7 +335,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     }
 
 
-    public byte getBlockState(int x, int y, int z) {
+    public byte getBlockStateGlobal(int x, int y, int z) {
 
         if (!isBlockInBounds(x, y, z)) {
             return WORLD.getBlockState(x, y, z);
@@ -345,13 +344,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
         return chunkData.getBlockState(toLocalX(x), toLocalY(y), toLocalZ(z));
     }
 
-    public int getBlockStateLocal(int x, int y, int z) {
+    public byte getBlockState(int x, int y, int z) {
 
         if (!isBlockInBoundsLocal(x, y, z)) {
             return WORLD.getBlockState(toGlobalX(x), toGlobalY(y), toGlobalZ(z));
         }
 
-        return chunkData.getBlock(x, y, z);
+        return chunkData.getBlockState(x, y, z);
     }
 
     // IN GLOBAL SPACE

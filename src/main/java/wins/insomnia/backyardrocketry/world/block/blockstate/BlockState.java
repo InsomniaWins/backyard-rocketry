@@ -7,7 +7,7 @@ import java.util.List;
 public abstract class BlockState {
 
 
-	public abstract BlockStateProperty<?>[] getProperties();
+	public abstract BlockStateProperty<Object>[] getProperties();
 	public String getStateString() {
 
 		BlockStateProperty<?>[] properties = getProperties();
@@ -28,5 +28,10 @@ public abstract class BlockState {
 		stateName.append('}');
 
 		return stateName.toString();
+	}
+
+	@Override
+	public String toString() {
+		return getStateString();
 	}
 }

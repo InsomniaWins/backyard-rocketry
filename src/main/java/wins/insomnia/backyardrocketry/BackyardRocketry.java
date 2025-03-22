@@ -41,8 +41,8 @@ public class BackyardRocketry {
 
 
     private static final VersionPhase VERSION_PHASE = VersionPhase.ALPHA;
-    private static final int VERSION_MAJOR = 1;
-    private static final int VERSION_MINOR = 2;
+    private static final int VERSION_MAJOR = 2;
+    private static final int VERSION_MINOR = 0;
 
 
 

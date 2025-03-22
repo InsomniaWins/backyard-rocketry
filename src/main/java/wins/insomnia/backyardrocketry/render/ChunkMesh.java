@@ -27,7 +27,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     public static final int VERTEX_ATTRIBUTE_FLOAT_AMOUNT = 16;
     private Chunk chunk;
     public boolean unloaded = false;
-
+    private float fadeTimer = 0f;
     int meshDataIndexCount = -1;
     float[] meshDataVertexArray = new float[0];
     int[] meshDataIndexArray = new int[0];
@@ -47,6 +47,14 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         }
 
         super.clean();
+    }
+
+    public void setFadeTimer(float value) {
+        fadeTimer = Math.clamp(0, 1, value);
+    }
+
+    public float getFadeTimer() {
+        return fadeTimer;
     }
 
     public void destroy() {
@@ -167,6 +175,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                 .identity()
                 .translate(chunk.getPosition());
         chunkMeshShaderProgram.setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
+        chunkMeshShaderProgram.setUniform("fs_fadeStage", fadeTimer);
         glBindVertexArray(vao);
 
         glEnableVertexAttribArray(0);

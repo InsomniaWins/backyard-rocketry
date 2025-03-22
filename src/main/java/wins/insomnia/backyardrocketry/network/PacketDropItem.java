@@ -14,7 +14,7 @@ public class PacketDropItem extends Packet {
 
 	String uuid;
 	int itemId;
-	int itemVolume;
+	int itemAmount;
 
 	public PacketDropItem setUuid(UUID uuid) {
 		this.uuid = uuid.toString();
@@ -26,8 +26,8 @@ public class PacketDropItem extends Packet {
 		return this;
 	}
 
-	public PacketDropItem setVolume(int volume) {
-		this.itemVolume = volume;
+	public PacketDropItem setAmount(int amount) {
+		this.itemAmount = amount;
 		return this;
 	}
 
@@ -41,7 +41,7 @@ public class PacketDropItem extends Packet {
 			ClientWorld world = ClientWorld.getClientWorld();
 			if (world == null) return;
 
-			ItemStack itemStack = new ItemStack(Items.getItem(itemId), itemVolume);
+			ItemStack itemStack = new ItemStack(Items.getItem(itemId), itemAmount);
 
 			EntityClientItem entity = new EntityClientItem(
 					itemStack,

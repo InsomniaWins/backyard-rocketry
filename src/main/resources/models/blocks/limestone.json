@@ -1,8 +1,13 @@
 {
-	"parent": "block_all_random_rotation",
+	"parent": "block",
 	"textures": {
 		"particle": "limestone",
-		"all": "limestone",
-		"icon": "limestone"
+		"icon": "limestone",
+		"pos_x": "limestone",
+		"pos_y": "limestone_top",
+		"pos_z": "limestone",
+		"neg_x": "limestone",
+		"neg_y": "limestone_top",
+		"neg_z": "limestone"
 	}
 }

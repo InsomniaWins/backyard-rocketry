@@ -1,0 +1,8 @@
+{
+	"parent": "block_all_random_rotation",
+	"textures": {
+		"particle": "borderstone",
+		"all": "borderstone",
+		"icon": "borderstone"
+	}
+}

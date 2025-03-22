@@ -1,0 +1,8 @@
+{
+	"parent": "block_all",
+	"textures": {
+		"particle": "stone_variation_1",
+		"all": "stone_variation_1",
+		"icon": "stone_variation_1"
+	}
+}

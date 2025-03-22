@@ -1,8 +1,6 @@
 package wins.insomnia.backyardrocketry.world.block;
 
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
-import wins.insomnia.backyardrocketry.world.block.blockstate.BlockState;
-import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 import wins.insomnia.backyardrocketry.world.block.types.*;
 import wins.insomnia.backyardrocketry.world.World;
 
@@ -32,6 +30,8 @@ public class Blocks {
     public static final byte WATER = registerBlock(new BlockWater());
     public static final byte LIMESTONE = registerBlock(new BlockLimestone());
     public static final byte LIGHT = registerBlock(new BlockLight());
+    public static final byte BORDERSTONE = registerBlock(new BlockBorderstone());
+    public static final byte HEMATITE = registerBlock(new BlockHematite());
 
     public static byte getBlockIdFromSynonym(String blockSynonym) {
         return BLOCK_SYNONYM_MAP.get(blockSynonym);

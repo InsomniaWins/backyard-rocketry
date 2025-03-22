@@ -3,23 +3,20 @@ package wins.insomnia.backyardrocketry.item;
 public class Item {
 	private final String NAME;
 	private final String ID_SYNONYM;
-	private final int VOLUME_PER_ITEM;
-	private final double KILOGRAMS_PER_LITER;
+	private final int MAX_STACK_AMOUNT;
 
-	public Item(String itemName, String itemSynonym, int volumePerItem, double kilosPerLiter) {
+	public Item(String itemName, String itemSynonym) {
+		this(itemName, itemSynonym, 64);
+	}
+
+	public Item(String itemName, String itemSynonym, int maxStackAmount) {
 		this.NAME = itemName;
 		this.ID_SYNONYM = itemSynonym;
-		this.VOLUME_PER_ITEM = volumePerItem;
-
-		this.KILOGRAMS_PER_LITER = kilosPerLiter;
+		this.MAX_STACK_AMOUNT = maxStackAmount;
 	}
 
-	public double getKilogramsPerLiter() {
-		return KILOGRAMS_PER_LITER;
-	}
-
-	public int getVolumePerItem() {
-		return VOLUME_PER_ITEM;
+	public int getMaxStackAmount() {
+		return MAX_STACK_AMOUNT;
 	}
 
 	public String getIdSynonym() {

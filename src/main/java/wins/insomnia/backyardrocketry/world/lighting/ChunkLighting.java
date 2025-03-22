@@ -210,7 +210,7 @@ public class ChunkLighting {
 
 			short neighborMinLight = Blocks.getBlockMinimumLightLevel(
 					neighborChunk.getBlock(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]),
-					neighborChunk.getBlockState(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]),
+					neighborChunk.getBlockStateGlobal(neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]),
 					neighborXYZ[0], neighborXYZ[1], neighborXYZ[2]
 			);
 

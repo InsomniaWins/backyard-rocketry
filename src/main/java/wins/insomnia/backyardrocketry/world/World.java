@@ -8,7 +8,6 @@ import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.controller.ClientController;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
-import wins.insomnia.backyardrocketry.util.*;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
@@ -29,9 +28,9 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
     }
 
     public static final int CHUNK_AMOUNT_X = ChunkIO.limitChunkAmount(500);
-    public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(30);
+    public static final int CHUNK_AMOUNT_Y = ChunkIO.limitChunkAmount(500);
     public static final int CHUNK_AMOUNT_Z = ChunkIO.limitChunkAmount(500);
-    public static int chunkLoadDistance = 7; // chunk loading RADIUS
+    public static int chunkLoadDistance = 5; // chunk loading RADIUS
     public static int chunkUnloadDistance = 10; // chunk unloading RADIUS
     public static int chunkProcessDistance = 3;
     protected final HashMap<ChunkPosition, Chunk> CHUNKS;
@@ -181,7 +180,7 @@ public abstract class World implements IFixedUpdateListener, IUpdateListener {
             return 0;
         }
 
-        return chunk.getBlockState(x, y, z);
+        return chunk.getBlockStateGlobal(x, y, z);
     }
 
 

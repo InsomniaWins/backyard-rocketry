@@ -26,6 +26,8 @@ public class Items {
 	public static final Item BRICKS = registerItem(new BlockItemBricks());
 	public static final Item LIMESTONE = registerItem(new BlockItemLimestone());
 	public static final Item LIGHT = registerItem(new BlockItemLight());
+	public static final Item BORDERSTONE = registerItem(new BlockItemBorderstone());
+	public static final Item HEMATITE = registerItem(new BlockItemHematite());
 
 
 	public static Item getItem(int itemId) {

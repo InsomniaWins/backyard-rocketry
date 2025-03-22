@@ -1,6 +1,8 @@
 {
 
-  "default": "stone"
-
+  "default": "stone_variation_0",
+  "{variation=0}": "stone_variation_0",
+  "{variation=1}": "stone_variation_1",
+  "{variation=2}": "stone_variation_2"
 }
 

@@ -1,47 +1,46 @@
 package wins.insomnia.backyardrocketry.item;
 
+import org.joml.Math;
+
 public class ItemStack {
 	private Item item;
-	private int volume;
+	private int amount;
 
 
-	public ItemStack(Item item, int volume) {
+	public ItemStack(Item item, int amount) {
 		this.item = item;
-		this.volume = volume;
+		setAmount(amount);
 	}
 
 	public Item getItem() {
 		return item;
 	}
 
-
-	public void addVolume(int addAmount) {
-		volume += addAmount;
+	public void setAmount(int amount) {
+		this.amount = Math.clamp(0, item.getMaxStackAmount(), amount);
 	}
 
-	public void removeVolume(int removeAmount) {
-		volume = Math.max(0, volume - removeAmount);
+	public void combine(ItemStack stack) {
+		if (stack.getItem() != item) return;
+
+		int amountAvailable = item.getMaxStackAmount() - getAmount();
+		int amountCombined = Math.min(stack.amount, amountAvailable);
+
+		stack.amount -= amountCombined;
+		amount += amountCombined;
 	}
 
-	public int getVolume() {
-		return volume;
+	public int getAvailableAmount() {
+		return getItem().getMaxStackAmount() - amount;
 	}
 
-	public double getKilograms() {
-		return getItem().getKilogramsPerLiter() * getVolume();
-	}
-
-	public float getStackDisplayAmount() {
-		return getVolume() / (float) getItem().getVolumePerItem();
-	}
-
-	public double getItemAmount() {
-		return getVolume() / (double) item.getVolumePerItem();
+	public int getAmount() {
+		return amount;
 	}
 
 	@Override
 	public String toString() {
-		return "ItemStack{" + item.getName() + " x " + getItemAmount() + " m^3 (" + volume + " liters)}";
+		return "ItemStack{" + item.getName() + " x " + getAmount() + "}";
 	}
 
 }

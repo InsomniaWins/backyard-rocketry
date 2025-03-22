@@ -17,6 +17,7 @@ import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.WorldGeneration;
 import wins.insomnia.backyardrocketry.world.block.Block;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.block.blockstate.BlockStateManager;
 import wins.insomnia.backyardrocketry.world.block.loot.BlockLoot;
 
 import java.util.*;
@@ -309,10 +310,18 @@ public class ServerChunk extends Chunk {
 		if (!isBlockInBoundsLocal(x, y, z)) return;
 
 		byte blockBroken = getBlock(x, y, z);
+		byte blockState = getBlockState(x, y, z);
 
 		if (Blocks.getBlockStrength(blockBroken) < 0) return;
 
 		setBlock(x, y, z, Blocks.AIR, (byte) 0, false);
+
+		if (blockBroken == Blocks.LOG) {
+
+			System.err.println(Blocks.AIR);
+			System.err.println(blockBroken + ":" + blockState + " = " + BlockStateManager.parseBlockState(blockBroken, blockState).getStateString());
+
+		}
 
 		if (dropLoot) {
 

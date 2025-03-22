@@ -4,13 +4,18 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import org.joml.Vector3d;
+import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.entity.player.EntityServerPlayer;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
+import wins.insomnia.backyardrocketry.world.WorldGeneration;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 public class ServerController extends GameController {
@@ -34,21 +39,53 @@ public class ServerController extends GameController {
 		@Override
 		public void connected(Connection connection) {
 
+
+			ServerController serverController = ServerController.get();
+			ServerWorld serverWorld = serverController.getWorld();
+
+			EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld, UUID.randomUUID());
+
+			double[] worldCenter = serverWorld.getCenterXZ();
+
+			serverPlayer.getTransform().setPosition(new Vector3d(worldCenter[0], 100, worldCenter[1]));
+			List<ChunkPosition> chunkPositionsAroundPlayer = serverWorld.getChunkPositionsAroundPlayer(serverPlayer, ServerWorld.chunkLoadDistance);
+
+
 			Updater.get().queueMainThreadInstruction(() -> {
+				for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+					double chunkDistance = serverWorld.getChunkDistanceToPlayer(chunkPosition, serverPlayer);
+					if (!serverWorld.isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
 
-				ServerController serverController = ServerController.get();
-				ServerWorld serverWorld = serverController.world;
-
-				EntityServerPlayer serverPlayer = new EntityServerPlayer(connection.getID(), serverWorld, UUID.randomUUID());
-
-				double[] worldCenter = serverWorld.getCenterXZ();
-
-				serverPlayer.getTransform().setPosition(new Vector3d(worldCenter[0], 100, worldCenter[1]));
-
-				serverWorld.setServerPlayer(connection.getID(), serverPlayer);
-
+						if (chunkDistance <= ServerWorld.chunkLoadDistance) {
+							serverWorld.queueChunkForLoading(chunkPosition, ServerChunk.GenerationPass.DECORATION);
+						}
+					}
+				}
 			});
 
+
+			// wait for chunks to load
+			for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
+
+				double chunkDistance = serverWorld.getChunkDistanceToPlayer(chunkPosition, serverPlayer);
+
+				if (chunkDistance <= ServerWorld.chunkLoadDistance) {
+					while (!serverWorld.isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
+
+					}
+				}
+
+			}
+
+			serverPlayer.getTransform().getPosition().y = WorldGeneration.getGroundHeight(
+					serverWorld.getSeed(),
+					(int) serverPlayer.getTransform().getPosition().x,
+					(int) serverPlayer.getTransform().getPosition().z
+			) + 2;
+
+			Updater.get().registerUpdateListener(serverPlayer);
+			Updater.get().registerFixedUpdateListener(serverPlayer);
+			serverWorld.setServerPlayer(connection.getID(), serverPlayer);
 
 
 		}

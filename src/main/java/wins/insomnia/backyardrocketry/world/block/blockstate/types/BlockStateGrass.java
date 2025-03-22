@@ -7,7 +7,7 @@ import wins.insomnia.backyardrocketry.world.block.blockstate.property.PropertyIn
 
 public class BlockStateGrass extends BlockState {
 
-	private final BlockStateProperty<?>[] PROPERTIES = new BlockStateProperty[] {
+	private final BlockStateProperty[] PROPERTIES = new BlockStateProperty[] {
 			new PropertyBoolean("flowers"),
 	};
 
@@ -16,7 +16,7 @@ public class BlockStateGrass extends BlockState {
 	}
 
 	@Override
-	public BlockStateProperty<?>[] getProperties() {
+	public BlockStateProperty<Object>[] getProperties() {
 		return PROPERTIES;
 	}
 

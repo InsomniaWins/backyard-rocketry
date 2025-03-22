@@ -69,9 +69,6 @@ public class EntityPlayer extends LivingEntity implements IPlayer, ICollisionBod
 
 		PREVIOUS_TRANSFORM = new Transform();
 
-		BackyardRocketry.getInstance().getUpdater().registerUpdateListener(this);
-		BackyardRocketry.getInstance().getUpdater().registerFixedUpdateListener(this);
-
 		BOUNDING_BOX = new BoundingBox();
 		updateBoundingBox();
 

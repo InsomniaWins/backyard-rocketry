@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 
 public class WorldGeneration {
 
-    public static int SEA_LEVEL = 80;
+    public static int SEA_LEVEL = 480;
 
     public static ChunkData generateChunkData(ChunkData chunkData) {
         generateLand(chunkData);
@@ -60,41 +60,60 @@ public class WorldGeneration {
                     int globalBlockZ = z + chunkData.getWorldZ();
 
                     int groundHeight = WorldGeneration.getGroundHeight(chunkData.getSeed(), globalBlockX, globalBlockZ);
+                    int groundHeightDistance = groundHeight - globalBlockY;
 
                     byte block;
                     byte blockState = 0;
 
 
+
                     if (isBlockWorldBorder(globalBlockX, globalBlockY, globalBlockZ)) {
 
-                        block = Blocks.WORLD_BORDER;
+                        if (globalBlockY == 0) {
+                            block = Blocks.BORDERSTONE;
+                        } else {
+                            block = Blocks.WORLD_BORDER;
+                        }
+
 
                     } else if (globalBlockY > groundHeight) {
 
                         if (globalBlockY <= WorldGeneration.SEA_LEVEL) {
-
                             block = Blocks.WATER;
-
-
                         } else {
                             block = Blocks.AIR;
                         }
 
                     } else {
 
-                        if (globalBlockY == groundHeight) {
-                            block = Blocks.GRASS;
 
-
-
-                        } else if (globalBlockY > groundHeight - 4) {
-                            block = Blocks.DIRT;
+                        if (carveCaveBlock(chunkData.getSeed(), groundHeightDistance,  globalBlockX, globalBlockY, globalBlockZ)) {
+                            block = Blocks.AIR;
                         } else {
-                            if (World.RANDOM.nextInt(2) == 0) {
-                                block = Blocks.COBBLESTONE;
+
+
+                            if (globalBlockY == groundHeight) {
+                                block = Blocks.GRASS;
+                            } else if (globalBlockY > groundHeight - 6) {
+
+
+
+                                if (World.RANDOM.nextFloat(groundHeightDistance) < 2) {
+                                    block = Blocks.DIRT;
+                                } else {
+                                    block = Blocks.LIMESTONE;
+                                }
+
                             } else {
-                                block = Blocks.STONE;
+
+                                if (isOre(chunkData.getSeed(), globalBlockX, globalBlockY, globalBlockZ)) {
+                                    block = Blocks.HEMATITE;
+                                } else {
+                                    block = Blocks.LIMESTONE;
+                                }
+
                             }
+
                         }
                     }
 
@@ -167,10 +186,41 @@ public class WorldGeneration {
 
     }
 
+
+    public static boolean isOre(long seed, int x, int y, int z) {
+
+        float noiseScale = 0.09f; // smaller number = larger veins
+
+        return (OpenSimplex2.noise3_ImproveXZ(seed,
+                x * noiseScale,
+                y * noiseScale,
+                z * noiseScale
+        )) > 0.9;
+
+    }
+
+
+    public static boolean carveCaveBlock(long seed, int groundHeightDistance, int x, int y, int z) {
+
+        float groundDistanceScale = Math.min(1f, groundHeightDistance / 40f);
+
+        float noiseScale = 0.035f; // smaller number = vaster caves
+        float checkValue = 1f - groundDistanceScale * 0.5f; // bigger number, shorter caves
+
+
+
+        return (OpenSimplex2.noise3_ImproveXZ(seed,
+                x * noiseScale,
+                y * noiseScale,
+                z * noiseScale
+        )) > checkValue;
+
+    }
+
     public static int getGroundHeight(long seed, int globalBlockX, int globalBlockZ) {
-        int noiseAmplitude = 6;
+        int noiseAmplitude = 25;
         float noiseScale = 0.0025f;
-        return (int) (60 + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
+        return (int) (SEA_LEVEL + noiseAmplitude * (OpenSimplex2.noise2_ImproveX(seed, globalBlockX * noiseScale, globalBlockZ * noiseScale) + 1f)) + 16;
     }
 
     public static int getGroundHeight(int globalBlockX, int globalBlockZ) {
@@ -211,6 +261,9 @@ public class WorldGeneration {
     private static void decorateChunk(ServerChunk chunk, ChunkData chunkData, Runnable finishedPassRunnable) {
 
 
+        boolean generateTrees = false;
+
+
         ServerWorld serverWorld = ServerWorld.getServerWorld();
 
         for (int x = 0; x < Chunk.SIZE_X; x++) {
@@ -227,19 +280,26 @@ public class WorldGeneration {
 
                     int groundHeight = WorldGeneration.getGroundHeight(chunkData.getSeed(), blockX, blockZ);
 
+                    // if block is just above ground
+                    if (blockY == groundHeight + 1) {
 
-                    if (blockY == groundHeight + 1 && serverWorld.getBlock(blockX, blockY, blockZ) == Blocks.AIR && World.RANDOM.nextInt(0, 140) == 0) {
+                        // tree generation
+                        if (generateTrees) {
+                            byte rootBlock = serverWorld.getBlock(blockX, blockY, blockZ);
+                            byte groundBlock = serverWorld.getBlock(blockX, blockY - 1, blockZ);
 
-                        //System.err.println("Placed tree at: " + blockX + ", " + blockY + ", " + blockZ);
-
-
-                        StructureManager.placeDecoration(
-                                StructureManager.DECO_PINE_TREE,
-                                blockX,
-                                blockY,
-                                blockZ,
-                                true
-                        );
+                            if (rootBlock == Blocks.AIR && (groundBlock == Blocks.DIRT || groundBlock == Blocks.GRASS)) {
+                                if (World.RANDOM.nextInt(0, 140) == 0) {
+                                    StructureManager.placeDecoration(
+                                            StructureManager.DECO_PINE_TREE,
+                                            blockX,
+                                            blockY,
+                                            blockZ,
+                                            true
+                                    );
+                                }
+                            }
+                        }
 
                     }
 

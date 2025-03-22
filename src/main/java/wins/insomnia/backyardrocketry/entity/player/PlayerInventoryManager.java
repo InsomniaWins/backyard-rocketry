@@ -18,7 +18,7 @@ public class PlayerInventoryManager {
 	public PlayerInventoryManager(IPlayer player) {
 
 		this.PLAYER = player;
-		INVENTORY = new Inventory(5000);
+		INVENTORY = new Inventory(5000000);
 
 	}
 
@@ -54,8 +54,10 @@ public class PlayerInventoryManager {
 	public void openInventory() {
 		if (isOpen()) return;
 
-		guiElement = new GuiElementPlayerInventory();
-		guiElement.register();
+		if (getPlayer() instanceof EntityClientPlayer clientPlayer) {
+			guiElement = new GuiElementPlayerInventory(clientPlayer);
+			guiElement.register();
+		}
 
 		open = true;
 	}
@@ -63,8 +65,10 @@ public class PlayerInventoryManager {
 	public void closeInventory() {
 		if (isClosed()) return;
 
-		guiElement.unregister();
-		guiElement = null;
+		if (getPlayer() instanceof EntityClientPlayer clientPlayer) {
+			guiElement.unregister();
+			guiElement = null;
+		}
 
 		open = false;
 	}

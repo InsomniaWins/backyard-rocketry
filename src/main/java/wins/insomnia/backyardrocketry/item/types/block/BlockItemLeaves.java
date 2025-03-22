@@ -5,6 +5,6 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class BlockItemLeaves extends BlockItem {
 	public BlockItemLeaves() {
-		super(Blocks.LEAVES, "Leaves", "leaves", 1000, 0.15);
+		super(Blocks.LEAVES, "Leaves", "leaves");
 	}
 }

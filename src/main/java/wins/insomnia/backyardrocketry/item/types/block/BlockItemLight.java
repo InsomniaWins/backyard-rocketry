@@ -5,6 +5,6 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 
 public class BlockItemLight extends BlockItem {
 	public BlockItemLight() {
-		super(Blocks.LIGHT, "Light", "light", 1000, 2.5);
+		super(Blocks.LIGHT, "Light", "light");
 	}
 }

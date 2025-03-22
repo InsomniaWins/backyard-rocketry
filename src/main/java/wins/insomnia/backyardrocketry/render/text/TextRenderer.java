@@ -1,11 +1,13 @@
 package wins.insomnia.backyardrocketry.render.text;
 
+import org.joml.Math;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.render.Window;
 import wins.insomnia.backyardrocketry.render.texture.FontTexture;
 import wins.insomnia.backyardrocketry.render.texture.Texture;
 import wins.insomnia.backyardrocketry.render.texture.TextureManager;
+import wins.insomnia.backyardrocketry.util.StringUtil;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -21,16 +23,25 @@ public class TextRenderer {
 
 	public static int getTextPixelWidth(String text, FontTexture fontTexture) {
 
+		int greatestWidth = 0;
 		int width = 0;
 
 		for (int i = 0; i < text.length(); i++) {
 
 			char character = text.charAt(i);
-			width += fontTexture.getCharacterWidth(character);
+
+			if (character == '\n') {
+				greatestWidth = Math.max(greatestWidth, width);
+				width = 0;
+			} else {
+				width += fontTexture.getCharacterWidth(character);
+			}
 
 		}
 
-		return width;
+		greatestWidth = Math.max(greatestWidth, width);
+
+		return greatestWidth;
 	}
 
 	public static int getTextPixelWidth(String text) {
@@ -44,6 +55,19 @@ public class TextRenderer {
 	public static int getTextPixelHeight(int lineAmount) {
 		return getTextPixelHeight(lineAmount, (FontTexture) TextureManager.getTexture("font"));
 	}
+
+	public static int getTextPixelHeight(String text) {
+		return getTextPixelHeight(text, (FontTexture) TextureManager.getTexture("font"));
+	}
+
+	public static int getTextPixelHeight(String text, FontTexture fontTexture) {
+
+		int lineAmount = StringUtil.countCharacter(text, '\n') + 1;
+		return getTextPixelHeight(lineAmount, fontTexture);
+
+	}
+
+
 
 	public static void drawText(String text, int guiX, int guiY) {
 		drawText(text, guiX, guiY, Renderer.get().getGuiScale(), TextureManager.getTexture("font"));

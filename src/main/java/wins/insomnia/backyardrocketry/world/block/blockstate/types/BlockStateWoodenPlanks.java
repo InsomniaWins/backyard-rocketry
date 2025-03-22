@@ -6,12 +6,12 @@ import wins.insomnia.backyardrocketry.world.block.blockstate.property.PropertyIn
 
 public class BlockStateWoodenPlanks extends BlockState {
 
-	private final BlockStateProperty<?>[] PROPERTIES = new BlockStateProperty[] {
+	private final BlockStateProperty[] PROPERTIES = new BlockStateProperty[] {
 			new PropertyInteger("planks_style", 0, 1),
 	};
 
 	@Override
-	public BlockStateProperty<?>[] getProperties() {
+	public BlockStateProperty<Object>[] getProperties() {
 		return PROPERTIES;
 	}
 

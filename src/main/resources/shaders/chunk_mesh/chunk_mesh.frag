@@ -16,6 +16,7 @@ uniform vec3 fs_viewPosition;
 uniform sampler2D fs_texture;
 uniform sampler2D fs_heightMap;
 uniform float fs_time;
+uniform float fs_fadeStage = 0.0;
 
 // fog
 uniform vec3 fs_fogColor;
@@ -142,7 +143,7 @@ void main() {
 
     }
 
-
+    fragmentColor.rgb = mix(fragmentColor.rgb, fs_fogColor, fs_fadeStage);
 
 
 

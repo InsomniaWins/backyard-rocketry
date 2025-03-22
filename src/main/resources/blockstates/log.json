@@ -1,12 +1,18 @@
 {
 
   "default": "log_pos_y",
-  "{top_direction=0}": "log_pos_x",
-  "{top_direction=1}": "log_pos_y",
-  "{top_direction=2}": "log_pos_z",
-  "{top_direction=3}": "log_pos_x",
-  "{top_direction=4}": "log_pos_y",
-  "{top_direction=5}": "log_pos_z"
+  "{top_direction=0, natural=false}": "log_pos_x",
+  "{top_direction=1, natural=false}": "log_pos_y",
+  "{top_direction=2, natural=false}": "log_pos_z",
+  "{top_direction=3, natural=false}": "log_pos_x",
+  "{top_direction=4, natural=false}": "log_pos_y",
+  "{top_direction=5, natural=false}": "log_pos_z",
+  "{top_direction=0, natural=true}": "log_pos_x",
+  "{top_direction=1, natural=true}": "log_pos_y",
+  "{top_direction=2, natural=true}": "log_pos_z",
+  "{top_direction=3, natural=true}": "log_pos_x",
+  "{top_direction=4, natural=true}": "log_pos_y",
+  "{top_direction=5, natural=true}": "log_pos_z"
 
 }
 

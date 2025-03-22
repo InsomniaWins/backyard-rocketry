@@ -19,7 +19,9 @@ public class BlockAtlasTexture extends Texture {
 
 		BLOCK_TEXTURE_MAP = new HashMap<>();
 		registerBlockTexture("cobblestone", new BlockTextureFrames(new Vector2i(0, 0)));
-		registerBlockTexture("stone", new BlockTextureFrames(new Vector2i(1, 0)));
+		registerBlockTexture("stone_variation_0", new BlockTextureFrames(new Vector2i(1, 0)));
+		registerBlockTexture("stone_variation_1", new BlockTextureFrames(new Vector2i(0, 3)));
+		registerBlockTexture("stone_variation_2", new BlockTextureFrames(new Vector2i(1, 3)));
 		registerBlockTexture("dirt", new BlockTextureFrames(new Vector2i(2, 0)));
 		registerBlockTexture("grass_bottom", new BlockTextureFrames(new Vector2i(3, 0)));
 		registerBlockTexture("grass_top", new BlockTextureFrames(new Vector2i(4, 0)));
@@ -33,12 +35,15 @@ public class BlockAtlasTexture extends Texture {
 		registerBlockTexture("bricks", new BlockTextureFrames(new Vector2i(5, 1)));
 		registerBlockTexture("wood", new BlockTextureFrames(new Vector2i(0, 2)));
 		registerBlockTexture("water", new BlockTextureFrames(
-				BlockTextureFrames.toTicksPerFrame(1),
+				BlockTextureFrames.toTicksPerFrame(2),
 				4,
 				new Vector2i(6, 0))
 		);
 		registerBlockTexture("limestone", new BlockTextureFrames(new Vector2i(1, 2)));
+		registerBlockTexture("limestone_top", new BlockTextureFrames(new Vector2i(2, 3)));
 		registerBlockTexture("light", new BlockTextureFrames(new Vector2i(4, 2)));
+		registerBlockTexture("borderstone", new BlockTextureFrames(new Vector2i(10, 0)));
+		registerBlockTexture("hematite", new BlockTextureFrames(new Vector2i(3, 3)));
 	}
 
 	private void registerBlockTexture(String textureName, BlockTextureFrames textureFrames) {

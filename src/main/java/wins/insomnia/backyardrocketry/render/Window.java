@@ -55,7 +55,7 @@ public class Window {
     }
 
     public void postInitialize() {
-        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true, false);
+        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true, true);
 
         keyboardInputCallback = inputEvent -> {
 

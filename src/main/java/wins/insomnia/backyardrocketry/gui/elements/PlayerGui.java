@@ -174,7 +174,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			ItemStack slotItemStack = player.getHotbarSlotContents(i);
 
 
-			if (slotItemStack != null && slotItemStack.getVolume() > 0) {
+			if (slotItemStack != null && slotItemStack.getAmount() > 0) {
 				renderItemIcon(
 						slotItemStack.getItem(),
 						guiX, guiY,
@@ -218,14 +218,12 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 				renderTargetBlock(targetBlockId);
 			}
 
-		} else {
-			BoundingBoxRaycastResult targetEntity = player.getTargetEntity();
+		}
 
-			if (targetEntity != null && targetEntity.getEntity() instanceof Entity entity) {
+		BoundingBoxRaycastResult targetEntity = player.getTargetEntity();
+		if (targetEntity != null && targetEntity.getEntity() instanceof Entity entity) {
 
-				renderTargetEntity(entity);
-
-			}
+			renderTargetEntity(entity);
 
 		}
 
@@ -283,7 +281,7 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 		renderItemIcon(
 				Items.getBlockItem(targetBlockId),
 				wailaPosX + (int) (wailaHeight / 2f),
-				(int) (wailaHeight / 2f)
+				wailaPosY + (int) (wailaHeight / 2f)
 		);
 
 		TextRenderer.drawTextOutline(
@@ -309,22 +307,20 @@ public class PlayerGui implements IGuiRenderable, IUpdateListener {
 			ItemStack itemStack = entityItem.getItemStack();
 			if (itemStack != null) {
 
-				String itemName = itemStack.getItem().getName() + " x " + (int) itemStack.getItemAmount();
-				String volumeString = (itemStack.getVolume() / 1000f) + " L";
-				String weightString = itemStack.getKilograms() + " Kg";
+				String itemName = itemStack.getItem().getName() + " x " + itemStack.getAmount();
 
 				int wailaHeight = TextRenderer.getTextPixelHeight(2);
 				int wailaPosX = 0;
-				int wailaPosY = 0;
+				int wailaPosY = 32;
 
 				renderItemIcon(
 						itemStack.getItem(),
 						wailaPosX + (int) (wailaHeight / 2f),
-						(int) (wailaHeight / 2f)
+						wailaPosY + (int) (wailaHeight / 2f)
 				);
 
 				TextRenderer.drawTextOutline(
-						itemName + "\n" + volumeString + "\n" + weightString,
+						itemName,
 						wailaPosX + (int) (wailaHeight / 2f) + 14,
 						wailaPosY + 3
 				);

@@ -53,13 +53,13 @@ public class ServerWorld extends World {
 		itemEntity.getVelocity().set(velocityX, velocityY, velocityZ);
 
 		int itemId = itemStack.getItem().getId();
-		int volume = itemStack.getVolume();
+		int itemAmount = itemStack.getAmount();
 
 		ServerController.sendReliable(
 				new PacketDropItem()
 						.setUuid(uuid)
 						.setItem(itemId)
-						.setVolume(volume)
+						.setAmount(itemAmount)
 		);
 
 	}
