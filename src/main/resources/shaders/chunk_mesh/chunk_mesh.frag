@@ -20,11 +20,12 @@ uniform float fs_fadeStage = 0.0;
 
 // fog
 uniform vec3 fs_fogColor;
-uniform bool fs_fogEnabled = true;
+uniform bool fs_fogEnabled = false;
 uniform float fs_fogStart = 0.0;
 uniform float fs_fogEnd = 1.0;
 
 // lighting
+uniform bool fs_heightMapEnabled = false;
 vec3 lightDirection = normalize(vec3(-0.7, -0.8, -0.45));
 vec3 lightColor = vec3(1.0, 1.0, 1.0);
 float ambientLightStrength = 0.7;
@@ -87,7 +88,10 @@ void main() {
     vec3 viewDirection = normalize(fs_viewPosition - fs_fragmentPosition);
     vec3 reflectDirection = reflect(lightDirection, fs_normal);
     float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 4);
-    vec3 specularLighting = (texture(fs_heightMap, currentFrameTexCoord).r) * specular * lightColor;
+    vec3 specularLighting;
+    if (fs_heightMapEnabled) {
+        specularLighting = (texture(fs_heightMap, currentFrameTexCoord).r) * specular * lightColor;
+    }
 
 
 
@@ -134,12 +138,13 @@ void main() {
 
         fragmentColor.rgb = fragmentColor.rgb * ambientLighting;
 
-        vec3 diffuseLighting = lightColor * (max(dot(normalize(fs_normal), lightDirection), 0.0));
+        vec3 diffuseLighting = lightColor * (max(dot(-fs_normal, lightDirection), 0.0));
 
         fragmentColor.rgb = (ambientLighting + diffuseLighting + specularLighting) * fragmentColor.rgb;
 
         // ambient occlusion
         fragmentColor.rgb = fragmentColor.rgb * fs_ambientOcclusionValue;
+
 
     }
 

@@ -8,13 +8,16 @@ import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.component.ComponentGravity;
 import wins.insomnia.backyardrocketry.network.entity.player.PacketPlayerTransform;
 import wins.insomnia.backyardrocketry.physics.BoundingBox;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ServerWorld;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 
 public class EntityServerPlayer extends EntityPlayer {
+    private boolean loadingTerrain = true; // true when player is just now connecting and loading terrain
     private boolean[] movementInputs = new boolean[MOVEMENT_INPUT_SIZE];
     private final int CONNECTION_ID;
     private boolean jumping = false; // true when player queued a jump
@@ -53,10 +56,7 @@ public class EntityServerPlayer extends EntityPlayer {
 
     }
 
-
-    @Override
-    public void fixedUpdate() {
-        super.fixedUpdate();
+    private void handleMovement() {
 
         handleCrouchingAndSprinting();
 
@@ -134,12 +134,20 @@ public class EntityServerPlayer extends EntityPlayer {
 
         moving = moveDistance > 0.01f;
 
-        //blockInteraction();
+    }
 
+    @Override
+    public void fixedUpdate() {
+        super.fixedUpdate();
+
+
+        if (!isLoadingTerrain()) {
+            handleMovement();
+            //blockInteraction();
+            //pickupNearbyItems();
+        }
 
         getWorld().updateChunksAroundPlayer(this);
-
-        //pickupNearbyItems();
 
     }
 
@@ -147,5 +155,17 @@ public class EntityServerPlayer extends EntityPlayer {
     public void update(double deltaTime) {
         super.update(deltaTime);
         sendUnreliableInfoToClients();
+    }
+
+    public void setFinishedLoadingTerrain() {
+        loadingTerrain = false;
+    }
+
+    public boolean isLoadingTerrain() {
+
+        ChunkPosition chunkPosition = getWorld().getPlayersChunkPosition(this);
+        ServerWorld serverWorld = (ServerWorld) getWorld();
+
+        return loadingTerrain || !serverWorld.isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION);
     }
 }

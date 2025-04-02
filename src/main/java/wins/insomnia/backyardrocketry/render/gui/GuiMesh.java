@@ -1,7 +1,7 @@
 package wins.insomnia.backyardrocketry.render.gui;
 
 import org.lwjgl.opengl.GL30;
-import wins.insomnia.backyardrocketry.render.IMesh;
+import wins.insomnia.backyardrocketry.render.mesh.IMesh;
 import wins.insomnia.backyardrocketry.render.IRenderable;
 
 import java.util.concurrent.atomic.AtomicBoolean;

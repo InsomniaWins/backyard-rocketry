@@ -18,9 +18,9 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     public boolean isClean = false;
     private final BoundingBox BOUNDING_BOX;
-    public static final int SIZE_X = 20;
-    public static final int SIZE_Y = 20;
-    public static  final int SIZE_Z = 20;
+    public static final int SIZE_X = 32;
+    public static final int SIZE_Y = 32;
+    public static  final int SIZE_Z = 32;
     private final int X;
     private final int Y;
     private final int Z;
@@ -48,8 +48,16 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     }
 
+    public void decrementTicksToLive() {
+        ticksToLive = Math.max(0, --ticksToLive);
+    }
+
     public int getTicksToLive() {
         return ticksToLive;
+    }
+
+    public void setTicksToLive(int ticks) {
+        ticksToLive = Math.max(ticksToLive, ticks);
     }
 
     public boolean isLoaded() {
@@ -322,7 +330,7 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
             int chunkPosZ = globalZ / (Chunk.SIZE_Z);
 
             ChunkPosition chunkPosition = new ChunkPosition(chunkPosX, chunkPosY, chunkPosZ);
-            Chunk chunk = WORLD.getChunk(chunkPosition);
+            Chunk chunk = WORLD.getChunkSafe(chunkPosition);
 
             if (chunk == null) {
                 return Blocks.NULL;
@@ -386,42 +394,42 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
         if (!includeCorners) {
             return new Chunk[] {
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
-                    WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 0))
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
+                    WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 1, 0))
             };
         }
 
         return new Chunk[] {
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, -1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, 0)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, -1, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, -1, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, -1, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 0, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 0, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(-1, 1, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(0, 1, 1)),
-                WORLD.getChunkAt(getChunkPosition().newOffsetChunkPosition(1, 1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, -1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, -1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, -1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 0, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 0, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 0, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 1, -1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, -1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, -1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, -1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 0, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 0, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 1, 0)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, -1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, -1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, -1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 0, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 0, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 0, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(-1, 1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(0, 1, 1)),
+                WORLD.getChunkAtSafe(getChunkPosition().newOffsetChunkPosition(1, 1, 1)),
 
         };
     }
@@ -456,7 +464,11 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
 
     @Override
     public void fixedUpdate() {
+        if (--ticksToLive <= 0) {
 
+            getWorld().queueChunkForUnloading(getChunkPosition());
+
+        }
     }
 
     @Override
@@ -477,8 +489,13 @@ public class Chunk implements IFixedUpdateListener, IUpdateListener {
     public Chunk getTopChunk() {
 
         ChunkPosition topChunkPosition = getChunkPosition().newOffsetChunkPosition(0, -1, 0);
-        return getWorld().getChunk(topChunkPosition);
+        return getWorld().getChunkSafe(topChunkPosition);
 
+    }
+
+
+    public boolean hasFinishedDesiredGenerationPass() {
+        return false;
     }
 
 }

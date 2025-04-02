@@ -13,9 +13,9 @@ import java.util.logging.*;
 
 public abstract class GameController implements IUpdateListener, IFixedUpdateListener {
 
-	public static final int CLIENT_WRITE_BUFFER_SIZE = 16_384;
+	public static final int CLIENT_WRITE_BUFFER_SIZE = 160_384;
 	public static final int SERVER_WRITE_BUFFER_SIZE = CLIENT_WRITE_BUFFER_SIZE * 2;
-	public static final int OBJECT_BUFFER_SIZE = 32_000; // read buffer size
+	public static final int OBJECT_BUFFER_SIZE = 320_000; // read buffer size
 	private boolean started = false;
 	private World world;
 	private final Logger LOGGER;

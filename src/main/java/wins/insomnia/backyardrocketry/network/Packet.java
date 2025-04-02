@@ -10,6 +10,7 @@ import wins.insomnia.backyardrocketry.network.entity.PacketRemoveEntity;
 import wins.insomnia.backyardrocketry.network.entity.PacketUpdateEntityTransform;
 import wins.insomnia.backyardrocketry.network.entity.player.*;
 import wins.insomnia.backyardrocketry.network.world.PacketLoadChunk;
+import wins.insomnia.backyardrocketry.network.world.PacketUnloadChunk;
 import wins.insomnia.backyardrocketry.network.world.PacketUpdateBlock;
 import wins.insomnia.backyardrocketry.util.Transform;
 
@@ -26,6 +27,7 @@ public abstract class Packet {
 	public static final List<Class<?>> CLASS_REGISTRATION_LIST = Arrays.asList(
 			TestPacket.class,
 			PacketLoadChunk.class,
+			PacketUnloadChunk.class,
 			PacketPlayerTransform.class,
 			PacketPlayerJump.class,
 			PacketPlayerBreakBlock.class,

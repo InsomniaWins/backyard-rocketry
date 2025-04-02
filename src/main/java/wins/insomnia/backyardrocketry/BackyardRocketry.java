@@ -141,6 +141,9 @@ public class BackyardRocketry {
 
     }
 
+    public boolean isRunning() {
+        return running;
+    }
 
     public EntityClientPlayer getClientPlayer() {
         return GameplayScene.getClientPlayer();

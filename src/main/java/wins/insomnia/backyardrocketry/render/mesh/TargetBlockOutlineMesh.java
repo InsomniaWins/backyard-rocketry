@@ -1,6 +1,7 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.mesh;
 
 import org.joml.Math;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.block.Blocks;
 
@@ -124,6 +125,8 @@ public class TargetBlockOutlineMesh {
 		NEG_X_MESH.clean();
 		NEG_Y_MESH.clean();
 		NEG_Z_MESH.clean();
+
+		ChunkOutlineMesh.clean();
 
 	}
 }

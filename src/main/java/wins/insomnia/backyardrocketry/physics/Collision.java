@@ -61,7 +61,7 @@ public class Collision {
 
                     currentChunkPosition.set(minChunkX + x, minChunkY + y, minChunkZ + z);
 
-                    Chunk chunk = world.getChunkAt(currentChunkPosition);
+                    Chunk chunk = world.getChunkAtSafe(currentChunkPosition);
 
                     if (!includeUnloadedChunks) {
 

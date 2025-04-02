@@ -5,7 +5,7 @@ import wins.insomnia.backyardrocketry.item.BlockItem;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.render.BlockModelData;
 import wins.insomnia.backyardrocketry.render.IRenderable;
-import wins.insomnia.backyardrocketry.render.Mesh;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
 import wins.insomnia.backyardrocketry.render.Renderer;
 import wins.insomnia.backyardrocketry.util.Transform;
 import wins.insomnia.backyardrocketry.util.update.Updater;

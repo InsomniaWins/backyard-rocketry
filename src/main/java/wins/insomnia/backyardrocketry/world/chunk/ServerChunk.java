@@ -129,7 +129,7 @@ public class ServerChunk extends Chunk {
 
 					if (!serverWorld.isChunkPositionInWorldBorder(neighborPosition)) continue;
 
-					ServerChunk chunk = (ServerChunk) serverWorld.getChunk(neighborPosition);
+					ServerChunk chunk = (ServerChunk) serverWorld.getChunkSafe(neighborPosition);
 
 					if (chunk == null) {
 						if (loadPass) {
@@ -174,6 +174,7 @@ public class ServerChunk extends Chunk {
 
 	@Override
 	public void fixedUpdate() {
+		super.fixedUpdate();
 
 		if (getCurrentGenerationPassOrdinal() < desiredGenerationPass) {
 
@@ -376,11 +377,18 @@ public class ServerChunk extends Chunk {
 	}
 
 
+	public boolean hasFinishedDesiredGenerationPass() {
+		return hasFinishedPass(getDesiredGenerationPass());
+	}
+
+
 	public record SetBlockQueueElement(
 		int localX, int localY, int localZ,
 		byte block,
 		byte blockState,
 		boolean updateClients
 	) {}
+
+
 
 }

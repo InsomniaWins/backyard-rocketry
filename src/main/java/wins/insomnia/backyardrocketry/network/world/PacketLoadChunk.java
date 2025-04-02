@@ -1,18 +1,15 @@
 package wins.insomnia.backyardrocketry.network.world;
 
 import com.esotericsoftware.kryonet.Connection;
-import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.network.Packet;
 import wins.insomnia.backyardrocketry.util.io.ChunkIO;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
-import wins.insomnia.backyardrocketry.world.ServerWorld;
 import wins.insomnia.backyardrocketry.world.World;
 import wins.insomnia.backyardrocketry.world.chunk.Chunk;
 import wins.insomnia.backyardrocketry.world.chunk.ChunkData;
 import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
-import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 
 public class PacketLoadChunk extends Packet {
@@ -48,6 +45,7 @@ public class PacketLoadChunk extends Packet {
 		// clients can only be told by server to load chunks, no other way
 		if (senderType != SenderType.SERVER) {
 
+			/*
 			Updater.get().queueMainThreadInstruction(() -> {
 
 				ServerWorld serverWorld = World.getServerWorld();
@@ -75,7 +73,7 @@ public class PacketLoadChunk extends Packet {
 						packet
 				);
 
-			});
+			});*/
 
 			return;
 		}
@@ -91,7 +89,7 @@ public class PacketLoadChunk extends Packet {
 
 			if (chunkPosition != null) {
 
-				Chunk chunk = clientWorld.getChunk(chunkPosition);
+				Chunk chunk = clientWorld.getChunkSafe(chunkPosition);
 
 				if (chunk == null) {
 					clientWorld.receivedChunkDataFromServer(chunkData);

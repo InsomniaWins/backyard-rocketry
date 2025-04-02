@@ -191,10 +191,6 @@ public class BlockStateManager {
 		}
 		BlockStateContainer container = new BlockStateContainer(stateName.toString(), blockState, (byte) states.size());
 
-		if (block == Blocks.LOG) {
-			System.err.println(states.size()+ " : " + container.BLOCK_STATE_NAME);
-		}
-
 		states.add(container);
 
 	}

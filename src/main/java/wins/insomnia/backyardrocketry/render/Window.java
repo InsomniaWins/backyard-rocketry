@@ -10,7 +10,6 @@ import wins.insomnia.backyardrocketry.util.io.device.KeyboardInputEvent;
 import wins.insomnia.backyardrocketry.util.io.device.MouseInput;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -20,6 +19,8 @@ public class Window {
 
     public final int DEFAULT_RESOLUTION_WIDTH = 320;
     public final int DEFAULT_RESOLUTION_HEIGHT = 240;
+    public final boolean DEFAULT_PIXEL_PERFECT = true;
+    public final boolean DEFAULT_EXPANDING = false;
 
     private final long WINDOW_HANDLE;
     private int width;
@@ -55,7 +56,7 @@ public class Window {
     }
 
     public void postInitialize() {
-        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, true, true);
+        setResolution(DEFAULT_RESOLUTION_WIDTH, DEFAULT_RESOLUTION_HEIGHT, DEFAULT_PIXEL_PERFECT, DEFAULT_EXPANDING);
 
         keyboardInputCallback = inputEvent -> {
 
@@ -71,7 +72,6 @@ public class Window {
 		};
 
         KeyboardInput.get().registerInputCallback(keyboardInputCallback);
-
     }
 
     public Vector2i getMonitorResolution() {
@@ -185,6 +185,8 @@ public class Window {
 
         window.width = width;
         window.height = height;
+
+        setResolution(window.width, window.height, DEFAULT_PIXEL_PERFECT, DEFAULT_EXPANDING);
 
         if (isViewportExpanding()) {
 

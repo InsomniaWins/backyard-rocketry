@@ -1,6 +1,5 @@
 package wins.insomnia.backyardrocketry.world;
 
-import com.esotericsoftware.kryonet.Server;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.controller.ServerController;
 import wins.insomnia.backyardrocketry.entity.Entity;
@@ -10,6 +9,7 @@ import wins.insomnia.backyardrocketry.entity.player.IPlayer;
 import wins.insomnia.backyardrocketry.item.ItemStack;
 import wins.insomnia.backyardrocketry.network.PacketDropItem;
 import wins.insomnia.backyardrocketry.network.entity.PacketRemoveEntity;
+import wins.insomnia.backyardrocketry.network.world.PacketUnloadChunk;
 import wins.insomnia.backyardrocketry.physics.Collision;
 import wins.insomnia.backyardrocketry.scene.GameplayScene;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -96,29 +96,32 @@ public class ServerWorld extends World {
 	}
 
 
+	public void loadChunkImmediate(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
+		_loadChunk(chunkPosition, generationPass);
+	}
+
 
 	// DO NOT CALL DIRECTLY
 	// only called on main-thread
 	private void _loadChunk(ChunkPosition chunkPosition, ServerChunk.GenerationPass generationPass) {
 
-		if (CHUNKS.get(chunkPosition) != null) {
+		Chunk chunk = CHUNKS.get(chunkPosition);
 
-			ServerChunk serverChunk = (ServerChunk) CHUNKS.get(chunkPosition);
+		if (chunk != null) {
+
+			ServerChunk serverChunk = (ServerChunk) chunk;
 
 			if (serverChunk.getDesiredGenerationPassOrdinal() >= generationPass.ordinal()) {
-
 				return;
-
 			}
 
+			serverChunk.setDesiredGenerationPass(generationPass);
+			return;
 		}
 
-		ServerChunk chunk = new ServerChunk(this, chunkPosition);
+		ServerChunk serverChunk = new ServerChunk(this, chunkPosition);
 
-		chunk.setDesiredGenerationPass(generationPass);
-
-		CHUNKS.put(chunkPosition, chunk);
-		CHUNKS_CURRENTLY_LOADING.remove(chunkPosition);
+		CHUNKS.put(chunkPosition, serverChunk);
 
 	}
 
@@ -143,38 +146,25 @@ public class ServerWorld extends World {
 			double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
 
 			if (!isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
-
 				if (chunkDistance <= chunkLoadDistance) {
 					queueChunkForLoading(chunkPosition, ServerChunk.GenerationPass.DECORATION);
 				}
+			} else {
+
+				Chunk chunk = getChunkSafe(chunkPosition);
+				chunk.setTicksToLive(chunkLoadingTicksToLive);
+
 			}
 		}
 
-		/*
+/*
+		for (ChunkPosition chunkPosition : CHUNKS.keySet()) {
 
-		TODO: implement chunk unloading
+			Chunk chunk = getChunk(chunkPosition);
 
-		for (Map.Entry<ChunkPosition, Chunk> chunkEntry : CHUNKS.entrySet()) {
+			if (chunk.getTicksToLive() <= 0) queueChunkForUnloading(chunkPosition);
 
-			ChunkPosition chunkPosition = chunkEntry.getKey();
-			Chunk chunk = chunkEntry.getValue();
-			double chunkDistance = getChunkDistanceToPlayer(chunkPosition, player);
-
-			chunk.setShouldProcess(chunkDistance <= chunkProcessDistance);
-
-			if (chunkDistance >= chunkUnloadDistance) {
-				chunk.ticksToLive -= 1;
-			}
-
-			if (chunk.isProcessing()) {
-				// if chunk is processing, make it stay alive
-				chunk.ticksToLive = Math.max(1, chunk.ticksToLive);
-			} else {
-				// check for chunk unloading
-				if (chunk.ticksToLive <= 0) {
-					queueChunkForUnloading(chunkPosition);
-				}
-			}
+			chunk.decrementTicksToLive();
 
 		}*/
 
@@ -259,6 +249,55 @@ public class ServerWorld extends World {
 		List<Chunk> chunksTouchingPlayer = Collision.getChunksTouchingBoundingBox(this, player.getBoundingBox(), true);
 
 		return chunksTouchingPlayer.contains(null);
+	}
+
+
+	@Override
+	public void update(double deltaTime) {
+
+
+
+		int chunkManagementQueueSize = CHUNK_MANAGEMENT_QUEUE.size();
+		for (int i = 0; i < chunkManagementQueueSize; i++) {
+
+			ChunkManagementData chunkManagementData = CHUNK_MANAGEMENT_QUEUE.poll();
+
+			if (chunkManagementData == null) continue;
+
+
+			ServerChunk chunk = (ServerChunk) CHUNKS.get(chunkManagementData.chunkPosition);
+
+
+			switch (chunkManagementData.type) {
+				case LOAD -> {
+
+					if (chunk == null) {
+						loadChunk(chunkManagementData.chunkPosition, chunkManagementData.pass);
+					}
+
+				}
+				case UNLOAD -> {
+					ChunkPosition chunkPosition = chunkManagementData.chunkPosition;
+
+					if (chunk == null) continue;
+
+					// if chunk is still loading, wait for it to finish loading before unloading it
+					if (!chunk.hasFinishedDesiredGenerationPass()) {
+
+						CHUNK_MANAGEMENT_QUEUE.offer(chunkManagementData);
+
+					} else {
+						unloadChunk(chunkPosition);
+					}
+				}
+				default -> {
+
+				}
+			}
+
+
+		}
+
 	}
 
 

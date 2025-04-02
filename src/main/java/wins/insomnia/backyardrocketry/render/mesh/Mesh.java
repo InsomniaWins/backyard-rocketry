@@ -1,8 +1,10 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.mesh;
 
 
 import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.render.IRenderable;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.lwjgl.opengl.GL15.*;

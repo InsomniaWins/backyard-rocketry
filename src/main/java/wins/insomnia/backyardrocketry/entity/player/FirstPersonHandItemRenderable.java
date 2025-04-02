@@ -4,6 +4,7 @@ import org.joml.Math;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
 import wins.insomnia.backyardrocketry.util.update.Updater;
 
 public class FirstPersonHandItemRenderable implements IRenderable {

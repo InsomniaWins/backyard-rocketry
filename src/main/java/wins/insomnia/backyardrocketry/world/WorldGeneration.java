@@ -169,7 +169,7 @@ public class WorldGeneration {
                     rgb.x *= 0.9f;
                     rgb.y *= 0.9f;
                     rgb.z *= 0.9f;
-                    color.setRGB(rgb);
+                    color.setRgb(rgb);
 
                 }
 

@@ -4,13 +4,15 @@ import org.joml.*;
 import org.joml.Math;
 import org.joml.primitives.Rectanglei;
 import org.lwjgl.opengl.GL11;
-import org.w3c.dom.Text;
 import wins.insomnia.backyardrocketry.BackyardRocketry;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.entity.player.EntityClientPlayer;
 import wins.insomnia.backyardrocketry.physics.*;
 import wins.insomnia.backyardrocketry.render.gui.GuiMesh;
 import wins.insomnia.backyardrocketry.render.gui.IGuiRenderable;
+import wins.insomnia.backyardrocketry.render.mesh.ChunkOutlineMesh;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
+import wins.insomnia.backyardrocketry.render.mesh.TargetBlockOutlineMesh;
 import wins.insomnia.backyardrocketry.render.text.FontMesh;
 import wins.insomnia.backyardrocketry.render.text.TextRenderer;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
@@ -23,7 +25,14 @@ import wins.insomnia.backyardrocketry.util.io.device.KeyboardInput;
 import wins.insomnia.backyardrocketry.util.update.IFixedUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.IUpdateListener;
 import wins.insomnia.backyardrocketry.util.update.Updater;
+import wins.insomnia.backyardrocketry.world.ChunkPosition;
+import wins.insomnia.backyardrocketry.world.ClientWorld;
+import wins.insomnia.backyardrocketry.world.ServerWorld;
 import wins.insomnia.backyardrocketry.world.World;
+import wins.insomnia.backyardrocketry.world.block.Blocks;
+import wins.insomnia.backyardrocketry.world.chunk.Chunk;
+import wins.insomnia.backyardrocketry.world.chunk.ClientChunk;
+import wins.insomnia.backyardrocketry.world.chunk.ServerChunk;
 
 import java.util.*;
 
@@ -40,8 +49,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private final TextureManager TEXTURE_MANAGER;
     private final FontMesh FONT_MESH;
     private final GuiMesh GUI_MESH;
-    private final LinkedList<IRenderable> RENDER_LIST;
-    private final LinkedList<IGuiRenderable> GUI_RENDER_LIST;
+    private final ArrayList<IRenderable> RENDER_LIST;
+    private final ArrayList<IGuiRenderable> GUI_RENDER_LIST;
     private int framesPerSecond = 0;
     private int framesRenderedSoFar = 0; // frames rendered before fps-polling occurs
 
@@ -54,7 +63,7 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
     private double fixedFrameRenderTime = 0.0; // DO NOT SET MANUALLY
     private Matrix4f modelMatrix;
     private int renderMode = 0;
-    private int guiScale = 1;
+    private int guiScale = 3;
     private double timeOfPreviousFrame = glfwGetTime(); // game time of previous frame's rendering/drawing (not total time it took to render)
     private boolean renderDebugInformation = false;
     private ShaderProgram defaultShaderProgram = null, guiShaderProgram = null, chunkMeshShaderProgram = null;
@@ -63,8 +72,8 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
     public Renderer() {
 
-        RENDER_LIST = new LinkedList<>();
-        GUI_RENDER_LIST = new LinkedList<>();
+        RENDER_LIST = new ArrayList<>();
+        GUI_RENDER_LIST = new ArrayList<>();
         TEXTURE_MANAGER = new TextureManager();
 
         camera = new Camera();
@@ -78,6 +87,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         defaultShaderProgram = registerShaderProgram("default", "vertex.vert", "fragment.frag");
         guiShaderProgram = registerShaderProgram("gui", "gui.vert", "gui.frag");
         chunkMeshShaderProgram = registerShaderProgram("chunk_mesh", "chunk_mesh/chunk_mesh.vert", "chunk_mesh/chunk_mesh.frag");
+        registerShaderProgram("line", "line/line.vert", "line/line.frag");
+
+        chunkMeshShaderProgram.use();
 
         setGuiScale(guiScale);
 
@@ -101,9 +113,10 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
         );
 
         setClearColor(120.0f / 255.0f, 167.0f / 255.0f, 1.0f);
-        setFpsLimit(120);
+        setFpsLimit(-1);
 
         TargetBlockOutlineMesh.init();
+
     }
 
 
@@ -463,7 +476,9 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 getShaderProgram().setUniform("fs_color", new Vector4f(TargetBlockOutlineMesh.getOutlineAlpha(), TargetBlockOutlineMesh.getOutlineAlpha(), TargetBlockOutlineMesh.getOutlineAlpha(), 1f));
 
                 Mesh targetBlockOutlineMesh = TargetBlockOutlineMesh.get(raycastResult.getFace());
-                if (targetBlockOutlineMesh != null) targetBlockOutlineMesh.render(GL_LINES);
+                if (targetBlockOutlineMesh != null) {
+                    targetBlockOutlineMesh.render(GL_LINES);
+                }
 
                 getShaderProgram().setUniform("fs_color", new Vector4f(1f, 1f, 1f, 1f));
 
@@ -474,6 +489,18 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
                 activateRenderMode();
             }
 
+        }
+
+
+
+
+
+        if (renderDebugInformation) {
+            // draw client chunks
+            //drawChunkBoundaries(false, false, false);
+
+            // draw server chunks
+            drawChunkBoundaries(true, false, false);
         }
 
 
@@ -540,6 +567,98 @@ public class Renderer implements IUpdateListener, IFixedUpdateListener {
 
 
 
+    }
+
+    private void drawChunkBoundaries(boolean isServerChunks, boolean colorForBothClientAndServer, boolean renderTicksToLive) {
+
+        ShaderProgram lineShader = getShaderProgram("line");
+        lineShader.use();
+
+        lineShader.setUniform("vs_projectionMatrix", getCamera().getProjectionMatrix());
+        lineShader.setUniform("vs_viewMatrix", getCamera().getViewMatrix());
+
+        World world;
+        if (isServerChunks) {
+            world = ServerWorld.getServerWorld();
+        } else {
+            world = ClientWorld.getClientWorld();
+        }
+
+        if (world == null) return;
+
+        Color chunkColor = new Color(0f, 0f, 0f);
+
+        for (Chunk chunk : world.getChunks()) {
+
+            glLineWidth(2f);
+
+            ChunkPosition chunkPosition = chunk.getChunkPosition();
+
+            if (isServerChunks) {
+
+                if (renderTicksToLive) {
+                    Vector3i screenPos = worldPositionToGuiPosition(camera, chunkPosition.getBlockX() + 10, chunkPosition.getBlockY() + 10, chunkPosition.getBlockZ() + 10);
+                    TextRenderer.drawText(String.valueOf(chunk.getTicksToLive()), screenPos.x, screenPos.y);
+                    lineShader.use();
+                }
+
+                chunkColor.setRgb(1f, 0f, 0f);
+
+                if (colorForBothClientAndServer) {
+                    ClientWorld clientWorld = ClientWorld.getClientWorld();
+                    if (clientWorld != null) {
+                        if (clientWorld.getChunkAtSafe(chunkPosition) != null) {
+
+                            glLineWidth(8f);
+
+                            chunkColor.setRgb(1f, 1f, 0f);
+                        }
+                    }
+                } else if (chunk instanceof ServerChunk serverChunk) {
+
+                    if (serverChunk.getDesiredGenerationPass() == ServerChunk.GenerationPass.DECORATION && serverChunk.hasFinishedDesiredGenerationPass()) {
+
+                        glLineWidth(4f);
+
+                        chunkColor.setRgb(0, 0, 1);
+
+                    }
+
+                }
+
+            } else {
+                chunkColor.setRgb(0f, 1f, 0f);
+            }
+
+            Matrix4f modelMatrix = new Matrix4f().identity();
+            modelMatrix.translate(
+					chunk.getPosition().x,
+					chunk.getPosition().y,
+					chunk.getPosition().z
+            );
+
+
+            lineShader.setUniform("vs_modelMatrix", modelMatrix);
+
+            lineShader.setUniform("fs_lineColor", chunkColor.getRGB());
+
+            glDisable(GL_CULL_FACE);
+
+            glBindTexture(GL_TEXTURE_2D, TextureManager.getTexture("block_outline").getTextureHandle());
+
+
+            glBindVertexArray(ChunkOutlineMesh.getVao());
+            glEnableVertexAttribArray(0);
+
+            glDrawElements(GL_LINES, ChunkOutlineMesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+
+
+            glEnable(GL_CULL_FACE);
+
+
+        }
+
+        getShaderProgram().use();
     }
 
     public void setGuiScale(int guiScale) {

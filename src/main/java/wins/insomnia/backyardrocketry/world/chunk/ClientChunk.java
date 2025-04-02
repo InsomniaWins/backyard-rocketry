@@ -3,13 +3,10 @@ package wins.insomnia.backyardrocketry.world.chunk;
 import wins.insomnia.backyardrocketry.Main;
 import wins.insomnia.backyardrocketry.audio.AudioManager;
 import wins.insomnia.backyardrocketry.audio.AudioPlayer;
-import wins.insomnia.backyardrocketry.render.ChunkMesh;
+import wins.insomnia.backyardrocketry.render.mesh.ChunkMesh;
 import wins.insomnia.backyardrocketry.render.Color;
 import wins.insomnia.backyardrocketry.render.Renderer;
-import wins.insomnia.backyardrocketry.util.debug.DebugInfo;
 import wins.insomnia.backyardrocketry.util.debug.DebugOutput;
-import wins.insomnia.backyardrocketry.util.io.ChunkIO;
-import wins.insomnia.backyardrocketry.util.update.Updater;
 import wins.insomnia.backyardrocketry.world.ChunkPosition;
 import wins.insomnia.backyardrocketry.world.ClientWorld;
 import wins.insomnia.backyardrocketry.world.World;
@@ -17,14 +14,24 @@ import wins.insomnia.backyardrocketry.world.block.Blocks;
 import wins.insomnia.backyardrocketry.world.block.BlockAudio;
 import wins.insomnia.backyardrocketry.world.lighting.ChunkLighting;
 
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.concurrent.ExecutorService;
+import java.util.PriorityQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientChunk extends Chunk {
 
-	public static final ExecutorService chunkMeshGenerationExecutorService = Executors.newFixedThreadPool(4, r -> new Thread(r, "chunk-mesh-generation-thread"));
+	public static final PriorityQueue<ChunkMeshGenerationData> CHUNK_MESH_PRIORITY_QUEUE = new PriorityQueue<>(
+			new Comparator<ChunkMeshGenerationData>() {
+				@Override
+				public int compare(ChunkMeshGenerationData o1, ChunkMeshGenerationData o2) {
+					return Integer.compare(o1.priority, o2.priority);
+				}
+			}
+	);
+	public static final ThreadPoolExecutor CHUNK_MESH_GENERATION_EXECUTOR_SERVICE = (ThreadPoolExecutor) Executors.newFixedThreadPool(4, r -> new Thread(r, "chunk-mesh-generation-thread"));
 	private final AtomicBoolean SHOULD_REGENERATE_MESH = new AtomicBoolean(false);
 	private final AtomicBoolean SHOULD_INSTANTLY_REGENERATE_MESH = new AtomicBoolean(false);
 	private final ChunkMesh CHUNK_MESH;
@@ -32,9 +39,6 @@ public class ClientChunk extends Chunk {
 
 	public ClientChunk(World world, ChunkPosition chunkPosition) {
 		super(world, chunkPosition);
-
-
-		SHOULD_REGENERATE_MESH.set(true);
 
 		CHUNK_MESH = new ChunkMesh(this, false);
 		TRANSPARENT_CHUNK_MESH = new ChunkMesh(this, true);
@@ -45,6 +49,12 @@ public class ClientChunk extends Chunk {
 	public ClientChunk(ClientWorld world, ChunkData chunkData) {
 		this(world, chunkData.getChunkPosition(world));
 		gotChunkDataFromServer(chunkData);
+
+		int p = (int) world.getChunkDistanceToPlayer(getChunkPosition(), world.getClientPlayer());
+		CHUNK_MESH.generationPriority = p;
+		TRANSPARENT_CHUNK_MESH.generationPriority = p;
+
+		SHOULD_REGENERATE_MESH.set(true);
 
 		/*
 		Updater.get().queueMainThreadInstruction(() -> {
@@ -169,23 +179,6 @@ public class ClientChunk extends Chunk {
 		return chunkData;
 	}
 
-	private void generateMesh(boolean isDelayed) {
-
-		SHOULD_REGENERATE_MESH.set(false);
-
-		try {
-
-			CHUNK_MESH.generateMesh(chunkData.getBlocks(), chunkData.getBlockStates(), isDelayed);
-			TRANSPARENT_CHUNK_MESH.generateMesh(chunkData.getBlocks(), chunkData.getBlockStates(), isDelayed);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
-	}
-
 	public void clean() {
 		SHOULD_REGENERATE_MESH.set(false);
 
@@ -198,6 +191,9 @@ public class ClientChunk extends Chunk {
 	}
 
 	public void setShouldRegenerateMesh(boolean value, boolean instantly) {
+
+		if (value && (SHOULD_INSTANTLY_REGENERATE_MESH.get() || SHOULD_REGENERATE_MESH.get())) return;
+
 		SHOULD_INSTANTLY_REGENERATE_MESH.set(instantly);
 		SHOULD_REGENERATE_MESH.set(value);
 	}
@@ -207,9 +203,7 @@ public class ClientChunk extends Chunk {
 		SHOULD_REGENERATE_MESH.set(value);
 	}
 
-	private void generateMesh() {
-		generateMesh(true);
-	}
+
 
 	public ChunkMesh getChunkMesh() {
 		return CHUNK_MESH;
@@ -235,7 +229,12 @@ public class ClientChunk extends Chunk {
 
 				boolean instantly = SHOULD_INSTANTLY_REGENERATE_MESH.getAndSet(false);
 
-				chunkMeshGenerationExecutorService.submit(() -> generateMesh(instantly));
+				ChunkMeshGenerationData generationData = new ChunkMeshGenerationData();
+				generationData.chunk = this;
+				generationData.priority = 0;
+				generationData.isDelayed = false;
+				CHUNK_MESH_PRIORITY_QUEUE.offer(generationData);
+
 			}
 		}
 
@@ -252,16 +251,25 @@ public class ClientChunk extends Chunk {
 		}
 		//</editor-fold>
 
-
-		if (!CHUNK_MESH.isGenerating() && CHUNK_MESH.getFadeTimer() > 0f) {
+		if (CHUNK_MESH.getFadeTimer() > 0f) {
 			CHUNK_MESH.setFadeTimer((float) (CHUNK_MESH.getFadeTimer() - deltaTime));
 		}
 
 		if (!TRANSPARENT_CHUNK_MESH.isGenerating() && TRANSPARENT_CHUNK_MESH.getFadeTimer() > 0f) {
 			TRANSPARENT_CHUNK_MESH.setFadeTimer((float) (TRANSPARENT_CHUNK_MESH.getFadeTimer() - deltaTime));
 		}
+
 	}
 
+	@Override
+	public void fixedUpdate() {
+		super.fixedUpdate();
+	}
+
+	@Override
+	public boolean hasFinishedDesiredGenerationPass() {
+		return true;
+	}
 
 	@Override
 	public void registeredFixedUpdateListener() {
@@ -275,11 +283,14 @@ public class ClientChunk extends Chunk {
 	public void unregisteredFixedUpdateListener() {
 		clean();
 
-		chunkMeshGenerationExecutorService.submit(() -> {
-			ChunkIO.saveChunk(this, chunkData);
-		});
-
 	}
 
+	public static class ChunkMeshGenerationData {
+
+		public ClientChunk chunk;
+		public boolean isDelayed;
+		public int priority;
+
+	}
 
 }

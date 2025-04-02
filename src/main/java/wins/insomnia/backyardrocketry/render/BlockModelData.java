@@ -2,6 +2,7 @@ package wins.insomnia.backyardrocketry.render;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
 import wins.insomnia.backyardrocketry.util.OpenSimplex2;
 import wins.insomnia.backyardrocketry.util.io.LoadTask;

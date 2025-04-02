@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 public class ChunkLighting {
 
+	public static final boolean LIGHTING_ENABLED = false;
 	private static final LinkedList<LightNode> LIGHT_QUEUE = new LinkedList<>();
 	private static final LinkedList<LightRemovalNode> LIGHT_REMOVAL_QUEUE = new LinkedList<>();
 	private static final LinkedList<LightNode> SUNLIGHT_QUEUE = new LinkedList<>();
@@ -329,6 +330,8 @@ public class ChunkLighting {
 
 	public static void setLight(Chunk chunk, int localX, int localY, int localZ, short light) {
 
+		if (!LIGHTING_ENABLED) return;
+
 		if (light == 0) {
 			removeLight(chunk, localX, localY, localZ);
 			return;
@@ -350,7 +353,7 @@ public class ChunkLighting {
 	public static void generateSunlight(Chunk chunk) {
 
 		ChunkPosition topChunkPosition = chunk.getChunkPosition().newOffsetChunkPosition(0, -1, 0);
-		Chunk topChunk = chunk.getWorld().getChunk(topChunkPosition);
+		Chunk topChunk = chunk.getWorld().getChunkSafe(topChunkPosition);
 
 		if (topChunk != null) {
 			for (int x = 0; x < Chunk.SIZE_X; x++) {

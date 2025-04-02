@@ -1,10 +1,13 @@
-package wins.insomnia.backyardrocketry.render;
+package wins.insomnia.backyardrocketry.render.mesh;
 
 import org.joml.*;
 import org.joml.Math;
 import org.lwjgl.opengl.GL30;
 import wins.insomnia.backyardrocketry.Main;
+import wins.insomnia.backyardrocketry.render.*;
+import wins.insomnia.backyardrocketry.render.mesh.Mesh;
 import wins.insomnia.backyardrocketry.render.texture.BlockAtlasTexture;
+import wins.insomnia.backyardrocketry.render.texture.TextureManager;
 import wins.insomnia.backyardrocketry.util.HelpfulMath;
 import wins.insomnia.backyardrocketry.util.update.DelayedMainThreadInstruction;
 import wins.insomnia.backyardrocketry.util.update.Updater;
@@ -35,6 +38,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
     private boolean meshIsReadyToRender = false;
     private AtomicBoolean readyToCreateOpenGLMeshData = new AtomicBoolean(false);
     private final boolean isTransparent;
+    public int generationPriority = 0;
 
     public boolean isReadyToCreateOpenGLMeshData() {
         return readyToCreateOpenGLMeshData.get();
@@ -97,6 +101,15 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshDataIndexArray, GL_STATIC_DRAW);
 
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
+        glEnableVertexAttribArray(4);
+        glEnableVertexAttribArray(5);
+        glEnableVertexAttribArray(6);
+        glEnableVertexAttribArray(7);
+
         glVertexAttribPointer(0, 3, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 3 * Float.BYTES);
         glVertexAttribPointer(2, 3, GL_FLOAT, false, VERTEX_ATTRIBUTE_FLOAT_AMOUNT * Float.BYTES, 5 * Float.BYTES);
@@ -154,7 +167,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         Vector3f boundingBoxMax = chunk.getBoundingBox().getMax().get(new Vector3f());
 
         return frustum.testAab(boundingBoxMin, boundingBoxMax);
-
     }
 
     public void setGenerating(boolean value) {
@@ -174,27 +186,15 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         Renderer.get().getModelMatrix()
                 .identity()
                 .translate(chunk.getPosition());
+
         chunkMeshShaderProgram.setUniform("vs_modelMatrix",Renderer.get().getModelMatrix());
-        chunkMeshShaderProgram.setUniform("fs_fadeStage", fadeTimer);
+        chunkMeshShaderProgram.setUniform("fs_fadeStage", 0f);
+
         glBindVertexArray(vao);
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        glEnableVertexAttribArray(3);
-        glEnableVertexAttribArray(4);
-        glEnableVertexAttribArray(5);
-        glEnableVertexAttribArray(6);
-        glEnableVertexAttribArray(7);
-
         glDrawElements(GL_TRIANGLES, getIndexCount(), GL_UNSIGNED_INT, 0);
 
-        glDisableVertexAttribArray(2);
-        glDisableVertexAttribArray(3);
-        glDisableVertexAttribArray(4);
-        glDisableVertexAttribArray(5);
-        glDisableVertexAttribArray(6);
-        glDisableVertexAttribArray(7);
+
+
     }
 
     public void generateMesh(byte[][][] blocks, byte[][][] blockStates) {
@@ -206,7 +206,7 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Integer> indices = new ArrayList<>();
 
-        byte[][][] blockNeighbors = new byte[9][9][9];
+        byte[][][] blockNeighbors = new byte[3][3][3];
 
         for (int y = 0; y < Chunk.SIZE_Y; y++) {
             for (int x = 0; x < Chunk.SIZE_X; x++) {
@@ -259,8 +259,6 @@ public class ChunkMesh extends Mesh implements IPositionOwner {
                     blockNeighbors[0][2][2] = chunk.getBlock(x-1, y+1, z+1);
                     blockNeighbors[1][2][2] = chunk.getBlock(x, y+1, z+1);
                     blockNeighbors[2][2][2] = chunk.getBlock(x+1, y+1, z+1);
-
-
 
                     for (Map.Entry<String, ?> faceEntry : blockModelData.getFaces().entrySet()) {
 

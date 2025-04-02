@@ -48,22 +48,18 @@ public class ServerController extends GameController {
 			double[] worldCenter = serverWorld.getCenterXZ();
 
 			serverPlayer.getTransform().setPosition(new Vector3d(worldCenter[0], 100, worldCenter[1]));
-			List<ChunkPosition> chunkPositionsAroundPlayer = serverWorld.getChunkPositionsAroundPlayer(serverPlayer, ServerWorld.chunkLoadDistance);
-
+			serverPlayer.getTransform().getPosition().y = WorldGeneration.getGroundHeight(
+					serverWorld.getSeed(),
+					(int) serverPlayer.getTransform().getPosition().x,
+					(int) serverPlayer.getTransform().getPosition().z
+			) + 2;
 
 			Updater.get().queueMainThreadInstruction(() -> {
-				for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
-					double chunkDistance = serverWorld.getChunkDistanceToPlayer(chunkPosition, serverPlayer);
-					if (!serverWorld.isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
-
-						if (chunkDistance <= ServerWorld.chunkLoadDistance) {
-							serverWorld.queueChunkForLoading(chunkPosition, ServerChunk.GenerationPass.DECORATION);
-						}
-					}
-				}
+				serverWorld.updateChunksAroundPlayer(serverPlayer);
 			});
 
 
+			/*    TEMPORARILY REMOVED DUE TO INFINITE LOOP (especially when closing server)
 			// wait for chunks to load
 			for (ChunkPosition chunkPosition : chunkPositionsAroundPlayer) {
 
@@ -72,21 +68,17 @@ public class ServerController extends GameController {
 				if (chunkDistance <= ServerWorld.chunkLoadDistance) {
 					while (!serverWorld.isChunkLoaded(chunkPosition, ServerChunk.GenerationPass.DECORATION)) {
 
+
+
 					}
 				}
 
-			}
-
-			serverPlayer.getTransform().getPosition().y = WorldGeneration.getGroundHeight(
-					serverWorld.getSeed(),
-					(int) serverPlayer.getTransform().getPosition().x,
-					(int) serverPlayer.getTransform().getPosition().z
-			) + 2;
+			} */
 
 			Updater.get().registerUpdateListener(serverPlayer);
 			Updater.get().registerFixedUpdateListener(serverPlayer);
 			serverWorld.setServerPlayer(connection.getID(), serverPlayer);
-
+			serverPlayer.setFinishedLoadingTerrain();
 
 		}
 

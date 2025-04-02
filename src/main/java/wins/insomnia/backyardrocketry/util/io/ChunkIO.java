@@ -14,7 +14,7 @@ public class ChunkIO {
 
 
 	// cubic size of region (in chunk amount)
-	public static final int REGION_SIZE = 20;
+	public static final int REGION_SIZE = 10;
 	public static final String REGION_FILE_EXTENSION = ".region";
 	public static final String TEMP_REGION_FILE_EXTENSION = ".tempregion";
 	public static final int BYTES_PER_CHUNK = Long.BYTES +  // seed
